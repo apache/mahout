@@ -34,6 +34,7 @@ mod profiling;
 
 pub use error::{MahoutError, Result, cuda_error_to_string};
 pub use gpu::memory::Precision;
+pub use reader::{NullHandling, handle_float64_nulls};
 
 // Throughput/latency pipeline runner: single path using QdpEngine and encode_batch in Rust.
 #[cfg(target_os = "linux")]
@@ -45,11 +46,62 @@ pub use pipeline_runner::{
     run_throughput_pipeline,
 };
 
+use std::ffi::c_void;
 use std::sync::Arc;
 
 use crate::dlpack::DLManagedTensor;
 use crate::gpu::get_encoder;
 use cudarc::driver::CudaDevice;
+
+#[cfg(target_os = "linux")]
+fn validate_cuda_input_ptr(device: &CudaDevice, ptr: *const c_void) -> Result<()> {
+    use crate::gpu::cuda_ffi::{
+        CUDA_MEMORY_TYPE_DEVICE, CUDA_MEMORY_TYPE_MANAGED, CudaPointerAttributes,
+        cudaPointerGetAttributes,
+    };
+
+    if ptr.is_null() {
+        return Err(MahoutError::InvalidInput(
+            "Input GPU pointer is null".to_string(),
+        ));
+    }
+
+    let mut attrs = CudaPointerAttributes {
+        memory_type: 0,
+        device: 0,
+        device_pointer: std::ptr::null_mut(),
+        host_pointer: std::ptr::null_mut(),
+        is_managed: 0,
+        allocation_flags: 0,
+    };
+
+    let ret = unsafe { cudaPointerGetAttributes(&mut attrs as *mut _, ptr) };
+    if ret != 0 {
+        return Err(MahoutError::InvalidInput(format!(
+            "cudaPointerGetAttributes failed for input pointer: {} ({})",
+            ret,
+            cuda_error_to_string(ret)
+        )));
+    }
+
+    if attrs.memory_type != CUDA_MEMORY_TYPE_DEVICE && attrs.memory_type != CUDA_MEMORY_TYPE_MANAGED
+    {
+        return Err(MahoutError::InvalidInput(format!(
+            "Input pointer is not CUDA device memory (memory_type={})",
+            attrs.memory_type
+        )));
+    }
+
+    let device_ordinal = device.ordinal() as i32;
+    if attrs.device >= 0 && attrs.device != device_ordinal {
+        return Err(MahoutError::InvalidInput(format!(
+            "Input pointer device mismatch: pointer on cuda:{}, engine on cuda:{}",
+            attrs.device, device_ordinal
+        )));
+    }
+
+    Ok(())
+}
 
 /// Main entry point for Mahout QDP
 ///
@@ -362,10 +414,6 @@ impl QdpEngine {
     /// a raw GPU pointer directly, avoiding the GPU→CPU→GPU copy that would otherwise
     /// be required.
     ///
-    /// TODO: Refactor to use QuantumEncoder trait (add `encode_from_gpu_ptr` to trait)
-    /// to reduce duplication with AmplitudeEncoder::encode(). This would also make it
-    /// easier to add GPU pointer support for other encoders (angle, basis) in the future.
-    ///
     /// # Arguments
     /// * `input_d` - Device pointer to input data (f64 for amplitude/angle, usize/int64 for basis)
     /// * `input_len` - Number of elements in the input
@@ -417,194 +465,149 @@ impl QdpEngine {
         stream: *mut std::ffi::c_void,
     ) -> Result<*mut DLManagedTensor> {
         crate::profile_scope!("Mahout::EncodeFromGpuPtr");
+        if input_len == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Input data cannot be empty".into(),
+            ));
+        }
+
+        validate_cuda_input_ptr(&self.device, input_d)?;
+
+        let encoder = get_encoder(encoding_method)?;
+        let state_vector = unsafe {
+            encoder.encode_from_gpu_ptr(&self.device, input_d, input_len, num_qubits, stream)
+        }?;
+        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
+        Ok(state_vector.to_dlpack())
+    }
+
+    /// Encode from existing GPU pointer (float32 input, amplitude encoding only)
+    ///
+    /// Zero-copy encoding from PyTorch CUDA float32 tensors. Uses the default CUDA stream.
+    /// For stream interop use `encode_from_gpu_ptr_f32_with_stream`.
+    ///
+    /// # Arguments
+    /// * `input_d` - Device pointer to input data (f32 array on GPU)
+    /// * `input_len` - Number of f32 elements in the input
+    /// * `num_qubits` - Number of qubits for encoding
+    ///
+    /// # Returns
+    /// DLPack pointer (state vector in engine precision) for zero-copy PyTorch integration.
+    /// Internal computation is f32; output is converted to [`Precision`] of the engine.
+    ///
+    /// # Safety
+    /// The input pointer must:
+    /// - Point to valid GPU memory on the same device as the engine
+    /// - Contain at least `input_len` f32 elements
+    /// - Remain valid for the duration of this call
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_from_gpu_ptr_f32(
+        &self,
+        input_d: *const f32,
+        input_len: usize,
+        num_qubits: usize,
+    ) -> Result<*mut DLManagedTensor> {
+        unsafe {
+            self.encode_from_gpu_ptr_f32_with_stream(
+                input_d,
+                input_len,
+                num_qubits,
+                std::ptr::null_mut(),
+            )
+        }
+    }
+
+    /// Encode from existing GPU pointer (float32) on a specified CUDA stream.
+    ///
+    /// # Returns
+    /// DLPack pointer (state vector in engine precision). Pass null for `stream` to use the default stream.
+    ///
+    /// # Safety
+    /// In addition to the `encode_from_gpu_ptr_f32` requirements, the stream pointer
+    /// must remain valid for the duration of this call.
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_from_gpu_ptr_f32_with_stream(
+        &self,
+        input_d: *const f32,
+        input_len: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<*mut DLManagedTensor> {
+        crate::profile_scope!("Mahout::EncodeFromGpuPtrF32");
+
+        if input_len == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Input data cannot be empty".into(),
+            ));
+        }
+
+        validate_cuda_input_ptr(&self.device, input_d as *const c_void)?;
 
         let state_len = 1usize << num_qubits;
-        let method = encoding_method.to_ascii_lowercase();
-
-        match method.as_str() {
-            "amplitude" => {
-                if input_len == 0 {
-                    return Err(MahoutError::InvalidInput(
-                        "Input data cannot be empty".into(),
-                    ));
-                }
-
-                if input_len > state_len {
-                    return Err(MahoutError::InvalidInput(format!(
-                        "Input size {} exceeds state vector size {} (2^{} qubits)",
-                        input_len, state_len, num_qubits
-                    )));
-                }
-
-                let input_d = input_d as *const f64;
-
-                let state_vector = {
-                    crate::profile_scope!("GPU::Alloc");
-                    gpu::GpuStateVector::new(&self.device, num_qubits, Precision::Float64)?
-                };
-
-                let inv_norm = {
-                    crate::profile_scope!("GPU::NormFromPtr");
-                    // SAFETY: input_d validity is guaranteed by the caller's safety contract
-                    unsafe {
-                        gpu::AmplitudeEncoder::calculate_inv_norm_gpu(
-                            &self.device,
-                            input_d,
-                            input_len,
-                        )?
-                    }
-                };
-
-                let state_ptr = state_vector.ptr_f64().ok_or_else(|| {
-                    MahoutError::InvalidInput(
-                        "State vector precision mismatch (expected float64 buffer)".to_string(),
-                    )
-                })?;
-
-                {
-                    crate::profile_scope!("GPU::KernelLaunch");
-                    let ret = unsafe {
-                        qdp_kernels::launch_amplitude_encode(
-                            input_d,
-                            state_ptr as *mut std::ffi::c_void,
-                            input_len,
-                            state_len,
-                            inv_norm,
-                            stream,
-                        )
-                    };
-
-                    if ret != 0 {
-                        return Err(MahoutError::KernelLaunch(format!(
-                            "Amplitude encode kernel failed with CUDA error code: {} ({})",
-                            ret,
-                            cuda_error_to_string(ret)
-                        )));
-                    }
-                }
-
-                {
-                    crate::profile_scope!("GPU::Synchronize");
-                    gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
-                }
-
-                let state_vector = state_vector.to_precision(&self.device, self.precision)?;
-                Ok(state_vector.to_dlpack())
-            }
-            "angle" => {
-                if input_len != num_qubits {
-                    return Err(MahoutError::InvalidInput(format!(
-                        "Angle encoding expects {} values (one per qubit), got {}",
-                        num_qubits, input_len
-                    )));
-                }
-
-                let angles_d = input_d as *const f64;
-
-                let state_vector = {
-                    crate::profile_scope!("GPU::Alloc");
-                    gpu::GpuStateVector::new(&self.device, num_qubits, Precision::Float64)?
-                };
-
-                let state_ptr = state_vector.ptr_f64().ok_or_else(|| {
-                    MahoutError::InvalidInput(
-                        "State vector precision mismatch (expected float64 buffer)".to_string(),
-                    )
-                })?;
-
-                {
-                    crate::profile_scope!("GPU::KernelLaunch");
-                    let ret = unsafe {
-                        qdp_kernels::launch_angle_encode(
-                            angles_d,
-                            state_ptr as *mut std::ffi::c_void,
-                            state_len,
-                            num_qubits as u32,
-                            stream,
-                        )
-                    };
-
-                    if ret != 0 {
-                        return Err(MahoutError::KernelLaunch(format!(
-                            "Angle encoding kernel failed with CUDA error code: {} ({})",
-                            ret,
-                            cuda_error_to_string(ret)
-                        )));
-                    }
-                }
-
-                {
-                    crate::profile_scope!("GPU::Synchronize");
-                    gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
-                }
-
-                let state_vector = state_vector.to_precision(&self.device, self.precision)?;
-                Ok(state_vector.to_dlpack())
-            }
-            "basis" => {
-                if input_len != 1 {
-                    return Err(MahoutError::InvalidInput(format!(
-                        "Basis encoding expects exactly 1 value (the basis index), got {}",
-                        input_len
-                    )));
-                }
-
-                let basis_indices_d = input_d as *const usize;
-
-                let state_vector = {
-                    crate::profile_scope!("GPU::Alloc");
-                    gpu::GpuStateVector::new(&self.device, num_qubits, self.precision)?
-                };
-
-                let state_ptr = state_vector.ptr_f64().ok_or_else(|| {
-                    MahoutError::InvalidInput(
-                        "State vector precision mismatch (expected float64 buffer)".to_string(),
-                    )
-                })?;
-
-                // Use batch API with num_samples=1 to avoid D2H copy; launch_basis_encode takes host usize.
-                {
-                    crate::profile_scope!("GPU::KernelLaunch");
-                    let ret = unsafe {
-                        qdp_kernels::launch_basis_encode_batch(
-                            basis_indices_d,
-                            state_ptr as *mut std::ffi::c_void,
-                            1,
-                            state_len,
-                            num_qubits as u32,
-                            stream,
-                        )
-                    };
-
-                    if ret != 0 {
-                        return Err(MahoutError::KernelLaunch(format!(
-                            "Basis encoding kernel failed with CUDA error code: {} ({})",
-                            ret,
-                            cuda_error_to_string(ret)
-                        )));
-                    }
-                }
-
-                {
-                    crate::profile_scope!("GPU::Synchronize");
-                    gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
-                }
-
-                let state_vector = state_vector.to_precision(&self.device, self.precision)?;
-                Ok(state_vector.to_dlpack())
-            }
-            _ => Err(MahoutError::NotImplemented(format!(
-                "GPU pointer encoding currently only supports 'amplitude', 'angle', or 'basis' methods, got '{}'",
-                encoding_method
-            ))),
+        if input_len > state_len {
+            return Err(MahoutError::InvalidInput(format!(
+                "Input size {} exceeds state vector size {} (2^{} qubits)",
+                input_len, state_len, num_qubits
+            )));
         }
+
+        let state_vector = {
+            crate::profile_scope!("GPU::Alloc");
+            gpu::GpuStateVector::new(&self.device, num_qubits, Precision::Float32)?
+        };
+
+        let inv_norm = {
+            crate::profile_scope!("GPU::NormFromPtr");
+            unsafe {
+                gpu::AmplitudeEncoder::calculate_inv_norm_gpu_f32_with_stream(
+                    &self.device,
+                    input_d,
+                    input_len,
+                    stream,
+                )?
+            }
+        };
+
+        let state_ptr = state_vector.ptr_f32().ok_or_else(|| {
+            MahoutError::InvalidInput(
+                "State vector precision mismatch (expected float32 buffer)".to_string(),
+            )
+        })?;
+
+        {
+            crate::profile_scope!("GPU::KernelLaunch");
+            let ret = unsafe {
+                qdp_kernels::launch_amplitude_encode_f32(
+                    input_d,
+                    state_ptr as *mut std::ffi::c_void,
+                    input_len,
+                    state_len,
+                    inv_norm,
+                    stream,
+                )
+            };
+
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Amplitude encode (f32) kernel failed with CUDA error code: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
+                )));
+            }
+        }
+
+        {
+            crate::profile_scope!("GPU::Synchronize");
+            gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
+        }
+
+        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
+        Ok(state_vector.to_dlpack())
     }
 
     /// Encode batch from existing GPU pointer (zero-copy for CUDA tensors)
     ///
     /// This method enables zero-copy batch encoding from PyTorch CUDA tensors.
-    ///
-    /// TODO: Refactor to use QuantumEncoder trait (see `encode_from_gpu_ptr` TODO).
     ///
     /// # Arguments
     /// * `input_batch_d` - Device pointer to batch input data (f64 for amplitude/angle, usize/int64 for basis)
@@ -661,298 +664,33 @@ impl QdpEngine {
         stream: *mut std::ffi::c_void,
     ) -> Result<*mut DLManagedTensor> {
         crate::profile_scope!("Mahout::EncodeBatchFromGpuPtr");
-
-        let state_len = 1usize << num_qubits;
-        let method = encoding_method.to_ascii_lowercase();
-
         if num_samples == 0 {
             return Err(MahoutError::InvalidInput(
                 "Number of samples cannot be zero".into(),
             ));
         }
 
-        match method.as_str() {
-            "amplitude" => {
-                if sample_size == 0 {
-                    return Err(MahoutError::InvalidInput(
-                        "Sample size cannot be zero".into(),
-                    ));
-                }
-
-                if sample_size > state_len {
-                    return Err(MahoutError::InvalidInput(format!(
-                        "Sample size {} exceeds state vector size {} (2^{} qubits)",
-                        sample_size, state_len, num_qubits
-                    )));
-                }
-
-                let input_batch_d = input_batch_d as *const f64;
-
-                let batch_state_vector = {
-                    crate::profile_scope!("GPU::AllocBatch");
-                    gpu::GpuStateVector::new_batch(&self.device, num_samples, num_qubits)?
-                };
-
-                let inv_norms_gpu = {
-                    crate::profile_scope!("GPU::BatchNormKernel");
-                    use cudarc::driver::DevicePtrMut;
-
-                    let mut buffer = self.device.alloc_zeros::<f64>(num_samples).map_err(|e| {
-                        MahoutError::MemoryAllocation(format!(
-                            "Failed to allocate norm buffer: {:?}",
-                            e
-                        ))
-                    })?;
-
-                    let ret = unsafe {
-                        qdp_kernels::launch_l2_norm_batch(
-                            input_batch_d,
-                            num_samples,
-                            sample_size,
-                            *buffer.device_ptr_mut() as *mut f64,
-                            stream,
-                        )
-                    };
-
-                    if ret != 0 {
-                        return Err(MahoutError::KernelLaunch(format!(
-                            "Norm reduction kernel failed with CUDA error code: {} ({})",
-                            ret,
-                            cuda_error_to_string(ret)
-                        )));
-                    }
-
-                    buffer
-                };
-
-                // Validate norms on host to catch zero or NaN samples early
-                {
-                    crate::profile_scope!("GPU::NormValidation");
-                    let host_inv_norms =
-                        self.device.dtoh_sync_copy(&inv_norms_gpu).map_err(|e| {
-                            MahoutError::Cuda(format!("Failed to copy norms to host: {:?}", e))
-                        })?;
-
-                    if host_inv_norms.iter().any(|v| !v.is_finite() || *v == 0.0) {
-                        return Err(MahoutError::InvalidInput(
-                            "One or more samples have zero or invalid norm".to_string(),
-                        ));
-                    }
-                }
-
-                {
-                    crate::profile_scope!("GPU::BatchKernelLaunch");
-                    use cudarc::driver::DevicePtr;
-
-                    let state_ptr = batch_state_vector.ptr_f64().ok_or_else(|| {
-                        MahoutError::InvalidInput(
-                            "Batch state vector precision mismatch (expected float64 buffer)"
-                                .to_string(),
-                        )
-                    })?;
-
-                    let ret = unsafe {
-                        qdp_kernels::launch_amplitude_encode_batch(
-                            input_batch_d,
-                            state_ptr as *mut std::ffi::c_void,
-                            *inv_norms_gpu.device_ptr() as *const f64,
-                            num_samples,
-                            sample_size,
-                            state_len,
-                            stream,
-                        )
-                    };
-
-                    if ret != 0 {
-                        return Err(MahoutError::KernelLaunch(format!(
-                            "Batch kernel launch failed with CUDA error code: {} ({})",
-                            ret,
-                            cuda_error_to_string(ret)
-                        )));
-                    }
-                }
-
-                {
-                    crate::profile_scope!("GPU::Synchronize");
-                    gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
-                }
-
-                let batch_state_vector =
-                    batch_state_vector.to_precision(&self.device, self.precision)?;
-                Ok(batch_state_vector.to_dlpack())
-            }
-            "angle" => {
-                use cudarc::driver::DevicePtrMut;
-
-                if sample_size == 0 {
-                    return Err(MahoutError::InvalidInput(
-                        "Sample size cannot be zero".into(),
-                    ));
-                }
-
-                if sample_size != num_qubits {
-                    return Err(MahoutError::InvalidInput(format!(
-                        "Angle encoding expects sample_size={} (one angle per qubit), got {}",
-                        num_qubits, sample_size
-                    )));
-                }
-
-                let input_batch_d = input_batch_d as *const f64;
-
-                // Validate that all input angles are finite (no NaN/Inf), consistent with
-                // CPU and host-side batch angle encoding paths.
-                let angle_validation_buffer = {
-                    crate::profile_scope!("GPU::AngleFiniteCheckBatch");
-
-                    let mut buffer = self.device.alloc_zeros::<f64>(num_samples).map_err(|e| {
-                        MahoutError::MemoryAllocation(format!(
-                            "Failed to allocate angle validation buffer: {:?}",
-                            e
-                        ))
-                    })?;
-
-                    let ret = unsafe {
-                        qdp_kernels::launch_l2_norm_batch(
-                            input_batch_d,
-                            num_samples,
-                            sample_size,
-                            *buffer.device_ptr_mut() as *mut f64,
-                            stream,
-                        )
-                    };
-
-                    if ret != 0 {
-                        return Err(MahoutError::KernelLaunch(format!(
-                            "Angle validation norm kernel failed with CUDA error code: {} ({})",
-                            ret,
-                            cuda_error_to_string(ret)
-                        )));
-                    }
-
-                    buffer
-                };
-
-                {
-                    crate::profile_scope!("GPU::AngleFiniteValidationHostCopy");
-                    let host_norms = self
-                        .device
-                        .dtoh_sync_copy(&angle_validation_buffer)
-                        .map_err(|e| {
-                            MahoutError::Cuda(format!(
-                                "Failed to copy angle validation norms to host: {:?}",
-                                e
-                            ))
-                        })?;
-
-                    if host_norms.iter().any(|v| !v.is_finite()) {
-                        return Err(MahoutError::InvalidInput(
-                            "Angle encoding batch contains non-finite values (NaN or Inf)"
-                                .to_string(),
-                        ));
-                    }
-                }
-
-                let batch_state_vector = {
-                    crate::profile_scope!("GPU::AllocBatch");
-                    gpu::GpuStateVector::new_batch(&self.device, num_samples, num_qubits)?
-                };
-
-                let state_ptr = batch_state_vector.ptr_f64().ok_or_else(|| {
-                    MahoutError::InvalidInput(
-                        "Batch state vector precision mismatch (expected float64 buffer)"
-                            .to_string(),
-                    )
-                })?;
-
-                {
-                    crate::profile_scope!("GPU::BatchKernelLaunch");
-                    let ret = unsafe {
-                        qdp_kernels::launch_angle_encode_batch(
-                            input_batch_d,
-                            state_ptr as *mut std::ffi::c_void,
-                            num_samples,
-                            state_len,
-                            num_qubits as u32,
-                            stream,
-                        )
-                    };
-
-                    if ret != 0 {
-                        return Err(MahoutError::KernelLaunch(format!(
-                            "Batch angle encoding kernel failed: {} ({})",
-                            ret,
-                            cuda_error_to_string(ret)
-                        )));
-                    }
-                }
-
-                {
-                    crate::profile_scope!("GPU::Synchronize");
-                    gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
-                }
-
-                let batch_state_vector =
-                    batch_state_vector.to_precision(&self.device, self.precision)?;
-                Ok(batch_state_vector.to_dlpack())
-            }
-            "basis" => {
-                if sample_size != 1 {
-                    return Err(MahoutError::InvalidInput(format!(
-                        "Basis encoding expects sample_size=1 (one index per sample), got {}",
-                        sample_size
-                    )));
-                }
-
-                let basis_indices_d = input_batch_d as *const usize;
-
-                let batch_state_vector = {
-                    crate::profile_scope!("GPU::AllocBatch");
-                    gpu::GpuStateVector::new_batch(&self.device, num_samples, num_qubits)?
-                };
-
-                let state_ptr = batch_state_vector.ptr_f64().ok_or_else(|| {
-                    MahoutError::InvalidInput(
-                        "Batch state vector precision mismatch (expected float64 buffer)"
-                            .to_string(),
-                    )
-                })?;
-
-                {
-                    crate::profile_scope!("GPU::BatchKernelLaunch");
-                    let ret = unsafe {
-                        qdp_kernels::launch_basis_encode_batch(
-                            basis_indices_d,
-                            state_ptr as *mut std::ffi::c_void,
-                            num_samples,
-                            state_len,
-                            num_qubits as u32,
-                            stream,
-                        )
-                    };
-
-                    if ret != 0 {
-                        return Err(MahoutError::KernelLaunch(format!(
-                            "Batch basis encoding kernel failed with CUDA error code: {} ({})",
-                            ret,
-                            cuda_error_to_string(ret)
-                        )));
-                    }
-                }
-
-                {
-                    crate::profile_scope!("GPU::Synchronize");
-                    gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
-                }
-
-                let batch_state_vector =
-                    batch_state_vector.to_precision(&self.device, self.precision)?;
-                Ok(batch_state_vector.to_dlpack())
-            }
-            _ => Err(MahoutError::NotImplemented(format!(
-                "GPU pointer batch encoding currently only supports 'amplitude', 'angle', or 'basis' methods, got '{}'",
-                encoding_method
-            ))),
+        if sample_size == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Sample size cannot be zero".into(),
+            ));
         }
+
+        validate_cuda_input_ptr(&self.device, input_batch_d)?;
+
+        let encoder = get_encoder(encoding_method)?;
+        let batch_state_vector = unsafe {
+            encoder.encode_batch_from_gpu_ptr(
+                &self.device,
+                input_batch_d,
+                num_samples,
+                sample_size,
+                num_qubits,
+                stream,
+            )
+        }?;
+        let batch_state_vector = batch_state_vector.to_precision(&self.device, self.precision)?;
+        Ok(batch_state_vector.to_dlpack())
     }
 }
 

@@ -1,0 +1,87 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+name: Deploy Website
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'website/**'
+      - 'docs/**'
+      - '.github/workflows/website.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install dependencies
+        working-directory: website
+        run: npm ci
+
+      - name: Build website
+        working-directory: website
+        run: npm run build
+
+      - name: Deploy to asf-site branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Configure git
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create a temporary directory for the build
+          BUILD_DIR=$(mktemp -d)
+          cp -r website/build/* $BUILD_DIR/
+
+          # Fetch and checkout asf-site branch
+          git fetch origin asf-site
+          git checkout -B asf-site origin/asf-site || git checkout --orphan asf-site
+
+          # Remove old content (except .git, .asf.yaml, and .claude if present)
+          find . -maxdepth 1 ! -name '.git' ! -name '.asf.yaml' ! -name '.claude' ! -name 'website' ! -name '.' ! -name '..' -exec rm -rf {} +
+
+          # Copy new content
+          cp -r $BUILD_DIR/* .
+
+          # Remove website source directory (only keep built site)
+          rm -rf website
+
+          # Add and commit changes
+          git add -A
+
+          # Only commit if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to deploy"
+          else
+            git commit --no-verify -m "Automatic Site Publish by GitHub Actions"
+            git push origin asf-site
+            echo "Website deployed successfully to asf-site branch"
+          fi

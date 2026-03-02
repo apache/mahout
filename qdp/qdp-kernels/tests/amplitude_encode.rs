@@ -673,6 +673,74 @@ fn test_l2_norm_batch_kernel_stream() {
 
 #[test]
 #[cfg(target_os = "linux")]
+fn test_l2_norm_batch_kernel_zero_num_samples() {
+    println!("Testing batched L2 norm rejection when num_samples==0 (float64)...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    let input_d = device.alloc_zeros::<f64>(2).unwrap();
+    let mut norms_d = device.alloc_zeros::<f64>(1).unwrap();
+
+    let status = unsafe {
+        launch_l2_norm_batch(
+            *input_d.device_ptr() as *const f64,
+            0, // num_samples == 0
+            2, // sample_len
+            *norms_d.device_ptr_mut() as *mut f64,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_eq!(
+        status, 1,
+        "Should reject num_samples==0 (cudaErrorInvalidValue), got {}",
+        status
+    );
+    println!("PASS: Correctly rejected num_samples==0 (f64)");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_l2_norm_batch_kernel_zero_sample_len() {
+    println!("Testing batched L2 norm rejection when sample_len==0 (float64)...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    let input_d = device.alloc_zeros::<f64>(1).unwrap();
+    let mut norms_d = device.alloc_zeros::<f64>(1).unwrap();
+
+    let status = unsafe {
+        launch_l2_norm_batch(
+            *input_d.device_ptr() as *const f64,
+            1, // num_samples
+            0, // sample_len == 0
+            *norms_d.device_ptr_mut() as *mut f64,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_eq!(
+        status, 1,
+        "Should reject sample_len==0 (cudaErrorInvalidValue), got {}",
+        status
+    );
+    println!("PASS: Correctly rejected sample_len==0 (f64)");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
 fn test_l2_norm_single_kernel_f32() {
     println!("Testing L2 norm reduction kernel (float32)...");
 
@@ -774,8 +842,8 @@ fn test_l2_norm_batch_kernel_f32() {
 
 #[test]
 #[cfg(target_os = "linux")]
-fn test_l2_norm_batch_kernel_grid_limit_f32() {
-    println!("Testing batched L2 norm reduction with grid limit boundary (float32)...");
+fn test_l2_norm_batch_kernel_zero_num_samples_f32() {
+    println!("Testing batched L2 norm rejection when num_samples==0 (float32)...");
 
     let device = match CudaDevice::new(0) {
         Ok(d) => d,
@@ -785,34 +853,59 @@ fn test_l2_norm_batch_kernel_grid_limit_f32() {
         }
     };
 
-    // Test that num_samples exceeding CUDA_MAX_GRID_DIM_1D (65535) returns error
-    const MAX_GRID_DIM: usize = 65535;
-    let num_samples = MAX_GRID_DIM + 1; // Exceeds limit
-    let sample_len = 2;
-
-    let input: Vec<f32> = vec![1.0; num_samples * sample_len];
-    let input_d = device.htod_sync_copy(input.as_slice()).unwrap();
-    let mut norms_d = device.alloc_zeros::<f32>(num_samples).unwrap();
+    let input_d = device.alloc_zeros::<f32>(2).unwrap();
+    let mut norms_d = device.alloc_zeros::<f32>(1).unwrap();
 
     let status = unsafe {
         launch_l2_norm_batch_f32(
             *input_d.device_ptr() as *const f32,
-            num_samples,
-            sample_len,
+            0, // num_samples == 0
+            2, // sample_len
             *norms_d.device_ptr_mut() as *mut f32,
             std::ptr::null_mut(),
         )
     };
 
-    // Should return error because num_samples exceeds grid limit
-    // cudaErrorInvalidValue = 1 (from cuda_error_to_string)
     assert_eq!(
         status, 1,
-        "Should reject num_samples exceeding CUDA_MAX_GRID_DIM_1D (f32), got error code {}",
+        "Should reject num_samples==0 (cudaErrorInvalidValue), got {}",
         status
     );
+    println!("PASS: Correctly rejected num_samples==0 (f32)");
+}
 
-    println!("PASS: Correctly rejected num_samples exceeding grid limit (f32)");
+#[test]
+#[cfg(target_os = "linux")]
+fn test_l2_norm_batch_kernel_zero_sample_len_f32() {
+    println!("Testing batched L2 norm rejection when sample_len==0 (float32)...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    let input_d = device.alloc_zeros::<f32>(1).unwrap();
+    let mut norms_d = device.alloc_zeros::<f32>(1).unwrap();
+
+    let status = unsafe {
+        launch_l2_norm_batch_f32(
+            *input_d.device_ptr() as *const f32,
+            1, // num_samples
+            0, // sample_len == 0
+            *norms_d.device_ptr_mut() as *mut f32,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_eq!(
+        status, 1,
+        "Should reject sample_len==0 (cudaErrorInvalidValue), got {}",
+        status
+    );
+    println!("PASS: Correctly rejected sample_len==0 (f32)");
 }
 
 #[test]

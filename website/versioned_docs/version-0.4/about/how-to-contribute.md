@@ -29,7 +29,7 @@ is discouraged.  See [http://people.apache.org/~hossman/#private_q](http://peopl
 
 What do you like to work on?  There are a ton of things in Mahout that we
 would love to have contributions for: documentation, performance improvements, better tests, etc.
-The best place to start is by looking into our [issue tracker](https://issues.apache.org/jira/browse/MAHOUT) and
+The best place to start is by looking into our [issue tracker](https://github.com/apache/mahout/issues) and
 seeing what bugs have been reported and seeing if any look like you could
 take them on.  Small, well written, well tested patches are a great way to
 get your feet wet.  It could be something as simple as fixing a typo.  The
@@ -39,7 +39,7 @@ point, so changes, especially from non-committers, need to be evolutionary
 not revolutionary since it is often very difficult to evaluate the merits
 of a very large patch.	Think small, at least to start!
 
-Beyond JIRA, hang out on the dev@ mailing list. That's where we discuss
+Beyond GitHub Issues, hang out on the dev@ mailing list. That's where we discuss
 what we are working on in the internals and where you can get a sense of
 where people are working.
 
@@ -66,7 +66,7 @@ don't have the time or resources to do everything outlined on this below
 should not be discouraged from submitting their ideas "as is" per "Yonik
 Seeley's (Solr committer) Law of Patches":
 
-*A half-baked patch in Jira, with no documentation, no tests and no backwards compatibility is better than no patch at all.*
+*A half-baked patch in GitHub Issues, with no documentation, no tests and no backwards compatibility is better than no patch at all.*
 
 Just because you may not have the time to write unit tests, or cleanup
 backwards compatibility issues, or add documentation, doesn't mean other
@@ -83,10 +83,10 @@ First of all, you need to get the Mahout source code from [GitHub](https://githu
 ## Making Changes
 
 Before you start, you should send a message to the [Mahout developer mailing list](/docs/community/mailing-lists)
-(note: you have to subscribe before you can post), or file a ticket in our [issue tracker](https://issues.apache.org/jira/browse/MAHOUT).
+(note: you have to subscribe before you can post), or file a ticket in our [issue tracker](https://github.com/apache/mahout/issues).
 Describe your proposed changes and check that they fit in with what others are doing and have planned for the project.  Be patient, it may take folks a while to understand your requirements.
 
- 1. Create a JIRA Issue (if one does not already exist or you haven't already)
+ 1. Create a GitHub Issue in the [issue tracker](https://github.com/apache/mahout/issues) (if one does not already exist or you haven't already)
  2. Pull the code from your GitHub repository
  3. Ensure that you are working with the latest code from the [apache/mahout](https://github.com/apache/mahout) master branch.
  3. Modify the source code and add some (very) nice features.
@@ -102,9 +102,8 @@ Describe your proposed changes and check that they fit in with what others are d
          - New unit tests should be provided to demonstrate bugs and fixes.
  4. Commit the changes to your local repository.
  4. Push the code back up to your GitHub repository.
- 5. Create a [Pull Request](https://help.github.com/articles/creating-a-pull-request) to the to apache/mahout repository on Github.
-     - Include the corresponding JIRA Issue number and description in the title of the pull request:
-        - ie. MAHOUT-xxxx: < JIRA-Issue-Description >
+ 5. Create a [Pull Request](https://help.github.com/articles/creating-a-pull-request) to the apache/mahout repository on GitHub.
+     - Reference the related GitHub Issue in your pull request (for example, by including `Closes #xxxx` in the PR description).
  6. Committers and other members of the Mahout community can then comment on the Pull Request.  Be sure to watch for comments, respond and make any necessary changes.
 
 Please be patient. Committers are busy people too. If no one responds to your Pull Request after a few days, please make friendly reminders on the mailing list.  Please
@@ -139,7 +138,7 @@ Please do:
 <a name="HowToContribute-Review/ImproveExistingPatches"></a>
 ## Review/Improve Existing Pull Requests
 
-If there's a JIRA issue that already has a Pull Request with changes that you think are really good, and works well for you -- please add a comment saying so.   If there's room
+If there's a GitHub issue that already has a Pull Request with changes that you think are really good, and works well for you -- please add a comment saying so.   If there's room
 for improvement (more tests, better javadocs, etc...) then make the changes on your GitHub branch and add a comment about them.	If a lot of people review a Pull Request and give it a
 thumbs up, that's a good sign for committers when deciding if it's worth spending time to review it -- and if other people have already put in
 effort to improve the docs/tests for an issue, that helps even more.

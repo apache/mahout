@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# https://cwiki.apache.org/confluence/display/INFRA/git+-+.asf.yaml+features
+# https://github.com/apache/infrastructure-asfyaml/blob/main/README.md
 ---
 github:
   description: "Apache Mahout - an environment for quickly creating scalable, performant machine learning applications."
@@ -52,6 +52,8 @@ github:
     allow_auto_merge: false
     # auto-delete head branches after being merged
     del_branch_on_merge: true
+    # enable updating head branches of pull requests
+    allow_update_branch: true
 
   protected_branches:
     main:

@@ -103,6 +103,75 @@ class TestDefaultShotsParameter:
         assert result is not None
 
 
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+class TestCircuitMutationPrevention:
+    """Test that circuits are not mutated during execution."""
+
+    def test_execute_circuit_multiple_times_no_mutation(self, backend_name):
+        """Test that executing a circuit multiple times doesn't mutate it"""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=2)
+        qumat.apply_hadamard_gate(0)
+        qumat.apply_cnot_gate(0, 1)
+
+        assert qumat.circuit is not None
+        circuit = qumat.circuit
+
+        # Record initial circuit state
+        if backend_name == "cirq":
+            initial_length = len(circuit)
+            initial_has_measurements = circuit.has_measurements()
+        elif backend_name == "qiskit":
+            initial_length = len(circuit.data)
+        else:
+            initial_length = len(circuit.instructions)
+
+        # Execute circuit multiple times
+        result1 = qumat.execute_circuit()
+        result2 = qumat.execute_circuit()
+        result3 = qumat.execute_circuit()
+
+        # Verify circuit hasn't been mutated
+        assert qumat.circuit is not None
+        circuit_after = qumat.circuit
+        if backend_name == "cirq":
+            final_length = len(circuit_after)
+            final_has_measurements = circuit_after.has_measurements()
+            assert initial_length == final_length, (
+                f"Circuit length changed from {initial_length} to {final_length}. "
+                "Circuit was mutated!"
+            )
+            assert initial_has_measurements == final_has_measurements, (
+                "Circuit measurement state changed. Circuit was mutated!"
+            )
+        elif backend_name == "qiskit":
+            final_length = len(circuit_after.data)
+            assert initial_length == final_length, (
+                f"Circuit length changed from {initial_length} to {final_length}. "
+                "Circuit was mutated!"
+            )
+        else:
+            final_length = len(circuit_after.instructions)
+            assert initial_length == final_length, (
+                f"Circuit length changed from {initial_length} to {final_length}. "
+                "Circuit was mutated!"
+            )
+
+        # Verify results are consistent (all should have same structure)
+        if isinstance(result1, list):
+            result1 = result1[0]
+        if isinstance(result2, list):
+            result2 = result2[0]
+        if isinstance(result3, list):
+            result3 = result3[0]
+
+        # All results should have the same keys (measurement states)
+        assert set(result1.keys()) == set(result2.keys()) == set(result3.keys()), (
+            "Results have different states after multiple executions"
+        )
+
+
 class TestBackendConfigValidation:
     """Test class for backend configuration validation."""
 

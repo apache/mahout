@@ -51,11 +51,14 @@ impl TorchReader {
                 )));
             }
             Err(e) => {
-                return Err(MahoutError::Io(format!(
-                    "Failed to check if PyTorch file exists at {}: {}",
-                    path.display(),
-                    e
-                )));
+                return Err(MahoutError::IoWithSource {
+                    message: format!(
+                        "Failed to check if PyTorch file exists at {}: {}",
+                        path.display(),
+                        e
+                    ),
+                    source: e,
+                });
             }
             Ok(true) => {}
         }

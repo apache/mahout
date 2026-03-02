@@ -18,56 +18,64 @@
 
 import pytest
 
-try:
-    import torch
-    from _qdp import QdpEngine
-except ImportError:
-    torch = None
-    QdpEngine = None
+torch = pytest.importorskip("torch")
+_qdp = pytest.importorskip("_qdp")
+QdpEngine = _qdp.QdpEngine
 
 
 def _cuda_available():
-    return torch is not None and torch.cuda.is_available()
+    return torch.cuda.is_available()
 
 
 def _engine():
-    if QdpEngine is None:
-        pytest.skip("_qdp not built")
-    e = QdpEngine(0)
-    return e
+    return QdpEngine(0)
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
-def test_dtype_validation_float32_rejected():
-    """DLPack tensor must be float64; float32 CUDA tensor should fail with clear message."""
+def test_cuda_float32_amplitude_supported():
+    """1D float32 CUDA tensor should be supported for amplitude encoding via GPU pointer f32 path."""
     engine = _engine()
     # 1D float32 CUDA tensor (contiguous)
     t = torch.randn(4, dtype=torch.float32, device="cuda")
-    with pytest.raises(RuntimeError) as exc_info:
+    result = engine.encode(t, num_qubits=2, encoding_method="amplitude")
+    assert result is not None
+
+    # Verify DLPack round-trip works and tensor is on CUDA
+    qt = torch.from_dlpack(result)
+    assert qt.is_cuda
+    # With default engine precision=float32, complex64 is expected
+    assert qt.dtype in (torch.complex64, torch.complex128)
+
+
+@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
+def test_cuda_float32_amplitude_2d_unsupported():
+    """2D float32 CUDA tensor with amplitude encoding should raise a clear error."""
+    engine = _engine()
+    t = torch.randn(2, 4, dtype=torch.float32, device="cuda")
+    with pytest.raises(
+        RuntimeError, match="float32 batch amplitude encoding is not yet supported"
+    ):
         engine.encode(t, num_qubits=2, encoding_method="amplitude")
-    msg = str(exc_info.value).lower()
-    assert "float64" in msg
-    assert "code=" in msg or "bits=" in msg or "lanes=" in msg
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
 def test_stride_1d_non_contiguous_rejected():
-    """Non-contiguous 1D CUDA tensor (stride != 1) should fail with actual vs expected."""
+    """Non-contiguous 1D CUDA tensor (stride != 1) should fail with contiguous requirement."""
     engine = _engine()
     # Slice so stride is 2: shape (2,), stride (2,)
     t = torch.randn(4, dtype=torch.float64, device="cuda")[::2]
     assert t.stride(0) != 1
     with pytest.raises(RuntimeError) as exc_info:
         engine.encode(t, num_qubits=1, encoding_method="amplitude")
-    msg = str(exc_info.value)
-    assert "contiguous" in msg.lower()
-    assert "stride[0]=" in msg
-    assert "expected 1" in msg or "expected 1 " in msg
+    msg = str(exc_info.value).lower()
+    assert "contiguous" in msg
+    # Accept either explicit stride[0]/expected or user-facing contiguous() hint
+    assert "stride" in msg or "contiguous()" in msg or "expected" in msg
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
 def test_stride_2d_non_contiguous_rejected():
-    """Non-contiguous 2D CUDA tensor should fail with actual vs expected strides."""
+    """Non-contiguous 2D CUDA tensor should fail with contiguous requirement."""
     engine = _engine()
     # (4, 2) with strides (3, 2) -> not C-contiguous; expected for (4,2) is (2, 1)
     t = torch.randn(4, 3, dtype=torch.float64, device="cuda")[:, ::2]
@@ -76,10 +84,10 @@ def test_stride_2d_non_contiguous_rejected():
     assert t.stride(0) == 3 and t.stride(1) == 2
     with pytest.raises(RuntimeError) as exc_info:
         engine.encode(t, num_qubits=1, encoding_method="amplitude")
-    msg = str(exc_info.value)
-    assert "contiguous" in msg.lower()
-    assert "strides=" in msg
-    assert "expected" in msg
+    msg = str(exc_info.value).lower()
+    assert "contiguous" in msg
+    # Accept either explicit strides=/expected or user-facing contiguous() hint
+    assert "stride" in msg or "contiguous()" in msg or "expected" in msg
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")

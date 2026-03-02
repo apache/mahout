@@ -1,5 +1,5 @@
-import {themes as prismThemes} from 'prism-react-renderer';
-import type {Config} from '@docusaurus/types';
+import { themes as prismThemes } from 'prism-react-renderer';
+import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -46,10 +46,14 @@ const config: Config = {
           remarkPlugins: [remarkMath],
           rehypePlugins: [rehypeKatex],
           // Versioning configuration
-          lastVersion: 'current',
+          lastVersion: '0.5',
           versions: {
             current: {
-              label: '0.5-dev',
+              label: 'next',
+              path: 'next',
+            },
+            '0.5': {
+              label: 'latest', // or '0.5' if preferred
               path: '',
             },
             '0.4': {
@@ -101,6 +105,11 @@ const config: Config = {
           // Redirect /news.html to /blog
           if (existingPath === '/blog') {
             return ['/news.html', '/news'];
+          }
+          // Keep /downloads as the canonical public download entry URL.
+          if (existingPath === '/downloads') {
+            return [
+            ];
           }
           return undefined;
         },
@@ -167,7 +176,7 @@ const config: Config = {
         },
         // Download
         {
-          to: '/docs/download',
+          to: '/downloads',
           label: 'Download',
           position: 'left',
         },
@@ -270,6 +279,14 @@ const config: Config = {
             {
               label: 'Apache Software Foundation',
               href: 'https://www.apache.org/',
+            },
+            {
+              label: 'Security',
+              href: 'https://www.apache.org/security/',
+            },
+            {
+              label: 'Privacy',
+              href: 'https://privacy.apache.org/policies/privacy-policy-public.html',
             },
           ],
         },

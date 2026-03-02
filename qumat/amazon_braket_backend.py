@@ -52,7 +52,7 @@ def create_empty_circuit(num_qubits: int | None = None):
     circuit = Circuit()
     if num_qubits is not None:
         for i in range(num_qubits):
-            circuit.i(i)
+            circuit.i(i)  # type: ignore[unresolved-attribute]
     return circuit
 
 

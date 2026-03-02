@@ -22,6 +22,8 @@ use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
 use crate::preprocessing::Preprocessor;
 use cudarc::driver::CudaDevice;
+#[cfg(target_os = "linux")]
+use std::ffi::c_void;
 
 /// Maximum number of qubits supported (16GB GPU memory limit)
 /// This constant must match MAX_QUBITS in qdp-kernels/src/kernel_config.h
@@ -90,6 +92,48 @@ pub trait QuantumEncoder: Send + Sync {
 
     /// Strategy description
     fn description(&self) -> &'static str;
+
+    /// Encode from existing GPU pointer (zero-copy). Default: not supported.
+    ///
+    /// # Safety
+    /// Caller must ensure `input_d` points to valid GPU memory with at least `input_len` elements
+    /// of the expected dtype on the same device as `device`, and `stream` is a valid CUDA stream or null.
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_from_gpu_ptr(
+        &self,
+        _device: &Arc<CudaDevice>,
+        _input_d: *const c_void,
+        _input_len: usize,
+        _num_qubits: usize,
+        _stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        Err(MahoutError::NotImplemented(format!(
+            "encode_from_gpu_ptr not supported for {}",
+            self.name()
+        )))
+    }
+
+    /// Encode batch from existing GPU pointer (zero-copy). Default: not supported.
+    ///
+    /// # Safety
+    /// Caller must ensure `input_batch_d` points to valid GPU memory with at least
+    /// `num_samples * sample_size` elements of the expected dtype on the same device as `device`,
+    /// and `stream` is a valid CUDA stream or null.
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_batch_from_gpu_ptr(
+        &self,
+        _device: &Arc<CudaDevice>,
+        _input_batch_d: *const c_void,
+        _num_samples: usize,
+        _sample_size: usize,
+        _num_qubits: usize,
+        _stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        Err(MahoutError::NotImplemented(format!(
+            "encode_batch_from_gpu_ptr not supported for {}",
+            self.name()
+        )))
+    }
 }
 
 // Encoding implementations

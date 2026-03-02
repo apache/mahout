@@ -124,8 +124,8 @@ You can also run subsets from the repo root:
 
 | Command | Description |
 |---------|-------------|
-| `make test_rust` | QDP Rust unit tests (requires NVIDIA GPU; skipped if none detected) |
-| `make test_python` | Python tests via pytest (syncs dev deps; builds QDP extension if GPU present, then runs full suite) |
+| `make test_rust` | QDP Rust unit tests via cargo-llvm-cov (requires NVIDIA GPU; skipped if none detected). HTML report: `qdp/target/llvm-cov/html/index.html`. |
+| `make test_python` | Python tests via pytest and pytest-cov (syncs dev deps; builds QDP extension if GPU present, then runs full suite). HTML report: `htmlcov/index.html` at repo root. |
 
 See [testing/README.md](testing/README.md) for more options and details.
 

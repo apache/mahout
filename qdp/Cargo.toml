@@ -34,7 +34,7 @@ ndarray-npy = "0.9"
 # Protocol Buffer support for TensorFlow TensorProto
 prost = "0.12"
 prost-build = "0.12"
-bytes = "1.5"
+bytes = "1.11"
 # PyTorch tensor loading (optional)
 tch = "0.22"
 # Optional: vendored protoc to avoid build failures when protoc is missing

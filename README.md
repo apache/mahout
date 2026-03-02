@@ -40,11 +40,13 @@ Qumat is a high-level Python library for quantum computing that provides:
 ## Quick Start
 
 ```bash
-git clone https://github.com/apache/mahout.git
-cd mahout
-pip install uv
-uv sync                     # Core Qumat
-uv sync --extra qdp         # With QDP (requires CUDA GPU)
+pip install qumat
+```
+
+with QDP (Quantum Data Plane) support
+
+```bash
+pip install qumat[qdp]
 ```
 
 ### Qumat: Run a Quantum Circuit

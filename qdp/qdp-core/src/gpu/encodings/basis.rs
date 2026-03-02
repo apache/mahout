@@ -225,6 +225,113 @@ impl QuantumEncoder for BasisEncoder {
         Ok(batch_state_vector)
     }
 
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_from_gpu_ptr(
+        &self,
+        device: &Arc<CudaDevice>,
+        input_d: *const c_void,
+        input_len: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        if input_len != 1 {
+            return Err(MahoutError::InvalidInput(format!(
+                "Basis encoding expects exactly 1 value (the basis index), got {}",
+                input_len
+            )));
+        }
+        let state_len = 1 << num_qubits;
+        let basis_indices_d = input_d as *const usize;
+        let state_vector = {
+            crate::profile_scope!("GPU::Alloc");
+            GpuStateVector::new(device, num_qubits, Precision::Float64)?
+        };
+        let state_ptr = state_vector.ptr_f64().ok_or_else(|| {
+            MahoutError::InvalidInput(
+                "State vector precision mismatch (expected float64 buffer)".to_string(),
+            )
+        })?;
+        {
+            crate::profile_scope!("GPU::KernelLaunch");
+            let ret = unsafe {
+                qdp_kernels::launch_basis_encode_batch(
+                    basis_indices_d,
+                    state_ptr as *mut c_void,
+                    1,
+                    state_len,
+                    num_qubits as u32,
+                    stream,
+                )
+            };
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Basis encoding kernel failed with CUDA error code: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
+                )));
+            }
+        }
+        {
+            crate::profile_scope!("GPU::Synchronize");
+            crate::gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
+        }
+        Ok(state_vector)
+    }
+
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_batch_from_gpu_ptr(
+        &self,
+        device: &Arc<CudaDevice>,
+        input_batch_d: *const c_void,
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        if sample_size != 1 {
+            return Err(MahoutError::InvalidInput(format!(
+                "Basis encoding expects sample_size=1 (one index per sample), got {}",
+                sample_size
+            )));
+        }
+        let state_len = 1 << num_qubits;
+        let basis_indices_d = input_batch_d as *const usize;
+        let batch_state_vector = {
+            crate::profile_scope!("GPU::AllocBatch");
+            GpuStateVector::new_batch(device, num_samples, num_qubits)?
+        };
+        let state_ptr = batch_state_vector.ptr_f64().ok_or_else(|| {
+            MahoutError::InvalidInput(
+                "Batch state vector precision mismatch (expected float64 buffer)".to_string(),
+            )
+        })?;
+        {
+            crate::profile_scope!("GPU::BatchKernelLaunch");
+            let ret = unsafe {
+                qdp_kernels::launch_basis_encode_batch(
+                    basis_indices_d,
+                    state_ptr as *mut c_void,
+                    num_samples,
+                    state_len,
+                    num_qubits as u32,
+                    stream,
+                )
+            };
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Batch basis encoding kernel failed with CUDA error code: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
+                )));
+            }
+        }
+        {
+            crate::profile_scope!("GPU::Synchronize");
+            crate::gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
+        }
+        Ok(batch_state_vector)
+    }
+
     fn validate_input(&self, data: &[f64], num_qubits: usize) -> Result<()> {
         // Basic validation: qubits and data availability
         validate_qubit_count(num_qubits)?;

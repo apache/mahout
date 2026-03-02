@@ -17,11 +17,11 @@ limitations under the License.
 
 # Contributing to QDP (Quantum Data Plane)
 
-This guide covers **QDP-specific** build, test, install, and profiling. For repository-wide workflow (issues, branches, pull requests, pre-commit), see the root [CONTRIBUTING.md](../CONTRIBUTING.md).
+This guide covers **QDP-specific** build, test, installation, and profiling. For repository-wide workflow (issues, branches, pull requests, pre-commit), see the root [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## Prerequisites
 
-- Linux machine (QDP currently targets Linux with NVIDIA GPU)
+- Linux machine (QDP currently supports Linux with NVIDIA GPUs)
 - NVIDIA GPU with CUDA driver and toolkit installed
 - Python 3.10 (>=3.10,<3.14)
 - Rust & Cargo
@@ -155,12 +155,12 @@ make install_profile
 nsys profile python qdp-python/benchmark/benchmark_e2e.py
 ```
 
-See [docs/observability/NVTX_USAGE.md](docs/observability/NVTX_USAGE.md) for details.
+See [../docs/observability/NVTX_USAGE.md](../docs/observability/NVTX_USAGE.md) for details.
 
 ## Troubleshooting
 
 | Problem | Suggestion |
-|--------|------------|
+|---------|------------|
 | Python import fails after install | Use the same venv where the package was installed; check with `python -c "import _qdp"`. Activate the venv: `source .venv/bin/activate`. |
 | Build fails with CUDA errors | Ensure CUDA toolkit is installed and `nvcc` is in PATH. Try `cargo clean` and rebuild. |
 | "No CUDA installed" despite having nvcc | Run `cargo clean` and build again. |
@@ -172,5 +172,5 @@ See [docs/observability/NVTX_USAGE.md](docs/observability/NVTX_USAGE.md) for det
 ## References
 
 - [qdp-python/README.md](qdp-python/README.md) — Package usage
-- [docs/observability/NVTX_USAGE.md](docs/observability/NVTX_USAGE.md) — NVTX profiling
-- [docs/test/README.md](docs/test/README.md) — QDP test layout and commands
+- [../docs/observability/NVTX_USAGE.md](../docs/observability/NVTX_USAGE.md) — NVTX profiling
+- [../docs/test/README.md](../docs/test/README.md) — QDP test layout and commands
