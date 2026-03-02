@@ -19,6 +19,7 @@
 // Run: cargo run -p qdp-core --example observability_test --release
 
 use qdp_core::QdpEngine;
+use qdp_core::dlpack::free_dlpack_tensor;
 use std::env;
 
 fn main() {
@@ -92,12 +93,12 @@ fn main() {
     for i in 0..NUM_SAMPLES {
         let sample = &test_data[i * VECTOR_LEN..(i + 1) * VECTOR_LEN];
         match engine.encode(sample, NUM_QUBITS, "amplitude") {
-            Ok(ptr) => unsafe {
-                let managed = &mut *ptr;
-                if let Some(deleter) = managed.deleter.take() {
-                    deleter(ptr);
+            Ok(ptr) => {
+                if let Err(e) = unsafe { free_dlpack_tensor(ptr) } {
+                    eprintln!("✗ Failed to free DLPack tensor for sample {}: {:?}", i, e);
+                    return;
                 }
-            },
+            }
             Err(e) => {
                 eprintln!("✗ Encoding failed for sample {}: {:?}", i, e);
                 return;
