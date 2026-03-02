@@ -31,12 +31,21 @@ from __future__ import annotations
 
 import math
 from collections.abc import Iterator
-from typing import TYPE_CHECKING
+from functools import lru_cache
+from typing import TYPE_CHECKING, Any
+
+import numpy as np
 
 from qumat_qdp._backend import get_qdp as _get_qdp
 
 if TYPE_CHECKING:
     import _qdp
+
+# Optional torch for as_torch()/as_numpy(); import at use site to avoid hard dependency.
+try:
+    import torch as _torch
+except ImportError:
+    _torch = None  # type: ignore[assignment]
 
 # Seed must fit Rust u64: 0 <= seed <= 2^64 - 1.
 _U64_MAX = 2**64 - 1
@@ -148,6 +157,40 @@ class QuantumDataLoader:
         self._file_requested = False
         self._null_handling: str | None = None
         self._backend_name: str = "rust"
+        self._array: np.ndarray | None = None
+        self._array_requested = False
+        # Output format: None = yield raw QuantumTensor (DLPack); ("torch", device) or ("numpy",)
+        self._output_format: tuple[str, ...] | None = None
+
+    def as_torch(self, device: str = "cuda") -> QuantumDataLoader:
+        """Yield batches as PyTorch tensors. device='cuda' keeps data on GPU (no copy); 'cpu' moves to CPU. Returns self."""
+        if device not in ("cuda", "cpu"):
+            raise ValueError(f"device must be 'cuda' or 'cpu', got {device!r}")
+        if _torch is None:
+            raise RuntimeError(
+                "PyTorch is required for as_torch(). Install with: pip install torch"
+            )
+        self._output_format = ("torch", device)
+        return self
+
+    def as_numpy(self) -> QuantumDataLoader:
+        """Yield batches as NumPy arrays (CPU). Conversion is done inside the loader. Returns self."""
+        self._output_format = ("numpy",)
+        return self
+
+    def source_array(self, X: np.ndarray) -> QuantumDataLoader:
+        """Use in-memory array; no temp file. Encodes via QdpEngine.encode() per batch. Returns self."""
+        if X is None or not hasattr(X, "shape") or len(X.shape) != 2:
+            raise ValueError(
+                "source_array(X) requires a 2D array (n_samples, n_features)."
+            )
+        self._array = np.asarray(X, dtype=np.float64)
+        if not self._array.flags.c_contiguous:
+            self._array = np.ascontiguousarray(self._array)
+        self._array_requested = True
+        n = self._array.shape[0]
+        self._total_batches = max(1, (n + self._batch_size - 1) // self._batch_size)
+        return self
 
     def qubits(self, n: int) -> QuantumDataLoader:
         """Set number of qubits. Returns self for chaining."""
@@ -248,8 +291,55 @@ class QuantumDataLoader:
         self._backend_name = name
         return self
 
+    def _array_iterator(self) -> Iterator[Any]:
+        """Yield one QuantumTensor per batch from in-memory array via QdpEngine.encode()."""
+        qdp = _get_qdp()
+        QdpEngine = getattr(qdp, "QdpEngine", None)
+        if QdpEngine is None:
+            raise RuntimeError("_qdp.QdpEngine not found. Build with maturin develop.")
+        engine = QdpEngine(device_id=self._device_id)
+        X = self._array
+        if X is None:
+            raise RuntimeError(
+                "Internal error: _array_iterator called without source_array() data."
+            )
+        assert X is not None  # type narrowing for static checkers
+        n = X.shape[0]
+        for start in range(0, n, self._batch_size):
+            end = min(start + self._batch_size, n)
+            qt = engine.encode(X[start:end], self._num_qubits, self._encoding_method)
+            yield qt
+
     def _create_iterator(self) -> Iterator[object]:
-        """Build engine and return a loader iterator (Rust-backed or PyTorch fallback)."""
+        """Build engine and return the Rust-backed loader iterator (synthetic, file, or array) or PyTorch fallback."""
+        if self._array_requested:
+            if self._synthetic_requested or self._file_requested:
+                raise ValueError(
+                    "Cannot combine source_array() with source_synthetic() or source_file(); use only one source."
+                )
+            if self._array is None:
+                raise ValueError(
+                    "source_array() was called without an array; set with .source_array(X)."
+                )
+            qdp = _get_qdp()
+            engine = getattr(qdp, "QdpEngine", None)
+            if engine is None:
+                raise RuntimeError(
+                    "_qdp.QdpEngine not found. Build with maturin develop."
+                )
+            engine = engine(device_id=self._device_id)
+            create_array_loader = getattr(engine, "create_array_loader", None)
+            if create_array_loader is not None:
+                return iter(
+                    create_array_loader(
+                        self._array,
+                        batch_size=self._batch_size,
+                        num_qubits=self._num_qubits,
+                        encoding_method=self._encoding_method,
+                        batch_limit=None,
+                    )
+                )
+            return iter(self._array_iterator())
         if self._synthetic_requested and self._file_requested:
             raise ValueError(
                 "Cannot set both synthetic and file sources; use either .source_synthetic() or .source_file(path), not both."
@@ -437,11 +527,25 @@ class QuantumDataLoader:
             batch = all_data[start:end]
             yield encode_fn(batch, num_qubits, encoding_method, device=device)
 
-    def __iter__(self) -> Iterator[object]:
-        """Return iterator that yields one encoded batch per step.
+    def _wrap_iterator(self, raw_iter: Iterator[object]) -> Iterator[Any]:
+        if self._output_format is None:
+            yield from raw_iter
+            return
+        kind = self._output_format[0]
+        if kind == "torch":
+            device = self._output_format[1]
+            for qt in raw_iter:
+                t = _torch.from_dlpack(qt)
+                yield t.cpu() if device == "cpu" else t
+        elif kind == "numpy":
+            for qt in raw_iter:
+                yield _torch.from_dlpack(qt).cpu().numpy()
+        else:
+            yield from raw_iter
 
-        With the default ``"rust"`` backend, yields ``QuantumTensor``
-        (use ``torch.from_dlpack(qt)``).  With ``.backend("pytorch")``,
-        yields ``torch.Tensor`` directly.
-        """
-        return self._create_iterator()
+    def __iter__(self) -> Iterator[object]:
+        """Return iterator yielding one batch per iteration (DLPack, torch, or numpy per as_torch/as_numpy)."""
+        raw = self._create_iterator()
+        if self._output_format is None:
+            return raw
+        return self._wrap_iterator(raw)
