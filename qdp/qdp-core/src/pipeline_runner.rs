@@ -246,6 +246,47 @@ impl PipelineIterator {
         })
     }
 
+    /// Create a pipeline iterator from an in-memory array (e.g. from Python numpy).
+    /// Data is owned by the iterator; the full encode loop runs in Rust (take_batch + encode_batch).
+    pub fn new_from_array(
+        engine: QdpEngine,
+        data: Vec<f64>,
+        num_samples: usize,
+        sample_size: usize,
+        config: PipelineConfig,
+        batch_limit: usize,
+    ) -> Result<Self> {
+        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        if sample_size != vector_len {
+            return Err(MahoutError::InvalidInput(format!(
+                "Array sample_size {} does not match vector_len {} for num_qubits={}, encoding={}",
+                sample_size, vector_len, config.num_qubits, config.encoding_method
+            )));
+        }
+        if data.len() != num_samples * sample_size {
+            return Err(MahoutError::InvalidInput(format!(
+                "Array length {} is not num_samples ({}) * sample_size ({})",
+                data.len(),
+                num_samples,
+                sample_size
+            )));
+        }
+        let source = DataSource::InMemory {
+            data,
+            cursor: 0,
+            num_samples,
+            sample_size,
+            batches_yielded: 0,
+            batch_limit,
+        };
+        Ok(Self {
+            engine,
+            config,
+            source,
+            vector_len,
+        })
+    }
+
     /// Create a pipeline iterator from a Parquet file using streaming read (Phase 2b).
     /// Only `.parquet` is supported; reduces memory for large files by reading in chunks.
     /// Validates sample_size == vector_len after the first chunk.
@@ -411,7 +452,61 @@ impl PipelineIterator {
     }
 
     /// Returns the next batch as a DLPack pointer; `Ok(None)` when exhausted.
+    /// For InMemory source, passes a slice reference to encode_batch (no per-batch copy).
     pub fn next_batch(&mut self) -> Result<Option<*mut DLManagedTensor>> {
+        // InMemory: update cursor, then encode from &data[start..end] to avoid to_vec().
+        let in_memory_range: Option<(usize, usize, usize, usize)> = match &mut self.source {
+            DataSource::InMemory {
+                data,
+                cursor,
+                sample_size,
+                batches_yielded,
+                batch_limit,
+                ..
+            } => {
+                if *batches_yielded >= *batch_limit {
+                    None
+                } else {
+                    let remaining = (data.len() - *cursor) / *sample_size;
+                    if remaining == 0 {
+                        None
+                    } else {
+                        let batch_n = remaining.min(self.config.batch_size);
+                        let start = *cursor;
+                        let end = start + batch_n * *sample_size;
+                        *cursor = end;
+                        *batches_yielded += 1;
+                        Some((
+                            start,
+                            batch_n,
+                            *sample_size,
+                            self.config.num_qubits as usize,
+                        ))
+                    }
+                }
+            }
+            _ => None,
+        };
+
+        if let Some((start, batch_n, sample_size, num_qubits)) = in_memory_range {
+            let slice = match &self.source {
+                DataSource::InMemory { data, .. } => {
+                    let len = batch_n * sample_size;
+                    &data[start..start + len]
+                }
+                _ => unreachable!(),
+            };
+            let ptr = self.engine.encode_batch(
+                slice,
+                batch_n,
+                sample_size,
+                num_qubits,
+                &self.config.encoding_method,
+            )?;
+            return Ok(Some(ptr));
+        }
+
+        // Synthetic / Streaming: take_batch_from_source (may copy) then encode.
         let Some((batch_data, batch_n, sample_size, num_qubits)) = self.take_batch_from_source()?
         else {
             return Ok(None);
