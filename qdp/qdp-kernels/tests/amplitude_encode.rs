@@ -26,8 +26,8 @@ use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
 use qdp_kernels::{
     CuComplex, CuDoubleComplex, launch_amplitude_encode, launch_amplitude_encode_batch,
-    launch_amplitude_encode_batch_f32, launch_amplitude_encode_f32, launch_l2_norm,
-    launch_l2_norm_batch, launch_l2_norm_batch_f32, launch_l2_norm_f32,
+    launch_amplitude_encode_f32, launch_l2_norm, launch_l2_norm_batch, launch_l2_norm_batch_f32,
+    launch_l2_norm_f32,
 };
 
 const EPSILON: f64 = 1e-10;
@@ -61,42 +61,6 @@ fn assert_batch_state_matches_f64(
             );
             assert!(
                 actual.y.abs() < EPSILON,
-                "sample {} element {} imaginary should be 0",
-                sample_idx,
-                elem_idx
-            );
-        }
-    }
-}
-
-#[cfg(target_os = "linux")]
-fn assert_batch_state_matches_f32(
-    state_h: &[CuComplex],
-    input: &[f32],
-    num_samples: usize,
-    sample_len: usize,
-    state_len: usize,
-) {
-    for sample_idx in 0..num_samples {
-        let sample = &input[sample_idx * sample_len..(sample_idx + 1) * sample_len];
-        let norm = sample.iter().map(|v| v * v).sum::<f32>().sqrt();
-        for elem_idx in 0..state_len {
-            let expected = if elem_idx < sample_len {
-                sample[elem_idx] / norm
-            } else {
-                0.0
-            };
-            let actual = state_h[sample_idx * state_len + elem_idx];
-            assert!(
-                (actual.x - expected).abs() < EPSILON_F32,
-                "sample {} element {} expected {}, got {}",
-                sample_idx,
-                elem_idx,
-                expected,
-                actual.x
-            );
-            assert!(
-                actual.y.abs() < EPSILON_F32,
                 "sample {} element {} imaginary should be 0",
                 sample_idx,
                 elem_idx
@@ -692,8 +656,6 @@ fn test_amplitude_encode_batch_odd_sample_length_handles_misaligned_samples() {
     let state_h = device.dtoh_sync_copy(&state_d).unwrap();
     assert_batch_state_matches_f64(&state_h, &input, num_samples, sample_len, state_len);
 }
-
-
 
 #[test]
 #[cfg(target_os = "linux")]
