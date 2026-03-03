@@ -16,6 +16,9 @@
 
 """tests for Quantum Data Loader."""
 
+from unittest.mock import patch
+
+import numpy as np
 import pytest
 
 try:
@@ -26,6 +29,15 @@ except ImportError:
 
 def _loader_available():
     return QuantumDataLoader is not None
+
+
+def _cuda_available():
+    try:
+        import torch
+
+        return torch.cuda.is_available()
+    except ImportError:
+        return False
 
 
 @pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
@@ -238,3 +250,134 @@ def test_source_file_s3_streaming_non_parquet_raises(path):
         )
     msg = str(exc_info.value).lower()
     assert "parquet" in msg or "streaming" in msg
+
+
+# --- as_torch() / as_numpy() output format tests ---
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+def test_as_torch_raises_at_config_time_when_torch_missing():
+    """as_torch() raises RuntimeError immediately (config time) when torch is not installed."""
+    with patch("qumat_qdp.loader._torch", None):
+        loader = QuantumDataLoader(device_id=0).qubits(4).batches(2, size=4)
+        with pytest.raises(RuntimeError) as exc_info:
+            loader.as_torch()
+        msg = str(exc_info.value)
+        assert "PyTorch" in msg or "torch" in msg.lower()
+        assert "pip install" in msg
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+def test_as_numpy_succeeds_at_config_time_without_torch():
+    """as_numpy() does not raise at config time even when torch is not installed."""
+    with patch("qumat_qdp.loader._torch", None):
+        loader = (
+            QuantumDataLoader(device_id=0)
+            .qubits(4)
+            .batches(2, size=4)
+            .source_synthetic()
+            .as_numpy()
+        )
+    assert loader._output_format == ("numpy",)
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+@pytest.mark.skipif(not _cuda_available(), reason="CUDA GPU required")
+def test_as_numpy_yields_float64_arrays():
+    """as_numpy() yields numpy float64 arrays with correct shape; no torch required."""
+    num_qubits = 4
+    batch_size = 8
+    state_len = 2**num_qubits  # 16
+
+    batches = []
+    with patch("qumat_qdp.loader._torch", None):
+        loader = (
+            QuantumDataLoader(device_id=0)
+            .qubits(num_qubits)
+            .batches(3, size=batch_size)
+            .source_synthetic()
+            .as_numpy()
+        )
+        for batch in loader:
+            batches.append(batch)
+
+    assert len(batches) == 3
+    for batch in batches:
+        assert isinstance(batch, np.ndarray), f"expected ndarray, got {type(batch)}"
+        assert batch.dtype == np.float64, f"expected float64, got {batch.dtype}"
+        assert batch.ndim == 2
+        assert batch.shape == (batch_size, state_len), f"unexpected shape {batch.shape}"
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+@pytest.mark.skipif(not _cuda_available(), reason="CUDA GPU required")
+def test_as_numpy_amplitudes_are_unit_norm():
+    """Each row from as_numpy() should be a unit-norm state vector (amplitude encoding)."""
+    num_qubits = 4
+    batch_size = 16
+
+    loader = (
+        QuantumDataLoader(device_id=0)
+        .qubits(num_qubits)
+        .batches(2, size=batch_size)
+        .source_synthetic()
+        .as_numpy()
+    )
+    for batch in loader:
+        arr = np.asarray(batch, dtype=np.float64)
+        norms = np.linalg.norm(arr, axis=1)
+        np.testing.assert_allclose(norms, 1.0, atol=1e-5)
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+@pytest.mark.skipif(not _cuda_available(), reason="CUDA GPU required")
+def test_as_torch_yields_cuda_tensors():
+    """as_torch(device='cuda') yields torch tensors on CUDA."""
+    try:
+        import torch
+    except ImportError:
+        pytest.skip("torch not installed")
+
+    num_qubits = 4
+    batch_size = 8
+    state_len = 2**num_qubits
+
+    loader = (
+        QuantumDataLoader(device_id=0)
+        .qubits(num_qubits)
+        .batches(2, size=batch_size)
+        .source_synthetic()
+        .as_torch(device="cuda")
+    )
+    for batch in loader:
+        assert isinstance(batch, torch.Tensor)
+        assert batch.is_cuda
+        assert batch.shape == (batch_size, state_len)
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+@pytest.mark.skipif(not _cuda_available(), reason="CUDA GPU required")
+def test_as_numpy_from_source_array():
+    """as_numpy() works with source_array(), yielding correct shapes and dtype."""
+    num_qubits = 3
+    state_len = 2**num_qubits  # 8
+    n_samples = 12
+    batch_size = 4
+
+    rng = np.random.default_rng(42)
+    X = rng.standard_normal((n_samples, state_len))
+
+    loader = (
+        QuantumDataLoader(device_id=0)
+        .qubits(num_qubits)
+        .batches(1, size=batch_size)
+        .encoding("amplitude")
+        .source_array(X)
+        .as_numpy()
+    )
+    batches = list(loader)
+    assert len(batches) == n_samples // batch_size
+    for batch in batches:
+        assert isinstance(batch, np.ndarray)
+        assert batch.dtype == np.float64
+        assert batch.shape[1] == state_len

@@ -31,14 +31,14 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
 if TYPE_CHECKING:
     import _qdp
 
-# Optional torch for as_torch()/as_numpy(); import at use site to avoid hard dependency.
+# Optional torch for as_torch(); as_numpy() uses QuantumTensor.to_numpy() (no torch needed).
 try:
     import torch as _torch
 except ImportError:
@@ -145,7 +145,7 @@ class QuantumDataLoader:
         return self
 
     def as_numpy(self) -> QuantumDataLoader:
-        """Yield batches as NumPy arrays (CPU). Conversion is done inside the loader. Returns self."""
+        """Yield batches as NumPy float64 arrays (CPU). Uses QuantumTensor.to_numpy() — no PyTorch required. Returns self."""
         self._output_format = ("numpy",)
         return self
 
@@ -371,7 +371,8 @@ class QuantumDataLoader:
                 yield t.cpu() if device == "cpu" else t
         elif kind == "numpy":
             for qt in raw_iter:
-                yield _torch.from_dlpack(qt).cpu().numpy()
+                # Rust QuantumTensor has to_numpy(); raw_iter is Iterator[object]
+                yield cast(Any, qt).to_numpy()
         else:
             yield from raw_iter
 
