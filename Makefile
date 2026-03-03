@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-.PHONY: test_rust test_python tests pre-commit setup-test-python
+.PHONY: test_rust test_python tests pre-commit setup-test-python install-llvm-cov
 
 # Detect NVIDIA GPU
 HAS_NVIDIA := $(shell command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/dev/null 2>&1 && echo yes || echo no)
@@ -22,7 +22,10 @@ HAS_NVIDIA := $(shell command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/d
 setup-test-python:
 	uv sync --group dev
 
-test_rust:
+install-llvm-cov:
+	@cargo llvm-cov --version >/dev/null 2>&1 || (echo "[INFO] Installing cargo-llvm-cov..." && cargo install cargo-llvm-cov)
+
+test_rust: install-llvm-cov
 ifeq ($(HAS_NVIDIA),yes)
 	cd qdp && cargo llvm-cov test --workspace --exclude qdp-python --html --output-dir target/llvm-cov/html
 	cd qdp && cargo llvm-cov report --summary-only

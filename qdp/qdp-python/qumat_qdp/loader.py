@@ -118,6 +118,7 @@ class QuantumDataLoader:
         )
         self._synthetic_requested = False  # set True only by source_synthetic()
         self._file_requested = False
+        self._null_handling: Optional[str] = None
 
     def qubits(self, n: int) -> QuantumDataLoader:
         """Set number of qubits. Returns self for chaining."""
@@ -190,6 +191,15 @@ class QuantumDataLoader:
         self._seed = s
         return self
 
+    def null_handling(self, policy: str) -> QuantumDataLoader:
+        """Set null handling policy ('fill_zero' or 'reject'). Returns self for chaining."""
+        if policy not in ("fill_zero", "reject"):
+            raise ValueError(
+                f"null_handling must be 'fill_zero' or 'reject', got {policy!r}"
+            )
+        self._null_handling = policy
+        return self
+
     def _create_iterator(self) -> Iterator[object]:
         """Build engine and return the Rust-backed loader iterator (synthetic or file)."""
         if self._synthetic_requested and self._file_requested:
@@ -237,6 +247,7 @@ class QuantumDataLoader:
                     num_qubits=self._num_qubits,
                     encoding_method=self._encoding_method,
                     batch_limit=None,
+                    null_handling=self._null_handling,
                 )
             )
         create_synthetic_loader = getattr(engine, "create_synthetic_loader", None)
@@ -251,6 +262,7 @@ class QuantumDataLoader:
                 num_qubits=self._num_qubits,
                 encoding_method=self._encoding_method,
                 seed=self._seed,
+                null_handling=self._null_handling,
             )
         )
 
