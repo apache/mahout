@@ -206,3 +206,21 @@ class TestBackendConfigValidation:
 
         assert qumat.backend is not None
         assert qumat.backend.options.method == "matrix_product_state"
+
+
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+class TestCircuitDrawing:
+    """Test class for circuit drawing functionality."""
+
+    def test_draw_circuit_returns_output(self, backend_name):
+        """Test that draw_circuit runs successfully and returns an output."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+
+        qumat.create_empty_circuit(num_qubits=2)
+        qumat.apply_hadamard_gate(0)
+        qumat.apply_cnot_gate(0, 1)
+
+        drawing = qumat.draw_circuit()
+
+        assert drawing is not None
