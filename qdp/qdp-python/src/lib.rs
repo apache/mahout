@@ -50,6 +50,7 @@ fn run_throughput_pipeline_py(
         encoding_method,
         seed,
         warmup_batches,
+        null_handling: qdp_core::NullHandling::default(),
     };
     let result = py
         .detach(|| qdp_core::run_throughput_pipeline(&config))
