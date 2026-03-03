@@ -724,6 +724,7 @@ impl QdpEngine {
             encoding_method,
             0,
             None,
+            qdp_core::reader::NullHandling::FillZero,
         );
         let engine = self.engine.clone();
         let iter = py
