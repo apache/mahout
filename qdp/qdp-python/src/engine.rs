@@ -26,7 +26,7 @@ use pyo3::prelude::*;
 use qdp_core::{Precision, QdpEngine as CoreEngine};
 
 #[cfg(target_os = "linux")]
-use crate::loader::{PyQuantumLoader, config_from_args, path_from_py};
+use crate::loader::{PyQuantumLoader, config_from_args, parse_null_handling, path_from_py};
 
 /// PyO3 wrapper for QdpEngine
 ///
@@ -575,7 +575,7 @@ impl QdpEngine {
     // --- Loader factory methods (Linux only) ---
     #[cfg(target_os = "linux")]
     /// Create a synthetic-data pipeline iterator (for QuantumDataLoader.source_synthetic()).
-    #[pyo3(signature = (total_batches, batch_size, num_qubits, encoding_method, seed=None))]
+    #[pyo3(signature = (total_batches, batch_size, num_qubits, encoding_method, seed=None, null_handling=None))]
     fn create_synthetic_loader(
         &self,
         total_batches: usize,
@@ -583,7 +583,9 @@ impl QdpEngine {
         num_qubits: u32,
         encoding_method: &str,
         seed: Option<u64>,
+        null_handling: Option<&str>,
     ) -> PyResult<PyQuantumLoader> {
+        let nh = parse_null_handling(null_handling)?;
         let config = config_from_args(
             &self.engine,
             batch_size,
@@ -591,6 +593,7 @@ impl QdpEngine {
             encoding_method,
             total_batches,
             seed,
+            nh,
         );
         let iter = qdp_core::PipelineIterator::new_synthetic(self.engine.clone(), config).map_err(
             |e| PyRuntimeError::new_err(format!("create_synthetic_loader failed: {}", e)),
@@ -600,7 +603,8 @@ impl QdpEngine {
 
     #[cfg(target_os = "linux")]
     /// Create a file-backed pipeline iterator (full read then batch; for QuantumDataLoader.source_file(path)).
-    #[pyo3(signature = (path, batch_size, num_qubits, encoding_method, batch_limit=None))]
+    #[allow(clippy::too_many_arguments)]
+    #[pyo3(signature = (path, batch_size, num_qubits, encoding_method, batch_limit=None, null_handling=None))]
     fn create_file_loader(
         &self,
         py: Python<'_>,
@@ -609,9 +613,11 @@ impl QdpEngine {
         num_qubits: u32,
         encoding_method: &str,
         batch_limit: Option<usize>,
+        null_handling: Option<&str>,
     ) -> PyResult<PyQuantumLoader> {
         let path_str = path_from_py(path)?;
         let batch_limit = batch_limit.unwrap_or(usize::MAX);
+        let nh = parse_null_handling(null_handling)?;
         let config = config_from_args(
             &self.engine,
             batch_size,
@@ -619,6 +625,7 @@ impl QdpEngine {
             encoding_method,
             0,
             None,
+            nh,
         );
         let engine = self.engine.clone();
         let iter = py
@@ -636,7 +643,8 @@ impl QdpEngine {
 
     #[cfg(target_os = "linux")]
     /// Create a streaming Parquet pipeline iterator (for QuantumDataLoader.source_file(path, streaming=True)).
-    #[pyo3(signature = (path, batch_size, num_qubits, encoding_method, batch_limit=None))]
+    #[allow(clippy::too_many_arguments)]
+    #[pyo3(signature = (path, batch_size, num_qubits, encoding_method, batch_limit=None, null_handling=None))]
     fn create_streaming_file_loader(
         &self,
         py: Python<'_>,
@@ -645,9 +653,11 @@ impl QdpEngine {
         num_qubits: u32,
         encoding_method: &str,
         batch_limit: Option<usize>,
+        null_handling: Option<&str>,
     ) -> PyResult<PyQuantumLoader> {
         let path_str = path_from_py(path)?;
         let batch_limit = batch_limit.unwrap_or(usize::MAX);
+        let nh = parse_null_handling(null_handling)?;
         let config = config_from_args(
             &self.engine,
             batch_size,
@@ -655,6 +665,7 @@ impl QdpEngine {
             encoding_method,
             0,
             None,
+            nh,
         );
         let engine = self.engine.clone();
         let iter = py

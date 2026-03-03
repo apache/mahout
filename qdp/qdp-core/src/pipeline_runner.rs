@@ -26,7 +26,7 @@ use crate::QdpEngine;
 use crate::dlpack::DLManagedTensor;
 use crate::error::{MahoutError, Result};
 use crate::io;
-use crate::reader::StreamingDataReader;
+use crate::reader::{NullHandling, StreamingDataReader};
 use crate::readers::ParquetStreamingReader;
 
 /// Configuration for throughput/latency pipeline runs (Python run_throughput_pipeline_py).
@@ -39,6 +39,7 @@ pub struct PipelineConfig {
     pub encoding_method: String,
     pub seed: Option<u64>,
     pub warmup_batches: usize,
+    pub null_handling: NullHandling,
 }
 
 impl Default for PipelineConfig {
@@ -51,6 +52,7 @@ impl Default for PipelineConfig {
             encoding_method: "amplitude".to_string(),
             seed: None,
             warmup_batches: 0,
+            null_handling: NullHandling::FillZero,
         }
     }
 }
@@ -154,12 +156,23 @@ fn path_extension_lower(path: &Path) -> Option<String> {
 
 /// Dispatches by path extension to the appropriate io reader. Returns (data, num_samples, sample_size).
 /// Unsupported or missing extension returns Err with message listing supported formats.
-fn read_file_by_extension(path: &Path) -> Result<(Vec<f64>, usize, usize)> {
+fn read_file_by_extension(
+    path: &Path,
+    null_handling: NullHandling,
+) -> Result<(Vec<f64>, usize, usize)> {
     let ext_lower = path_extension_lower(path);
     let ext = ext_lower.as_deref();
     match ext {
-        Some("parquet") => io::read_parquet_batch(path),
-        Some("arrow") | Some("feather") | Some("ipc") => io::read_arrow_ipc_batch(path),
+        Some("parquet") => {
+            use crate::reader::DataReader;
+            let mut reader = crate::readers::ParquetReader::new(path, None, null_handling)?;
+            reader.read_batch()
+        }
+        Some("arrow") | Some("feather") | Some("ipc") => {
+            use crate::reader::DataReader;
+            let mut reader = crate::readers::ArrowIPCReader::new(path, null_handling)?;
+            reader.read_batch()
+        }
         Some("npy") => io::read_numpy_batch(path),
         Some("pt") | Some("pth") => io::read_torch_batch(path),
         Some("pb") => io::read_tensorflow_batch(path),
@@ -211,7 +224,7 @@ impl PipelineIterator {
         batch_limit: usize,
     ) -> Result<Self> {
         let path = path.as_ref();
-        let (data, num_samples, sample_size) = read_file_by_extension(path)?;
+        let (data, num_samples, sample_size) = read_file_by_extension(path, config.null_handling)?;
         let vector_len = vector_len(config.num_qubits, &config.encoding_method);
 
         // Dimension validation at construction.
@@ -263,7 +276,11 @@ impl PipelineIterator {
             )));
         }
 
-        let mut reader = ParquetStreamingReader::new(path, Some(DEFAULT_PARQUET_ROW_GROUP_SIZE))?;
+        let mut reader = ParquetStreamingReader::new(
+            path,
+            Some(DEFAULT_PARQUET_ROW_GROUP_SIZE),
+            config.null_handling,
+        )?;
         let vector_len = vector_len(config.num_qubits, &config.encoding_method);
 
         // Read first chunk to learn sample_size; reuse as initial buffer.
