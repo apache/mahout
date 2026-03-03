@@ -194,3 +194,15 @@ class TestBackendConfigValidation:
 
         with pytest.raises(KeyError, match="missing required key.*backend_options"):
             QuMat(config)
+
+    def test_qiskit_custom_simulator_fallback(self):
+        """Test that Qiskit backend accepts simulator types outside the legacy map."""
+        config = {
+            "backend_name": "qiskit",
+            "backend_options": {"simulator_type": "matrix_product_state"},
+        }
+
+        qumat = QuMat(config)
+
+        assert qumat.backend is not None
+        assert qumat.backend.options.method == "matrix_product_state"
