@@ -18,7 +18,7 @@ use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use std::ffi::c_void;
 
-use crate::constants::format_supported_cuda_encoding_methods;
+use crate::constants::{CUDA_ENCODING_METHODS, format_supported_cuda_encoding_methods};
 
 /// Helper to detect PyTorch tensor
 pub fn is_pytorch_tensor(obj: &Bound<'_, PyAny>) -> PyResult<bool> {
@@ -152,6 +152,15 @@ pub fn validate_cuda_tensor_for_encoding(
 ) -> PyResult<()> {
     let method = encoding_method.to_ascii_lowercase();
 
+    if !CUDA_ENCODING_METHODS.contains(&method.as_str()) {
+        return Err(PyRuntimeError::new_err(format!(
+            "CUDA tensor encoding currently only supports {} methods, got '{}'. \
+             Use tensor.cpu() to convert to CPU tensor for other encoding methods.",
+            format_supported_cuda_encoding_methods(),
+            encoding_method
+        )));
+    }
+
     // Check encoding method support and dtype (ASCII lowercase for case-insensitive match).
     let dtype = tensor.getattr("dtype")?;
     let dtype_str: String = dtype.str()?.extract()?;
@@ -186,10 +195,8 @@ pub fn validate_cuda_tensor_for_encoding(
         }
         _ => {
             return Err(PyRuntimeError::new_err(format!(
-                "CUDA tensor encoding currently only supports {} methods, got '{}'. \
-                 Use tensor.cpu() to convert to CPU tensor for other encoding methods.",
-                format_supported_cuda_encoding_methods(),
-                encoding_method
+                "Internal error: missing CUDA validation branch for supported method '{}'",
+                method
             )));
         }
     }
