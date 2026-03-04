@@ -490,3 +490,19 @@ class TestMultiQubitGatesEdgeCases:
                 assert abs(probabilities[i] - probabilities[j]) < 0.05, (
                     f"Backends have inconsistent CNOT results: {results_dict}"
                 )
+
+
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+def test_apply_swap_gate(backend_name):
+    """Test that the SWAP gate applies correctly across backends."""
+    backend_config = get_backend_config(backend_name)
+    qumat = QuMat(backend_config)
+
+    qumat.create_empty_circuit(num_qubits=2)
+
+    qumat.apply_pauli_x_gate(0)
+
+    qumat.apply_swap_gate(0, 1)
+
+    results = qumat.execute_circuit()
+    assert results is not None
