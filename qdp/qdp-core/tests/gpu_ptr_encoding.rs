@@ -541,6 +541,84 @@ fn test_encode_batch_from_gpu_ptr_basis_success() {
     }
 }
 
+#[test]
+fn test_encode_from_gpu_ptr_iqp_z_success() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
+        Ok(e) => e,
+        Err(_) => {
+            println!("SKIP: No GPU available");
+            return;
+        }
+    };
+
+    let num_qubits = 2;
+    let data = [0.1_f64, -0.2_f64];
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => {
+            println!("SKIP: Failed to copy to device");
+            return;
+        }
+    };
+
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_from_gpu_ptr(ptr, data.len(), num_qubits, "iqp-z")
+            .expect("encode_from_gpu_ptr iqp-z should succeed")
+    };
+
+    assert_dlpack_shape_2_4_and_delete(dlpack_ptr);
+}
+
+#[test]
+fn test_encode_from_gpu_ptr_iqp_success() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
+        Ok(e) => e,
+        Err(_) => {
+            println!("SKIP: No GPU available");
+            return;
+        }
+    };
+
+    let num_qubits = 2;
+    let data = [0.1_f64, -0.2_f64, 0.3_f64];
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => {
+            println!("SKIP: Failed to copy to device");
+            return;
+        }
+    };
+
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_from_gpu_ptr(ptr, data.len(), num_qubits, "iqp")
+            .expect("encode_from_gpu_ptr iqp should succeed")
+    };
+
+    assert_dlpack_shape_2_4_and_delete(dlpack_ptr);
+}
+
 // ---- encode_from_gpu_ptr_f32 (float32 amplitude) ----
 
 #[test]
