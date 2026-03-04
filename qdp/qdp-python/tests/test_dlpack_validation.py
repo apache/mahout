@@ -52,7 +52,7 @@ def test_cuda_float32_amplitude_2d_supported():
     """2D float32 CUDA tensor should use the batch GPU-pointer float32 amplitude path."""
     engine = _engine()
     t = torch.tensor(
-        [[1.0, 0.0, 0.0, 0.0], [0.5, 0.5, 0.5, 0.5]],
+        [[3.0, 4.0, 0.0, 0.0], [1.0, 2.0, 2.0, 1.0]],
         dtype=torch.float32,
         device="cuda",
     )
@@ -66,7 +66,15 @@ def test_cuda_float32_amplitude_2d_supported():
     assert qt.dtype == torch.complex64
 
     expected = torch.tensor(
-        [[1.0, 0.0, 0.0, 0.0], [0.5, 0.5, 0.5, 0.5]],
+        [
+            [0.6, 0.8, 0.0, 0.0],
+            [
+                1.0 / (10.0**0.5),
+                2.0 / (10.0**0.5),
+                2.0 / (10.0**0.5),
+                1.0 / (10.0**0.5),
+            ],
+        ],
         dtype=torch.complex64,
         device="cuda",
     )
@@ -78,7 +86,7 @@ def test_cuda_float32_amplitude_2d_respects_engine_precision():
     """2D float32 CUDA amplitude batch should still honor float64 engine output precision."""
     engine = QdpEngine(0, precision="float64")
     t = torch.tensor(
-        [[1.0, 0.0, 0.0, 0.0], [0.5, 0.5, 0.5, 0.5]],
+        [[3.0, 4.0, 0.0, 0.0], [1.0, 2.0, 2.0, 1.0]],
         dtype=torch.float32,
         device="cuda",
     )
@@ -92,7 +100,15 @@ def test_cuda_float32_amplitude_2d_respects_engine_precision():
     assert qt.dtype == torch.complex128
 
     expected = torch.tensor(
-        [[1.0, 0.0, 0.0, 0.0], [0.5, 0.5, 0.5, 0.5]],
+        [
+            [0.6, 0.8, 0.0, 0.0],
+            [
+                1.0 / (10.0**0.5),
+                2.0 / (10.0**0.5),
+                2.0 / (10.0**0.5),
+                1.0 / (10.0**0.5),
+            ],
+        ],
         dtype=torch.complex128,
         device="cuda",
     )

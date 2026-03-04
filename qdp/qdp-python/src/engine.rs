@@ -479,6 +479,7 @@ impl QdpEngine {
         let is_f32 = dtype_str_lower.contains("float32");
         let method = encoding_method.to_ascii_lowercase();
         let ndim: usize = data.call_method0("dim")?.extract()?;
+        let tensor_info = extract_cuda_tensor_info(data)?;
 
         if method.as_str() == "amplitude" && is_f32 {
             match ndim {
@@ -507,8 +508,8 @@ impl QdpEngine {
                     })
                 }
                 2 => {
-                    let num_samples: usize = data.call_method1("size", (0,))?.extract()?;
-                    let sample_size: usize = data.call_method1("size", (1,))?.extract()?;
+                    let num_samples = tensor_info.shape[0] as usize;
+                    let sample_size = tensor_info.shape[1] as usize;
                     let stream_ptr = get_torch_cuda_stream_ptr(data)?;
                     let data_ptr_u64: u64 = data.call_method0("data_ptr")?.extract()?;
                     let data_ptr = data_ptr_u64 as *const f32;
@@ -542,7 +543,6 @@ impl QdpEngine {
                 ))),
             }
         } else {
-            let tensor_info = extract_cuda_tensor_info(data)?;
             let stream_ptr = get_torch_cuda_stream_ptr(data)?;
 
             match ndim {
