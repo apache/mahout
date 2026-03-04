@@ -18,6 +18,8 @@ use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use std::ffi::c_void;
 
+use crate::constants::{CUDA_ENCODING_METHODS, format_supported_cuda_encoding_methods};
+
 /// Helper to detect PyTorch tensor
 pub fn is_pytorch_tensor(obj: &Bound<'_, PyAny>) -> PyResult<bool> {
     let type_obj = obj.get_type();
@@ -150,6 +152,15 @@ pub fn validate_cuda_tensor_for_encoding(
 ) -> PyResult<()> {
     let method = encoding_method.to_ascii_lowercase();
 
+    if !CUDA_ENCODING_METHODS.contains(&method.as_str()) {
+        return Err(PyRuntimeError::new_err(format!(
+            "CUDA tensor encoding currently only supports {} methods, got '{}'. \
+             Use tensor.cpu() to convert to CPU tensor for other encoding methods.",
+            format_supported_cuda_encoding_methods(),
+            encoding_method
+        )));
+    }
+
     // Check encoding method support and dtype (ASCII lowercase for case-insensitive match).
     let dtype = tensor.getattr("dtype")?;
     let dtype_str: String = dtype.str()?.extract()?;
@@ -164,12 +175,12 @@ pub fn validate_cuda_tensor_for_encoding(
                 )));
             }
         }
-        "angle" => {
+        "angle" | "iqp" | "iqp-z" => {
             if !dtype_str_lower.contains("float64") {
                 return Err(PyRuntimeError::new_err(format!(
-                    "CUDA tensor must have dtype float64 for angle encoding, got {}. \
+                    "CUDA tensor must have dtype float64 for {} encoding, got {}. \
                      Use tensor.to(torch.float64)",
-                    dtype_str
+                    method, dtype_str
                 )));
             }
         }
@@ -182,20 +193,10 @@ pub fn validate_cuda_tensor_for_encoding(
                 )));
             }
         }
-        "iqp" | "iqp-z" => {
-            if !dtype_str_lower.contains("float64") {
-                return Err(PyRuntimeError::new_err(format!(
-                    "CUDA tensor must have dtype float64 for {} encoding, got {}. \
-                     Use tensor.to(torch.float64)",
-                    method, dtype_str
-                )));
-            }
-        }
         _ => {
             return Err(PyRuntimeError::new_err(format!(
-                "CUDA tensor encoding currently only supports 'amplitude', 'angle', 'basis', 'iqp', or 'iqp-z' methods, got '{}'. \
-                 Use tensor.cpu() to convert to CPU tensor for other encoding methods.",
-                encoding_method
+                "Internal error: missing CUDA validation branch for supported method '{}'",
+                method
             )));
         }
     }
