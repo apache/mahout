@@ -20,6 +20,7 @@
 #include <cuComplex.h>
 #include <vector_types.h>
 #include <math.h>
+#include <stdint.h>
 #include "kernel_config.h"
 
 __global__ void amplitude_encode_kernel(
@@ -231,10 +232,10 @@ int launch_amplitude_encode_f32(
 /// - state_batch: [sample0_state | sample1_state | ... | sampleN_state]
 ///
 /// Optimizations:
-/// 1. Vectorized double2 loads for 128-bit memory transactions
+/// 1. Vectorized double2 loads for 128-bit memory transactions when aligned
 /// 2. Grid-stride loop for arbitrary batch sizes
 /// 3. Coalesced memory access within warps
-/// 4. Minimized register pressure
+/// 4. Scalar fallback for misaligned sample bases and odd tails
 __global__ void amplitude_encode_batch_kernel(
     const double* __restrict__ input_batch,
     cuDoubleComplex* __restrict__ state_batch,
@@ -264,17 +265,21 @@ __global__ void amplitude_encode_batch_kernel(
         // Load inverse norm (cached by L1)
         const double inv_norm = inv_norms[sample_idx];
 
-        // Vectorized load: read 2 doubles as double2 for 128-bit transaction
         double v1, v2;
-        if (elem_offset + 1 < input_len) {
-            // Aligned vectorized load
-            const double2 vec_data = __ldg(reinterpret_cast<const double2*>(input_batch + input_base) + elem_pair);
+        const double* sample_input = input_batch + input_base;
+        const bool sample_input_aligned =
+            (reinterpret_cast<uintptr_t>(sample_input) & (alignof(double2) - 1)) == 0;
+
+        if (sample_input_aligned && elem_offset + 1 < input_len) {
+            const double2 vec_data =
+                __ldg(reinterpret_cast<const double2*>(sample_input) + elem_pair);
             v1 = vec_data.x;
             v2 = vec_data.y;
         } else if (elem_offset < input_len) {
-            // Edge case: single element load
-            v1 = __ldg(input_batch + input_base + elem_offset);
-            v2 = 0.0;
+            v1 = __ldg(sample_input + elem_offset);
+            v2 = (elem_offset + 1 < input_len)
+                ? __ldg(sample_input + elem_offset + 1)
+                : 0.0;
         } else {
             // Padding region
             v1 = v2 = 0.0;
@@ -432,20 +437,33 @@ __global__ void l2_norm_batch_kernel(
 
     const size_t vec_idx = block_in_sample * blockDim.x + threadIdx.x;
     const size_t stride = blockDim.x * blocks_per_sample;
+    const double* sample_input = input_batch + base;
+    const bool sample_input_aligned =
+        (reinterpret_cast<uintptr_t>(sample_input) & (alignof(double2) - 1)) == 0;
 
     double local_sum = 0.0;
 
     size_t vec_offset = vec_idx;
     size_t offset = vec_offset * 2;
-    while (offset + 1 < sample_len) {
-        const double2 v = __ldg(reinterpret_cast<const double2*>(input_batch + base) + vec_offset);
-        local_sum += v.x * v.x + v.y * v.y;
-        vec_offset += stride;
-        offset = vec_offset * 2;
+    if (sample_input_aligned) {
+        while (offset + 1 < sample_len) {
+            const double2 v = __ldg(reinterpret_cast<const double2*>(sample_input) + vec_offset);
+            local_sum += v.x * v.x + v.y * v.y;
+            vec_offset += stride;
+            offset = vec_offset * 2;
+        }
+    } else {
+        while (offset + 1 < sample_len) {
+            const double v1 = __ldg(sample_input + offset);
+            const double v2 = __ldg(sample_input + offset + 1);
+            local_sum += v1 * v1 + v2 * v2;
+            vec_offset += stride;
+            offset = vec_offset * 2;
+        }
     }
 
     if (offset < sample_len) {
-        const double v = __ldg(input_batch + base + offset);
+        const double v = __ldg(sample_input + offset);
         local_sum += v * v;
     }
 
@@ -472,20 +490,33 @@ __global__ void l2_norm_batch_kernel_f32(
 
     const size_t vec_idx = block_in_sample * blockDim.x + threadIdx.x;
     const size_t stride = blockDim.x * blocks_per_sample;
+    const float* sample_input = input_batch + base;
+    const bool sample_input_aligned =
+        (reinterpret_cast<uintptr_t>(sample_input) & (alignof(float2) - 1)) == 0;
 
     float local_sum = 0.0f;
 
     size_t vec_offset = vec_idx;
     size_t offset = vec_offset * 2;
-    while (offset + 1 < sample_len) {
-        const float2 v = __ldg(reinterpret_cast<const float2*>(input_batch + base) + vec_offset);
-        local_sum += v.x * v.x + v.y * v.y;
-        vec_offset += stride;
-        offset = vec_offset * 2;
+    if (sample_input_aligned) {
+        while (offset + 1 < sample_len) {
+            const float2 v = __ldg(reinterpret_cast<const float2*>(sample_input) + vec_offset);
+            local_sum += v.x * v.x + v.y * v.y;
+            vec_offset += stride;
+            offset = vec_offset * 2;
+        }
+    } else {
+        while (offset + 1 < sample_len) {
+            const float v1 = __ldg(sample_input + offset);
+            const float v2 = __ldg(sample_input + offset + 1);
+            local_sum += v1 * v1 + v2 * v2;
+            vec_offset += stride;
+            offset = vec_offset * 2;
+        }
     }
 
     if (offset < sample_len) {
-        const float v = __ldg(input_batch + base + offset);
+        const float v = __ldg(sample_input + offset);
         local_sum += v * v;
     }
 
