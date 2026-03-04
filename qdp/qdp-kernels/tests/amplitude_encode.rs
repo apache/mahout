@@ -25,12 +25,49 @@
 use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
 use qdp_kernels::{
-    CuComplex, CuDoubleComplex, launch_amplitude_encode, launch_amplitude_encode_f32,
-    launch_l2_norm, launch_l2_norm_batch, launch_l2_norm_batch_f32, launch_l2_norm_f32,
+    CuComplex, CuDoubleComplex, launch_amplitude_encode, launch_amplitude_encode_batch,
+    launch_amplitude_encode_f32, launch_l2_norm, launch_l2_norm_batch, launch_l2_norm_batch_f32,
+    launch_l2_norm_f32,
 };
 
 const EPSILON: f64 = 1e-10;
 const EPSILON_F32: f32 = 1e-5;
+
+#[cfg(target_os = "linux")]
+fn assert_batch_state_matches_f64(
+    state_h: &[CuDoubleComplex],
+    input: &[f64],
+    num_samples: usize,
+    sample_len: usize,
+    state_len: usize,
+) {
+    for sample_idx in 0..num_samples {
+        let sample = &input[sample_idx * sample_len..(sample_idx + 1) * sample_len];
+        let norm = sample.iter().map(|v| v * v).sum::<f64>().sqrt();
+        for elem_idx in 0..state_len {
+            let expected = if elem_idx < sample_len {
+                sample[elem_idx] / norm
+            } else {
+                0.0
+            };
+            let actual = state_h[sample_idx * state_len + elem_idx];
+            assert!(
+                (actual.x - expected).abs() < EPSILON,
+                "sample {} element {} expected {}, got {}",
+                sample_idx,
+                elem_idx,
+                expected,
+                actual.x
+            );
+            assert!(
+                actual.y.abs() < EPSILON,
+                "sample {} element {} imaginary should be 0",
+                sample_idx,
+                elem_idx
+            );
+        }
+    }
+}
 
 #[test]
 #[cfg(target_os = "linux")]
@@ -576,6 +613,52 @@ fn test_amplitude_encode_small_input_large_state() {
 
 #[test]
 #[cfg(target_os = "linux")]
+fn test_amplitude_encode_batch_odd_sample_length_handles_misaligned_samples() {
+    println!("Testing batch amplitude encoding with odd sample length (float64)...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    let num_samples = 2usize;
+    let sample_len = 3usize;
+    let state_len = 4usize;
+    let input: Vec<f64> = vec![1.0, 2.0, 2.0, 2.0, 1.0, 2.0];
+    let inv_norms: Vec<f64> = input
+        .chunks(sample_len)
+        .map(|sample| 1.0 / sample.iter().map(|v| v * v).sum::<f64>().sqrt())
+        .collect();
+
+    let input_d = device.htod_sync_copy(input.as_slice()).unwrap();
+    let inv_norms_d = device.htod_sync_copy(inv_norms.as_slice()).unwrap();
+    let mut state_d = device
+        .alloc_zeros::<CuDoubleComplex>(num_samples * state_len)
+        .unwrap();
+
+    let result = unsafe {
+        launch_amplitude_encode_batch(
+            *input_d.device_ptr() as *const f64,
+            *state_d.device_ptr_mut() as *mut std::ffi::c_void,
+            *inv_norms_d.device_ptr() as *const f64,
+            num_samples,
+            sample_len,
+            state_len,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_eq!(result, 0, "Batch kernel launch should succeed");
+
+    let state_h = device.dtoh_sync_copy(&state_d).unwrap();
+    assert_batch_state_matches_f64(&state_h, &input, num_samples, sample_len, state_len);
+}
+
+#[test]
+#[cfg(target_os = "linux")]
 fn test_l2_norm_single_kernel() {
     println!("Testing single-vector GPU norm reduction...");
 
@@ -669,6 +752,55 @@ fn test_l2_norm_batch_kernel_stream() {
     }
 
     println!("PASS: Batched norm reduction on stream matches CPU");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_l2_norm_batch_kernel_odd_sample_len() {
+    println!("Testing batched L2 norm reduction with odd sample length (float64)...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    let sample_len = 3usize;
+    let num_samples = 2usize;
+    let input: Vec<f64> = vec![1.0, 2.0, 2.0, 2.0, 1.0, 2.0];
+    let expected: Vec<f64> = input
+        .chunks(sample_len)
+        .map(|chunk| 1.0 / chunk.iter().map(|v| v * v).sum::<f64>().sqrt())
+        .collect();
+
+    let input_d = device.htod_sync_copy(input.as_slice()).unwrap();
+    let mut norms_d = device.alloc_zeros::<f64>(num_samples).unwrap();
+
+    let status = unsafe {
+        launch_l2_norm_batch(
+            *input_d.device_ptr() as *const f64,
+            num_samples,
+            sample_len,
+            *norms_d.device_ptr_mut() as *mut f64,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_eq!(status, 0, "Batch norm kernel should succeed");
+    device.synchronize().unwrap();
+
+    let norms_h = device.dtoh_sync_copy(&norms_d).unwrap();
+    for (i, (got, expect)) in norms_h.iter().zip(expected.iter()).enumerate() {
+        assert!(
+            (got - expect).abs() < EPSILON,
+            "Sample {} inv norm mismatch: expected {}, got {}",
+            i,
+            expect,
+            got
+        );
+    }
 }
 
 #[test]
@@ -838,6 +970,55 @@ fn test_l2_norm_batch_kernel_f32() {
     }
 
     println!("PASS: Batched norm reduction (float32) matches CPU");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_l2_norm_batch_kernel_f32_odd_sample_len() {
+    println!("Testing batched L2 norm reduction with odd sample length (float32)...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    let sample_len = 3usize;
+    let num_samples = 2usize;
+    let input: Vec<f32> = vec![1.0, 2.0, 2.0, 2.0, 1.0, 2.0];
+    let expected: Vec<f32> = input
+        .chunks(sample_len)
+        .map(|chunk| 1.0 / chunk.iter().map(|v| v * v).sum::<f32>().sqrt())
+        .collect();
+
+    let input_d = device.htod_sync_copy(input.as_slice()).unwrap();
+    let mut norms_d = device.alloc_zeros::<f32>(num_samples).unwrap();
+
+    let status = unsafe {
+        launch_l2_norm_batch_f32(
+            *input_d.device_ptr() as *const f32,
+            num_samples,
+            sample_len,
+            *norms_d.device_ptr_mut() as *mut f32,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_eq!(status, 0, "Batch norm f32 kernel should succeed");
+    device.synchronize().unwrap();
+
+    let norms_h = device.dtoh_sync_copy(&norms_d).unwrap();
+    for (i, (got, expect)) in norms_h.iter().zip(expected.iter()).enumerate() {
+        assert!(
+            (got - expect).abs() < EPSILON_F32,
+            "Sample {} inv norm mismatch: expected {}, got {}",
+            i,
+            expect,
+            got
+        );
+    }
 }
 
 #[test]
