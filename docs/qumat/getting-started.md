@@ -1,21 +1,29 @@
+---
+title: Getting Started
+---
+
 # Getting Started with Qumat
 
-## Basic Installation
+## Installation
 
-Getting started with Qumat is easy, thanks to the simplified installation process. You can install Qumat by choosing one of the following methods.
-
-### Method 1: Install from PyPI (Recommended)
+Install Qumat from PyPI:
 
 ```bash
 pip install qumat
 ```
 
-### Method 2: Install from Source (Development)
-
-For development or to get the latest changes, use [uv](https://docs.astral.sh/uv/):
+Install with QDP (Quantum Data Plane) support:
 
 ```bash
-git clone https://github.com/apache/mahout
+pip install qumat[qdp]
+```
+
+## From Source (Development)
+
+For development or the latest changes, use [uv](https://docs.astral.sh/uv/):
+
+```bash
+git clone https://github.com/apache/mahout.git
 cd mahout
 pip install uv
 uv sync                     # Core Qumat
@@ -26,25 +34,42 @@ uv sync --extra qdp         # With QDP (requires NVIDIA GPU + CUDA)
 The project uses `uv` to handle dependency overrides required for Python 3.10+ compatibility with some backend dependencies.
 :::
 
+## Basic Usage
+
+```python
+from qumat import QumatCircuit
+
+circuit = QumatCircuit(2)
+circuit.h(0)
+circuit.cx(0, 1)
+result = circuit.run()
+print(result)
+```
+
 ## Dependencies
 
-Prior to installation, ensure Python 3.10-3.12 is installed. Dependencies such as Qiskit, Cirq, and Amazon Braket SDK will be managed automatically.
+Prior to installation, ensure Python 3.10-3.12 is installed. Dependencies such as Qiskit, Cirq, and Amazon Braket SDK are managed automatically.
+
+## Apache Release
+
+Official source releases are available at [apache.org/dist/mahout](http://www.apache.org/dist/mahout).
+
+To verify the integrity of a downloaded release:
+
+```bash
+gpg --import KEYS
+gpg --verify mahout-qumat-0.5.zip.asc mahout-qumat-0.5.zip
+```
 
 ## Examples
 
-Refer to the example notebooks in the `examples/` directory at the repository root for practical implementations:
+Refer to repository examples:
 
-- `examples/Simple_Example.ipynb` - Basic quantum circuit example
-- `examples/Optimization_Example.ipynb` - Optimization with parameterized circuits
+- `examples/Simple_Example.ipynb`
+- `examples/Optimization_Example.ipynb`
 
-## Building the Website
+## Next Steps
 
-To serve the website locally:
-
-```bash
-cd website
-npm install
-npm run start
-```
-
-See the [website README](https://github.com/apache/mahout/tree/main/website#readme) for more details.
+- [Basic Gates](/docs/qumat/basic-gates)
+- [API Reference](/docs/qumat/api)
+- [QDP Getting Started](/docs/qdp/getting-started)
