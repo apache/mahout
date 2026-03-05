@@ -422,9 +422,34 @@ def test_encode_cuda_tensor_preserves_input(data_shape, is_batch):
 
 @requires_qdp
 @pytest.mark.gpu
-@pytest.mark.parametrize("encoding_method", ["iqp"])
-def test_encode_cuda_tensor_unsupported_encoding(encoding_method):
-    """Test error when using CUDA tensor with an encoding not supported on GPU (only amplitude, angle, basis)."""
+@pytest.mark.parametrize(
+    "encoding_method,data",
+    [
+        ("iqp-z", [0.1, -0.2]),
+        ("iqp", [0.1, -0.2, 0.3]),
+    ],
+)
+def test_encode_cuda_tensor_iqp_methods(encoding_method, data):
+    """Test CUDA tensor path supports IQP-family encodings."""
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+    cuda_data = torch.tensor(data, dtype=torch.float64, device="cuda:0")
+
+    qtensor = engine.encode(cuda_data, 2, encoding_method)
+    output = torch.from_dlpack(qtensor)
+
+    assert tuple(output.shape) == (1, 4)
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_encode_cuda_tensor_invalid_encoding_method():
+    """Test error when using CUDA tensor with an unknown encoding method."""
     pytest.importorskip("torch")
     from _qdp import QdpEngine
 
@@ -433,14 +458,14 @@ def test_encode_cuda_tensor_unsupported_encoding(encoding_method):
 
     engine = QdpEngine(0)
 
-    # CUDA path only supports amplitude, angle, basis; iqp/iqp-z should raise unsupported error
+    # Unknown encoding should fail with supported-method guidance.
     data = torch.tensor([1.0, 0.0, 0.0, 0.0], dtype=torch.float64, device="cuda:0")
 
     with pytest.raises(
         RuntimeError,
-        match="only supports .*amplitude.*angle.*basis.*Use tensor.cpu",
+        match="only supports .*amplitude.*angle.*basis.*iqp.*iqp-z.*Use tensor.cpu",
     ):
-        engine.encode(data, 2, encoding_method)
+        engine.encode(data, 2, "unknown-encoding")
 
 
 @requires_qdp

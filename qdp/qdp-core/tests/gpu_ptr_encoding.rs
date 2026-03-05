@@ -52,6 +52,24 @@ fn assert_dlpack_shape_2_4_and_delete(dlpack_ptr: *mut qdp_core::dlpack::DLManag
     }
 }
 
+fn assert_dlpack_batch_shape_and_delete(
+    dlpack_ptr: *mut qdp_core::dlpack::DLManagedTensor,
+    num_samples: i64,
+    state_len: i64,
+) {
+    assert!(!dlpack_ptr.is_null());
+    unsafe {
+        let tensor = &(*dlpack_ptr).dl_tensor;
+        assert_eq!(tensor.ndim, 2);
+        let shape = std::slice::from_raw_parts(tensor.shape, 2);
+        assert_eq!(shape[0], num_samples);
+        assert_eq!(shape[1], state_len);
+        if let Some(deleter) = (*dlpack_ptr).deleter {
+            deleter(dlpack_ptr);
+        }
+    }
+}
+
 // ---- Validation / error-path tests (return before using pointer) ----
 
 #[test]
@@ -700,4 +718,184 @@ fn test_encode_from_gpu_ptr_f32_input_exceeds_state_len() {
         }
         e => panic!("Expected InvalidInput, got {:?}", e),
     }
+}
+
+#[test]
+fn test_encode_batch_from_gpu_ptr_f32_success() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let num_samples = 2;
+    let sample_size = 4;
+    let (_device, input_d) = match device_and_f32_slice(&[1.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 0.5]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_batch_from_gpu_ptr_f32(
+                *input_d.device_ptr() as *const f32,
+                num_samples,
+                sample_size,
+                2,
+            )
+            .expect("encode_batch_from_gpu_ptr_f32")
+    };
+    assert_dlpack_batch_shape_and_delete(dlpack_ptr, num_samples as i64, sample_size as i64);
+}
+
+#[test]
+fn test_encode_batch_from_gpu_ptr_f32_with_stream_success() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (device, input_d) = match device_and_f32_slice(&[1.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 0.5]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let stream = device.fork_default_stream().expect("fork_default_stream");
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_batch_from_gpu_ptr_f32_with_stream(
+                *input_d.device_ptr() as *const f32,
+                2,
+                4,
+                2,
+                stream.stream as *mut c_void,
+            )
+            .expect("encode_batch_from_gpu_ptr_f32_with_stream")
+    };
+    assert_dlpack_batch_shape_and_delete(dlpack_ptr, 2, 4);
+}
+
+#[test]
+fn test_encode_batch_from_gpu_ptr_f32_success_f64_engine() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64).ok() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (_device, input_d) = match device_and_f32_slice(&[1.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 0.5]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 4, 2)
+            .expect("encode_batch_from_gpu_ptr_f32 (Float64 engine)")
+    };
+    assert_dlpack_batch_shape_and_delete(dlpack_ptr, 2, 4);
+}
+
+#[test]
+fn test_encode_batch_from_gpu_ptr_f32_zero_samples() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let result = unsafe { engine.encode_batch_from_gpu_ptr_f32(std::ptr::null(), 0, 4, 2) };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => assert!(msg.contains("zero") || msg.contains("samples")),
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_batch_from_gpu_ptr_f32_null_pointer() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let result = unsafe { engine.encode_batch_from_gpu_ptr_f32(std::ptr::null(), 2, 4, 2) };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => assert!(msg.contains("null")),
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_batch_from_gpu_ptr_f32_sample_size_exceeds_state_len() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (_device, input_d) = match device_and_f32_slice(&[1.0; 10]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let result = unsafe {
+        engine.encode_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 5, 2)
+    };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => {
+            assert!(msg.contains("exceeds") || msg.contains("state vector"));
+        }
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_batch_from_gpu_ptr_f32_odd_sample_size_success() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let num_samples = 2;
+    let sample_size = 3;
+    let num_qubits = 2;
+    let (_device, input_d) = match device_and_f32_slice(&[1.0, 2.0, 2.0, 2.0, 1.0, 2.0]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_batch_from_gpu_ptr_f32(
+                *input_d.device_ptr() as *const f32,
+                num_samples,
+                sample_size,
+                num_qubits,
+            )
+            .expect("encode_batch_from_gpu_ptr_f32 odd sample size")
+    };
+    assert_dlpack_batch_shape_and_delete(dlpack_ptr, num_samples as i64, (1 << num_qubits) as i64);
 }

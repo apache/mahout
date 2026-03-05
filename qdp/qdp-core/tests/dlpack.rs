@@ -35,8 +35,9 @@ mod dlpack_tests {
 
         let num_samples = 4;
         let num_qubits = 2; // 2^2 = 4 elements per sample
-        let state_vector = GpuStateVector::new_batch(&device, num_samples, num_qubits)
-            .expect("Failed to create batch state vector");
+        let state_vector =
+            GpuStateVector::new_batch(&device, num_samples, num_qubits, Precision::Float64)
+                .expect("Failed to create batch state vector");
 
         let dlpack_ptr = state_vector.to_dlpack();
         assert!(!dlpack_ptr.is_null());
@@ -117,6 +118,41 @@ mod dlpack_tests {
             assert_eq!(tensor.ndim, 2, "DLPack tensor should be 2D");
             let shape = std::slice::from_raw_parts(tensor.shape, 2);
             assert_eq!(shape[0], 1);
+            assert_eq!(shape[1], (1 << num_qubits) as i64);
+            if let Some(deleter) = (*dlpack_ptr).deleter {
+                deleter(dlpack_ptr);
+            }
+        }
+    }
+
+    #[test]
+    #[cfg(target_os = "linux")]
+    fn test_dlpack_batch_shape_f32() {
+        let device = CudaDevice::new(0).unwrap();
+
+        let num_samples = 3;
+        let num_qubits = 2;
+        let state_vector =
+            GpuStateVector::new_batch(&device, num_samples, num_qubits, Precision::Float32)
+                .expect("Failed to create Float32 batch state vector");
+
+        assert!(
+            state_vector.ptr_f32().is_some(),
+            "Float32 batch state vector should have ptr_f32()"
+        );
+        assert!(
+            state_vector.ptr_f64().is_none(),
+            "Float32 batch state vector should not have ptr_f64()"
+        );
+
+        let dlpack_ptr = state_vector.to_dlpack();
+        assert!(!dlpack_ptr.is_null());
+
+        unsafe {
+            let tensor = &(*dlpack_ptr).dl_tensor;
+            assert_eq!(tensor.ndim, 2, "DLPack tensor should be 2D");
+            let shape = std::slice::from_raw_parts(tensor.shape, 2);
+            assert_eq!(shape[0], num_samples as i64);
             assert_eq!(shape[1], (1 << num_qubits) as i64);
             if let Some(deleter) = (*dlpack_ptr).deleter {
                 deleter(dlpack_ptr);
