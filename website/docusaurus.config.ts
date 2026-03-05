@@ -106,9 +106,13 @@ const config: Config = {
           if (existingPath === '/blog') {
             return ['/news.html', '/news'];
           }
-          // Keep /downloads as the canonical public download entry URL.
-          if (existingPath === '/downloads') {
+          // Keep /docs/qumat/getting-started as the canonical getting-started URL.
+          if (existingPath === '/docs/qumat/getting-started') {
             return [
+              '/docs/download',
+              '/docs/download/quickstart',
+              '/docs/next/download',
+              '/docs/next/download/quickstart',
             ];
           }
           return undefined;
@@ -176,7 +180,7 @@ const config: Config = {
         },
         // Download
         {
-          to: '/downloads',
+          to: '/docs/qumat/getting-started',
           label: 'Download',
           position: 'left',
         },

@@ -14,7 +14,7 @@ anywhere.'
 ## Documentation
 
 ### Getting Started
-- [Getting Started with QuMat](./qumat/getting-started) - Introduction and setup guide
+- [Getting Started with QuMat](/docs/qumat/getting-started) - Introduction and setup guide
 
 ### Core Concepts
 - [Basic Gates](./qumat/basic-gates) - Introduction to fundamental quantum gates (NOT, Hadamard, CNOT, Toffoli, SWAP, Pauli gates, CSWAP, U gate)
