@@ -63,9 +63,15 @@ For non-trivial code contributions, contributors are expected to have an ASF ICL
 - CODEOWNERS define suggested reviewers, not exclusive authority.
 - Reviewers should focus on correctness, API/UX impact, test coverage, security, and maintainability.
 
-### Approval Threshold
+### For Contributors and Reviewers
 
-A PR is merge-ready when all of the following are true:
+- Treat review comments as collaborative feedback.
+- Resolve open questions with tests, benchmarks, or design rationale when possible.
+- Keep review discussion on the PR thread so decisions are public and traceable.
+
+### Committer Merge Criteria (Committers Only)
+
+When deciding whether to merge, committers should verify all of the following:
 
 - Required CI checks are green.
 - At least one committer approves.
@@ -83,15 +89,6 @@ The following changes should receive at least two committer approvals and prior 
 - A blocking objection must include concrete technical reasons and, when possible, a suggested path to resolution.
 - PRs with unresolved blocking objections must not be merged.
 - If consensus is unclear, escalate discussion to `dev@mahout.apache.org`.
-
-## Merge Policy
-
-- Only committers merge PRs.
-- Follow repository settings in [`.asf.yaml`](https://github.com/apache/mahout/blob/main/.asf.yaml):
-  - `main` requires linear history.
-  - Squash merge is enabled; merge/rebase buttons are disabled.
-- Do not merge your own PR without at least one independent committer approval.
-- For contentious or high-impact PRs, wait for broader feedback before merge.
 
 ## Security and Legal Checks
 
