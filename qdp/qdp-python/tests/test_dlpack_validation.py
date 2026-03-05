@@ -48,14 +48,71 @@ def test_cuda_float32_amplitude_supported():
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
-def test_cuda_float32_amplitude_2d_unsupported():
-    """2D float32 CUDA tensor with amplitude encoding should raise a clear error."""
+def test_cuda_float32_amplitude_2d_supported():
+    """2D float32 CUDA tensor should use the batch GPU-pointer float32 amplitude path."""
     engine = _engine()
-    t = torch.randn(2, 4, dtype=torch.float32, device="cuda")
-    with pytest.raises(
-        RuntimeError, match="float32 batch amplitude encoding is not yet supported"
-    ):
-        engine.encode(t, num_qubits=2, encoding_method="amplitude")
+    t = torch.tensor(
+        [[3.0, 4.0, 0.0, 0.0], [1.0, 2.0, 2.0, 1.0]],
+        dtype=torch.float32,
+        device="cuda",
+    )
+
+    result = engine.encode(t, num_qubits=2, encoding_method="amplitude")
+    assert result is not None
+
+    qt = torch.from_dlpack(result)
+    assert qt.is_cuda
+    assert qt.shape == (2, 4)
+    assert qt.dtype == torch.complex64
+
+    expected = torch.tensor(
+        [
+            [0.6, 0.8, 0.0, 0.0],
+            [
+                1.0 / (10.0**0.5),
+                2.0 / (10.0**0.5),
+                2.0 / (10.0**0.5),
+                1.0 / (10.0**0.5),
+            ],
+        ],
+        dtype=torch.complex64,
+        device="cuda",
+    )
+    assert torch.allclose(qt, expected)
+
+
+@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
+def test_cuda_float32_amplitude_2d_respects_engine_precision():
+    """2D float32 CUDA amplitude batch should still honor float64 engine output precision."""
+    engine = QdpEngine(0, precision="float64")
+    t = torch.tensor(
+        [[3.0, 4.0, 0.0, 0.0], [1.0, 2.0, 2.0, 1.0]],
+        dtype=torch.float32,
+        device="cuda",
+    )
+
+    result = engine.encode(t, num_qubits=2, encoding_method="amplitude")
+    assert result is not None
+
+    qt = torch.from_dlpack(result)
+    assert qt.is_cuda
+    assert qt.shape == (2, 4)
+    assert qt.dtype == torch.complex128
+
+    expected = torch.tensor(
+        [
+            [0.6, 0.8, 0.0, 0.0],
+            [
+                1.0 / (10.0**0.5),
+                2.0 / (10.0**0.5),
+                2.0 / (10.0**0.5),
+                1.0 / (10.0**0.5),
+            ],
+        ],
+        dtype=torch.complex128,
+        device="cuda",
+    )
+    assert torch.allclose(qt, expected)
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
