@@ -22,9 +22,10 @@ For development (from source):
 
 ```bash
 git clone https://github.com/apache/mahout.git
-cd mahout/qdp/qdp-python
-uv venv -p python3.10 && source .venv/bin/activate
-uv sync --group dev && uv run maturin develop
+cd mahout
+uv sync --group dev --extra qdp
+source .venv/bin/activate
+uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml
 ```
 
 ## Quick Start
@@ -65,7 +66,7 @@ engine.encode("data.parquet", num_qubits=10, encoding_method="amplitude")  # als
 
 | Problem | Solution |
 |---------|----------|
-| Import fails | Activate venv: `source .venv/bin/activate` |
+| Import fails | Activate root venv: `source mahout/.venv/bin/activate` (or `cd mahout && source .venv/bin/activate`) |
 | CUDA errors | Run `cargo clean` in `qdp/` and rebuild |
 | Out of memory | Reduce `num_qubits` or use `precision="float32"` |
 
