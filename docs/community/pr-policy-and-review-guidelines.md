@@ -98,6 +98,18 @@ Before merge, confirm:
 - New dependencies and copied code are license-compatible with Apache-2.0.
 - License/notice updates are included when required (`LICENSE`, `NOTICE`).
 
+## AI-Assisted Contributions
+
+AI-assisted contributions are allowed, including code, documentation, and images, if they comply with ASF legal guidance.
+
+- Contributors are responsible for ensuring generated output does not introduce incompatible third-party material.
+- The AI tool's terms of use must not impose restrictions that conflict with open-source distribution.
+- If third-party material appears in generated output, contributors must ensure it is used with permission and under compatible licensing terms.
+- Contributors should use reasonable checks (tooling signals, scanners, or manual verification) to reduce the risk of copied copyrighted content.
+- Recommended practice: disclose AI assistance in commit messages with a provenance token such as `Generated-by: <tool-name>`.
+
+When uncertainty remains (for example, unclear provenance or license of generated output), discuss on `dev@mahout.apache.org` before merge.
+
 ## Recommended SLA (Non-binding)
 
 - First review response target: within 5 business days.
@@ -111,5 +123,6 @@ These are goals, not strict requirements.
 - ASF Committer Guide: https://community.apache.org/committers/
 - ASF Voting Process: https://www.apache.org/foundation/voting.html
 - ASF License and Contribution FAQs: https://www.apache.org/licenses/
+- ASF Generative Tooling Guidance: https://www.apache.org/legal/generative-tooling.html
 - Project contribution guide: [`CONTRIBUTING.md`](https://github.com/apache/mahout/blob/main/CONTRIBUTING.md)
 - CODEOWNERS: [`.github/CODEOWNERS`](https://github.com/apache/mahout/blob/main/.github/CODEOWNERS)
