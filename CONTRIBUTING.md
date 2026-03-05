@@ -156,5 +156,6 @@ Apache Mahout includes several subprojects. Use the root workflow above for issu
 
 - [testing/README.md](testing/README.md) — Test structure and commands
 - [.github/PULL_REQUEST_TEMPLATE](.github/PULL_REQUEST_TEMPLATE) — PR description template
+- [docs/community/pr-policy-and-review-guidelines.md](docs/community/pr-policy-and-review-guidelines.md) — PR policy and review guidelines (ASF-aligned)
 - [docs/](docs/) — Documentation source (used by the website)
 - [qdp/DEVELOPMENT.md](qdp/DEVELOPMENT.md) — QDP setup, tests, benchmarks, profiling

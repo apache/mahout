@@ -94,6 +94,7 @@ const sidebars: SidebarsConfig = {
         'community/who-we-are',
         'community/mailing-lists',
         'community/code-of-conduct',
+        'community/pr-policy-and-review-guidelines',
       ],
     },
     {
