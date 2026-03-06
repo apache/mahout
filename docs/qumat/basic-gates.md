@@ -56,7 +56,19 @@ $$\text{CSWAP}|c\rangle|t_1\rangle|t_2\rangle = \begin{cases} |c\rangle|t_1\rang
 
 In matrix form (for the 8-dimensional space of three qubits), the CSWAP gate is:
 
-$$\text{CSWAP} = \begin{pmatrix} 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \end{pmatrix}$$
+$$
+\text{CSWAP} =
+\begin{pmatrix}
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1
+\end{pmatrix}
+$$
 
 The CSWAP gate is fundamental in quantum algorithms such as the swap test, quantum error correction, and quantum state comparison. The CSWAP gate is reversible and preserves the number of $|1\rangle$ states in the system (conserves the Hamming weight).
 
@@ -67,7 +79,13 @@ The U gate is a **universal single-qubit gate** parameterized by three angles ($
 
 The U gate matrix representation is:
 
-$$U(\theta, \phi, \lambda) = \begin{pmatrix} \cos(\theta/2) & -e^{i\lambda}\sin(\theta/2) \\ e^{i\phi}\sin(\theta/2) & e^{i(\phi+\lambda)}\cos(\theta/2) \end{pmatrix}$$
+$$
+U(\theta, \phi, \lambda) =
+\begin{pmatrix}
+\cos(\theta/2)          & -e^{i\lambda}\sin(\theta/2) \\
+e^{i\phi}\sin(\theta/2) & e^{i(\phi+\lambda)}\cos(\theta/2)
+\end{pmatrix}
+$$
 
 The U gate can be decomposed into rotations around the Z, Y, and Z axes:
 
