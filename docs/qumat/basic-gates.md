@@ -10,8 +10,6 @@ The Hadamard gate, denoted as the H-gate, is used to create superposition states
 
 $$H|0\rangle = \frac{|0\rangle + |1\rangle}{\sqrt{2}}$$
 
-
-
 This gate is crucial in quantum algorithms like Grover's and quantum teleportation.
 
 ## CNOT Gate (Controlled-X Gate)
@@ -26,24 +24,24 @@ The SWAP gate exchanges the states of two qubits. When applied, it swaps the sta
 ## Pauli Y Gate (Y-Gate)
 The Pauli Y gate introduces complex phase shifts along with a bit-flip operation. It can be thought of as a combination of bit-flip and phase-flip gates. Mathematically:
 
-$$Y|0\rangle = i|1\rangle$$
-$$Y|1\rangle = -i|0\rangle$$
+- $$Y|0\rangle = i|1\rangle$$
+- $$Y|1\rangle = -i|0\rangle$$
 
 It's essential in quantum error correction and quantum algorithms.
 
 ## Pauli Z Gate (Z-Gate)
 The Pauli Z gate introduces a phase flip without changing the qubit's state. It leaves $|0\rangle$ unchanged and transforms $|1\rangle$ to $-|1\rangle$. Mathematically:
 
-$$Z|0\rangle = |0\rangle$$
-$$Z|1\rangle = -|1\rangle$$
+- $$Z|0\rangle = |0\rangle$$
+- $$Z|1\rangle = -|1\rangle$$
 
 It's used for measuring the phase of a qubit.
 
 ## T-Gate (π/8 Gate)
 The T-Gate applies a **π/4 phase shift** to the qubit. It is essential for quantum computing because it, along with the Hadamard and CNOT gates, allows for **universal quantum computation**. Mathematically:
 
-$$T|0\rangle = |0\rangle$$
-$$T|1\rangle = e^{i\pi/4} |1\rangle$$
+- $$T|0\rangle = |0\rangle$$
+- $$T|1\rangle = e^{i\pi/4} |1\rangle$$
 
 ## CSWAP Gate (Controlled-SWAP / Fredkin Gate)
 The CSWAP gate, also known as the **Fredkin gate**, is a three-qubit gate that conditionally swaps the states of two target qubits based on the state of a control qubit. If the control qubit is in the $|1\rangle$ state, it swaps the states of the two target qubits; otherwise, it leaves them unchanged.
@@ -92,17 +90,17 @@ The U gate can be decomposed into rotations around the Z, Y, and Z axes:
 $$U(\theta, \phi, \lambda) = R_z(\phi) \cdot R_y(\theta) \cdot R_z(\lambda)$$
 
 This decomposition shows that the U gate applies:
-1. A rotation by λ around the Z-axis
-2. A rotation by θ around the Y-axis
-3. A rotation by φ around the Z-axis
+1. A rotation by $\lambda$ around the Z-axis
+2. A rotation by $\theta$ around the Y-axis
+3. A rotation by $\phi$ around the Z-axis
 
 ### Special Cases
 
-- **Identity**: U(0, 0, 0) = I
-- **Pauli X**: U(π, 0, π) = X
-- **Pauli Y**: U(π, π/2, π/2) = Y
-- **Pauli Z**: U(0, 0, π) = Z
-- **Hadamard**: U(π/2, 0, π) = H
+- **Identity**: $U(0, 0, 0) = I$
+- **Pauli X**: $U(\pi, 0, \pi) = X$
+- **Pauli Y**: $U(\pi, \pi/2, \pi/2) = Y$
+- **Pauli Z**: $U(0, 0, \pi) = Z$
+- **Hadamard**: $U(\pi/2, 0, \pi) = H$
 
 This gate is particularly useful in parameterized quantum circuits and variational quantum algorithms where you need to optimize over all possible single-qubit operations.
 
