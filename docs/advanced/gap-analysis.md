@@ -1,3 +1,8 @@
+---
+title: Analysis of the QuMat Codebase for Implementing Parameterized Quantum Circuits
+sidebar_label: Qumat PQC Gap Analysis
+---
+
 # Analysis of the QuMat Codebase for Implementing Parameterized Quantum Circuits
 
 This analysis examines the provided `qumat` codebase to identify the necessary modifications and additions required to implement Parameterized Quantum Circuits (PQCs). The analysis is divided into two parts:

@@ -1,3 +1,8 @@
+---
+title: QDP Python API (qumat_qdp)
+sidebar_label: Python API
+---
+
 # QDP Python API (qumat_qdp)
 
 Public Python API for QDP: GPU-accelerated encoding, benchmark helpers, and a batch iterator for training or evaluation loops.

@@ -1,3 +1,8 @@
+---
+title: Parameterized Quantum Circuits - Developer's Guide
+sidebar_label: PQC Developer's Guide
+---
+
 # Parameterized Quantum Circuits: Developer's Guide
 
 Welcome to the guide designed for developers interested in implementing parameterized quantum circuits (PQCs) from scratch. This document provides detailed information about the theory, design, and applications of PQCs without reliance on existing quantum computing frameworks like Qiskit or Cirq.
