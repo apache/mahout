@@ -41,6 +41,7 @@ const config: Config = {
       'classic',
       {
         docs: {
+          path: '../docs/',
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/apache/mahout/tree/main/docs/',
           remarkPlugins: [remarkMath],
