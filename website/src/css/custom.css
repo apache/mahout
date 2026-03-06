@@ -161,7 +161,6 @@
 
 /* Math equations styling */
 .katex-display {
-  overflow-x: auto;
   padding: 1rem 0;
 }
 
