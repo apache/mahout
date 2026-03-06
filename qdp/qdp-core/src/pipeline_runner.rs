@@ -589,11 +589,13 @@ mod tests {
     use super::*;
 
     fn assert_generate_and_inplace_match(encoding_method: &str) {
-        let mut config = PipelineConfig::default();
-        config.num_qubits = 5;
-        config.batch_size = 8;
-        config.encoding_method = encoding_method.to_string();
-        config.seed = Some(123);
+        let config = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 8,
+            encoding_method: encoding_method.to_string(),
+            seed: Some(123),
+            ..Default::default()
+        };
 
         let vector_len = vector_len(config.num_qubits, &config.encoding_method);
         let batch_idx = 7;
