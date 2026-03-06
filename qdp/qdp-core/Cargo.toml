@@ -16,6 +16,10 @@ ndarray-npy = { workspace = true }
 prost = { workspace = true }
 bytes = { workspace = true }
 tch = { workspace = true, optional = true }
+object_store = { workspace = true, features = ["aws"], optional = true }
+tokio = { workspace = true, features = ["rt"], optional = true }
+tempfile = { workspace = true, optional = true }
+futures = { version = "0.3", default-features = false, optional = true }
 log = "0.4"
 
 [build-dependencies]
@@ -29,6 +33,7 @@ name = "qdp_core"
 default = []
 observability = ["nvtx"]
 pytorch = ["tch"]
+remote-io = ["object_store", "tokio", "tempfile", "futures"]
 
 [dev-dependencies]
 approx = "0.5.1"

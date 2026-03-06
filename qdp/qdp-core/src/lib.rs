@@ -28,6 +28,8 @@ mod platform;
 pub mod preprocessing;
 pub mod reader;
 pub mod readers;
+#[cfg(feature = "remote-io")]
+pub mod remote;
 pub mod tf_proto;
 #[macro_use]
 mod profiling;

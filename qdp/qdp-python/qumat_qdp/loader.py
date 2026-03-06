@@ -165,10 +165,13 @@ class QuantumDataLoader:
 
         For streaming=True (Phase 2b), only .parquet is supported; data is read in chunks to reduce memory.
         For streaming=False, supports .parquet, .arrow, .feather, .ipc, .npy, .pt, .pth, .pb.
+        Remote paths (s3://) are supported when the remote-io feature is enabled.
         """
         if not path or not isinstance(path, str):
             raise ValueError(f"path must be a non-empty string, got {path!r}")
-        if streaming and not (path.lower().endswith(".parquet")):
+        # For remote URLs, extract the key portion for extension checks.
+        check_path = path.split("?")[0].rsplit("/", 1)[-1] if "://" in path else path
+        if streaming and not (check_path.lower().endswith(".parquet")):
             raise ValueError(
                 "streaming=True supports only .parquet files; use streaming=False for other formats."
             )
