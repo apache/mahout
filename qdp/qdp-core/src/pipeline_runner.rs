@@ -488,20 +488,31 @@ fn fill_sample(seed: u64, out: &mut [f64], encoding_method: &str) -> Result<()> 
 
 /// Generate one batch (batch_size * vector_len elements, or batch_size * 1 for basis).
 fn generate_batch(config: &PipelineConfig, batch_idx: usize, vector_len: usize) -> Vec<f64> {
+    let mut batch = vec![0.0f64; config.batch_size * vector_len];
+    fill_batch_inplace(config, batch_idx, vector_len, &mut batch);
+    batch
+}
+
+/// Fill an existing batch buffer in-place (avoids per-iteration allocations in benchmarks).
+fn fill_batch_inplace(
+    config: &PipelineConfig,
+    batch_idx: usize,
+    vector_len: usize,
+    batch_buf: &mut [f64],
+) {
+    debug_assert_eq!(batch_buf.len(), config.batch_size * vector_len);
     let seed_base = config
         .seed
         .unwrap_or(0)
         .wrapping_add((batch_idx * config.batch_size) as u64);
-    let mut batch = vec![0.0f64; config.batch_size * vector_len];
     for i in 0..config.batch_size {
         let offset = i * vector_len;
         let _ = fill_sample(
             seed_base + i as u64,
-            &mut batch[offset..offset + vector_len],
+            &mut batch_buf[offset..offset + vector_len],
             &config.encoding_method,
         );
     }
-    batch
 }
 
 /// Release DLPack tensor (call deleter so GPU memory is freed).
@@ -521,11 +532,14 @@ pub fn run_throughput_pipeline(config: &PipelineConfig) -> Result<PipelineRunRes
     let vector_len = vector_len(config.num_qubits, &config.encoding_method);
     let num_qubits = config.num_qubits as usize;
 
+    // Reuse a single CPU batch buffer to avoid per-iteration allocations in throughput benchmarks.
+    let mut batch_buf = vec![0.0f64; config.batch_size * vector_len];
+
     // Warmup
     for b in 0..config.warmup_batches {
-        let batch = generate_batch(config, b, vector_len);
+        fill_batch_inplace(config, b, vector_len, &mut batch_buf);
         let ptr = engine.encode_batch(
-            &batch,
+            &batch_buf,
             config.batch_size,
             vector_len,
             num_qubits,
@@ -539,9 +553,9 @@ pub fn run_throughput_pipeline(config: &PipelineConfig) -> Result<PipelineRunRes
 
     let start = Instant::now();
     for b in 0..config.total_batches {
-        let batch = generate_batch(config, b, vector_len);
+        fill_batch_inplace(config, b, vector_len, &mut batch_buf);
         let ptr = engine.encode_batch(
-            &batch,
+            &batch_buf,
             config.batch_size,
             vector_len,
             num_qubits,
@@ -568,4 +582,41 @@ pub fn run_throughput_pipeline(config: &PipelineConfig) -> Result<PipelineRunRes
 /// Run latency pipeline (same as throughput; returns same stats; name for API parity).
 pub fn run_latency_pipeline(config: &PipelineConfig) -> Result<PipelineRunResult> {
     run_throughput_pipeline(config)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn assert_generate_and_inplace_match(encoding_method: &str) {
+        let mut config = PipelineConfig::default();
+        config.num_qubits = 5;
+        config.batch_size = 8;
+        config.encoding_method = encoding_method.to_string();
+        config.seed = Some(123);
+
+        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let batch_idx = 7;
+
+        let generated = generate_batch(&config, batch_idx, vector_len);
+        let mut buf = vec![0.0f64; config.batch_size * vector_len];
+        fill_batch_inplace(&config, batch_idx, vector_len, &mut buf);
+
+        assert_eq!(generated, buf);
+    }
+
+    #[test]
+    fn generate_batch_matches_fill_batch_inplace_amplitude() {
+        assert_generate_and_inplace_match("amplitude");
+    }
+
+    #[test]
+    fn generate_batch_matches_fill_batch_inplace_angle() {
+        assert_generate_and_inplace_match("angle");
+    }
+
+    #[test]
+    fn generate_batch_matches_fill_batch_inplace_basis() {
+        assert_generate_and_inplace_match("basis");
+    }
 }
