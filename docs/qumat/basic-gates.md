@@ -1,3 +1,8 @@
+---
+title: Quantum Gate Explanations
+sidebar_label: Basic Gates
+---
+
 # Quantum Gate Explanations
 
 ## NOT Gate (X-Gate)
