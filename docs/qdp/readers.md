@@ -1,3 +1,8 @@
+---
+title: QDP Input Format Architecture
+sidebar_label: Readers
+---
+
 # QDP Input Format Architecture
 
 This document describes the refactored input handling system in QDP that makes it easy to support multiple data formats.
