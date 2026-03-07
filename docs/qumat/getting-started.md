@@ -70,6 +70,6 @@ Refer to repository examples:
 
 ## Next Steps
 
-- [Basic Gates](/docs/qumat/basic-gates)
-- [API Reference](/docs/qumat/api)
-- [QDP Getting Started](/docs/qdp/getting-started)
+- [Basic Gates](./basic-gates)
+- [API Reference](./api)
+- [QDP Getting Started](../qdp/getting-started)
