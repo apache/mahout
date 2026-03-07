@@ -29,9 +29,9 @@ import argparse
 import time
 
 import torch
+from qumat_qdp import QdpBenchmark
 
 from benchmark.utils import normalize_batch, prefetched_batches
-from qumat_qdp import QdpBenchmark
 
 BAR = "=" * 70
 SEP = "-" * 70
@@ -52,8 +52,8 @@ except ImportError:
 
 try:
     from qiskit import QuantumCircuit, transpile
-    from qiskit_aer import AerSimulator
     from qiskit.quantum_info import Statevector
+    from qiskit_aer import AerSimulator
 
     HAS_QISKIT = True
 except ImportError:

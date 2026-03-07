@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .qumat import QuMat
 from . import qdp
+from .qumat import QuMat
 
 __all__ = ["QuMat", "qdp"]

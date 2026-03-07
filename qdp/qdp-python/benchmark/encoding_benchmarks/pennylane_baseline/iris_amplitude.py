@@ -33,7 +33,6 @@ Pipeline: state prep (Möttönen angles) → Rot layers + CNOT → expval(PauliZ
 from __future__ import annotations
 
 # --- Imports ---
-
 import argparse
 import time
 from typing import Any
@@ -43,7 +42,7 @@ import numpy as np
 try:
     import pennylane as qml
     from pennylane import numpy as pnp
-    from pennylane.optimize import NesterovMomentumOptimizer, AdamOptimizer
+    from pennylane.optimize import AdamOptimizer, NesterovMomentumOptimizer
 except ImportError as e:
     raise SystemExit(
         "PennyLane is required. Install with: uv sync --group benchmark"

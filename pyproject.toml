@@ -96,6 +96,34 @@ exclude = [
 # api: benchmark module loaded via sys.path in tests
 allowed-unresolved-imports = ["_qdp", "_qdp.*", "api", "api.*"]
 
+[tool.ruff]
+extend-exclude = ["**/*.ipynb"]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # isort
+    "I",
+    # pygrep-hooks
+    "PGH003",
+    "PGH004",
+    # unsorted-dunder-all
+    "RUF022",
+    # unused-noqa
+    "RUF100",
+    # flake8-pytest-style
+    "PT",
+]
+
+ignore = ["PT011"]
+
+[tool.ruff.lint.pyflakes]
+allowed-unused-imports = ["_qdp"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

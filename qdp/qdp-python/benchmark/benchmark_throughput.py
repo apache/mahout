@@ -32,9 +32,9 @@ import time
 
 import numpy as np
 import torch
+from qumat_qdp import QdpBenchmark
 
 from benchmark.utils import normalize_batch, prefetched_batches
-from qumat_qdp import QdpBenchmark
 
 BAR = "=" * 70
 SEP = "-" * 70
