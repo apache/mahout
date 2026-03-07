@@ -42,7 +42,7 @@ jobs:
           sccache: true
 
       - run: uv pip install torch --index-url https://download.pytorch.org/whl/cpu
-      - run: uv run pytest testing/ -v
+      - run: uv run pytest -n auto testing/ -v
       - run: uv build
 
       - uses: PyO3/maturin-action@v1
