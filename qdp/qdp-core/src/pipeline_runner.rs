@@ -455,14 +455,16 @@ pub fn vector_len(num_qubits: u32, encoding_method: &str) -> usize {
 }
 
 /// Deterministic sample generation matching Python utils.build_sample (amplitude/angle/basis).
-fn fill_sample(seed: u64, out: &mut [f64], encoding_method: &str) -> Result<()> {
+fn fill_sample(seed: u64, out: &mut [f64], encoding_method: &str, num_qubits: usize) -> Result<()> {
     let len = out.len();
     if len == 0 {
         return Ok(());
     }
     match encoding_method.to_lowercase().as_str() {
         "basis" => {
-            let mask = len.saturating_sub(1) as u64;
+            // For basis encoding, use 2^num_qubits as the state space size for mask calculation
+            let state_space_size = 1 << num_qubits;
+            let mask = (state_space_size - 1) as u64;
             let idx = seed & mask;
             out[0] = idx as f64;
         }
@@ -511,6 +513,7 @@ fn fill_batch_inplace(
             seed_base + i as u64,
             &mut batch_buf[offset..offset + vector_len],
             &config.encoding_method,
+            config.num_qubits as usize,
         );
     }
 }
@@ -598,13 +601,31 @@ mod tests {
         };
 
         let vector_len = vector_len(config.num_qubits, &config.encoding_method);
-        let batch_idx = 7;
 
-        let generated = generate_batch(&config, batch_idx, vector_len);
-        let mut buf = vec![0.0f64; config.batch_size * vector_len];
-        fill_batch_inplace(&config, batch_idx, vector_len, &mut buf);
+        // Test edge cases: 0 and batch_size-1
+        for batch_idx in [0, config.batch_size - 1, 7] {
+            let generated = generate_batch(&config, batch_idx, vector_len);
+            let mut buf = vec![0.0f64; config.batch_size * vector_len];
+            fill_batch_inplace(&config, batch_idx, vector_len, &mut buf);
 
-        assert_eq!(generated, buf);
+            assert_eq!(generated, buf);
+        }
+    }
+
+    fn assert_adjacent_batches_differ(encoding_method: &str) {
+        let config = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 8,
+            encoding_method: encoding_method.to_string(),
+            seed: Some(123),
+            ..Default::default()
+        };
+
+        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+
+        let batch0 = generate_batch(&config, 0, vector_len);
+        let batch1 = generate_batch(&config, 1, vector_len);
+        assert_ne!(batch0, batch1);
     }
 
     #[test]
@@ -620,5 +641,20 @@ mod tests {
     #[test]
     fn generate_batch_matches_fill_batch_inplace_basis() {
         assert_generate_and_inplace_match("basis");
+    }
+
+    #[test]
+    fn adjacent_batches_differ_amplitude() {
+        assert_adjacent_batches_differ("amplitude");
+    }
+
+    #[test]
+    fn adjacent_batches_differ_angle() {
+        assert_adjacent_batches_differ("angle");
+    }
+
+    #[test]
+    fn adjacent_batches_differ_basis() {
+        assert_adjacent_batches_differ("basis");
     }
 }
