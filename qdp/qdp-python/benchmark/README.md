@@ -14,36 +14,37 @@ scripts:
 From the repo root:
 
 ```bash
-cd qdp
-make benchmark
+uv sync --group dev --extra qdp
+source .venv/bin/activate
+uv sync --project qdp/qdp-python --group benchmark --active
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_e2e.py
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_latency.py
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_throughput.py
 ```
 
-This installs the QDP Python package (if needed), installs benchmark
-dependencies, and runs both benchmarks.
+This keeps all benchmark dependencies in the unified repo root venv (`mahout/.venv`).
 
 ## Manual Setup
 
 ```bash
-cd qdp/qdp-python
-uv sync --group benchmark
+source .venv/bin/activate
+uv sync --project qdp/qdp-python --group benchmark --active
 ```
 
-Then run benchmarks with `uv run python ...` or activate the virtual
-environment and use `python ...`.
+Then run benchmarks with `uv run --project qdp/qdp-python python ...`.
 
 ## E2E Benchmark (Disk -> GPU)
 
 ```bash
-cd qdp/qdp-python/benchmark
-python benchmark_e2e.py
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_e2e.py
 ```
 
 Additional options:
 
 ```bash
-python benchmark_e2e.py --qubits 16 --samples 200 --frameworks mahout-parquet mahout-arrow
-python benchmark_e2e.py --frameworks all
-python benchmark_e2e.py --encoding-method basis
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_e2e.py --qubits 16 --samples 200 --frameworks mahout-parquet mahout-arrow
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_e2e.py --frameworks all
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_e2e.py --encoding-method basis
 ```
 
 Notes:
@@ -60,10 +61,9 @@ Notes:
 ## Data-to-State Latency Benchmark
 
 ```bash
-cd qdp/qdp-python/benchmark
-python benchmark_latency.py --qubits 16 --batches 200 --batch-size 64 --prefetch 16
-python benchmark_latency.py --frameworks mahout,pennylane
-python benchmark_latency.py --encoding-method basis
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_latency.py --qubits 16 --batches 200 --batch-size 64 --prefetch 16
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_latency.py --frameworks mahout,pennylane
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_latency.py --encoding-method basis
 ```
 
 Notes:
@@ -89,10 +89,9 @@ See `qdp/qdp-python/benchmark/benchmark_throughput.md` for details and example
 output.
 
 ```bash
-cd qdp/qdp-python/benchmark
-python benchmark_throughput.py --qubits 16 --batches 200 --batch-size 64 --prefetch 16
-python benchmark_throughput.py --frameworks mahout,pennylane
-python benchmark_throughput.py --encoding-method basis
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_throughput.py --qubits 16 --batches 200 --batch-size 64 --prefetch 16
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_throughput.py --frameworks mahout,pennylane
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_throughput.py --encoding-method basis
 ```
 
 Notes:
