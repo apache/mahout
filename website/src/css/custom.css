@@ -109,6 +109,11 @@
   color: var(--ifm-font-color-base);
 }
 
+/* Remove background color from active dropdown links, probably a bug in Docusaurus */
+.dropdown__link--active:not(:hover) {
+  background-color: unset;
+}
+
 /* Dark mode navbar adjustments */
 [data-theme='dark'] .navbar {
   background-color: #00838f;
