@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkmahout_website=globalThis.webpackChunkmahout_website||[]).push([[372],{70674(t){t.exports=JSON.parse('{"tags":[{"label":"news","permalink":"/docs/next/tags/news","count":6},{"label":"minutes","permalink":"/docs/next/tags/minutes","count":44},{"label":"tutorial","permalink":"/docs/next/tags/tutorial","count":1}]}')}}]);
