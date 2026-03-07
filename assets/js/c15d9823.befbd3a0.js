@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkmahout_website=globalThis.webpackChunkmahout_website||[]).push([[8146],{9328(e){e.exports=JSON.parse('{"metadata":{"permalink":"/blog","page":1,"postsPerPage":10,"totalPages":6,"totalCount":51,"nextPage":"/blog/page/2","blogDescription":"Apache Mahout project news, releases, and community updates","blogTitle":"News & Updates"}}')}}]);
