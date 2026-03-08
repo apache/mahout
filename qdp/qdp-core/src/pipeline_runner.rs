@@ -657,4 +657,139 @@ mod tests {
     fn adjacent_batches_differ_basis() {
         assert_adjacent_batches_differ("basis");
     }
+
+    #[test]
+    fn test_seed_none() {
+        let config = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 8,
+            encoding_method: "amplitude".to_string(),
+            seed: None,
+            ..Default::default()
+        };
+
+        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let batch = generate_batch(&config, 0, vector_len);
+        assert_eq!(batch.len(), config.batch_size * vector_len);
+
+        let mut buf = vec![0.0f64; config.batch_size * vector_len];
+        fill_batch_inplace(&config, 0, vector_len, &mut buf);
+        assert_eq!(batch, buf);
+    }
+
+    #[test]
+    fn test_batch_size_one() {
+        let config = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 1,
+            encoding_method: "amplitude".to_string(),
+            seed: Some(123),
+            ..Default::default()
+        };
+
+        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let batch = generate_batch(&config, 0, vector_len);
+        assert_eq!(batch.len(), vector_len);
+
+        let mut buf = vec![0.0f64; vector_len];
+        fill_batch_inplace(&config, 0, vector_len, &mut buf);
+        assert_eq!(batch, buf);
+
+        let batch0 = generate_batch(&config, 0, vector_len);
+        let batch1 = generate_batch(&config, 1, vector_len);
+        assert_ne!(batch0, batch1);
+    }
+
+    #[test]
+    fn test_amplitude_encoding_case_insensitive() {
+        let config_lower = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 8,
+            encoding_method: "amplitude".to_string(),
+            seed: Some(123),
+            ..Default::default()
+        };
+
+        let config_upper = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 8,
+            encoding_method: "AMPLITUDE".to_string(),
+            seed: Some(123),
+            ..Default::default()
+        };
+
+        let vector_len = vector_len(config_lower.num_qubits, &config_lower.encoding_method);
+        let batch_lower = generate_batch(&config_lower, 0, vector_len);
+        let batch_upper = generate_batch(&config_upper, 0, vector_len);
+        assert_eq!(batch_lower, batch_upper);
+    }
+
+    #[test]
+    fn test_amplitude_samples_in_range() {
+        let config = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 8,
+            encoding_method: "amplitude".to_string(),
+            seed: Some(123),
+            ..Default::default()
+        };
+
+        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+
+        for batch_idx in 0..5 {
+            let batch = generate_batch(&config, batch_idx, vector_len);
+            for &value in &batch {
+                assert!(
+                    (0.0..1.0).contains(&value),
+                    "amplitude value should be in [0, 1), got {} at batch_idx={}",
+                    value,
+                    batch_idx
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_amplitude_samples_in_range_with_seed_none() {
+        let config = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 8,
+            encoding_method: "amplitude".to_string(),
+            seed: None,
+            ..Default::default()
+        };
+
+        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let batch = generate_batch(&config, 0, vector_len);
+
+        for &value in &batch {
+            assert!(
+                (0.0..1.0).contains(&value),
+                "amplitude value should be in [0, 1) with seed=None, got {}",
+                value
+            );
+        }
+    }
+
+    #[test]
+    fn test_amplitude_samples_in_range_batch_size_one() {
+        let config = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 1,
+            encoding_method: "amplitude".to_string(),
+            seed: Some(123),
+            ..Default::default()
+        };
+
+        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let batch = generate_batch(&config, 0, vector_len);
+
+        for &value in &batch {
+            assert!(
+                (0.0..1.0).contains(&value),
+                "amplitude value should be in [0, 1) with batch_size=1, got {}",
+                value
+            );
+        }
+    }
 }
