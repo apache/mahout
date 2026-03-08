@@ -38,7 +38,4 @@ jobs:
 
       - name: Run Jupyter Notebooks
         run: |
-          for nb in $(find . -name 'example/qumat/*.ipynb'); do
-            echo "Executing $nb"
-            uv run jupyter execute "$nb" --inplace
-          done
+          uv run jupyter execute examples/qumat/*.ipynb --inplace
