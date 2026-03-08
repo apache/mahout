@@ -17,6 +17,7 @@
 mod constants;
 mod dlpack;
 mod engine;
+mod jax;
 mod loader;
 mod pytorch;
 mod tensor;

@@ -19,6 +19,7 @@ use crate::pytorch::{
     extract_cuda_tensor_info, get_tensor_device_id, get_torch_cuda_stream_ptr, is_cuda_tensor,
     is_pytorch_tensor, validate_cuda_tensor_for_encoding, validate_shape, validate_tensor,
 };
+use crate::jax::{is_jax_array, synchronize_jax_array};
 use crate::tensor::QuantumTensor;
 use numpy::{PyReadonlyArray1, PyReadonlyArray2, PyUntypedArrayMethods};
 use pyo3::exceptions::PyRuntimeError;
@@ -128,8 +129,67 @@ impl QdpEngine {
             return self.encode_from_pytorch(data, num_qubits, encoding_method);
         }
 
+        // Check if it's a Jax array
+        if is_jax_array(data)? {
+            synchronize_jax_array(data)?;
+            // Jax arrays support DLPack, so we fall through to the generic DLPack check
+        }
+
+        // Generic DLPack fallback (supports Jax, Cupy, etc.)
+        if data.hasattr("__dlpack__")? && data.hasattr("__dlpack_device__")? {
+            return self._encode_from_dlpack(data, num_qubits, encoding_method);
+        }
+
         // Fallback: try to extract as Vec<f64> (Python list)
         self.encode_from_list(data, num_qubits, encoding_method)
+    }
+
+    /// Internal helper: encode from any object implementing the DLPack protocol
+    fn _encode_from_dlpack(
+        &self,
+        data: &Bound<'_, PyAny>,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> PyResult<QuantumTensor> {
+        let dlpack_info = extract_dlpack_tensor(data.py(), data)?;
+        
+        // Basic shape validation
+        let ndim = dlpack_info.shape.len();
+        validate_shape(ndim, "DLPack object")?;
+
+        match ndim {
+            1 => {
+                let input_len = dlpack_info.shape[0] as usize;
+                let ptr = unsafe {
+                    self.engine
+                        .encode_from_gpu_ptr(
+                            dlpack_info.data_ptr,
+                            input_len,
+                            num_qubits,
+                            encoding_method,
+                        )
+                        .map_err(|e| PyRuntimeError::new_err(format!("DLPack encoding failed: {}", e)))?
+                };
+                Ok(QuantumTensor { ptr, consumed: false })
+            }
+            2 => {
+                let num_samples = dlpack_info.shape[0] as usize;
+                let sample_size = dlpack_info.shape[1] as usize;
+                let ptr = unsafe {
+                    self.engine
+                        .encode_batch_from_gpu_ptr(
+                            dlpack_info.data_ptr,
+                            num_samples,
+                            sample_size,
+                            num_qubits,
+                            encoding_method,
+                        )
+                        .map_err(|e| PyRuntimeError::new_err(format!("DLPack batch encoding failed: {}", e)))?
+                };
+                Ok(QuantumTensor { ptr, consumed: false })
+            }
+            _ => unreachable!(),
+        }
     }
 
     /// Encode from NumPy array (1D or 2D)
