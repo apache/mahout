@@ -261,6 +261,13 @@ impl QdpEngine {
     /// * `num_qubits` - Number of qubits
     /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
     ///
+    /// # Null handling
+    ///
+    /// When reading from Parquet, the streaming encoder always uses
+    /// [`NullHandling::FillZero`] for the underlying `ParquetBlockReader`. This
+    /// replaces any null values with `0.0`, matching the behavior of the batch
+    /// readers and preserving backward compatibility.
+    ///
     /// # Returns
     /// DLPack pointer to encoded states [num_samples, 2^num_qubits]
     pub fn encode_from_parquet(

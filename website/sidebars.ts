@@ -87,13 +87,6 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Download',
-      collapsed: true,
-      link: {type: 'doc', id: 'download/index'},
-      items: ['download/quickstart'],
-    },
-    {
-      type: 'category',
       label: 'Community',
       collapsed: true,
       link: {type: 'doc', id: 'community/index'},

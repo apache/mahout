@@ -41,6 +41,7 @@ const config: Config = {
       'classic',
       {
         docs: {
+          path: '../docs/',
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/apache/mahout/tree/main/docs/',
           remarkPlugins: [remarkMath],
@@ -106,9 +107,13 @@ const config: Config = {
           if (existingPath === '/blog') {
             return ['/news.html', '/news'];
           }
-          // Keep /downloads as the canonical public download entry URL.
-          if (existingPath === '/downloads') {
+          // Keep /docs/qumat/getting-started as the canonical getting-started URL.
+          if (existingPath === '/docs/qumat/getting-started') {
             return [
+              '/docs/download',
+              '/docs/download/quickstart',
+              '/docs/next/download',
+              '/docs/next/download/quickstart',
             ];
           }
           return undefined;
@@ -141,8 +146,9 @@ const config: Config = {
               href: 'https://www.apache.org/foundation/how-it-works.html',
             },
             {
+              type: 'doc',
+              docId: 'about/how-to-contribute',
               label: 'How to Contribute',
-              to: '/docs/about/how-to-contribute',
             },
           ],
         },
@@ -153,30 +159,36 @@ const config: Config = {
           position: 'left',
           items: [
             {
+              type: 'doc',
+              docId: 'qumat/index',
               label: 'Overview',
-              to: '/docs/qumat',
             },
             {
+              type: 'doc',
+              docId: 'qumat/getting-started',
               label: 'Getting Started',
-              to: '/docs/qumat/getting-started',
             },
             {
+              type: 'doc',
+              docId: 'qdp/index',
               label: 'QDP (Data Encoding)',
-              to: '/docs/qdp',
             },
             {
+              type: 'doc',
+              docId: 'learning/quantum-computing-primer/index',
               label: 'Quantum Computing Primer',
-              to: '/docs/learning/quantum-computing-primer',
             },
             {
+              type: 'doc',
+              docId: 'learning/papers/index',
               label: 'Research Papers',
-              to: '/docs/learning/papers',
             },
           ],
         },
         // Download
         {
-          to: '/downloads',
+          type: 'doc',
+          docId: 'qumat/getting-started',
           label: 'Download',
           position: 'left',
         },
@@ -187,24 +199,28 @@ const config: Config = {
           position: 'left',
           items: [
             {
+              type: 'doc',
+              docId: 'community/index',
               label: 'Overview',
-              to: '/docs/community',
             },
             {
+              type: 'doc',
+              docId: 'community/who-we-are',
               label: 'Who We Are',
-              to: '/docs/community/who-we-are',
             },
             {
+              type: 'doc',
+              docId: 'community/mailing-lists',
               label: 'Mailing Lists',
-              to: '/docs/community/mailing-lists',
             },
             {
               label: 'Issue Tracker',
               href: 'https://issues.apache.org/jira/browse/MAHOUT',
             },
             {
+              type: 'doc',
+              docId: 'community/code-of-conduct',
               label: 'Code of Conduct',
-              to: '/docs/community/code-of-conduct',
             },
           ],
         },
