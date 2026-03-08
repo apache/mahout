@@ -57,7 +57,8 @@ impl IqpEncoder {
     fn expected_data_len(&self, num_qubits: usize) -> usize {
         if self.enable_zz {
             // n single-qubit + n*(n-1)/2 two-qubit terms
-            num_qubits + num_qubits * (num_qubits - 1) / 2
+            let n_minus_one = num_qubits.saturating_sub(1);
+            num_qubits + num_qubits * n_minus_one / 2
         } else {
             num_qubits
         }
@@ -148,6 +149,13 @@ impl QuantumEncoder for IqpEncoder {
     ) -> Result<GpuStateVector> {
         crate::profile_scope!("IqpEncoder::encode_batch");
 
+        if num_qubits == 0 || num_qubits > 30 {
+            return Err(MahoutError::InvalidInput(format!(
+                "Number of qubits {} must be between 1 and 30",
+                num_qubits
+            )));
+        }
+
         let expected_len = self.expected_data_len(num_qubits);
         if sample_size != expected_len {
             return Err(MahoutError::InvalidInput(format!(
@@ -165,13 +173,6 @@ impl QuantumEncoder for IqpEncoder {
                 batch_data.len(),
                 num_samples,
                 sample_size
-            )));
-        }
-
-        if num_qubits == 0 || num_qubits > 30 {
-            return Err(MahoutError::InvalidInput(format!(
-                "Number of qubits {} must be between 1 and 30",
-                num_qubits
             )));
         }
 
@@ -320,6 +321,13 @@ impl QuantumEncoder for IqpEncoder {
         num_qubits: usize,
         stream: *mut c_void,
     ) -> Result<GpuStateVector> {
+        if num_qubits == 0 || num_qubits > 30 {
+            return Err(MahoutError::InvalidInput(format!(
+                "Number of qubits {} must be between 1 and 30",
+                num_qubits
+            )));
+        }
+
         let expected_len = self.expected_data_len(num_qubits);
         if sample_size != expected_len {
             return Err(MahoutError::InvalidInput(format!(
@@ -328,13 +336,6 @@ impl QuantumEncoder for IqpEncoder {
                 expected_len,
                 num_qubits,
                 sample_size
-            )));
-        }
-
-        if num_qubits == 0 || num_qubits > 30 {
-            return Err(MahoutError::InvalidInput(format!(
-                "Number of qubits {} must be between 1 and 30",
-                num_qubits
             )));
         }
 
