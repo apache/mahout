@@ -66,9 +66,9 @@ ifeq ($(HAS_NVIDIA),yes)
 	@echo "  - benchmark_throughput.py: DataLoader-style throughput"
 	@echo ""
 	@echo "[INFO] Run specific benchmarks with:"
-	@echo "  uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_e2e.py"
-	@echo "  uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_latency.py"
-	@echo "  uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_throughput.py"
+	@echo "  uv run --active python qdp/qdp-python/benchmark/benchmark_e2e.py"
+	@echo "  uv run --active python qdp/qdp-python/benchmark/benchmark_latency.py"
+	@echo "  uv run --active python qdp/qdp-python/benchmark/benchmark_throughput.py"
 	@echo ""
 	@echo "[INFO] See qdp/qdp-python/benchmark/README.md for more options."
 else
