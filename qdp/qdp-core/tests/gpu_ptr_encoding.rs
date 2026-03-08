@@ -26,6 +26,16 @@ use qdp_core::{MahoutError, Precision, QdpEngine};
 
 mod common;
 
+/// IQP full encoding expected data length: n + n*(n-1)/2.
+fn iqp_full_data_len(num_qubits: usize) -> usize {
+    num_qubits + num_qubits * (num_qubits.saturating_sub(1)) / 2
+}
+
+/// IQP-Z encoding expected data length: n.
+fn iqp_z_data_len(num_qubits: usize) -> usize {
+    num_qubits
+}
+
 // ---- Helpers for f32 encode_from_gpu_ptr_f32 tests ----
 
 fn engine_f32() -> Option<QdpEngine> {
@@ -538,6 +548,415 @@ fn test_encode_batch_from_gpu_ptr_basis_success() {
         let managed = &mut *dlpack_ptr;
         let deleter = managed.deleter.take().expect("Deleter missing");
         deleter(dlpack_ptr);
+    }
+}
+
+#[test]
+fn test_encode_batch_from_gpu_ptr_iqp_success() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+    let num_qubits = 2;
+    let state_len = 1 << num_qubits;
+    let sample_size = iqp_full_data_len(num_qubits);
+    let num_samples = 3;
+    let total = num_samples * sample_size;
+    let data: Vec<f64> = (0..total).map(|i| (i as f64) * 0.05).collect();
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => return,
+    };
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => return,
+    };
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_batch_from_gpu_ptr(ptr, num_samples, sample_size, num_qubits, "iqp")
+            .expect("encode_batch_from_gpu_ptr iqp should succeed")
+    };
+    assert!(!dlpack_ptr.is_null());
+    assert_dlpack_batch_shape_and_delete(dlpack_ptr, num_samples as i64, state_len as i64);
+}
+
+#[test]
+fn test_encode_batch_from_gpu_ptr_iqp_z_success() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+    let num_qubits = 2;
+    let state_len = 1 << num_qubits;
+    let sample_size = iqp_z_data_len(num_qubits);
+    let num_samples = 3;
+    let total = num_samples * sample_size;
+    let data: Vec<f64> = (0..total).map(|i| (i as f64) * 0.05).collect();
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => return,
+    };
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => return,
+    };
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_batch_from_gpu_ptr(ptr, num_samples, sample_size, num_qubits, "iqp-z")
+            .expect("encode_batch_from_gpu_ptr iqp-z should succeed")
+    };
+    assert!(!dlpack_ptr.is_null());
+    assert_dlpack_batch_shape_and_delete(dlpack_ptr, num_samples as i64, state_len as i64);
+}
+
+#[test]
+fn test_encode_batch_from_gpu_ptr_iqp_wrong_sample_size() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+    let num_qubits = 2;
+    let expected_sample_size = iqp_full_data_len(num_qubits);
+    let wrong_sample_size = expected_sample_size + 1;
+    let num_samples = 2;
+    let data = vec![0.1_f64; num_samples * wrong_sample_size];
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => return,
+    };
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => return,
+    };
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+    let result = unsafe {
+        engine.encode_batch_from_gpu_ptr(ptr, num_samples, wrong_sample_size, num_qubits, "iqp")
+    };
+    assert!(result.is_err());
+    match &result {
+        Err(MahoutError::InvalidInput(msg)) => {
+            assert!(
+                msg.contains("expects") || msg.contains("sample_size"),
+                "msg: {}",
+                msg
+            );
+        }
+        _ => panic!("expected InvalidInput"),
+    }
+}
+
+#[test]
+fn test_encode_batch_from_gpu_ptr_iqp_z_wrong_sample_size() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+    let num_qubits = 2;
+    let expected_sample_size = iqp_z_data_len(num_qubits);
+    let wrong_sample_size = expected_sample_size + 1;
+    let num_samples = 2;
+    let data = vec![0.1_f64; num_samples * wrong_sample_size];
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => return,
+    };
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => return,
+    };
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+    let result = unsafe {
+        engine.encode_batch_from_gpu_ptr(ptr, num_samples, wrong_sample_size, num_qubits, "iqp-z")
+    };
+    assert!(result.is_err());
+    match &result {
+        Err(MahoutError::InvalidInput(msg)) => {
+            assert!(
+                msg.contains("expects") || msg.contains("sample_size"),
+                "msg: {}",
+                msg
+            );
+        }
+        _ => panic!("expected InvalidInput"),
+    }
+}
+
+#[test]
+fn test_encode_from_gpu_ptr_iqp_z_success() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
+        Ok(e) => e,
+        Err(_) => {
+            println!("SKIP: No GPU available");
+            return;
+        }
+    };
+
+    let num_qubits = 2;
+    let data = [0.1_f64, -0.2_f64];
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => {
+            println!("SKIP: Failed to copy to device");
+            return;
+        }
+    };
+
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_from_gpu_ptr(ptr, data.len(), num_qubits, "iqp-z")
+            .expect("encode_from_gpu_ptr iqp-z should succeed")
+    };
+
+    assert_dlpack_shape_2_4_and_delete(dlpack_ptr);
+}
+
+#[test]
+fn test_encode_from_gpu_ptr_iqp_success() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
+        Ok(e) => e,
+        Err(_) => {
+            println!("SKIP: No GPU available");
+            return;
+        }
+    };
+
+    let num_qubits = 2;
+    let data = [0.1_f64, -0.2_f64, 0.3_f64];
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => {
+            println!("SKIP: Failed to copy to device");
+            return;
+        }
+    };
+
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_from_gpu_ptr(ptr, data.len(), num_qubits, "iqp")
+            .expect("encode_from_gpu_ptr iqp should succeed")
+    };
+
+    assert_dlpack_shape_2_4_and_delete(dlpack_ptr);
+}
+
+#[test]
+fn test_encode_from_gpu_ptr_iqp_wrong_input_len() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+    let num_qubits = 2;
+    let expected_len = iqp_full_data_len(num_qubits);
+    let data = vec![0.1_f64; expected_len];
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => return,
+    };
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => return,
+    };
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+
+    let result_too_few =
+        unsafe { engine.encode_from_gpu_ptr(ptr, expected_len - 1, num_qubits, "iqp") };
+    assert!(result_too_few.is_err());
+    match &result_too_few {
+        Err(MahoutError::InvalidInput(msg)) => {
+            assert!(msg.contains("expects") || msg.contains("sample"))
+        }
+        _ => panic!("expected InvalidInput"),
+    }
+
+    let result_too_many =
+        unsafe { engine.encode_from_gpu_ptr(ptr, expected_len + 1, num_qubits, "iqp") };
+    assert!(result_too_many.is_err());
+}
+
+#[test]
+fn test_encode_from_gpu_ptr_iqp_z_wrong_input_len() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+    let num_qubits = 2;
+    let expected_len = iqp_z_data_len(num_qubits);
+    let data = vec![0.1_f64; expected_len];
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => return,
+    };
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => return,
+    };
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+
+    let result = unsafe { engine.encode_from_gpu_ptr(ptr, expected_len + 1, num_qubits, "iqp-z") };
+    assert!(result.is_err());
+    match &result {
+        Err(MahoutError::InvalidInput(msg)) => {
+            assert!(msg.contains("expects") || msg.contains("sample"))
+        }
+        _ => panic!("expected InvalidInput"),
+    }
+}
+
+#[test]
+fn test_encode_from_gpu_ptr_with_stream_iqp_success() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+    let num_qubits = 2;
+    let data = [0.1_f64, -0.2_f64, 0.3_f64];
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => return,
+    };
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => return,
+    };
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_from_gpu_ptr_with_stream(
+                ptr,
+                data.len(),
+                num_qubits,
+                "iqp",
+                std::ptr::null_mut(),
+            )
+            .expect("encode_from_gpu_ptr_with_stream iqp")
+    };
+    assert_dlpack_shape_2_4_and_delete(dlpack_ptr);
+}
+
+#[test]
+fn test_encode_from_gpu_ptr_with_stream_iqp_z_success() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+    let num_qubits = 2;
+    let data = [0.1_f64, -0.2_f64];
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => return,
+    };
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => return,
+    };
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_from_gpu_ptr_with_stream(
+                ptr,
+                data.len(),
+                num_qubits,
+                "iqp-z",
+                std::ptr::null_mut(),
+            )
+            .expect("encode_from_gpu_ptr_with_stream iqp-z")
+    };
+    assert_dlpack_shape_2_4_and_delete(dlpack_ptr);
+}
+
+#[test]
+fn test_encode_from_gpu_ptr_iqp_three_qubits() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+    let num_qubits = 3;
+    let state_len = 1 << num_qubits;
+    let expected_len = iqp_full_data_len(num_qubits);
+    let data: Vec<f64> = (0..expected_len).map(|i| (i as f64) * 0.1).collect();
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => return,
+    };
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => return,
+    };
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_from_gpu_ptr(ptr, data.len(), num_qubits, "iqp")
+            .expect("encode_from_gpu_ptr iqp 3 qubits")
+    };
+    assert!(!dlpack_ptr.is_null());
+    unsafe {
+        let tensor = &(*dlpack_ptr).dl_tensor;
+        assert_eq!(tensor.ndim, 2);
+        let shape = std::slice::from_raw_parts(tensor.shape, 2);
+        assert_eq!(shape[0], 1);
+        assert_eq!(shape[1], state_len as i64);
+        if let Some(deleter) = (*dlpack_ptr).deleter {
+            deleter(dlpack_ptr);
+        }
+    }
+}
+
+#[test]
+fn test_encode_from_gpu_ptr_iqp_z_three_qubits() {
+    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+    let num_qubits = 3;
+    let state_len = 1 << num_qubits;
+    let expected_len = iqp_z_data_len(num_qubits);
+    let data: Vec<f64> = (0..expected_len).map(|i| (i as f64) * 0.1).collect();
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => return,
+    };
+    let data_d = match device.htod_sync_copy(data.as_slice()) {
+        Ok(b) => b,
+        Err(_) => return,
+    };
+    let ptr = *data_d.device_ptr() as *const f64 as *const c_void;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_from_gpu_ptr(ptr, data.len(), num_qubits, "iqp-z")
+            .expect("encode_from_gpu_ptr iqp-z 3 qubits")
+    };
+    assert!(!dlpack_ptr.is_null());
+    unsafe {
+        let tensor = &(*dlpack_ptr).dl_tensor;
+        assert_eq!(tensor.ndim, 2);
+        let shape = std::slice::from_raw_parts(tensor.shape, 2);
+        assert_eq!(shape[0], 1);
+        assert_eq!(shape[1], state_len as i64);
+        if let Some(deleter) = (*dlpack_ptr).deleter {
+            deleter(dlpack_ptr);
+        }
     }
 }
 
