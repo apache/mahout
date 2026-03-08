@@ -52,6 +52,7 @@ qdp = ["qumat-qdp"]
 [dependency-groups]
 dev = [
     "pytest>=9.0.1",
+    "pytest-xdist>=3.8.0",
     "ruff>=0.13.1",
     "ty>=0.0.16",
     "pre-commit>=3.0.0",
