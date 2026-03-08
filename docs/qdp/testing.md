@@ -1,3 +1,8 @@
+---
+title: QDP Core Test Suite
+sidebar_label: Testing
+---
+
 # QDP Core Test Suite
 
 Unit tests for QDP core library covering input validation, API workflows, and memory safety.

@@ -1,3 +1,8 @@
+---
+title: QuMat Class Methods
+sidebar_label: API
+---
+
 # QuMat Class Methods
 
 ## `__init__(self, backend_config)`

@@ -1,3 +1,8 @@
+---
+title: Parameterized Quantum Circuits and Rotation Gates
+sidebar_label: Parameterized Circuits
+---
+
 # Parameterized Quantum Circuits and Rotation Gates
 
 Parameterized quantum circuits (PQCs) contain gates with tunable parameters that can be optimized. Instead of using fixed angles, you use symbolic parameters that can be adjusted to find optimal values.

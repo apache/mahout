@@ -25,6 +25,9 @@ use std::ffi::c_void;
 #[cfg(target_os = "linux")]
 use std::sync::Arc;
 
+#[cfg(target_os = "linux")]
+use crate::error::cuda_error_to_string;
+
 /// Precision of the GPU state vector.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Precision {
@@ -38,17 +41,6 @@ use crate::gpu::cuda_ffi::{cudaFreeHost, cudaHostAlloc, cudaMemGetInfo};
 #[cfg(target_os = "linux")]
 fn bytes_to_mib(bytes: usize) -> f64 {
     bytes as f64 / (1024.0 * 1024.0)
-}
-
-#[cfg(target_os = "linux")]
-fn cuda_error_to_string(code: i32) -> &'static str {
-    match code {
-        0 => "cudaSuccess",
-        2 => "cudaErrorMemoryAllocation",
-        3 => "cudaErrorInitializationError",
-        30 => "cudaErrorUnknown",
-        _ => "Unknown CUDA error",
-    }
 }
 
 #[cfg(target_os = "linux")]
