@@ -39,7 +39,7 @@ ifeq ($(HAS_NVIDIA),yes)
 else
 	@echo "[SKIP] No NVIDIA GPU detected, skipping maturin develop"
 endif
-	uv run pytest -n auto --cov=qumat --cov=qumat_qdp --cov-report=term-missing --cov-report=html:htmlcov
+	uv run pytest --cov --cov-report=term-missing --cov-report=html:htmlcov
 tests: test_rust test_python
 
 pre-commit: setup-test-python
