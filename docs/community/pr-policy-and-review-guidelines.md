@@ -100,15 +100,30 @@ Before merge, confirm:
 
 ## AI-Assisted Contributions
 
-AI-assisted contributions are allowed, including code, documentation, and images, if they comply with ASF legal guidance.
+AI-assisted contributions are allowed, including code, documentation, and images, when they comply with ASF legal guidance and normal project review standards.
 
-- Contributors are responsible for ensuring generated output does not introduce incompatible third-party material.
-- The AI tool's terms of use must not impose restrictions that conflict with open-source distribution.
-- If third-party material appears in generated output, contributors must ensure it is used with permission and under compatible licensing terms.
-- Contributors should use reasonable checks (tooling signals, scanners, or manual verification) to reduce the risk of copied copyrighted content.
-- Recommended practice: disclose AI assistance in commit messages with a provenance token such as `Generated-by: <tool-name>`.
+### Contributor Responsibilities
 
-When uncertainty remains (for example, unclear provenance or license of generated output), discuss on `dev@mahout.apache.org` before merge.
+- The PR author should understand the implementation end-to-end and be able to explain design and code decisions during review.
+- If some generated code is not fully understood, call out the unknowns and assumptions explicitly in the PR for reviewer attention.
+- Avoid submitting "AI dump" PRs (large generated changes without clear understanding, validation, or rationale).
+- PRs that look like unverified AI dumps may be closed or redirected due to limited review capacity.
+
+### Quality Expectations for AI-Assisted PRs
+
+- Add tests and evidence equivalent to non-AI PRs; AI usage does not lower review or quality bars.
+- Keep AI-assisted changes small and reviewable whenever possible.
+- Include reproducible context (problem statement, expected behavior, and constraints), especially for generated fixes.
+
+### Legal and Provenance Requirements
+
+- Contributors remain responsible for ensuring generated output does not introduce incompatible third-party material.
+- The AI tool's terms of use must not conflict with open-source distribution.
+- If third-party material appears in generated output, ensure permission and compatible licensing.
+- Use reasonable checks (tooling, scanners, and manual verification) to reduce copied copyrighted content risk.
+- Recommended practice: disclose AI assistance in commit messages with `Generated-by: <tool-name>`.
+
+When uncertainty remains (for example, unclear provenance, licensing, or design safety), discuss on `dev@mahout.apache.org` before merge.
 
 ## Recommended SLA (Non-binding)
 
@@ -124,5 +139,6 @@ These are goals, not strict requirements.
 - ASF Voting Process: https://www.apache.org/foundation/voting.html
 - ASF License and Contribution FAQs: https://www.apache.org/licenses/
 - ASF Generative Tooling Guidance: https://www.apache.org/legal/generative-tooling.html
+- Apache DataFusion AI-Assisted Contributions: https://datafusion.apache.org/contributor-guide/index.html#ai-assisted-contributions
 - Project contribution guide: [`CONTRIBUTING.md`](https://github.com/apache/mahout/blob/main/CONTRIBUTING.md)
 - CODEOWNERS: [`.github/CODEOWNERS`](https://github.com/apache/mahout/blob/main/.github/CODEOWNERS)
