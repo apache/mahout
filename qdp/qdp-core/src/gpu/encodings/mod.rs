@@ -137,27 +137,35 @@ pub trait QuantumEncoder: Send + Sync {
 }
 
 // Encoding implementations
-pub mod amplitude;
-pub mod angle;
-pub mod basis;
 pub mod iqp;
+pub mod zz;
 
 pub use amplitude::AmplitudeEncoder;
 pub use angle::AngleEncoder;
 pub use basis::BasisEncoder;
 pub use iqp::IqpEncoder;
+pub use zz::ZzEncoder;
 
-/// Create encoder by name: "amplitude", "angle", "basis", "iqp", or "iqp-z"
+/// Create encoder by name: "amplitude", "angle", "basis", "iqp", "iqp-z", or "zz" (optionally "zz-l<N>")
 pub fn get_encoder(name: &str) -> Result<Box<dyn QuantumEncoder>> {
-    match name.to_lowercase().as_str() {
+    let name_low = name.to_lowercase();
+    match name_low.as_str() {
         "amplitude" => Ok(Box::new(AmplitudeEncoder)),
         "angle" => Ok(Box::new(AngleEncoder)),
         "basis" => Ok(Box::new(BasisEncoder)),
         "iqp" => Ok(Box::new(IqpEncoder::full())),
         "iqp-z" => Ok(Box::new(IqpEncoder::z_only())),
-        _ => Err(crate::error::MahoutError::InvalidInput(format!(
-            "Unknown encoder: {}. Available: amplitude, angle, basis, iqp, iqp-z",
-            name
-        ))),
+        "zz" => Ok(Box::new(ZzEncoder::default())),
+        _ => {
+            if name_low.starts_with("zz-l") {
+                if let Ok(layers) = name_low[4..].parse::<usize>() {
+                    return Ok(Box::new(ZzEncoder::new(layers)));
+                }
+            }
+            Err(crate::error::MahoutError::InvalidInput(format!(
+                "Unknown encoder: {}. Available: amplitude, angle, basis, iqp, iqp-z, zz (or zz-lN)",
+                name
+            )))
+        }
     }
 }

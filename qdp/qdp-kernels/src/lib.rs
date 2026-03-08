@@ -270,6 +270,28 @@ unsafe extern "C" {
         enable_zz: i32,
         stream: *mut c_void,
     ) -> i32;
+
+    /// Launch ZZ encoding kernel
+    pub fn launch_zz_encode(
+        features_d: *const f64,
+        state_d: *mut c_void,
+        state_len: usize,
+        num_qubits: u32,
+        num_layers: u32,
+        stream: *mut c_void,
+    ) -> i32;
+
+    /// Launch batch ZZ encoding kernel
+    pub fn launch_zz_encode_batch(
+        data_batch_d: *const f64,
+        state_batch_d: *mut c_void,
+        num_samples: usize,
+        state_len: usize,
+        num_qubits: u32,
+        data_len: u32,
+        num_layers: u32,
+        stream: *mut c_void,
+    ) -> i32;
 }
 
 // Dummy implementation for non-Linux and Linux builds without CUDA (allows linking)
@@ -467,6 +489,34 @@ pub extern "C" fn launch_iqp_encode_batch(
     _num_qubits: u32,
     _data_len: u32,
     _enable_zz: i32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_zz_encode(
+    _features_d: *const f64,
+    _state_d: *mut c_void,
+    _state_len: usize,
+    _num_qubits: u32,
+    _num_layers: u32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_zz_encode_batch(
+    _data_batch_d: *const f64,
+    _state_batch_d: *mut c_void,
+    _num_samples: usize,
+    _state_len: usize,
+    _num_qubits: u32,
+    _data_len: u32,
+    _num_layers: u32,
     _stream: *mut c_void,
 ) -> i32 {
     999
