@@ -20,6 +20,7 @@ limitations under the License.
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Python](https://img.shields.io/badge/Python-3.10--3.12-blue.svg)](https://www.python.org/)
+[![Check Links](https://github.com/apache/mahout/actions/workflows/links.yml/badge.svg)](https://github.com/apache/mahout/actions/workflows/links.yml)
 [![GitHub Stars](https://img.shields.io/github/stars/apache/mahout.svg)](https://github.com/apache/mahout/stargazers)
 [![GitHub Contributors](https://img.shields.io/github/contributors/apache/mahout.svg)](https://github.com/apache/mahout/graphs/contributors)
 
