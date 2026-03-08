@@ -65,7 +65,7 @@ STATE_DIM = 2**NUM_QUBITS  # 4
 
 
 # --- Circuit: variational layer (Rot + CNOT); state prep is StatePrep(encoded) in training ---
-def layer(layer_weights, wires=(0, 1)):
+def layer(layer_weights, wires=(0, 1)) -> None:
     """Rot on each wire + CNOT (tutorial Iris section)."""
     for i, w in enumerate(wires):
         qml.Rot(*layer_weights[i], wires=w)
@@ -216,7 +216,7 @@ def _run_training_cpu(
     Y_train: np.ndarray,
     Y_test: np.ndarray,
     *,
-    dev_qml: Any,
+    dev_qml: Any,  # noqa: ANN401
     num_layers: int,
     iterations: int,
     batch_size: int,
@@ -309,7 +309,7 @@ def _run_training_gpu(
     Y_train: np.ndarray,
     Y_test: np.ndarray,
     *,
-    dev_qml: Any,
+    dev_qml: Any,  # noqa: ANN401
     num_layers: int,
     iterations: int,
     batch_size: int,

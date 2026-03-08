@@ -29,6 +29,8 @@ Example:
     >>> torch_tensor = torch.from_dlpack(qtensor)
 """
 
+from typing import NoReturn
+
 _INSTALL_MSG = (
     "QDP requires the qumat-qdp native extension. "
     "Build and install it with: cd qdp/qdp-python && maturin develop --release"
@@ -38,7 +40,7 @@ _INSTALL_MSG = (
 def _make_stub(name: str) -> type:
     """Create a stub class that raises ImportError on instantiation."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: object, **kwargs: object) -> NoReturn:
         raise ImportError(_INSTALL_MSG)
 
     return type(name, (), {"__init__": __init__, "__doc__": f"Stub class - {name}"})

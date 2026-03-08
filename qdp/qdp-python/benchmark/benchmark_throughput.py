@@ -179,7 +179,7 @@ def run_qiskit(num_qubits: int, total_batches: int, batch_size: int, prefetch: i
     return duration, throughput
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Benchmark DataLoader throughput across frameworks."
     )
