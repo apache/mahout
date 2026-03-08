@@ -37,8 +37,11 @@ This keeps all benchmark dependencies in the unified repo root venv (`mahout/.ve
 If you prefer to set up manually (or if `make benchmark` is not available):
 
 ```bash
+# First-time setup: install dependencies and build QDP extension
+uv sync --group dev --extra qdp
 source .venv/bin/activate
 uv sync --project qdp/qdp-python --group benchmark --active
+unset CONDA_PREFIX && uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml
 ```
 
 Then run benchmarks with `uv run --project qdp/qdp-python python ...`.

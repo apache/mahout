@@ -48,6 +48,7 @@ pre-commit: setup-test-python
 setup-benchmark: setup-test-python
 ifeq ($(HAS_NVIDIA),yes)
 	@echo "[INFO] Setting up benchmark environment..."
+	uv sync --group dev --extra qdp
 	uv sync --project qdp/qdp-python --group benchmark --active
 	unset CONDA_PREFIX && uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml
 else
