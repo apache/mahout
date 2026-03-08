@@ -14,10 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
 import importlib
-import pytest
+import sys
 from unittest.mock import patch
+
+import pytest
 
 
 def _reload_qdp_without_extension():

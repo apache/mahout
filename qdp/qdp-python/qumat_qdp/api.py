@@ -32,7 +32,6 @@ Usage:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -52,7 +51,7 @@ class LatencyResult:
 
 
 # Cached reference to Rust pipeline (avoids repeated import).
-_run_throughput_pipeline_py: Optional[object] = None
+_run_throughput_pipeline_py: object | None = None
 
 
 def _get_run_throughput_pipeline_py():
@@ -85,30 +84,30 @@ class QdpBenchmark:
 
     def __init__(self, device_id: int = 0):
         self._device_id = device_id
-        self._num_qubits: Optional[int] = None
+        self._num_qubits: int | None = None
         self._encoding_method: str = "amplitude"
-        self._total_batches: Optional[int] = None
+        self._total_batches: int | None = None
         self._batch_size: int = 64
         self._warmup_batches: int = 0
 
-    def qubits(self, n: int) -> "QdpBenchmark":
+    def qubits(self, n: int) -> QdpBenchmark:
         self._num_qubits = n
         return self
 
-    def encoding(self, method: str) -> "QdpBenchmark":
+    def encoding(self, method: str) -> QdpBenchmark:
         self._encoding_method = method
         return self
 
-    def batches(self, total: int, size: int = 64) -> "QdpBenchmark":
+    def batches(self, total: int, size: int = 64) -> QdpBenchmark:
         self._total_batches = total
         self._batch_size = size
         return self
 
-    def prefetch(self, n: int) -> "QdpBenchmark":
+    def prefetch(self, n: int) -> QdpBenchmark:
         """No-op for API compatibility; Rust pipeline does not use prefetch from Python."""
         return self
 
-    def warmup(self, n: int) -> "QdpBenchmark":
+    def warmup(self, n: int) -> QdpBenchmark:
         self._warmup_batches = n
         return self
 

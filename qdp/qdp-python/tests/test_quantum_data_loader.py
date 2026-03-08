@@ -42,7 +42,8 @@ def test_mutual_exclusion_both_sources_raises():
         list(loader)
     msg = str(exc_info.value)
     assert "Cannot set both synthetic and file sources" in msg
-    assert "source_synthetic" in msg and "source_file" in msg
+    assert "source_synthetic" in msg
+    assert "source_file" in msg
 
 
 @pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")

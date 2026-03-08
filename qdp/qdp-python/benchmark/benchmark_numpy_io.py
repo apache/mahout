@@ -38,7 +38,6 @@ import time
 
 import numpy as np
 import torch
-
 from _qdp import QdpEngine
 from utils import normalize_batch
 

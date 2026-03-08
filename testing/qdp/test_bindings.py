@@ -163,7 +163,7 @@ def test_pytorch_integration():
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "precision,expected_dtype",
+    ("precision", "expected_dtype"),
     [
         ("float32", "complex64"),
         ("float64", "complex128"),
@@ -188,7 +188,7 @@ def test_precision(precision, expected_dtype):
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "data_shape,expected_shape",
+    ("data_shape", "expected_shape"),
     [
         ([1.0, 2.0, 3.0, 4.0], (1, 4)),  # 1D tensor -> single sample
         (
@@ -224,10 +224,11 @@ def test_encode_from_tensorflow_binding():
     """Test TensorFlow TensorProto binding path (requires GPU and TensorFlow)."""
     pytest.importorskip("torch")
     tf = pytest.importorskip("tensorflow")
-    import numpy as np
-    from _qdp import QdpEngine
     import os
     import tempfile
+
+    import numpy as np
+    from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
         pytest.skip("GPU required for QdpEngine")
@@ -277,7 +278,7 @@ def test_encode_errors():
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "data_shape,expected_shape,expected_batch_size",
+    ("data_shape", "expected_shape", "expected_batch_size"),
     [
         ([1.0, 2.0, 3.0, 4.0], (1, 4), 1),  # 1D tensor -> single sample
         (
@@ -392,7 +393,7 @@ def test_encode_cuda_tensor_empty():
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "data_shape,is_batch",
+    ("data_shape", "is_batch"),
     [
         ([1.0, 2.0, 3.0, 4.0], False),  # 1D tensor
         ([[1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, 8.0]], True),  # 2D tensor (batch)
@@ -423,7 +424,7 @@ def test_encode_cuda_tensor_preserves_input(data_shape, is_batch):
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "encoding_method,data",
+    ("encoding_method", "data"),
     [
         ("iqp-z", [0.1, -0.2]),
         ("iqp", [0.1, -0.2, 0.3]),
@@ -471,7 +472,7 @@ def test_encode_cuda_tensor_invalid_encoding_method():
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "input_type,error_match",
+    ("input_type", "error_match"),
     [
         ("cuda_tensor", "Unsupported CUDA tensor shape: 3D"),
         ("cpu_tensor", "Unsupported tensor shape: 3D"),
@@ -506,7 +507,7 @@ def test_encode_3d_rejected(input_type, error_match):
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "tensor_factory,description",
+    ("tensor_factory", "description"),
     [
         (lambda: torch.zeros(4, dtype=torch.float64, device="cuda:0"), "zeros"),
         (
@@ -541,7 +542,7 @@ def test_encode_cuda_tensor_non_finite_values(tensor_factory, description):
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "precision,expected_dtype",
+    ("precision", "expected_dtype"),
     [
         ("float32", torch.complex64),
         ("float64", torch.complex128),
@@ -566,7 +567,7 @@ def test_encode_cuda_tensor_output_dtype(precision, expected_dtype):
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "precision,expected_dtype",
+    ("precision", "expected_dtype"),
     [
         ("float32", torch.complex64),
         ("float64", torch.complex128),
@@ -794,7 +795,7 @@ def test_angle_encode_errors():
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "data_shape,expected_shape",
+    ("data_shape", "expected_shape"),
     [
         ([1.0, 2.0, 3.0, 4.0], (1, 4)),  # 1D array -> single sample
         (
@@ -827,10 +828,11 @@ def test_encode_numpy_array(data_shape, expected_shape):
 def test_encode_pathlib_path():
     """Test encoding from pathlib.Path object."""
     pytest.importorskip("torch")
-    import numpy as np
-    from pathlib import Path
-    import tempfile
     import os
+    import tempfile
+    from pathlib import Path
+
+    import numpy as np
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():

@@ -136,9 +136,11 @@ def test_stride_2d_non_contiguous_rejected():
     engine = _engine()
     # (4, 2) with strides (3, 2) -> not C-contiguous; expected for (4,2) is (2, 1)
     t = torch.randn(4, 3, dtype=torch.float64, device="cuda")[:, ::2]
-    assert t.dim() == 2 and t.shape == (4, 2)
+    assert t.dim() == 2
+    assert t.shape == (4, 2)
     # Strides should be (3, 2) not (2, 1)
-    assert t.stride(0) == 3 and t.stride(1) == 2
+    assert t.stride(0) == 3
+    assert t.stride(1) == 2
     with pytest.raises(RuntimeError) as exc_info:
         engine.encode(t, num_qubits=1, encoding_method="amplitude")
     msg = str(exc_info.value).lower()
