@@ -35,6 +35,13 @@ pub enum Precision {
     Float64,
 }
 
+/// Backend GPU device type for DLPack metadata.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum GpuDeviceType {
+    Cuda,
+    Rocm,
+}
+
 #[cfg(target_os = "linux")]
 use crate::gpu::cuda_ffi::{cudaFreeHost, cudaHostAlloc, cudaMemGetInfo};
 
@@ -212,6 +219,8 @@ pub struct GpuStateVector {
     pub(crate) num_samples: Option<usize>,
     /// CUDA device ordinal
     pub device_id: usize,
+    /// GPU backend type used for DLPack device metadata.
+    pub device_type: GpuDeviceType,
 }
 
 // Safety: CudaSlice and Arc are both Send + Sync
@@ -290,6 +299,7 @@ impl GpuStateVector {
             size_elements: _size_elements,
             num_samples: None,
             device_id: _device.ordinal(),
+            device_type: GpuDeviceType::Cuda,
         })
     }
 
@@ -401,6 +411,7 @@ impl GpuStateVector {
                 size_elements: total_elements,
                 num_samples: Some(num_samples),
                 device_id: _device.ordinal(),
+                device_type: GpuDeviceType::Cuda,
             })
         }
 
@@ -487,6 +498,7 @@ impl GpuStateVector {
                         size_elements: self.size_elements,
                         num_samples: self.num_samples,
                         device_id: device.ordinal(),
+                        device_type: self.device_type,
                     })
                 }
 
@@ -562,6 +574,7 @@ impl GpuStateVector {
                         size_elements: self.size_elements,
                         num_samples: self.num_samples, // Preserve batch information
                         device_id: device.ordinal(),
+                        device_type: self.device_type,
                     })
                 }
 

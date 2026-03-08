@@ -101,7 +101,7 @@ impl QuantumTensor {
     /// Returns DLPack device information
     ///
     /// Returns:
-    ///     Tuple of (device_type, device_id) where device_type=2 for CUDA
+    ///     Tuple of (device_type, device_id) where device_type follows DLPack constants
     fn __dlpack_device__(&self) -> PyResult<(i32, i32)> {
         if self.ptr.is_null() {
             return Err(PyRuntimeError::new_err("Invalid DLPack tensor pointer"));
@@ -109,9 +109,10 @@ impl QuantumTensor {
 
         unsafe {
             let tensor = &(*self.ptr).dl_tensor;
-            // DLPack device_type: kDLCUDA = 2, kDLCPU = 1
+            // DLPack device_type: kDLCUDA = 2, kDLROCM = 10, kDLCPU = 1
             let device_type = match tensor.device.device_type {
                 qdp_core::dlpack::DLDeviceType::kDLCUDA => 2,
+                qdp_core::dlpack::DLDeviceType::kDLROCM => 10,
                 qdp_core::dlpack::DLDeviceType::kDLCPU => 1,
             };
             // Read device_id from DLPack tensor metadata

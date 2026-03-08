@@ -16,11 +16,13 @@
 
 mod constants;
 mod dlpack;
+mod amd_engine;
 mod engine;
 mod loader;
 mod pytorch;
 mod tensor;
 
+use amd_engine::AmdQdpEngine;
 use engine::QdpEngine;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
@@ -72,6 +74,7 @@ fn _qdp(m: &Bound<'_, PyModule>) -> PyResult<()> {
     let _ = env_logger::Builder::from_default_env().try_init();
 
     m.add_class::<QdpEngine>()?;
+    m.add_class::<AmdQdpEngine>()?;
     m.add_class::<QuantumTensor>()?;
     #[cfg(target_os = "linux")]
     m.add_class::<PyQuantumLoader>()?;

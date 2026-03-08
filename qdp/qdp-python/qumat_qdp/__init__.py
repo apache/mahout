@@ -17,40 +17,78 @@
 """
 QDP (Quantum Data Processing) Python API.
 
-Public API: QdpEngine, QuantumTensor (Rust extension _qdp),
+Public API: QdpEngine, AmdQdpEngine, QuantumTensor (Rust extension _qdp),
 QdpBenchmark, ThroughputResult, LatencyResult (benchmark API),
-QuantumDataLoader (data loader iterator).
+QuantumDataLoader (data loader iterator), EngineRouter with backends:
+CUDA and Triton AMD.
 
 Usage:
-    from qumat_qdp import QdpEngine, QuantumTensor
+    from qumat_qdp import QdpEngine, AmdQdpEngine, QuantumTensor
+    from qumat_qdp import TritonAmdEngine, create_encoder_engine
     from qumat_qdp import QdpBenchmark, ThroughputResult, LatencyResult
     from qumat_qdp import QuantumDataLoader
 """
 
 from __future__ import annotations
 
-# Rust extension (built by maturin). QdpEngine/QuantumTensor are public for
-# advanced use; QdpBenchmark and QuantumDataLoader are the recommended high-level API.
-import _qdp
+# Rust extension is optional at import time. CUDA-specific objects are exposed when available.
+try:
+    import _qdp as _qdp_mod
+except Exception:
+    _qdp_mod = None
 
 from qumat_qdp.api import (
     LatencyResult,
     QdpBenchmark,
     ThroughputResult,
 )
+from qumat_qdp.backend import (
+    EngineRouter,
+    create_encoder_engine,
+)
 from qumat_qdp.loader import QuantumDataLoader
 
-# Re-export Rust extension types (getattr for compiled extension module)
-QdpEngine = getattr(_qdp, "QdpEngine")
-QuantumTensor = getattr(_qdp, "QuantumTensor")
-run_throughput_pipeline_py = getattr(_qdp, "run_throughput_pipeline_py", None)
+
+def is_triton_amd_available() -> bool:
+    try:
+        from qumat_qdp.triton_amd import is_triton_amd_available as _fn
+
+        return _fn()
+    except Exception:
+        return False
+
+
+# Re-export Rust extension types when available.
+if _qdp_mod is not None:
+    QdpEngine = getattr(_qdp_mod, "QdpEngine", None)
+    AmdQdpEngine = getattr(_qdp_mod, "AmdQdpEngine", None)
+    QuantumTensor = getattr(_qdp_mod, "QuantumTensor", None)
+    run_throughput_pipeline_py = getattr(_qdp_mod, "run_throughput_pipeline_py", None)
+else:
+    QdpEngine = None
+    AmdQdpEngine = None
+    QuantumTensor = None
+    run_throughput_pipeline_py = None
+
+
+def __getattr__(name: str):
+    if name == "TritonAmdEngine":
+        from qumat_qdp.triton_amd import TritonAmdEngine
+
+        return TritonAmdEngine
+    raise AttributeError(name)
 
 __all__ = [
     "LatencyResult",
+    "AmdQdpEngine",
     "QdpBenchmark",
     "QdpEngine",
     "QuantumDataLoader",
     "QuantumTensor",
+    "TritonAmdEngine",
+    "EngineRouter",
     "ThroughputResult",
+    "create_encoder_engine",
+    "is_triton_amd_available",
     "run_throughput_pipeline_py",
 ]

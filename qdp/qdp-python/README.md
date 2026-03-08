@@ -8,7 +8,10 @@ GPU-accelerated quantum state encoding for [Apache Mahout Qumat](https://github.
 pip install qumat[qdp]
 ```
 
-Requires CUDA-capable GPU.
+Requires one of:
+- NVIDIA GPU (CUDA path via `QdpEngine`)
+- AMD GPU with ROCm-enabled PyTorch (ROCm path via `AmdQdpEngine`)
+- AMD GPU with ROCm + Triton (ROCm Triton path via `TritonAmdEngine`)
 
 ## Usage
 
@@ -27,6 +30,38 @@ tensor = torch.from_dlpack(qtensor)
 print(tensor)  # Complex tensor on CUDA
 ```
 
+### AMD ROCm Usage
+
+```python
+import qumat.qdp as qdp
+import torch
+
+# ROCm path (PyTorch ROCm build required: torch.version.hip is not None)
+engine = qdp.AmdQdpEngine(device_id=0, precision="float32")
+qtensor = engine.encode(torch.randn(8, 4, device="cuda"), 2, "amplitude")
+tensor = torch.from_dlpack(qtensor)
+print(tensor.device, tensor.dtype)  # cuda:0, complex64
+```
+
+### Triton AMD Backend Usage
+
+```python
+import torch
+from qumat_qdp import TritonAmdEngine, create_encoder_engine
+
+# Force Triton AMD backend
+engine = TritonAmdEngine(device_id=0, precision="float32")
+qt = engine.encode(torch.randn(64, 1024, device="cuda"), 10, "amplitude")
+state = torch.from_dlpack(qt)
+
+# Or route automatically:
+engine_auto = create_encoder_engine(backend="auto", device_id=0, precision="float32")
+qt = engine_auto.encode(torch.randn(8, 4, device="cuda"), 2, "amplitude")
+state = torch.from_dlpack(qt)
+```
+
+See `qdp/qdp-python/TRITON_AMD_BACKEND.md` for setup and validation details.
+
 ## Encoding Methods
 
 | Method | Description |
@@ -35,6 +70,10 @@ print(tensor)  # Complex tensor on CUDA
 | `angle` | Map values to rotation angles (one per qubit) |
 | `basis` | Encode integer as computational basis state |
 | `iqp` | IQP-style encoding with entanglement |
+
+Backend support boundary:
+- CUDA (`QdpEngine`): `amplitude`, `angle`, `basis`, `iqp`
+- Triton AMD (`TritonAmdEngine` / `backend="triton_amd"`): `amplitude`, `angle`, `basis` (no `iqp` yet)
 
 ## Input Sources
 
