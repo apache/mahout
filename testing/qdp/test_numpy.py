@@ -16,8 +16,8 @@
 
 """Test NumPy file format and array input support in Mahout QDP Python bindings"""
 
-import tempfile
 import os
+import tempfile
 
 import numpy as np
 import pytest
@@ -43,7 +43,7 @@ def _verify_tensor(tensor, expected_shape, check_normalization=False):
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "num_samples,num_qubits,check_norm",
+    ("num_samples", "num_qubits", "check_norm"),
     [
         (10, 3, True),  # Basic: 10 samples, 3 qubits, check normalization
         (100, 6, False),  # Large: 100 samples, 6 qubits
@@ -105,7 +105,7 @@ def test_encode_numpy_array_1d(num_qubits):
 
 @requires_qdp
 @pytest.mark.gpu
-@pytest.mark.parametrize("num_samples,num_qubits", [(5, 2), (10, 3)])
+@pytest.mark.parametrize(("num_samples", "num_qubits"), [(5, 2), (10, 3)])
 def test_encode_numpy_array_2d(num_samples, num_qubits):
     """Test 2D NumPy array encoding (batch)"""
     from _qdp import QdpEngine
@@ -150,7 +150,7 @@ def test_encode_numpy_encoding_methods(encoding_method):
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "precision,expected_dtype",
+    ("precision", "expected_dtype"),
     [
         ("float32", torch.complex64),
         ("float64", torch.complex128),
@@ -178,7 +178,7 @@ def test_encode_numpy_precision(precision, expected_dtype):
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "data,error_match",
+    ("data", "error_match"),
     [
         (
             np.array([1.0, 2.0, 3.0, 4.0], dtype=np.float32),

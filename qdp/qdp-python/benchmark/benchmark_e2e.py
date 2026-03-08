@@ -28,17 +28,18 @@ Scope:
 This is the most realistic comparison for a "Cold Start" Training Epoch.
 """
 
-import time
 import argparse
+import gc
+import itertools
+import os
+import time
+
+import numpy as np
+import pyarrow as pa
+import pyarrow.ipc as ipc
+import pyarrow.parquet as pq
 import torch
 import torch.nn as nn
-import numpy as np
-import os
-import itertools
-import gc
-import pyarrow as pa
-import pyarrow.parquet as pq
-import pyarrow.ipc as ipc
 from _qdp import QdpEngine
 from utils import generate_batch_data, normalize_batch
 

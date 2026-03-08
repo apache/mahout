@@ -29,7 +29,6 @@ import time
 
 import numpy as np
 import torch
-
 from _qdp import QdpEngine
 from utils import build_sample, normalize_batch_torch, prefetched_batches_torch
 

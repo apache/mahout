@@ -16,8 +16,8 @@
 #
 import boto3
 from braket.aws import AwsDevice, AwsSession
-from braket.devices import LocalSimulator
 from braket.circuits import Circuit, FreeParameter
+from braket.devices import LocalSimulator
 
 
 def initialize_backend(backend_config):

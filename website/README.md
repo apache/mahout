@@ -2,6 +2,11 @@
 
 This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
 
+## Prerequisites
+
+- Node.js
+- npm (for Docusaurus)
+
 ## Quick Start
 
 ```bash
@@ -10,7 +15,7 @@ npm install
 npm run start
 ```
 
-This starts a local development server at `http://localhost:3000` with hot reload.
+This starts a local development server at `http://localhost:3000` with hot reload. The changes to the documentation will be reflected at `http://localhost:3000/docs/next/`.
 
 ## Architecture
 
@@ -33,14 +38,14 @@ This starts a local development server at `http://localhost:3000` with hot reloa
 ├── api.md, basic-gates.md...   # API reference docs
 └── adr/                        # Architecture decisions
 
-/website-new/docs/              ← BUILD ARTIFACT (auto-synced, don't edit!)
+/website/docs/              ← BUILD ARTIFACT (auto-synced, don't edit!)
 ├── .gitignore                  # Only tracked file
 └── [everything synced from /docs/]
 ```
 
 ### Sync Workflow
 
-The sync script copies `/docs/` to `website-new/docs/` at build time:
+The sync script copies `/docs/` to `website/docs/` at build time:
 
 ```bash
 npm run sync      # Manual sync
@@ -49,9 +54,9 @@ npm run build     # Auto-syncs before building
 ```
 
 **Important:**
-- Edit ALL documentation in `/docs/`, NOT in `website-new/docs/`
-- `website-new/docs/` is gitignored (except `.gitignore` itself)
-- Changes in `website-new/docs/` will be overwritten on next sync
+- Edit ALL documentation in `/docs/`, NOT in `website/docs/`
+- `website/docs/` is gitignored (except `.gitignore` itself)
+- Changes in `website/docs/` will be overwritten on next sync
 
 ## Adding New Documentation
 
@@ -71,7 +76,7 @@ Content here...
 
 ### 2. Add to Sidebar
 
-Edit `website-new/sidebars.ts`:
+Edit `website/sidebars.ts`:
 
 ```typescript
 const sidebars: SidebarsConfig = {
@@ -125,7 +130,7 @@ sidebar_position: 1            # Optional: order in auto-generated sidebars
 
 ## Adding Images
 
-1. Place images in `/docs/assets/` (for code docs) or `website-new/static/img/` (for website)
+1. Place images in `/docs/assets/` (for code docs) or `website/static/img/` (for website)
 2. Reference in markdown:
 
 ```markdown
@@ -199,7 +204,7 @@ docs: {
 
 ## Blog Posts
 
-Blog posts live in `website-new/blog/`:
+Blog posts live in `website/blog/`:
 
 ```markdown
 ---
@@ -227,11 +232,15 @@ npm run serve    # Serve production build locally
 GitHub Actions automatically deploys to `asf-site` branch when changes are pushed to `main`.
 
 Triggers:
-- Changes to `website-new/**`
+- Changes to `website/**`
 - Changes to `docs/**`
 - Changes to `qdp/docs/**`
 
 ## Troubleshooting
+
+### Changes are not reflected in the development server
+
+Please ensure that you are looking at `http://localhost:3000/docs/next/`.
 
 ### Broken Links
 
@@ -253,7 +262,7 @@ Document IDs are derived from file paths:
 ## Project Structure
 
 ```
-website-new/
+website/
 ├── docusaurus.config.ts    # Main configuration
 ├── sidebars.ts             # Sidebar navigation
 ├── package.json

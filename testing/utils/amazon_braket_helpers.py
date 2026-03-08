@@ -15,9 +15,9 @@
 # limitations under the License.
 #
 
-from braket.devices import LocalSimulator
-from braket.circuits import Circuit
 import numpy as np
+from braket.circuits import Circuit
+from braket.devices import LocalSimulator
 
 
 def get_qumat_backend_config(test_type: str = "get_final_state_vector"):

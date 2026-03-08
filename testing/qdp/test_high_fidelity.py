@@ -19,10 +19,11 @@ Tests include: full-stack verification, async pipeline, fidelity metrics,
 zero-copy validation, and edge cases (boundaries, stability, memory, threads).
 """
 
+import concurrent.futures
+
+import numpy as np
 import pytest
 import torch
-import numpy as np
-import concurrent.futures
 
 from .qdp_test_utils import requires_qdp
 
@@ -81,7 +82,7 @@ def engine_float64():
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "num_qubits, data_size, desc",
+    ("num_qubits", "data_size", "desc"),
     [
         (4, 16, "Small - Sync Path"),
         (10, 1000, "Medium - Padding Logic"),

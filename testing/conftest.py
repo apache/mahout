@@ -26,15 +26,13 @@ QDP tests are automatically skipped if the _qdp extension is not available,
 allowing contributors without CUDA to run the qumat test suite.
 """
 
-from typing import Optional
-
 import pytest
 
 # Check if QDP extension is available at module load time
 _QDP_AVAILABLE = False
-_QDP_IMPORT_ERROR: Optional[str] = "No module named '_qdp'"
+_QDP_IMPORT_ERROR: str | None = "No module named '_qdp'"
 try:
-    import _qdp  # noqa: F401, PLC0415
+    import _qdp
 
     _QDP_AVAILABLE = True
     _QDP_IMPORT_ERROR = None
@@ -42,7 +40,7 @@ except ImportError as e:
     _QDP_IMPORT_ERROR = str(e)
 
 
-def pytest_configure(config):  # noqa: ARG001
+def pytest_configure(config):
     """Register custom pytest markers."""
     config.addinivalue_line(
         "markers", "gpu: marks tests as requiring GPU and _qdp extension"
@@ -50,7 +48,7 @@ def pytest_configure(config):  # noqa: ARG001
     config.addinivalue_line("markers", "slow: marks tests as slow running")
 
 
-def pytest_collection_modifyitems(config, items):  # noqa: ARG001
+def pytest_collection_modifyitems(config, items):
     """Auto-skip GPU/QDP tests if the _qdp extension is not available."""
     if _QDP_AVAILABLE:
         return
@@ -88,7 +86,7 @@ def qdp_available():
 
 
 @pytest.fixture
-def qdp_engine(qdp_available):  # noqa: ARG001
+def qdp_engine(qdp_available):
     """
     Fixture that provides a QDP engine instance.
 

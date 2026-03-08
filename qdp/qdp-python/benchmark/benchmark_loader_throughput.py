@@ -30,7 +30,7 @@ from __future__ import annotations
 import argparse
 import time
 
-from qumat_qdp import QuantumDataLoader, QdpBenchmark
+from qumat_qdp import QdpBenchmark, QuantumDataLoader
 
 
 def run_loader_throughput(

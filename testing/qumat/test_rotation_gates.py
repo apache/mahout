@@ -86,7 +86,7 @@ class TestRXGate:
     """Test class for RX gate functionality."""
 
     @pytest.mark.parametrize(
-        "angle, expected_behavior",
+        ("angle", "expected_behavior"),
         [
             (0, "identity"),  # RX(0) = I
             (math.pi, "pauli_x"),  # RX(π) = X
@@ -134,7 +134,7 @@ class TestRYGate:
     """Test class for RY gate functionality."""
 
     @pytest.mark.parametrize(
-        "angle, expected_behavior",
+        ("angle", "expected_behavior"),
         [
             (0, "identity"),  # RY(0) = I
             (math.pi, "pauli_y"),  # RY(π) ≈ Y (phase doesn't affect measurement)
@@ -183,7 +183,7 @@ class TestRZGate:
     """Test class for RZ gate functionality."""
 
     @pytest.mark.parametrize(
-        "angle, expected_state",
+        ("angle", "expected_state"),
         [
             (0, "0"),  # RZ(0) = I, |0⟩ -> |0⟩
             (math.pi, "0"),  # RZ(π) adds phase, but |0⟩ measurement unchanged
@@ -231,7 +231,7 @@ class TestParameterizedRotationGates:
     """Test class for parameterized rotation gates using string parameters."""
 
     @pytest.mark.parametrize(
-        "gate_type, param_name",
+        ("gate_type", "param_name"),
         [
             ("rx", "theta"),
             ("ry", "phi"),
@@ -263,7 +263,7 @@ class TestParameterBinding:
     """Test class for parameter binding in rotation gates."""
 
     @pytest.mark.parametrize(
-        "gate_type, param_name, bound_value, expected_behavior",
+        ("gate_type", "param_name", "bound_value", "expected_behavior"),
         [
             ("rx", "theta", math.pi, "pauli_x"),  # RX(π) = X
             (
