@@ -208,7 +208,7 @@ def run_qiskit_statevector(
     return duration, latency_ms
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Benchmark Data-to-State latency across frameworks."
     )

@@ -66,7 +66,7 @@ HIDDEN_DIM = 16
 BATCH_SIZE = 64  # Small batch to stress loop overhead
 
 
-def clean_cache():
+def clean_cache() -> None:
     """Clear GPU cache and Python garbage collection."""
     gc.collect()
     if torch.cuda.is_available():
@@ -75,7 +75,7 @@ def clean_cache():
 
 
 class DummyQNN(nn.Module):
-    def __init__(self, n_qubits):
+    def __init__(self, n_qubits) -> None:
         super().__init__()
         self.fc = nn.Linear(1 << n_qubits, HIDDEN_DIM)
 
@@ -83,7 +83,7 @@ class DummyQNN(nn.Module):
         return self.fc(x)
 
 
-def generate_data(n_qubits, n_samples, encoding_method: str = "amplitude"):
+def generate_data(n_qubits, n_samples, encoding_method: str = "amplitude") -> None:
     for f in [DATA_FILE, ARROW_FILE]:
         if os.path.exists(f):
             os.remove(f)
@@ -400,7 +400,7 @@ def run_mahout_arrow(engine, n_qubits, n_samples, encoding_method: str = "amplit
     return total_time, gpu_batched
 
 
-def compare_states(name_a, states_a, name_b, states_b):
+def compare_states(name_a, states_a, name_b, states_b) -> None:
     print("\n" + "=" * 70)
     print(f"VERIFICATION ({name_a} vs {name_b})")
     print("=" * 70)
@@ -425,7 +425,7 @@ def compare_states(name_a, states_a, name_b, states_b):
         print(">> FAILURE: States do not match.")
 
 
-def verify_correctness(states_dict):
+def verify_correctness(states_dict) -> None:
     # Filter out None values
     valid_states = {
         name: states for name, states in states_dict.items() if states is not None

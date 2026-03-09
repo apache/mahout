@@ -166,7 +166,7 @@ def prefetched_batches(
     """
     q: queue.Queue[np.ndarray | None] = queue.Queue(maxsize=prefetch)
 
-    def producer():
+    def producer() -> None:
         for batch_idx in range(total_batches):
             base = batch_idx * batch_size
             batch = [
@@ -209,7 +209,7 @@ def prefetched_batches_torch(
     """
     q: queue.Queue[torch.Tensor | None] = queue.Queue(maxsize=prefetch)
 
-    def producer():
+    def producer() -> None:
         for batch_idx in range(total_batches):
             base = batch_idx * batch_size
             batch = [

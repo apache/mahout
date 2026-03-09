@@ -18,7 +18,7 @@ import ast
 
 
 class GeneralReviewCheck:
-    def __init__(self, client, model_name):
+    def __init__(self, client, model_name) -> None:
         self.client = client
         self.model_name = model_name
 

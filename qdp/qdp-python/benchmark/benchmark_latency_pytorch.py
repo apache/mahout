@@ -120,7 +120,7 @@ def run_mahout_numpy(
     return duration, latency_ms
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Benchmark PyTorch Tensor encoding latency (zero-copy optimization test)."
     )

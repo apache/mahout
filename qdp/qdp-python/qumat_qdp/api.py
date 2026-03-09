@@ -82,7 +82,7 @@ class QdpBenchmark:
     (Linux/CUDA build).
     """
 
-    def __init__(self, device_id: int = 0):
+    def __init__(self, device_id: int = 0) -> None:
         self._device_id = device_id
         self._num_qubits: int | None = None
         self._encoding_method: str = "amplitude"
