@@ -15,11 +15,12 @@
 # limitations under the License.
 #
 
-import pytest
 import numpy as np
+import pytest
+
+from qumat import QuMat
 
 from ..utils import TESTING_BACKENDS, get_backend_config
-from qumat import QuMat
 
 
 @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)

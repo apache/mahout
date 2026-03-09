@@ -47,17 +47,17 @@ def create_empty_circuit(num_qubits: int | None = None):
         return qiskit.QuantumCircuit()
 
 
-def apply_not_gate(circuit, qubit_index):
+def apply_not_gate(circuit, qubit_index) -> None:
     # Apply a NOT gate (X gate) on the specified qubit
     circuit.x(qubit_index)
 
 
-def apply_hadamard_gate(circuit, qubit_index):
+def apply_hadamard_gate(circuit, qubit_index) -> None:
     # Apply a Hadamard gate on the specified qubit
     circuit.h(qubit_index)
 
 
-def apply_cnot_gate(circuit, control_qubit_index, target_qubit_index):
+def apply_cnot_gate(circuit, control_qubit_index, target_qubit_index) -> None:
     # Apply a CNOT gate (controlled-X gate) with the specified control and
     # target qubits
     circuit.cx(control_qubit_index, target_qubit_index)
@@ -65,40 +65,40 @@ def apply_cnot_gate(circuit, control_qubit_index, target_qubit_index):
 
 def apply_toffoli_gate(
     circuit, control_qubit_index1, control_qubit_index2, target_qubit_index
-):
+) -> None:
     # Apply a Toffoli gate (controlled-controlled-X gate) with the
     # specified control and target qubits
     circuit.ccx(control_qubit_index1, control_qubit_index2, target_qubit_index)
 
 
-def apply_swap_gate(circuit, qubit_index1, qubit_index2):
+def apply_swap_gate(circuit, qubit_index1, qubit_index2) -> None:
     # Apply a SWAP gate to exchange the states of two qubits
     circuit.swap(qubit_index1, qubit_index2)
 
 
 def apply_cswap_gate(
     circuit, control_qubit_index, target_qubit_index1, target_qubit_index2
-):
+) -> None:
     # Apply a controlled-SWAP (Fredkin) gate with the specified control and target qubits
     circuit.cswap(control_qubit_index, target_qubit_index1, target_qubit_index2)
 
 
-def apply_pauli_x_gate(circuit, qubit_index):
+def apply_pauli_x_gate(circuit, qubit_index) -> None:
     # Apply a Pauli X gate on the specified qubit
     circuit.x(qubit_index)
 
 
-def apply_pauli_y_gate(circuit, qubit_index):
+def apply_pauli_y_gate(circuit, qubit_index) -> None:
     # Apply a Pauli Y gate on the specified qubit
     circuit.y(qubit_index)
 
 
-def apply_pauli_z_gate(circuit, qubit_index):
+def apply_pauli_z_gate(circuit, qubit_index) -> None:
     # Apply a Pauli Z gate on the specified qubit
     circuit.z(qubit_index)
 
 
-def apply_t_gate(circuit, qubit_index):
+def apply_t_gate(circuit, qubit_index) -> None:
     # Apply a T gate (π/8 gate) on the specified qubit
     circuit.t(qubit_index)
 
@@ -168,22 +168,22 @@ def draw_circuit(circuit):
     return circuit.draw()
 
 
-def apply_rx_gate(circuit, qubit_index, angle):
+def apply_rx_gate(circuit, qubit_index, angle) -> None:
     param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
     circuit.rx(param, qubit_index)
 
 
-def apply_ry_gate(circuit, qubit_index, angle):
+def apply_ry_gate(circuit, qubit_index, angle) -> None:
     param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
     circuit.ry(param, qubit_index)
 
 
-def apply_rz_gate(circuit, qubit_index, angle):
+def apply_rz_gate(circuit, qubit_index, angle) -> None:
     param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
     circuit.rz(param, qubit_index)
 
 
-def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
+def apply_u_gate(circuit, qubit_index, theta, phi, lambd) -> None:
     # Apply the U gate directly with specified parameters
     circuit.u(theta, phi, lambd, qubit_index)
 

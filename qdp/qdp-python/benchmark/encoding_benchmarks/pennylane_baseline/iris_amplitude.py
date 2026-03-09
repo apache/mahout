@@ -33,7 +33,6 @@ Pipeline: state prep (Möttönen angles) → Rot layers + CNOT → expval(PauliZ
 from __future__ import annotations
 
 # --- Imports ---
-
 import argparse
 import time
 from typing import Any
@@ -43,7 +42,7 @@ import numpy as np
 try:
     import pennylane as qml
     from pennylane import numpy as pnp
-    from pennylane.optimize import NesterovMomentumOptimizer, AdamOptimizer
+    from pennylane.optimize import AdamOptimizer, NesterovMomentumOptimizer
 except ImportError as e:
     raise SystemExit(
         "PennyLane is required. Install with: uv sync --group benchmark"
@@ -73,7 +72,7 @@ def get_angles(x: np.ndarray) -> np.ndarray:
 
 
 # --- Circuit: amplitude state prep (RY/CNOT) + variational layer (Rot + CNOT) ---
-def state_preparation(a, wires=(0, 1)):
+def state_preparation(a, wires=(0, 1)) -> None:
     """Amplitude encoding via rotation angles (tutorial / Möttönen et al.)."""
     qml.RY(a[0], wires=wires[0])
     qml.CNOT(wires=[wires[0], wires[1]])
@@ -88,7 +87,7 @@ def state_preparation(a, wires=(0, 1)):
     qml.PauliX(wires=wires[0])
 
 
-def layer(layer_weights, wires=(0, 1)):
+def layer(layer_weights, wires=(0, 1)) -> None:
     """Rot on each wire + CNOT (tutorial Iris section)."""
     for i, w in enumerate(wires):
         qml.Rot(*layer_weights[i], wires=w)

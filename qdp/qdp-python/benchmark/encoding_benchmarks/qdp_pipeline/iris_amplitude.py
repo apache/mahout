@@ -34,7 +34,6 @@ baseline uses get_angles → state_preparation(angles). Rest: same circuit (Rot 
 from __future__ import annotations
 
 # --- Imports ---
-
 import argparse
 import time
 from typing import Any
@@ -44,7 +43,7 @@ import numpy as np
 try:
     import pennylane as qml
     from pennylane import numpy as pnp
-    from pennylane.optimize import NesterovMomentumOptimizer, AdamOptimizer
+    from pennylane.optimize import AdamOptimizer, NesterovMomentumOptimizer
 except ImportError as e:
     raise SystemExit(
         "PennyLane is required. Install with: uv sync --group benchmark"
@@ -58,16 +57,15 @@ except ImportError as e:
         "scikit-learn is required. Install with: uv sync --group benchmark"
     ) from e
 
-from qumat_qdp import QdpEngine
 import torch
-
+from qumat_qdp import QdpEngine
 
 NUM_QUBITS = 2
 STATE_DIM = 2**NUM_QUBITS  # 4
 
 
 # --- Circuit: variational layer (Rot + CNOT); state prep is StatePrep(encoded) in training ---
-def layer(layer_weights, wires=(0, 1)):
+def layer(layer_weights, wires=(0, 1)) -> None:
     """Rot on each wire + CNOT (tutorial Iris section)."""
     for i, w in enumerate(wires):
         qml.Rot(*layer_weights[i], wires=w)
@@ -218,7 +216,7 @@ def _run_training_cpu(
     Y_train: np.ndarray,
     Y_test: np.ndarray,
     *,
-    dev_qml: Any,
+    dev_qml: Any,  # noqa: ANN401
     num_layers: int,
     iterations: int,
     batch_size: int,
@@ -311,7 +309,7 @@ def _run_training_gpu(
     Y_train: np.ndarray,
     Y_test: np.ndarray,
     *,
-    dev_qml: Any,
+    dev_qml: Any,  # noqa: ANN401
     num_layers: int,
     iterations: int,
     batch_size: int,
