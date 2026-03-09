@@ -185,3 +185,56 @@ def test_null_handling_default_is_none() -> None:
     """By default, _null_handling is None (Rust will use FillZero)."""
     loader = QuantumDataLoader(device_id=0)
     assert loader._null_handling is None
+
+
+# --- S3 URL (source_file) builder tests ---
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+@pytest.mark.parametrize(
+    ("path", "streaming"),
+    [
+        ("s3://my-bucket/data.parquet", False),
+        ("s3://bucket/path/to/data.parquet", True),
+        ("s3://bucket/data.parquet?versionId=abc123", False),
+        ("s3://bucket/data.parquet?versionId=abc123", True),
+        ("s3://bucket/data.npy", False),
+    ],
+    ids=[
+        "parquet-no-stream",
+        "parquet-stream",
+        "parquet-query-no-stream",
+        "parquet-query-stream",
+        "npy-no-stream",
+    ],
+)
+def test_source_file_s3_accepted(path, streaming):
+    """source_file() accepts valid S3 URLs at builder level."""
+    loader = (
+        QuantumDataLoader(device_id=0)
+        .qubits(4)
+        .batches(10, size=4)
+        .source_file(path, streaming=streaming)
+    )
+    assert loader._file_path == path
+    assert loader._file_requested is True
+    assert loader._streaming_requested is streaming
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+@pytest.mark.parametrize(
+    "path",
+    [
+        "s3://bucket/data.npy",
+        "s3://bucket/data.npy?versionId=abc",
+    ],
+    ids=["npy", "npy-query"],
+)
+def test_source_file_s3_streaming_non_parquet_raises(path):
+    """source_file(s3://..., streaming=True) with non-.parquet raises ValueError."""
+    with pytest.raises(ValueError) as exc_info:
+        QuantumDataLoader(device_id=0).qubits(4).batches(10, size=4).source_file(
+            path, streaming=True
+        )
+    msg = str(exc_info.value).lower()
+    assert "parquet" in msg or "streaming" in msg

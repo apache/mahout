@@ -379,13 +379,27 @@ impl QdpEngine {
         })
     }
 
-    /// Internal helper to encode from file based on extension
+    /// Internal helper to encode from file based on extension.
+    /// When the `remote-io` feature is enabled, `s3://` URLs are supported.
     fn encode_from_file(
         &self,
         path: &str,
         num_qubits: usize,
         encoding_method: &str,
     ) -> PyResult<QuantumTensor> {
+        #[cfg(feature = "remote-io")]
+        let _resolved;
+        #[cfg(feature = "remote-io")]
+        let path = {
+            _resolved = qdp_core::remote::resolve_path(path).map_err(|e| {
+                PyRuntimeError::new_err(format!("Remote path resolution failed: {}", e))
+            })?;
+            _resolved
+                .path
+                .to_str()
+                .ok_or_else(|| PyRuntimeError::new_err("Resolved path is not valid UTF-8"))?
+        };
+
         let ptr = if path.ends_with(".parquet") {
             self.engine
                 .encode_from_parquet(path, num_qubits, encoding_method)
@@ -653,6 +667,14 @@ impl QdpEngine {
             nh,
         );
         let engine = self.engine.clone();
+        // Resolve S3 URLs before detaching from GIL. The _resolved guard keeps the
+        // temp file alive until after the file is fully read inside py.detach.
+        #[cfg(feature = "remote-io")]
+        let _resolved = qdp_core::remote::resolve_path(path_str.as_str()).map_err(|e| {
+            PyRuntimeError::new_err(format!("Remote path resolution failed: {}", e))
+        })?;
+        #[cfg(feature = "remote-io")]
+        let path_str = _resolved.path.to_string_lossy().into_owned();
         let iter = py
             .detach(|| {
                 qdp_core::PipelineIterator::new_from_file(
@@ -693,6 +715,14 @@ impl QdpEngine {
             nh,
         );
         let engine = self.engine.clone();
+        // Resolve S3 URLs before detaching from GIL. The _resolved guard keeps the
+        // temp file alive; the streaming reader's open fd preserves data after drop.
+        #[cfg(feature = "remote-io")]
+        let _resolved = qdp_core::remote::resolve_path(path_str.as_str()).map_err(|e| {
+            PyRuntimeError::new_err(format!("Remote path resolution failed: {}", e))
+        })?;
+        #[cfg(feature = "remote-io")]
+        let path_str = _resolved.path.to_string_lossy().into_owned();
         let iter = py
             .detach(|| {
                 qdp_core::PipelineIterator::new_from_file_streaming(
