@@ -350,6 +350,7 @@ def main() -> None:
     Y_test = Y[test_idx]
 
     # QDP encoding
+    t0 = time.perf_counter()
     encoded_train = encode_via_qdp(
         X_train,
         num_qubits=args.qubits,
@@ -366,6 +367,7 @@ def main() -> None:
         data_dir=args.data_dir,
         filename="mnist_nd_test.npy",
     )
+    encode_sec = time.perf_counter() - t0
 
     print("MNIST amplitude (QDP encoding) — 2-class variational classifier")
     print(
@@ -375,6 +377,9 @@ def main() -> None:
     print(
         f"  Qubits: {args.qubits}, iters: {args.iters}, batch_size: {args.batch_size}, "
         f"layers: {args.layers}, lr: {args.lr}"
+    )
+    print(
+        f"  QDP encode:  {encode_sec:.4f} s  (train + test, {n_train} + {n - n_train} samples)"
     )
 
     results: list[dict[str, Any]] = []
