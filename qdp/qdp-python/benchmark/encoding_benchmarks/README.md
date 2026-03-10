@@ -69,9 +69,61 @@ uv run python benchmark/encoding_benchmarks/qdp_pipeline/iris_amplitude.py \
   --optimizer nesterov --lr 0.01 --layers 6 --trials 3 --iters 80 --early-stop 0
 ```
 
+## MNIST amplitude baseline (pure PennyLane)
+
+Pipeline: 2-class MNIST (default: digits 3 vs 6) → PCA (784 → 2^qubits) → L2 normalize → `AmplitudeEmbedding` → variational classifier.
+
+```bash
+uv run python benchmark/encoding_benchmarks/pennylane_baseline/mnist_amplitude.py
+```
+
+Common flags (only the key ones):
+
+- `--qubits`: number of qubits; PCA reduces to 2^qubits features (default: 4 → 16-D)
+- `--digits`: two digits for binary classification (default: `3,6`)
+- `--n-samples`: max samples per class (default: 500)
+- `--iters`: optimizer steps (default: 2000)
+- `--layers`: number of variational layers (default: 10)
+- `--lr`: learning rate (default: 0.05)
+- `--optimizer`: `adam` or `nesterov` (default: `adam`)
+- `--trials`: number of restarts; best test accuracy reported (default: 10)
+
+Example (quick test):
+
+```bash
+uv run python benchmark/encoding_benchmarks/pennylane_baseline/mnist_amplitude.py \
+  --digits "3,6" --n-samples 100 --trials 3 --iters 500 --early-stop 0
+```
+
+## MNIST amplitude (QDP pipeline)
+
+Pipeline is identical to the baseline except for encoding:
+PCA-reduced vectors → QDP `QdpEngine.encode` (amplitude) → `StatePrep(state_vector)` → same variational classifier.
+
+```bash
+uv run python benchmark/encoding_benchmarks/qdp_pipeline/mnist_amplitude.py
+```
+
+The CLI mirrors the baseline, plus:
+
+- **QDP-specific flags**
+  - `--device-id`: QDP device id (default: 0)
+  - `--data-dir`: directory for temporary `.npy` files (default: system temp directory)
+
+Example (same settings as the baseline example, but with QDP encoding):
+
+```bash
+uv run python benchmark/encoding_benchmarks/qdp_pipeline/mnist_amplitude.py \
+  --digits "3,6" --n-samples 100 --trials 3 --iters 500 --early-stop 0
+```
+
+## Full help
+
 To see the full list of options and defaults, append `--help`:
 
 ```bash
 uv run python benchmark/encoding_benchmarks/pennylane_baseline/iris_amplitude.py --help
+uv run python benchmark/encoding_benchmarks/pennylane_baseline/mnist_amplitude.py --help
 uv run python benchmark/encoding_benchmarks/qdp_pipeline/iris_amplitude.py --help
+uv run python benchmark/encoding_benchmarks/qdp_pipeline/mnist_amplitude.py --help
 ```
