@@ -29,6 +29,8 @@ Data sources (default: sklearn, not the official file):
 
 Only difference from baseline: encoding. Here we use QDP (QdpEngine.encode + amplitude) → StatePrep(encoded);
 baseline uses get_angles → state_preparation(angles). Rest: same circuit (Rot + CNOT), loss, optimizer, CLI.
+
+Training always runs on GPU via lightning.gpu.
 """
 
 from __future__ import annotations
@@ -39,11 +41,10 @@ import time
 from typing import Any
 
 import numpy as np
+import torch
 
 try:
     import pennylane as qml
-    from pennylane import numpy as pnp
-    from pennylane.optimize import AdamOptimizer, NesterovMomentumOptimizer
 except ImportError as e:
     raise SystemExit(
         "PennyLane is required. Install with: uv sync --group benchmark"
@@ -57,18 +58,17 @@ except ImportError as e:
         "scikit-learn is required. Install with: uv sync --group benchmark"
     ) from e
 
-import torch
 from qumat_qdp import QdpEngine
 
 NUM_QUBITS = 2
 STATE_DIM = 2**NUM_QUBITS  # 4
 
 
-# --- Circuit: variational layer (Rot + CNOT); state prep is StatePrep(encoded) in training ---
+# --- Circuit: variational layer (Rot + CNOT); state prep is AmplitudeEmbedding(encoded) in training ---
 def layer(layer_weights, wires=(0, 1)) -> None:
     """Rot on each wire + CNOT (tutorial Iris section)."""
     for i, w in enumerate(wires):
-        qml.Rot(*layer_weights[i], wires=w)
+        qml.Rot(layer_weights[i, 0], layer_weights[i, 1], layer_weights[i, 2], wires=w)
     qml.CNOT(wires=list(wires))
 
 
@@ -120,7 +120,7 @@ def encode_via_qdp(
     """QDP: use QdpEngine.encode on 4-D vectors (amplitude), return encoded (n, 4) on GPU.
 
     Uses in-memory encoding via QdpEngine instead of writing/reading .npy files. The returned
-    tensor stays on the selected CUDA device and can be fed directly to qml.StatePrep.
+    tensor stays on the selected CUDA device and can be fed directly to qml.AmplitudeEmbedding.
     """
     n, dim = X_norm.shape
     if dim != STATE_DIM:
@@ -141,193 +141,41 @@ def encode_via_qdp(
     return encoded[:n].clone()
 
 
-# --- Training: StatePrep(encoded) + Rot layers, square loss, optional early stop ---
+# --- Training: AmplitudeEmbedding(encoded) + Rot layers, square loss, GPU only ---
 def run_training(
-    encoded_train: torch.Tensor | np.ndarray,
-    encoded_test: torch.Tensor | np.ndarray,
-    Y_train: np.ndarray,
-    Y_test: np.ndarray,
-    *,
-    num_layers: int,
-    iterations: int,
-    batch_size: int,
-    lr: float,
-    seed: int,
-    early_stop_target: float | None = None,
-    optimizer: str = "nesterov",
-) -> dict[str, Any]:
-    """Train variational classifier: StatePrep(encoded) + Rot layers + bias, square loss, batched.
-    If encoded_* are on GPU and lightning.gpu is available, training runs on GPU; otherwise on CPU.
-    When early_stop_target is set, evaluate test acc every 100 steps and stop when >= target."""
-    n_train = len(Y_train)
-    np.random.seed(seed)
-    rng = np.random.default_rng(seed)
-
-    # Prefer Lightning GPU when encoded data is on GPU
-    use_gpu = isinstance(encoded_train, torch.Tensor) and encoded_train.is_cuda
-    dev_qml = None
-    if use_gpu:
-        try:
-            dev_qml = qml.device("lightning.gpu", wires=NUM_QUBITS)
-        except Exception:
-            use_gpu = False
-    if not use_gpu or dev_qml is None:
-        dev_qml = qml.device("default.qubit", wires=NUM_QUBITS)
-        use_gpu = False
-        if isinstance(encoded_train, torch.Tensor):
-            encoded_train = encoded_train.cpu().numpy()
-        if isinstance(encoded_test, torch.Tensor):
-            encoded_test = encoded_test.cpu().numpy()
-
-    if use_gpu:
-        return _run_training_gpu(
-            encoded_train,
-            encoded_test,
-            Y_train,
-            Y_test,
-            dev_qml=dev_qml,
-            num_layers=num_layers,
-            iterations=iterations,
-            batch_size=batch_size,
-            lr=lr,
-            seed=seed,
-            n_train=n_train,
-            rng=rng,
-            early_stop_target=early_stop_target,
-        )
-    return _run_training_cpu(
-        encoded_train,
-        encoded_test,
-        Y_train,
-        Y_test,
-        dev_qml=dev_qml,
-        num_layers=num_layers,
-        iterations=iterations,
-        batch_size=batch_size,
-        lr=lr,
-        seed=seed,
-        n_train=n_train,
-        rng=rng,
-        qml_device="cpu",
-        early_stop_target=early_stop_target,
-        optimizer=optimizer,
-    )
-
-
-def _run_training_cpu(
-    encoded_train: np.ndarray,
-    encoded_test: np.ndarray,
-    Y_train: np.ndarray,
-    Y_test: np.ndarray,
-    *,
-    dev_qml: Any,
-    num_layers: int,
-    iterations: int,
-    batch_size: int,
-    lr: float,
-    seed: int,
-    n_train: int,
-    rng: np.random.Generator,
-    qml_device: str = "cpu",
-    early_stop_target: float | None = None,
-    optimizer: str = "nesterov",
-) -> dict[str, Any]:
-    """CPU path: default.qubit + autograd + Nesterov or Adam. Optional early stop every 100 steps."""
-    try:
-        pnp.random.seed(seed)
-    except Exception:
-        pass
-    # Plain np.ndarray: PennyLane autograd treats as non-differentiable constant.
-    # Avoids pnp.tensor subclass overhead and prevents AdamOptimizer from computing
-    # ∂cost/∂feats_train (unnecessary gradient over state vectors).
-    feats_train = np.asarray(encoded_train)
-    feats_test = encoded_test
-    Y_train_pnp = pnp.array(np.asarray(Y_train, dtype=np.float64), requires_grad=False)
-    Y_test_np = np.asarray(Y_test)
-
-    @qml.qnode(dev_qml, interface="autograd", diff_method="backprop")
-    def circuit(weights, state_vector):
-        # normalize=False: QDP pre-normalizes to unit norm, skipping PennyLane's re-normalization.
-        qml.AmplitudeEmbedding(state_vector, wires=(0, 1), normalize=False)
-        for lw in weights:
-            layer(lw, wires=(0, 1))
-        return qml.expval(qml.PauliZ(0))
-
-    def model(weights, bias, state_batch):
-        return circuit(weights, state_batch) + bias
-
-    def cost(weights, bias, X_batch, Y_batch):
-        preds = model(weights, bias, X_batch)
-        return pnp.mean((Y_batch - preds) ** 2)
-
-    weights_init = 0.01 * pnp.random.randn(
-        num_layers, NUM_QUBITS, 3, requires_grad=True
-    )
-    bias_init = pnp.array(0.0, requires_grad=True)
-    opt = AdamOptimizer(lr) if optimizer == "adam" else NesterovMomentumOptimizer(lr)
-
-    t0 = time.perf_counter()
-    _ = circuit(weights_init, feats_train[0])
-    _ = cost(weights_init, bias_init, feats_train[:1], Y_train_pnp[:1])
-    compile_sec = time.perf_counter() - t0
-
-    t0 = time.perf_counter()
-    weights, bias = weights_init, bias_init
-    steps_done = 0
-    for step in range(iterations):
-        batch_idx = rng.integers(0, n_train, size=(batch_size,))
-        fb = feats_train[batch_idx]
-        yb = Y_train_pnp[batch_idx]
-        out = opt.step(cost, weights, bias, fb, yb)
-        weights, bias = out[0], out[1]
-        steps_done += 1
-        if early_stop_target is not None and (step + 1) % 100 == 0:
-            pred_test_now = np.sign(
-                np.array(model(weights, bias, pnp.array(feats_test)))
-            ).flatten()
-            test_acc_now = float(np.mean(np.abs(pred_test_now - Y_test_np) < 1e-5))
-            if test_acc_now >= early_stop_target:
-                break
-    train_sec = time.perf_counter() - t0
-
-    pred_train = np.sign(np.array(model(weights, bias, feats_train))).flatten()
-    pred_test = np.sign(np.array(model(weights, bias, pnp.array(feats_test)))).flatten()
-    Y_train_np = np.array(Y_train_pnp)
-    train_acc = float(np.mean(np.abs(pred_train - Y_train_np) < 1e-5))
-    test_acc = float(np.mean(np.abs(pred_test - Y_test_np) < 1e-5))
-
-    return {
-        "compile_time_sec": compile_sec,
-        "train_time_sec": train_sec,
-        "train_accuracy": train_acc,
-        "test_accuracy": test_acc,
-        "n_train": n_train,
-        "n_test": len(Y_test),
-        "epochs": steps_done,
-        "samples_per_sec": (steps_done * batch_size) / train_sec
-        if train_sec > 0
-        else 0.0,
-        "qml_device": qml_device,
-    }
-
-
-def _run_training_gpu(
     encoded_train: torch.Tensor,
     encoded_test: torch.Tensor,
     Y_train: np.ndarray,
     Y_test: np.ndarray,
     *,
-    dev_qml: Any,
     num_layers: int,
     iterations: int,
     batch_size: int,
     lr: float,
     seed: int,
-    n_train: int,
-    rng: np.random.Generator,
     early_stop_target: float | None = None,
 ) -> dict[str, Any]:
-    """GPU path: lightning.gpu + PyTorch interface, data stays on GPU. Optional early stop every 100 steps."""
+    """Train variational classifier on GPU: AmplitudeEmbedding(encoded) + Rot layers + bias, square loss, batched.
+    When early_stop_target is set, evaluate test acc every 100 steps and stop when >= target."""
+    if not torch.cuda.is_available():
+        raise RuntimeError("CUDA GPU is required for training. No CUDA device found.")
+    try:
+        dev_qml = qml.device("lightning.gpu", wires=NUM_QUBITS)
+    except Exception as e:
+        raise RuntimeError(
+            "lightning.gpu is required for GPU training. Install with: "
+            "pip install pennylane-lightning[gpu]"
+        ) from e
+
+    n_train = len(Y_train)
+    rng = np.random.default_rng(seed)
+
+    # Ensure encoded data is on GPU
+    if not encoded_train.is_cuda:
+        encoded_train = encoded_train.cuda()
+    if not encoded_test.is_cuda:
+        encoded_test = encoded_test.cuda()
+
     device = encoded_train.device
     dtype = encoded_train.dtype
     Y_train_t = torch.tensor(Y_train, dtype=dtype, device=device)
@@ -349,10 +197,10 @@ def _run_training_gpu(
         return torch.mean((Y_batch - preds) ** 2)
 
     torch.manual_seed(seed)
-    weights = 0.01 * torch.randn(
-        num_layers, NUM_QUBITS, 3, device=device, dtype=dtype, requires_grad=True
+    weights = torch.nn.Parameter(
+        0.01 * torch.randn(num_layers, NUM_QUBITS, 3, device=device, dtype=dtype)
     )
-    bias = torch.tensor(0.0, device=device, dtype=dtype, requires_grad=True)
+    bias = torch.nn.Parameter(torch.tensor(0.0, device=device, dtype=dtype))
     opt = torch.optim.SGD([weights, bias], lr=lr, momentum=0.9, nesterov=True)
 
     t0 = time.perf_counter()
@@ -398,13 +246,12 @@ def _run_training_gpu(
         "samples_per_sec": (steps_done * batch_size) / train_sec
         if train_sec > 0
         else 0.0,
-        "qml_device": "cuda",
     }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="QDP Iris amplitude encoding pipeline (2-class, same training as baseline)"
+        description="QDP Iris amplitude encoding pipeline (2-class, GPU training)"
     )
     parser.add_argument(
         "--iters",
@@ -428,13 +275,6 @@ def main() -> None:
         help="Test fraction (default: 0.1); ignored if --data-file set",
     )
     parser.add_argument("--seed", type=int, default=0, help="Random seed (default: 0)")
-    parser.add_argument(
-        "--optimizer",
-        type=str,
-        default="adam",
-        choices=("adam", "nesterov"),
-        help="Optimizer for CPU (default: adam); GPU uses SGD+Nesterov",
-    )
     parser.add_argument(
         "--trials",
         type=int,
@@ -480,7 +320,7 @@ def main() -> None:
     Y_train = Y[train_idx]
     Y_test = Y[test_idx]
 
-    # QDP encoding: 4-D → amplitude-encoded state vectors
+    # QDP encoding: 4-D → amplitude-encoded state vectors (on GPU)
     encoded_train = encode_via_qdp(
         X_train_4d,
         batch_size=args.batch_size,
@@ -496,10 +336,10 @@ def main() -> None:
         filename="iris_4d_test.npy",
     )
 
-    print("Iris amplitude (QDP encoding) — 2-class variational classifier")
+    print("Iris amplitude (QDP encoding, GPU) — 2-class variational classifier")
     print(f"  Data: {data_src} → QDP amplitude  (n={n}; 2-class Iris = 100 samples)")
     print(
-        f"  Iters: {args.iters}, batch_size: {args.batch_size}, layers: {args.layers}, lr: {args.lr}, optimizer: {args.optimizer}"
+        f"  Iters: {args.iters}, batch_size: {args.batch_size}, layers: {args.layers}, lr: {args.lr}"
     )
 
     results: list[dict[str, Any]] = []
@@ -516,11 +356,9 @@ def main() -> None:
             lr=args.lr,
             seed=args.seed + t,
             early_stop_target=early_stop,
-            optimizer=args.optimizer,
         )
         results.append(r)
         print(f"\n  Trial {t + 1}:")
-        print(f"    QML device: {r.get('qml_device', 'cpu')}")
         print(f"    Compile:   {r['compile_time_sec']:.4f} s")
         print(f"    Train:     {r['train_time_sec']:.4f} s")
         print(f"    Train acc: {r['train_accuracy']:.4f}  (n={r['n_train']})")

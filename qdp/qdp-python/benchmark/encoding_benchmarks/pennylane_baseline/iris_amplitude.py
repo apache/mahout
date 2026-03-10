@@ -28,6 +28,8 @@ Data sources (default: sklearn, not the official file):
   - Total samples: 100 (2-class Iris). Full Iris has 150 (3 classes).
 
 Pipeline: state prep (Möttönen angles) → Rot layers + CNOT → expval(PauliZ(0)) + bias; square loss; Adam or Nesterov.
+
+Training always runs on GPU via lightning.gpu for fair comparison with QDP pipeline.
 """
 
 from __future__ import annotations
@@ -38,11 +40,10 @@ import time
 from typing import Any
 
 import numpy as np
+import torch
 
 try:
     import pennylane as qml
-    from pennylane import numpy as pnp
-    from pennylane.optimize import AdamOptimizer, NesterovMomentumOptimizer
 except ImportError as e:
     raise SystemExit(
         "PennyLane is required. Install with: uv sync --group benchmark"
@@ -90,7 +91,7 @@ def state_preparation(a, wires=(0, 1)) -> None:
 def layer(layer_weights, wires=(0, 1)) -> None:
     """Rot on each wire + CNOT (tutorial Iris section)."""
     for i, w in enumerate(wires):
-        qml.Rot(*layer_weights[i], wires=w)
+        qml.Rot(layer_weights[i, 0], layer_weights[i, 1], layer_weights[i, 2], wires=w)
     qml.CNOT(wires=list(wires))
 
 
@@ -131,7 +132,7 @@ def load_iris_binary(seed: int = 42) -> tuple[np.ndarray, np.ndarray]:
     return features, Y
 
 
-# --- Training: build circuit, split data, optimize, evaluate ---
+# --- Training: build circuit, split data, optimize, evaluate (GPU via lightning.gpu) ---
 def run_training(
     features: np.ndarray,
     Y: np.ndarray,
@@ -142,14 +143,23 @@ def run_training(
     lr: float,
     seed: int,
     test_size: float = 0.25,
-    optimizer: str = "adam",
     early_stop_target: float | None = 0.9,
 ) -> dict[str, Any]:
-    """Train classifier: circuit + bias, square loss, batched. Optional early stop when test acc ≥ target."""
-    dev = qml.device("default.qubit", wires=NUM_QUBITS)
+    """Train classifier on GPU: circuit + bias, square loss, batched. Optional early stop when test acc ≥ target."""
+    if not torch.cuda.is_available():
+        raise RuntimeError("CUDA GPU is required for training. No CUDA device found.")
+    try:
+        dev = qml.device("lightning.gpu", wires=NUM_QUBITS)
+    except Exception as e:
+        raise RuntimeError(
+            "lightning.gpu is required for GPU training. Install with: "
+            "pip install pennylane-lightning[gpu]"
+        ) from e
+    device = torch.device("cuda")
+    dtype = torch.float64
 
     # Circuit: state_prep(angles) → layers of Rot+CNOT → expval(PauliZ(0))
-    @qml.qnode(dev, interface="autograd", diff_method="backprop")
+    @qml.qnode(dev, interface="torch", diff_method="adjoint")
     def circuit(weights, angles):
         state_preparation(angles, wires=(0, 1))
         for lw in weights:
@@ -161,82 +171,75 @@ def run_training(
 
     def cost(weights, bias, X_batch, Y_batch):
         preds = model(weights, bias, X_batch.T)
-        return pnp.mean((Y_batch - preds) ** 2)
+        return torch.mean((Y_batch - preds) ** 2)
 
     # Train/val split (seed-driven)
     n = len(Y)
-    np.random.seed(seed)
-    try:
-        pnp.random.seed(seed)
-    except Exception:
-        pass
     rng = np.random.default_rng(seed)
     idx = rng.permutation(n)
     n_train = int(n * (1 - test_size))
-    # Plain np.ndarray: PennyLane autograd treats as non-differentiable constant.
-    # Prevents AdamOptimizer from computing ∂cost/∂feats_train (unnecessary gradient over angle features).
-    feats_train = np.asarray(features[idx[:n_train]])
-    Y_train = pnp.array(
-        np.asarray(Y[idx[:n_train]], dtype=np.float64), requires_grad=False
+
+    feats_train_t = torch.tensor(features[idx[:n_train]], dtype=dtype, device=device)
+    Y_train_t = torch.tensor(
+        np.asarray(Y[idx[:n_train]], dtype=np.float64), dtype=dtype, device=device
     )
-    feats_test = features[idx[n_train:]]
-    Y_test = Y[idx[n_train:]]
+    feats_test_t = torch.tensor(features[idx[n_train:]], dtype=dtype, device=device)
+    Y_test_t = torch.tensor(
+        np.asarray(Y[idx[n_train:]], dtype=np.float64), dtype=dtype, device=device
+    )
 
     # Weights and optimizer
-    weights_init = 0.01 * pnp.random.randn(
-        num_layers, NUM_QUBITS, 3, requires_grad=True
+    torch.manual_seed(seed)
+    weights = torch.nn.Parameter(
+        0.01 * torch.randn(num_layers, NUM_QUBITS, 3, device=device, dtype=dtype)
     )
-    bias_init = pnp.array(0.0, requires_grad=True)
-    if optimizer == "adam":
-        opt = AdamOptimizer(lr)
-    else:
-        opt = NesterovMomentumOptimizer(lr)
+    bias = torch.nn.Parameter(torch.tensor(0.0, device=device, dtype=dtype))
+    opt = torch.optim.Adam([weights, bias], lr=lr)
 
     # Compile (first run)
     t0 = time.perf_counter()
-    _ = circuit(weights_init, feats_train[0])
-    _ = cost(weights_init, bias_init, feats_train[:1], Y_train[:1])
+    _ = circuit(weights, feats_train_t[0])
+    _ = cost(weights, bias, feats_train_t[:1], Y_train_t[:1])
     compile_sec = time.perf_counter() - t0
 
     # Optimize (batched steps; optional early stop every 100 steps)
     t0 = time.perf_counter()
-    weights, bias = weights_init, bias_init
     steps_done = 0
     for step in range(iterations):
+        opt.zero_grad()
         batch_idx = rng.integers(0, n_train, size=(batch_size,))
-        fb = feats_train[batch_idx]
-        yb = Y_train[batch_idx]
-        out = opt.step(cost, weights, bias, fb, yb)
-        weights, bias = out[0], out[1]
+        fb = feats_train_t[batch_idx]
+        yb = Y_train_t[batch_idx]
+        loss = cost(weights, bias, fb, yb)
+        loss.backward()
+        opt.step()
         steps_done += 1
         if early_stop_target is not None and (step + 1) % 100 == 0:
-            pred_test_now = np.sign(
-                np.array(model(weights, bias, pnp.array(feats_test).T))
-            ).flatten()
-            test_acc_now = float(
-                np.mean(np.abs(pred_test_now - np.array(Y_test)) < 1e-5)
-            )
+            with torch.no_grad():
+                pred_test_now = torch.sign(
+                    model(weights, bias, feats_test_t.T)
+                ).flatten()
+                test_acc_now = (
+                    (pred_test_now - Y_test_t).abs().lt(1e-5).float().mean().item()
+                )
             if test_acc_now >= early_stop_target:
                 break
     train_sec = time.perf_counter() - t0
 
     # Metrics (train/test accuracy)
-    pred_train = np.sign(np.array(model(weights, bias, feats_train.T))).flatten()
-    pred_test = np.sign(
-        np.array(model(weights, bias, pnp.array(feats_test).T))
-    ).flatten()
-    Y_train_np = np.array(Y_train)
-    Y_test_np = np.array(Y_test)
-    train_acc = float(np.mean(np.abs(pred_train - Y_train_np) < 1e-5))
-    test_acc = float(np.mean(np.abs(pred_test - Y_test_np) < 1e-5))
+    with torch.no_grad():
+        pred_train = torch.sign(model(weights, bias, feats_train_t.T)).flatten()
+        pred_test = torch.sign(model(weights, bias, feats_test_t.T)).flatten()
+    train_acc = (pred_train - Y_train_t).abs().lt(1e-5).float().mean().item()
+    test_acc = (pred_test - Y_test_t).abs().lt(1e-5).float().mean().item()
 
     return {
         "compile_time_sec": compile_sec,
         "train_time_sec": train_sec,
-        "train_accuracy": train_acc,
-        "test_accuracy": test_acc,
+        "train_accuracy": float(train_acc),
+        "test_accuracy": float(test_acc),
         "n_train": n_train,
-        "n_test": len(Y_test),
+        "n_test": len(Y) - n_train,
         "epochs": steps_done,
         "samples_per_sec": (steps_done * batch_size) / train_sec
         if train_sec > 0
@@ -246,7 +249,7 @@ def run_training(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="PennyLane Iris amplitude encoding baseline (2-class)"
+        description="PennyLane Iris amplitude encoding baseline (2-class, GPU training)"
     )
     parser.add_argument(
         "--iters",
@@ -270,13 +273,6 @@ def main() -> None:
         help="Test fraction (default: 0.1); ignored if --data-file set",
     )
     parser.add_argument("--seed", type=int, default=0, help="Random seed (default: 0)")
-    parser.add_argument(
-        "--optimizer",
-        type=str,
-        default="adam",
-        choices=("adam", "nesterov"),
-        help="Optimizer (default: adam)",
-    )
     parser.add_argument(
         "--trials",
         type=int,
@@ -307,12 +303,12 @@ def main() -> None:
         test_size = args.test_size
         data_src = "sklearn load_iris, classes 0 & 1, 4 features"
     n = len(Y)
-    print("Iris amplitude baseline (PennyLane) — 2-class variational classifier")
+    print("Iris amplitude baseline (PennyLane, GPU) — 2-class variational classifier")
     print(
         f"  Data: {data_src} → L2 norm → get_angles  (n={n}; 2-class Iris = 100 samples)"
     )
     print(
-        f"  Iters: {args.iters}, batch_size: {args.batch_size}, layers: {args.layers}, lr: {args.lr}, optimizer: {args.optimizer}"
+        f"  Iters: {args.iters}, batch_size: {args.batch_size}, layers: {args.layers}, lr: {args.lr}"
     )
 
     results: list[dict[str, Any]] = []
@@ -326,7 +322,6 @@ def main() -> None:
             lr=args.lr,
             seed=args.seed + t,
             test_size=test_size,
-            optimizer=args.optimizer,
             early_stop_target=args.early_stop if args.early_stop > 0 else None,
         )
         results.append(r)

@@ -25,29 +25,31 @@ encoding step is different**. Here we:
   StandardScaler → PCA (to <= pca_dim) → pad to FEATURE_DIM → L2-normalized vector.
 - Use QDP (`QuantumDataLoader` with `encoding("amplitude")`) to encode these
   FEATURE_DIM vectors into **amplitude state vectors** of length `2**NUM_QUBITS`.
-- Feed the encoded state vectors into a PennyLane circuit via `qml.StatePrep`,
+- Feed the encoded state vectors into a PennyLane circuit via `qml.AmplitudeEmbedding`,
   then apply the same variational layers, optimizer, and loss as the baseline.
 
 Best practices (aligned with ENCODING_BENCHMARK_PLAN.md §2.2):
 
-- Dataset: Kaggle “Credit Card Fraud Detection” (Time, V1..V28, Amount, Class).
+- Dataset: Kaggle "Credit Card Fraud Detection" (Time, V1..V28, Amount, Class).
 - Metrics: AUPRC (precision–recall AUC), F1-score, precision, recall.
 - Imbalance: class-weighted loss (minority class up-weighted); no accuracy.
+
+Training always runs on GPU via lightning.gpu.
 """
 
 from __future__ import annotations
 
 import argparse
 import time
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Iterator, Union
+from typing import Any
 
 import numpy as np
+import torch
 
 try:
     import pennylane as qml
-    from pennylane import numpy as pnp
-    from pennylane.optimize import AdamOptimizer
 except ImportError as e:
     raise SystemExit(
         "PennyLane is required. Install with: uv sync --group benchmark"
@@ -75,24 +77,16 @@ except ImportError as e:
         "qumat_qdp (QDP Python bindings) is required. Build with: uv run maturin develop"
     ) from e
 
-import torch
-
 
 NUM_QUBITS = 5
 STATE_DIM = 2**NUM_QUBITS  # length of encoded state vector
 FEATURE_DIM = STATE_DIM  # pre-QDP feature dimension (padded to this)
 
-# Threshold for GPU circuit simulation: lightning.gpu is beneficial only for larger circuits.
-# For NUM_QUBITS below this threshold, GPU kernel-launch overhead dominates over the
-# computation for tiny state vectors (e.g. 2^5 = 32 elements), making default.qubit
-# (CPU NumPy backprop) faster. Increase this value to force GPU training for larger qubit counts.
-_GPU_CIRCUIT_QUBIT_THRESHOLD = 10
 
-
-def _layer(layer_weights: pnp.ndarray, wires: tuple[int, ...]) -> None:
+def _layer(layer_weights: torch.Tensor, wires: tuple[int, ...]) -> None:
     """Single variational layer: Rot on each wire + ring of CNOTs."""
     for i, w in enumerate(wires):
-        qml.Rot(*layer_weights[i], wires=w)
+        qml.Rot(layer_weights[i, 0], layer_weights[i, 1], layer_weights[i, 2], wires=w)
     for i in range(len(wires)):
         qml.CNOT(wires=[wires[i], wires[(i + 1) % len(wires)]])
 
@@ -210,14 +204,11 @@ def encode_via_qdp_engine(
     *,
     batch_size: int,
     device_id: int = 0,
-    return_numpy: bool = True,
-) -> Union[np.ndarray, torch.Tensor]:
+) -> torch.Tensor:
     """
     QDP API: amplitude-encode in memory via QdpEngine.encode() (batched).
     No temp file; minimal CPU–GPU transfer by batching.
-
-    If return_numpy=True (default), returns CPU NumPy shape (n, STATE_DIM).
-    If return_numpy=False, returns GPU torch.Tensor so training can use lightning.gpu.
+    Returns GPU torch.Tensor shape (n, STATE_DIM).
     """
     n, dim = X_norm.shape
     if dim != FEATURE_DIM:
@@ -236,7 +227,7 @@ def encode_via_qdp_engine(
         qt = engine.encode(X_norm[start:end], NUM_QUBITS, "amplitude")
         t = torch.from_dlpack(qt)
         batches_list.append(t)
-    # torch.cat produces exactly n rows and a contiguous tensor; [:n] and .clone() are redundant.
+    # torch.cat produces exactly n rows and a contiguous tensor.
     encoded = torch.cat(batches_list, dim=0)
     # DLPack exports complex128 (CuDoubleComplex) even though imaginary parts are always 0.0
     # (amplitude encoding of real input → real state vector; CUDA kernel hardcodes imag=0.0).
@@ -248,8 +239,6 @@ def encode_via_qdp_engine(
         raise ValueError(
             f"Encoded state dimension mismatch: expected {STATE_DIM}, got {encoded.shape[1]}"
         )
-    if return_numpy:
-        return encoded.cpu().numpy()
     return encoded
 
 
@@ -260,12 +249,11 @@ def encoded_batches_from_loader(
     device_id: int = 0,
     data_dir: str | None = None,
     filename: str = "creditcard_train.npy",
-    output_device: str | None = None,
-) -> Iterator[tuple[Union[np.ndarray, torch.Tensor], int, int]]:
+) -> Iterator[tuple[torch.Tensor, int, int]]:
     """
     DataLoader API: stream amplitude-encoded batches from QuantumDataLoader (in-memory).
-    Uses source_array() (no temp file). output_device None or "cpu" -> .as_numpy();
-    "cuda" -> .as_torch(device="cuda") so data stays on GPU. Yields (batch, start_idx, end_idx).
+    Uses source_array() (no temp file). Always returns GPU torch.Tensor batches.
+    Yields (batch, start_idx, end_idx).
     """
     n, dim = X_norm.shape
     if dim != FEATURE_DIM:
@@ -273,17 +261,14 @@ def encoded_batches_from_loader(
             f"X_norm must have {FEATURE_DIM} features for {NUM_QUBITS} qubits, got {dim}"
         )
     total_batches = (n + batch_size - 1) // batch_size
-    builder = (
+    loader = (
         QuantumDataLoader(device_id=device_id)
         .qubits(NUM_QUBITS)
         .encoding("amplitude")
         .batches(total_batches, size=batch_size)
         .source_array(X_norm.astype(np.float64))
+        .as_torch(device="cuda")
     )
-    if output_device == "cuda":
-        loader = builder.as_torch(device="cuda")
-    else:
-        loader = builder.as_numpy()
     start = 0
     for batch in loader:
         end = min(start + batch.shape[0], n)
@@ -296,157 +281,7 @@ def encoded_batches_from_loader(
         start = end
 
 
-def run_training_from_loader(
-    X_train: np.ndarray,
-    encoded_test: Union[np.ndarray, torch.Tensor],
-    y_train: np.ndarray,
-    y_test: np.ndarray,
-    sample_weights: np.ndarray,
-    *,
-    num_layers: int,
-    iterations: int,
-    encode_batch_size: int,
-    device_id: int = 0,
-    encode_data_dir: str | None = None,
-    lr: float,
-    seed: int,
-    use_gpu: bool = False,
-    batch_size: int = 256,
-) -> dict[str, Any]:
-    """Train by streaming encoded batches from QuantumDataLoader. use_gpu=True: .as_torch(cuda), then _run_training_gpu."""
-    n_train = len(y_train)
-    num_batches = (n_train + encode_batch_size - 1) // encode_batch_size
-    epochs = max(1, (iterations + num_batches - 1) // num_batches)
-
-    # GPU path: encode once on GPU, then train with lightning.gpu.
-    # Use same encode path as no-loader (encode_via_qdp_engine) to avoid DataLoader overhead
-    # (create_array_loader + list + cat + clone was ~2x slower; Rust slice path still has Python/Rust boundary cost).
-    if use_gpu and isinstance(encoded_test, torch.Tensor) and encoded_test.is_cuda:
-        try:
-            encoded_train_gpu = encode_via_qdp_engine(
-                X_train,
-                batch_size=encode_batch_size,
-                device_id=device_id,
-                return_numpy=False,
-            )
-            return _run_training_gpu(
-                encoded_train_gpu,
-                encoded_test,
-                y_train,
-                y_test,
-                sample_weights,
-                num_layers=num_layers,
-                iterations=iterations,
-                batch_size=batch_size,
-                lr=lr,
-                seed=seed,
-            )
-        except Exception:
-            encoded_test = encoded_test.cpu().numpy()
-            use_gpu = False
-
-    if isinstance(encoded_test, torch.Tensor):
-        encoded_test = encoded_test.cpu().numpy()
-    # CPU path: prefer lightning.qubit (C++ adjoint) over default.qubit (NumPy backprop).
-    # AmplitudeEmbedding(normalize=False) matches baseline code path and avoids StatePrep overhead.
-    try:
-        dev = qml.device("lightning.qubit", wires=NUM_QUBITS)
-        _diff_method = "adjoint"
-    except Exception:
-        dev = qml.device("default.qubit", wires=NUM_QUBITS)
-        _diff_method = "backprop"
-    wires = tuple(range(NUM_QUBITS))
-    Y_train_pnp = pnp.array(np.asarray(y_train, dtype=np.float64), requires_grad=False)
-    W_train_pnp = pnp.array(sample_weights, requires_grad=False)
-    y_test_np = np.asarray(y_test)
-
-    @qml.qnode(dev, interface="autograd", diff_method=_diff_method)
-    def circuit(weights: pnp.ndarray, state_vector: pnp.ndarray) -> pnp.ndarray:
-        qml.AmplitudeEmbedding(state_vector, wires=wires, normalize=False)
-        for w in weights:
-            _layer(w, wires)
-        return qml.expval(qml.PauliZ(0))
-
-    def model(
-        weights: pnp.ndarray, bias: pnp.ndarray, state_vector: pnp.ndarray
-    ) -> pnp.ndarray:
-        return circuit(weights, state_vector) + bias
-
-    def cost(
-        weights: pnp.ndarray,
-        bias: pnp.ndarray,
-        states_batch: pnp.ndarray,
-        Y_batch: pnp.ndarray,
-        w_batch: pnp.ndarray,
-    ) -> pnp.ndarray:
-        target = pnp.array(Y_batch * 2.0 - 1.0)
-        preds = model(weights, bias, states_batch)
-        return pnp.sum(w_batch * (target - preds) ** 2) / (pnp.sum(w_batch) + 1e-12)
-
-    try:
-        pnp.random.seed(seed)
-    except Exception:
-        pass
-    weights_init = 0.01 * pnp.random.randn(
-        num_layers, NUM_QUBITS, 3, requires_grad=True
-    )
-    bias_init = pnp.array(0.0, requires_grad=True)
-    opt = AdamOptimizer(lr)
-    weights, bias = weights_init, bias_init
-    # Encode once, cache all batches; reuse for every epoch (avoids re-encoding 2000x).
-    cached_batches = list(
-        encoded_batches_from_loader(
-            X_train,
-            batch_size=encode_batch_size,
-            device_id=device_id,
-            data_dir=encode_data_dir,
-            filename="creditcard_train.npy",
-        )
-    )
-    states0, s0, _ = cached_batches[0]
-    t0 = time.perf_counter()
-    _ = circuit(weights_init, states0[:1])
-    _ = cost(
-        weights_init,
-        bias_init,
-        states0[:1],
-        Y_train_pnp[s0 : s0 + 1],
-        W_train_pnp[s0 : s0 + 1],
-    )
-    compile_sec = time.perf_counter() - t0
-    t0 = time.perf_counter()
-    step_count = 0
-    for _ in range(epochs):
-        for states_b, start, end in cached_batches:
-            y_b = Y_train_pnp[start:end]
-            w_b = W_train_pnp[start:end]
-            out = opt.step(cost, weights, bias, states_b, y_b, w_b)
-            weights, bias = out[0], out[1]
-            step_count += 1
-    train_sec = time.perf_counter() - t0
-    pred_scores = np.array(model(weights, bias, pnp.array(encoded_test))).flatten()
-    pred_binary = (np.sign(pred_scores) > 0).astype(np.int32)
-    scores_positive = (pred_scores + 1.0) / 2.0
-    auprc = float(average_precision_score(y_test_np, scores_positive))
-    f1 = float(f1_score(y_test_np, pred_binary, zero_division=0))
-    prec = float(precision_score(y_test_np, pred_binary, zero_division=0))
-    rec = float(recall_score(y_test_np, pred_binary, zero_division=0))
-    samples_this_run = step_count * min(encode_batch_size, n_train)
-    return {
-        "compile_time_sec": compile_sec,
-        "train_time_sec": train_sec,
-        "samples_per_sec": samples_this_run / train_sec if train_sec > 0 else 0.0,
-        "auprc": auprc,
-        "f1_score": f1,
-        "precision": prec,
-        "recall": rec,
-        "n_train": n_train,
-        "n_test": len(y_test_np),
-        "iterations": step_count,
-    }
-
-
-def _run_training_gpu(
+def run_training(
     encoded_train: torch.Tensor,
     encoded_test: torch.Tensor,
     y_train: np.ndarray,
@@ -459,75 +294,40 @@ def _run_training_gpu(
     lr: float,
     seed: int,
 ) -> dict[str, Any]:
-    """GPU path: encode pre-computed on GPU; circuit sim on lightning.gpu or CPU depending on qubit count.
+    """Train 5-qubit amplitude VQC on GPU; dispatch to lightning.gpu."""
+    if not torch.cuda.is_available():
+        raise RuntimeError("CUDA GPU is required for training. No CUDA device found.")
+    try:
+        dev_qml = qml.device("lightning.gpu", wires=NUM_QUBITS)
+    except Exception as e:
+        raise RuntimeError(
+            "lightning.gpu is required for GPU training. Install with: "
+            "pip install pennylane-lightning[gpu]"
+        ) from e
 
-    For small circuits (NUM_QUBITS < _GPU_CIRCUIT_QUBIT_THRESHOLD), GPU kernel-launch overhead
-    dominates over computation for tiny state vectors (e.g. 2^5 = 32 elements). In that case we
-    use default.qubit (CPU NumPy backprop) which is measurably faster, while the encoding step
-    still benefits from batch GPU processing via QDP.
-    """
+    # Ensure encoded data is on GPU
+    if not encoded_train.is_cuda:
+        encoded_train = encoded_train.cuda()
+    if not encoded_test.is_cuda:
+        encoded_test = encoded_test.cuda()
+
     device = encoded_train.device
     dtype = encoded_train.dtype
     n_train = len(y_train)
     y_test_np = np.asarray(y_test)
-
-    # Auto-select: for small qubit counts CPU simulation wins (no GPU kernel-launch overhead).
-    if NUM_QUBITS < _GPU_CIRCUIT_QUBIT_THRESHOLD:
-        print(
-            f"    [QDP] {NUM_QUBITS} qubits < threshold ({_GPU_CIRCUIT_QUBIT_THRESHOLD}): "
-            "using default.qubit (CPU) for circuit simulation — GPU kernel-launch overhead "
-            "dominates for tiny state vectors; encoding was still done on GPU."
-        )
-        return _run_training_cpu(
-            encoded_train.cpu().numpy(),
-            encoded_test.cpu().numpy(),
-            y_train,
-            y_test,
-            sample_weights,
-            num_layers=num_layers,
-            iterations=iterations,
-            batch_size=batch_size,
-            lr=lr,
-            seed=seed,
-        )
 
     Y_train_t = torch.tensor(
         np.asarray(y_train, dtype=np.float64), dtype=dtype, device=device
     )
     W_train_t = torch.tensor(sample_weights, dtype=dtype, device=device)
 
-    try:
-        dev_qml = qml.device("lightning.gpu", wires=NUM_QUBITS)
-    except Exception as e:
-        import warnings
-
-        warnings.warn(
-            f"lightning.gpu failed ({e!r}); falling back to CPU (training ~2x slower). "
-            "For GPU training install: pip install pennylane-lightning[gpu] custatevec-cu11 "
-            "(or custatevec-cu12 for CUDA 12). See https://docs.pennylane.ai/projects/lightning/en/stable/lightning_gpu/installation.html",
-            UserWarning,
-            stacklevel=2,
-        )
-        return _run_training_cpu(
-            encoded_train.cpu().numpy(),
-            encoded_test.cpu().numpy(),
-            y_train,
-            y_test,
-            sample_weights,
-            num_layers=num_layers,
-            iterations=iterations,
-            batch_size=batch_size,
-            lr=lr,
-            seed=seed,
-        )
-
     wires = tuple(range(NUM_QUBITS))
 
     @qml.qnode(dev_qml, interface="torch", diff_method="adjoint")
     def circuit(weights: torch.Tensor, state_vector: torch.Tensor) -> torch.Tensor:
-        qml.StatePrep(state_vector, wires=wires)
+        qml.AmplitudeEmbedding(state_vector, wires=wires, normalize=False)
         for w in weights:
-            _layer_torch(w, wires)
+            _layer(w, wires)
         return qml.expval(qml.PauliZ(0))
 
     def model(
@@ -598,206 +398,31 @@ def _run_training_gpu(
     }
 
 
-def _layer_torch(layer_weights: torch.Tensor, wires: tuple[int, ...]) -> None:
-    """Single variational layer (PyTorch): Rot on each wire + ring of CNOTs."""
-    for i, w in enumerate(wires):
-        qml.Rot(layer_weights[i, 0], layer_weights[i, 1], layer_weights[i, 2], wires=w)
-    for i in range(len(wires)):
-        qml.CNOT(wires=[wires[i], wires[(i + 1) % len(wires)]])
-
-
-def _run_training_cpu(
-    encoded_train: np.ndarray,
-    encoded_test: np.ndarray,
+def run_training_from_loader(
+    X_train: np.ndarray,
+    encoded_test: torch.Tensor,
     y_train: np.ndarray,
     y_test: np.ndarray,
     sample_weights: np.ndarray,
     *,
     num_layers: int,
     iterations: int,
-    batch_size: int,
+    encode_batch_size: int,
+    device_id: int = 0,
+    encode_data_dir: str | None = None,
     lr: float,
     seed: int,
+    batch_size: int = 256,
 ) -> dict[str, Any]:
-    """CPU path: prefer lightning.qubit (C++ adjoint) > default.qubit (NumPy backprop).
+    """Train by streaming encoded batches from QuantumDataLoader on GPU.
+    Encode once on GPU, then train with lightning.gpu."""
 
-    Uses AmplitudeEmbedding(normalize=False) instead of StatePrep — same code path as the
-    PennyLane baseline, avoids any StatePrep validation overhead, and skips L2 norm since
-    QDP pre-encodes data with unit norm.
-    """
-    # Prefer lightning.qubit (C++-optimized adjoint) over default.qubit (NumPy backprop).
-    # lightning.qubit is typically 2-5x faster for CPU simulation at comparable accuracy.
-    _lightning_qubit_ok = False
-    try:
-        dev = qml.device("lightning.qubit", wires=NUM_QUBITS)
-        _diff_method = "adjoint"
-        _interface = "autograd"
-        _lightning_qubit_ok = True
-    except Exception:
-        dev = qml.device("default.qubit", wires=NUM_QUBITS)
-        _diff_method = "backprop"
-        _interface = "autograd"
-
-    wires = tuple(range(NUM_QUBITS))
-    # Use plain np.ndarray for features (not pnp.tensor): plain arrays are automatically
-    # treated as non-differentiable by PennyLane autograd, avoiding pnp.tensor subclass
-    # overhead (__array_finalize__) on every feats_train[idx] fancy-index in the hot loop.
-    feats_train = np.asarray(encoded_train)  # float64, no pnp wrapper needed
-    feats_test = encoded_test
-    # Labels and weights still need pnp.tensor so cost function arithmetic (pnp.sum, etc.) works.
-    Y_train_pnp = pnp.array(np.asarray(y_train, dtype=np.float64), requires_grad=False)
-    y_test_np = np.asarray(y_test)
-
-    # Use AmplitudeEmbedding(normalize=False) instead of StatePrep:
-    # — same code path as the baseline (AmplitudeEmbedding), eliminates any StatePrep overhead
-    # — normalize=False is safe because QDP already produces unit-norm state vectors
-    @qml.qnode(dev, interface=_interface, diff_method=_diff_method)
-    def circuit(weights: pnp.ndarray, state_vector: pnp.ndarray) -> pnp.ndarray:
-        qml.AmplitudeEmbedding(state_vector, wires=wires, normalize=False)
-        for w in weights:
-            _layer(w, wires)
-        return qml.expval(qml.PauliZ(0))
-
-    def model(
-        weights: pnp.ndarray, bias: pnp.ndarray, state_batch: pnp.ndarray
-    ) -> pnp.ndarray:
-        return circuit(weights, state_batch) + bias
-
-    def cost(
-        weights: pnp.ndarray,
-        bias: pnp.ndarray,
-        states_batch,  # np.ndarray or pnp.ndarray; non-differentiable
-        t_batch: pnp.ndarray,  # pre-computed targets in {-1, +1} (avoids per-step creation)
-        w_batch: pnp.ndarray,
-    ) -> pnp.ndarray:
-        # t_batch is pre-computed (Y_train * 2 - 1); skip the per-step pnp.array() allocation.
-        preds = model(weights, bias, states_batch)
-        return pnp.sum(w_batch * (t_batch - preds) ** 2) / (pnp.sum(w_batch) + 1e-12)
-
-    n_train = len(y_train)
-    _train_device_name = (
-        "lightning.qubit (adjoint)"
-        if _lightning_qubit_ok
-        else "default.qubit (backprop)"
+    encoded_train = encode_via_qdp_engine(
+        X_train,
+        batch_size=encode_batch_size,
+        device_id=device_id,
     )
-    print(
-        f"    [QDP] CPU circuit sim: {_train_device_name}, AmplitudeEmbedding(normalize=False)"
-    )
-
-    rng = np.random.default_rng(seed)
-    try:
-        pnp.random.seed(seed)
-    except Exception:
-        pass
-
-    weights_init = 0.01 * pnp.random.randn(
-        num_layers, NUM_QUBITS, 3, requires_grad=True
-    )
-    bias_init = pnp.array(0.0, requires_grad=True)
-    opt = AdamOptimizer(lr)
-
-    W_train_pnp = pnp.array(sample_weights, requires_grad=False)
-    # Pre-compute all targets once outside the loop: Y ∈ {0,1} → t ∈ {-1,+1}.
-    # Eliminates 5000× (256 multiplications + 256 subtractions + pnp.array allocation) per run.
-    targets_all = (
-        Y_train_pnp * 2.0 - 1.0
-    )  # pnp.tensor, requires_grad=False, shape (n_train,)
-
-    # Compile (first forward + cost); batched like iris_amplitude.py
-    t0 = time.perf_counter()
-    _ = circuit(weights_init, feats_train[:1])
-    _ = cost(
-        weights_init,
-        bias_init,
-        feats_train[:1],
-        targets_all[:1],
-        W_train_pnp[:1],
-    )
-    compile_sec = time.perf_counter() - t0
-
-    # Train
-    _batch_n = min(batch_size, n_train)
-    t0 = time.perf_counter()
-    weights, bias = weights_init, bias_init
-    for _ in range(iterations):
-        idx = rng.integers(0, n_train, size=(_batch_n,))
-        states_b = feats_train[idx]  # plain np.ndarray — no pnp.tensor overhead
-        t_b = targets_all[idx]  # pnp.tensor, pre-computed targets
-        w_b = W_train_pnp[idx]
-        out = opt.step(cost, weights, bias, states_b, t_b, w_b)
-        weights, bias = out[0], out[1]
-    train_sec = time.perf_counter() - t0
-
-    # Test-set predictions (batched like Iris)
-    pred_scores = np.array(model(weights, bias, feats_test)).flatten()
-    pred_binary = (np.sign(pred_scores) > 0).astype(np.int32)
-
-    # Map expval in [-1,1] to positive-class score in [0,1] for AUPRC
-    scores_positive = (pred_scores + 1.0) / 2.0
-
-    auprc = float(average_precision_score(y_test_np, scores_positive))
-    f1 = float(f1_score(y_test_np, pred_binary, zero_division=0))
-    prec = float(precision_score(y_test_np, pred_binary, zero_division=0))
-    rec = float(recall_score(y_test_np, pred_binary, zero_division=0))
-
-    return {
-        "compile_time_sec": compile_sec,
-        "train_time_sec": train_sec,
-        "samples_per_sec": (_batch_n * iterations) / train_sec
-        if train_sec > 0
-        else 0.0,
-        "train_device": _train_device_name,
-        "auprc": auprc,
-        "f1_score": f1,
-        "precision": prec,
-        "recall": rec,
-        "n_train": n_train,
-        "n_test": len(y_test_np),
-        "iterations": iterations,
-    }
-
-
-def run_training(
-    encoded_train: Union[np.ndarray, torch.Tensor],
-    encoded_test: Union[np.ndarray, torch.Tensor],
-    y_train: np.ndarray,
-    y_test: np.ndarray,
-    sample_weights: np.ndarray,
-    *,
-    num_layers: int,
-    iterations: int,
-    batch_size: int,
-    lr: float,
-    seed: int,
-) -> dict[str, Any]:
-    """Train 5-qubit amplitude VQC; dispatch to GPU (lightning.gpu) or CPU (default.qubit) like Iris."""
-    use_gpu = (
-        isinstance(encoded_train, torch.Tensor)
-        and isinstance(encoded_test, torch.Tensor)
-        and encoded_train.is_cuda
-    )
-    if use_gpu:
-        try:
-            return _run_training_gpu(
-                encoded_train,
-                encoded_test,
-                y_train,
-                y_test,
-                sample_weights,
-                num_layers=num_layers,
-                iterations=iterations,
-                batch_size=batch_size,
-                lr=lr,
-                seed=seed,
-            )
-        except Exception:
-            encoded_train = encoded_train.cpu().numpy()
-            encoded_test = encoded_test.cpu().numpy()
-    if isinstance(encoded_train, torch.Tensor):
-        encoded_train = encoded_train.cpu().numpy()
-    if isinstance(encoded_test, torch.Tensor):
-        encoded_test = encoded_test.cpu().numpy()
-    return _run_training_cpu(
+    return run_training(
         encoded_train,
         encoded_test,
         y_train,
@@ -813,7 +438,7 @@ def run_training(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="QDP Credit Card Fraud pipeline (amplitude, 5 qubits, AUPRC/F1)"
+        description="QDP Credit Card Fraud pipeline (amplitude, 5 qubits, AUPRC/F1, GPU training)"
     )
     parser.add_argument(
         "--data-file",
@@ -872,12 +497,7 @@ def main() -> None:
     parser.add_argument(
         "--use-loader",
         action="store_true",
-        help="Stream encoded batches via QuantumDataLoader.source_file() (DataLoader API).",
-    )
-    parser.add_argument(
-        "--cpu",
-        action="store_true",
-        help="Force CPU training (no lightning.gpu); encode still on GPU when not --use-loader.",
+        help="Stream encoded batches via QuantumDataLoader.source_array() (DataLoader API).",
     )
     args = parser.parse_args()
 
@@ -914,7 +534,7 @@ def main() -> None:
         val_size=0.1,
     )
 
-    print("QDP Credit Card Fraud amplitude pipeline")
+    print("QDP Credit Card Fraud amplitude pipeline (GPU)")
     print(
         f"  Data: {data_src} → StandardScaler → PCA({args.pca_dim}) "
         f"→ pad to {FEATURE_DIM} → QDP amplitude → L2 norm (implicit)"
@@ -927,65 +547,21 @@ def main() -> None:
         f"  Iters: {args.iters}, train batch: {args.batch_size}, "
         f"encode batch: {args.encode_batch_size}, layers: {args.layers}, lr: {args.lr}"
     )
+    print("  Encode + Train: GPU (QDP encode + lightning.gpu circuit).")
 
-    use_gpu_path = not args.cpu
-    if use_gpu_path:
-        if NUM_QUBITS < _GPU_CIRCUIT_QUBIT_THRESHOLD:
-            print(
-                f"  Encode: GPU (QDP). Circuit: CPU (default.qubit) — "
-                f"{NUM_QUBITS} qubits < threshold {_GPU_CIRCUIT_QUBIT_THRESHOLD}; "
-                "GPU overhead dominates tiny state vectors."
-            )
-        else:
-            try:
-                qml.device("lightning.gpu", wires=NUM_QUBITS)
-                print("  Encode + Train: GPU (QDP encode + lightning.gpu circuit).")
-            except Exception:
-                print(
-                    "  Encode: GPU (QDP). Train: lightning.gpu unavailable; will fall back to CPU."
-                )
-    else:
-        print("  Training: CPU (default.qubit); encode still uses QDP GPU.")
-
-    # Encode test set via QDP. Keep on GPU when the training path is full GPU.
-    _keep_encoded_on_gpu = use_gpu_path and (NUM_QUBITS >= _GPU_CIRCUIT_QUBIT_THRESHOLD)
+    # Encode test set via QDP (keep on GPU)
     t_enc0 = time.perf_counter()
     encoded_test = encode_via_qdp_engine(
         X_test,
         batch_size=args.encode_batch_size,
         device_id=args.device_id,
-        return_numpy=not _keep_encoded_on_gpu,
     )
     enc_test_sec = time.perf_counter() - t_enc0
     print(f"  Encode test  ({len(X_test)} samples): {enc_test_sec:.4f} s")
 
     results: list[dict[str, Any]] = []
     for t in range(args.trials):
-        # When GPU: use same path whether or not --use-loader (encode_via_qdp_engine + run_training)
-        # to avoid any extra overhead from run_training_from_loader (Python/Rust boundary, list/cat, or lightning.gpu variance).
-        if use_gpu_path:
-            t_enc1 = time.perf_counter()
-            encoded_train = encode_via_qdp_engine(
-                X_train,
-                batch_size=args.encode_batch_size,
-                device_id=args.device_id,
-                return_numpy=not _keep_encoded_on_gpu,
-            )
-            enc_train_sec = time.perf_counter() - t_enc1
-            r = run_training(
-                encoded_train,
-                encoded_test,
-                y_train,
-                y_test,
-                sample_weights,
-                num_layers=args.layers,
-                iterations=args.iters,
-                batch_size=args.batch_size,
-                lr=args.lr,
-                seed=args.seed + t,
-            )
-            r["encode_train_sec"] = enc_train_sec
-        elif args.use_loader:
+        if args.use_loader:
             r = run_training_from_loader(
                 X_train,
                 encoded_test,
@@ -999,7 +575,6 @@ def main() -> None:
                 encode_data_dir=args.encode_data_dir,
                 lr=args.lr,
                 seed=args.seed + t,
-                use_gpu=False,
                 batch_size=args.batch_size,
             )
             r["encode_train_sec"] = 0.0  # encoded lazily inside loader
@@ -1009,7 +584,6 @@ def main() -> None:
                 X_train,
                 batch_size=args.encode_batch_size,
                 device_id=args.device_id,
-                return_numpy=True,
             )
             enc_train_sec = time.perf_counter() - t_enc1
             r = run_training(
@@ -1030,7 +604,6 @@ def main() -> None:
         print(
             f"    Encode train ({len(X_train)} samples): {r.get('encode_train_sec', 0.0):.4f} s"
         )
-        print(f"    Circuit:   {r.get('train_device', 'see above')}")
         print(f"    Compile:   {r['compile_time_sec']:.4f} s")
         print(
             f"    Train:     {r['train_time_sec']:.4f} s  "

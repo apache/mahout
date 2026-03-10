@@ -29,6 +29,8 @@ Data source:
   CSV with columns V1..V28, Amount, Class (0=legit, 1=fraud). Example: Kaggle
   "Credit Card Fraud Detection" (https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud).
   Pass path via --data-file. If no file, a small synthetic imbalanced dataset is used for smoke test.
+
+Training always runs on GPU via lightning.gpu for fair comparison with QDP pipeline.
 """
 
 from __future__ import annotations
@@ -39,11 +41,10 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import torch
 
 try:
     import pennylane as qml
-    from pennylane import numpy as pnp
-    from pennylane.optimize import AdamOptimizer
 except ImportError as e:
     raise SystemExit(
         "PennyLane is required. Install with: uv sync --group benchmark"
@@ -69,10 +70,10 @@ NUM_QUBITS = 5
 FEATURE_DIM = 2**NUM_QUBITS  # amplitude embedding dimension (32 for 5 qubits)
 
 
-def _layer(layer_weights: pnp.ndarray, wires: tuple[int, ...]) -> None:
+def _layer(layer_weights: torch.Tensor, wires: tuple[int, ...]) -> None:
     """Single variational layer: Rot on each wire + ring of CNOTs."""
     for i, w in enumerate(wires):
-        qml.Rot(*layer_weights[i], wires=w)
+        qml.Rot(layer_weights[i, 0], layer_weights[i, 1], layer_weights[i, 2], wires=w)
     for i in range(len(wires)):
         qml.CNOT(wires=[wires[i], wires[(i + 1) % len(wires)]])
 
@@ -199,66 +200,86 @@ def run_training(
     lr: float,
     seed: int,
 ) -> dict[str, Any]:
-    """Train 5-qubit amplitude VQC with class-weighted loss; report AUPRC, F1, compile/train time."""
-    dev = qml.device("default.qubit", wires=NUM_QUBITS)
+    """Train 5-qubit amplitude VQC on GPU with class-weighted loss; report AUPRC, F1, compile/train time."""
+    if not torch.cuda.is_available():
+        raise RuntimeError("CUDA GPU is required for training. No CUDA device found.")
+    try:
+        dev = qml.device("lightning.gpu", wires=NUM_QUBITS)
+    except Exception as e:
+        raise RuntimeError(
+            "lightning.gpu is required for GPU training. Install with: "
+            "pip install pennylane-lightning[gpu]"
+        ) from e
+
+    device = torch.device("cuda")
+    dtype = torch.float64
     wires = tuple(range(NUM_QUBITS))
 
-    @qml.qnode(dev, interface="autograd", diff_method="backprop")
-    def circuit(weights: pnp.ndarray, features: pnp.ndarray) -> pnp.ndarray:
+    @qml.qnode(dev, interface="torch", diff_method="adjoint")
+    def circuit(weights: torch.Tensor, features: torch.Tensor) -> torch.Tensor:
         qml.AmplitudeEmbedding(features, wires=wires, normalize=True)
         for w in weights:
             _layer(w, wires)
         return qml.expval(qml.PauliZ(0))
 
-    def model(weights: pnp.ndarray, bias: pnp.ndarray, x: pnp.ndarray) -> pnp.ndarray:
+    def model(
+        weights: torch.Tensor, bias: torch.Tensor, x: torch.Tensor
+    ) -> torch.Tensor:
         return circuit(weights, x) + bias
 
     def cost(
-        weights: pnp.ndarray,
-        bias: pnp.ndarray,
-        X_batch: pnp.ndarray,
-        Y_batch: pnp.ndarray,
-        w_batch: pnp.ndarray,
-    ) -> pnp.ndarray:
+        weights: torch.Tensor,
+        bias: torch.Tensor,
+        X_batch: torch.Tensor,
+        Y_batch: torch.Tensor,
+        w_batch: torch.Tensor,
+    ) -> torch.Tensor:
         # Y in {0,1} -> target in {-1, 1}
-        target = pnp.array(Y_batch * 2.0 - 1.0)
+        target = Y_batch * 2.0 - 1.0
         pred = model(weights, bias, X_batch)
-        return pnp.sum(w_batch * (target - pred) ** 2) / (pnp.sum(w_batch) + 1e-12)
+        return (w_batch * (target - pred) ** 2).sum() / (w_batch.sum() + 1e-12)
 
     n_train = len(y_train)
-    rng = np.random.default_rng(seed)
-    weights_init = 0.01 * pnp.random.randn(
-        num_layers, NUM_QUBITS, 3, requires_grad=True
-    )
-    bias_init = pnp.array(0.0, requires_grad=True)
-    opt = AdamOptimizer(lr)
 
-    X_train_pnp = pnp.array(X_train, requires_grad=False)
-    # Float so PennyLane autograd does not try to differentiate ints (align with QDP pipeline)
-    Y_train_pnp = pnp.array(np.asarray(y_train, dtype=np.float64), requires_grad=False)
-    W_train_pnp = pnp.array(sample_weights, requires_grad=False)
+    torch.manual_seed(seed)
+    weights = torch.nn.Parameter(
+        0.01 * torch.randn(num_layers, NUM_QUBITS, 3, device=device, dtype=dtype)
+    )
+    bias = torch.nn.Parameter(torch.tensor(0.0, device=device, dtype=dtype))
+    opt = torch.optim.Adam([weights, bias], lr=lr)
+
+    X_train_t = torch.tensor(X_train, dtype=dtype, device=device)
+    # Float so autograd does not try to differentiate ints
+    Y_train_t = torch.tensor(
+        np.asarray(y_train, dtype=np.float64), dtype=dtype, device=device
+    )
+    W_train_t = torch.tensor(sample_weights, dtype=dtype, device=device)
+
+    X_test_t = torch.tensor(X_test, dtype=dtype, device=device)
 
     # Compile (first forward + cost)
     t0 = time.perf_counter()
-    _ = circuit(weights_init, X_train_pnp[0])
-    _ = cost(weights_init, bias_init, X_train_pnp[:1], Y_train_pnp[:1], W_train_pnp[:1])
+    _ = circuit(weights, X_train_t[0])
+    _ = cost(weights, bias, X_train_t[:1], Y_train_t[:1], W_train_t[:1])
     compile_sec = time.perf_counter() - t0
 
     # Train
+    _batch_n = min(batch_size, n_train)
     t0 = time.perf_counter()
-    weights, bias = weights_init, bias_init
-    for step in range(iterations):
-        idx = rng.integers(0, n_train, size=(min(batch_size, n_train),))
-        Xb = X_train_pnp[idx]
-        Yb = Y_train_pnp[idx]
-        Wb = W_train_pnp[idx]
-        out = opt.step(cost, weights, bias, Xb, Yb, Wb)
-        weights, bias = out[0], out[1]
+    for _ in range(iterations):
+        opt.zero_grad()
+        idx = torch.randint(0, n_train, (_batch_n,), device=device)
+        Xb = X_train_t[idx]
+        Yb = Y_train_t[idx]
+        Wb = W_train_t[idx]
+        loss = cost(weights, bias, Xb, Yb, Wb)
+        loss.backward()
+        opt.step()
     train_sec = time.perf_counter() - t0
 
     # Test-set predictions and scores (for AUPRC we need continuous scores)
-    X_test_pnp = pnp.array(X_test, requires_grad=False)
-    pred_scores = np.array(model(weights, bias, X_test_pnp)).flatten()
+    with torch.no_grad():
+        pred_scores = model(weights, bias, X_test_t).cpu().numpy().flatten()
     pred_binary = (np.sign(pred_scores) > 0).astype(np.int32)
     # Map expval in [-1,1] to positive-class score in [0,1] for AUPRC
     scores_positive = (pred_scores + 1.0) / 2.0
@@ -272,7 +293,7 @@ def run_training(
     return {
         "compile_time_sec": compile_sec,
         "train_time_sec": train_sec,
-        "samples_per_sec": (iterations * min(batch_size, n_train)) / train_sec
+        "samples_per_sec": (iterations * _batch_n) / train_sec
         if train_sec > 0
         else 0.0,
         "auprc": auprc,
@@ -287,7 +308,7 @@ def run_training(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="PennyLane Credit Card Fraud baseline (amplitude, 5 qubits, AUPRC/F1)"
+        description="PennyLane Credit Card Fraud baseline (amplitude, 5 qubits, AUPRC/F1, GPU training)"
     )
     parser.add_argument(
         "--data-file",
@@ -353,7 +374,7 @@ def main() -> None:
         val_size=0.1,
     )
 
-    print("Credit Card Fraud amplitude baseline (PennyLane)")
+    print("Credit Card Fraud amplitude baseline (PennyLane, GPU)")
     print(
         f"  Data: {data_src} → StandardScaler → PCA({args.pca_dim}) → pad to {FEATURE_DIM} → L2 norm"
     )
