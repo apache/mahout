@@ -2076,12 +2076,8 @@ dev = [
 [[package]]
 name = "qumat-qdp"
 source = { editable = "qdp/qdp-python" }
-dependencies = [
-    { name = "qumat" },
-]
 
 [package.metadata]
-requires-dist = [{ name = "qumat", editable = "." }]
 
 [package.metadata.requires-dev]
 benchmark = [
