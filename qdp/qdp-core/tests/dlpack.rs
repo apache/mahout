@@ -31,7 +31,10 @@ mod dlpack_tests {
 
     #[test]
     fn test_dlpack_batch_shape() {
-        let device = CudaDevice::new(0).unwrap();
+        let device = match CudaDevice::new(0) {
+            Ok(device) => device,
+            Err(_) => return,
+        };
 
         let num_samples = 4;
         let num_qubits = 2; // 2^2 = 4 elements per sample
@@ -62,7 +65,10 @@ mod dlpack_tests {
 
     #[test]
     fn test_dlpack_single_shape() {
-        let device = CudaDevice::new(0).unwrap();
+        let device = match CudaDevice::new(0) {
+            Ok(device) => device,
+            Err(_) => return,
+        };
 
         let num_qubits = 2;
         let state_vector = GpuStateVector::new(&device, num_qubits, Precision::Float64)
@@ -95,7 +101,10 @@ mod dlpack_tests {
     #[test]
     #[cfg(target_os = "linux")]
     fn test_dlpack_single_shape_f32() {
-        let device = CudaDevice::new(0).unwrap();
+        let device = match CudaDevice::new(0) {
+            Ok(device) => device,
+            Err(_) => return,
+        };
 
         let num_qubits = 2;
         let state_vector = GpuStateVector::new(&device, num_qubits, Precision::Float32)
@@ -128,7 +137,10 @@ mod dlpack_tests {
     #[test]
     #[cfg(target_os = "linux")]
     fn test_dlpack_batch_shape_f32() {
-        let device = CudaDevice::new(0).unwrap();
+        let device = match CudaDevice::new(0) {
+            Ok(device) => device,
+            Err(_) => return,
+        };
 
         let num_samples = 3;
         let num_qubits = 2;
@@ -176,6 +188,9 @@ mod dlpack_tests {
     #[test]
     #[cfg(target_os = "linux")]
     fn test_synchronize_stream_legacy() {
+        if CudaDevice::new(0).is_err() {
+            return;
+        }
         unsafe {
             let result = synchronize_stream(CUDA_STREAM_LEGACY);
             assert!(
