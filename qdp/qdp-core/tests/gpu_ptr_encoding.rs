@@ -39,11 +39,11 @@ fn iqp_z_data_len(num_qubits: usize) -> usize {
 // ---- Helpers for f32 encode_from_gpu_ptr_f32 tests ----
 
 fn engine_f32() -> Option<QdpEngine> {
-    QdpEngine::new_with_precision(0, Precision::Float32).ok()
+    common::qdp_engine_with_precision(Precision::Float32)
 }
 
 fn device_and_f32_slice(data: &[f32]) -> Option<(Arc<CudaDevice>, CudaSlice<f32>)> {
-    let device = CudaDevice::new(0).ok()?;
+    let device = common::cuda_device()?;
     let slice = device.htod_sync_copy(data).ok()?;
     Some((device, slice))
 }
@@ -84,15 +84,13 @@ fn assert_dlpack_batch_shape_and_delete(
 
 #[test]
 fn test_encode_from_gpu_ptr_unknown_method() {
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     // Need valid GPU pointer so we reach method dispatch (validation runs first)
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => return,
+    let Some(device) = common::cuda_device() else {
+        return;
     };
     let data = common::create_test_data(4);
     let data_d = match device.htod_sync_copy(data.as_slice()) {
@@ -117,9 +115,8 @@ fn test_encode_from_gpu_ptr_unknown_method() {
 
 #[test]
 fn test_encode_from_gpu_ptr_amplitude_empty_input() {
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let result = unsafe { engine.encode_from_gpu_ptr(std::ptr::null(), 0, 2, "amplitude") };
@@ -135,15 +132,13 @@ fn test_encode_from_gpu_ptr_amplitude_empty_input() {
 
 #[test]
 fn test_encode_from_gpu_ptr_amplitude_input_exceeds_state() {
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     // Need valid GPU pointer so we reach input_len > state_len check (validation runs first)
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => return,
+    let Some(device) = common::cuda_device() else {
+        return;
     };
     let data = common::create_test_data(10);
     let data_d = match device.htod_sync_copy(data.as_slice()) {
@@ -166,15 +161,13 @@ fn test_encode_from_gpu_ptr_amplitude_input_exceeds_state() {
 
 #[test]
 fn test_encode_batch_from_gpu_ptr_unknown_method() {
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     // Need valid GPU pointer so we reach method dispatch (validation runs first)
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => return,
+    let Some(device) = common::cuda_device() else {
+        return;
     };
     let data = common::create_test_data(8);
     let data_d = match device.htod_sync_copy(data.as_slice()) {
@@ -199,9 +192,8 @@ fn test_encode_batch_from_gpu_ptr_unknown_method() {
 
 #[test]
 fn test_encode_batch_from_gpu_ptr_amplitude_num_samples_zero() {
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let result =
@@ -218,15 +210,13 @@ fn test_encode_batch_from_gpu_ptr_amplitude_num_samples_zero() {
 
 #[test]
 fn test_encode_from_gpu_ptr_basis_input_len_not_one() {
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     // Need valid GPU pointer so we reach basis input_len checks (validation runs first)
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => return,
+    let Some(device) = common::cuda_device() else {
+        return;
     };
     let indices: Vec<usize> = vec![0, 1, 2];
     let indices_d = match device.htod_sync_copy(indices.as_slice()) {
@@ -262,15 +252,13 @@ fn test_encode_from_gpu_ptr_basis_input_len_not_one() {
 
 #[test]
 fn test_encode_batch_from_gpu_ptr_basis_sample_size_not_one() {
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     // Need valid GPU pointer so we reach basis sample_size check (validation runs first)
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => return,
+    let Some(device) = common::cuda_device() else {
+        return;
     };
     let indices: Vec<usize> = vec![0, 1];
     let indices_d = match device.htod_sync_copy(indices.as_slice()) {
@@ -297,24 +285,18 @@ fn test_encode_batch_from_gpu_ptr_basis_sample_size_not_one() {
 
 #[test]
 fn test_encode_from_gpu_ptr_amplitude_success() {
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let num_qubits = 4;
     let state_len = 1 << num_qubits;
     let data = common::create_test_data(state_len);
 
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => {
-            println!("SKIP: No CUDA device");
-            return;
-        }
+    let Some(device) = common::cuda_device() else {
+        println!("SKIP: No CUDA device");
+        return;
     };
 
     let data_d = match device.htod_sync_copy(data.as_slice()) {
@@ -348,24 +330,18 @@ fn test_encode_from_gpu_ptr_amplitude_success() {
 
 #[test]
 fn test_encode_from_gpu_ptr_with_stream_amplitude_success() {
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let num_qubits = 3;
     let state_len = 1 << num_qubits;
     let data = common::create_test_data(state_len);
 
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => {
-            println!("SKIP: No CUDA device");
-            return;
-        }
+    let Some(device) = common::cuda_device() else {
+        println!("SKIP: No CUDA device");
+        return;
     };
 
     let data_d = match device.htod_sync_copy(data.as_slice()) {
@@ -401,12 +377,9 @@ fn test_encode_from_gpu_ptr_with_stream_amplitude_success() {
 
 #[test]
 fn test_encode_batch_from_gpu_ptr_amplitude_success() {
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let num_qubits = 3;
@@ -416,12 +389,9 @@ fn test_encode_batch_from_gpu_ptr_amplitude_success() {
     let total = num_samples * sample_size;
     let data = common::create_test_data(total);
 
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => {
-            println!("SKIP: No CUDA device");
-            return;
-        }
+    let Some(device) = common::cuda_device() else {
+        println!("SKIP: No CUDA device");
+        return;
     };
 
     let data_d = match device.htod_sync_copy(data.as_slice()) {
@@ -452,23 +422,17 @@ fn test_encode_batch_from_gpu_ptr_amplitude_success() {
 #[test]
 fn test_encode_from_gpu_ptr_basis_success() {
     // Basis path uses ptr_f64(); engine must be Float64
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let num_qubits = 3;
     let basis_index: usize = 0;
 
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => {
-            println!("SKIP: No CUDA device");
-            return;
-        }
+    let Some(device) = common::cuda_device() else {
+        println!("SKIP: No CUDA device");
+        return;
     };
 
     let indices: Vec<usize> = vec![basis_index];
@@ -504,12 +468,9 @@ fn test_encode_from_gpu_ptr_basis_success() {
 #[test]
 fn test_encode_batch_from_gpu_ptr_basis_success() {
     // Basis path uses ptr_f64(); engine must be Float64
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let num_qubits = 3;
@@ -518,12 +479,9 @@ fn test_encode_batch_from_gpu_ptr_basis_success() {
     let state_len = 1 << num_qubits;
     let basis_indices: Vec<usize> = (0..num_samples).map(|i| i % state_len).collect();
 
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => {
-            println!("SKIP: No CUDA device");
-            return;
-        }
+    let Some(device) = common::cuda_device() else {
+        println!("SKIP: No CUDA device");
+        return;
     };
 
     let indices_d = match device.htod_sync_copy(basis_indices.as_slice()) {
@@ -553,9 +511,8 @@ fn test_encode_batch_from_gpu_ptr_basis_success() {
 
 #[test]
 fn test_encode_batch_from_gpu_ptr_iqp_success() {
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        return;
     };
     let num_qubits = 2;
     let state_len = 1 << num_qubits;
@@ -563,9 +520,8 @@ fn test_encode_batch_from_gpu_ptr_iqp_success() {
     let num_samples = 3;
     let total = num_samples * sample_size;
     let data: Vec<f64> = (0..total).map(|i| (i as f64) * 0.05).collect();
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => return,
+    let Some(device) = common::cuda_device() else {
+        return;
     };
     let data_d = match device.htod_sync_copy(data.as_slice()) {
         Ok(b) => b,
@@ -583,9 +539,8 @@ fn test_encode_batch_from_gpu_ptr_iqp_success() {
 
 #[test]
 fn test_encode_batch_from_gpu_ptr_iqp_z_success() {
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        return;
     };
     let num_qubits = 2;
     let state_len = 1 << num_qubits;
@@ -593,9 +548,8 @@ fn test_encode_batch_from_gpu_ptr_iqp_z_success() {
     let num_samples = 3;
     let total = num_samples * sample_size;
     let data: Vec<f64> = (0..total).map(|i| (i as f64) * 0.05).collect();
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => return,
+    let Some(device) = common::cuda_device() else {
+        return;
     };
     let data_d = match device.htod_sync_copy(data.as_slice()) {
         Ok(b) => b,
@@ -613,18 +567,16 @@ fn test_encode_batch_from_gpu_ptr_iqp_z_success() {
 
 #[test]
 fn test_encode_batch_from_gpu_ptr_iqp_wrong_sample_size() {
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        return;
     };
     let num_qubits = 2;
     let expected_sample_size = iqp_full_data_len(num_qubits);
     let wrong_sample_size = expected_sample_size + 1;
     let num_samples = 2;
     let data = vec![0.1_f64; num_samples * wrong_sample_size];
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => return,
+    let Some(device) = common::cuda_device() else {
+        return;
     };
     let data_d = match device.htod_sync_copy(data.as_slice()) {
         Ok(b) => b,
@@ -649,18 +601,16 @@ fn test_encode_batch_from_gpu_ptr_iqp_wrong_sample_size() {
 
 #[test]
 fn test_encode_batch_from_gpu_ptr_iqp_z_wrong_sample_size() {
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        return;
     };
     let num_qubits = 2;
     let expected_sample_size = iqp_z_data_len(num_qubits);
     let wrong_sample_size = expected_sample_size + 1;
     let num_samples = 2;
     let data = vec![0.1_f64; num_samples * wrong_sample_size];
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => return,
+    let Some(device) = common::cuda_device() else {
+        return;
     };
     let data_d = match device.htod_sync_copy(data.as_slice()) {
         Ok(b) => b,
@@ -685,23 +635,17 @@ fn test_encode_batch_from_gpu_ptr_iqp_z_wrong_sample_size() {
 
 #[test]
 fn test_encode_from_gpu_ptr_iqp_z_success() {
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let num_qubits = 2;
     let data = [0.1_f64, -0.2_f64];
 
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => {
-            println!("SKIP: No CUDA device");
-            return;
-        }
+    let Some(device) = common::cuda_device() else {
+        println!("SKIP: No CUDA device");
+        return;
     };
 
     let data_d = match device.htod_sync_copy(data.as_slice()) {
@@ -724,23 +668,17 @@ fn test_encode_from_gpu_ptr_iqp_z_success() {
 
 #[test]
 fn test_encode_from_gpu_ptr_iqp_success() {
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let num_qubits = 2;
     let data = [0.1_f64, -0.2_f64, 0.3_f64];
 
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => {
-            println!("SKIP: No CUDA device");
-            return;
-        }
+    let Some(device) = common::cuda_device() else {
+        println!("SKIP: No CUDA device");
+        return;
     };
 
     let data_d = match device.htod_sync_copy(data.as_slice()) {
@@ -763,16 +701,14 @@ fn test_encode_from_gpu_ptr_iqp_success() {
 
 #[test]
 fn test_encode_from_gpu_ptr_iqp_wrong_input_len() {
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        return;
     };
     let num_qubits = 2;
     let expected_len = iqp_full_data_len(num_qubits);
     let data = vec![0.1_f64; expected_len];
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => return,
+    let Some(device) = common::cuda_device() else {
+        return;
     };
     let data_d = match device.htod_sync_copy(data.as_slice()) {
         Ok(b) => b,
@@ -797,16 +733,14 @@ fn test_encode_from_gpu_ptr_iqp_wrong_input_len() {
 
 #[test]
 fn test_encode_from_gpu_ptr_iqp_z_wrong_input_len() {
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        return;
     };
     let num_qubits = 2;
     let expected_len = iqp_z_data_len(num_qubits);
     let data = vec![0.1_f64; expected_len];
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => return,
+    let Some(device) = common::cuda_device() else {
+        return;
     };
     let data_d = match device.htod_sync_copy(data.as_slice()) {
         Ok(b) => b,
@@ -826,15 +760,13 @@ fn test_encode_from_gpu_ptr_iqp_z_wrong_input_len() {
 
 #[test]
 fn test_encode_from_gpu_ptr_with_stream_iqp_success() {
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        return;
     };
     let num_qubits = 2;
     let data = [0.1_f64, -0.2_f64, 0.3_f64];
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => return,
+    let Some(device) = common::cuda_device() else {
+        return;
     };
     let data_d = match device.htod_sync_copy(data.as_slice()) {
         Ok(b) => b,
@@ -857,15 +789,13 @@ fn test_encode_from_gpu_ptr_with_stream_iqp_success() {
 
 #[test]
 fn test_encode_from_gpu_ptr_with_stream_iqp_z_success() {
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        return;
     };
     let num_qubits = 2;
     let data = [0.1_f64, -0.2_f64];
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => return,
+    let Some(device) = common::cuda_device() else {
+        return;
     };
     let data_d = match device.htod_sync_copy(data.as_slice()) {
         Ok(b) => b,
@@ -888,17 +818,15 @@ fn test_encode_from_gpu_ptr_with_stream_iqp_z_success() {
 
 #[test]
 fn test_encode_from_gpu_ptr_iqp_three_qubits() {
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        return;
     };
     let num_qubits = 3;
     let state_len = 1 << num_qubits;
     let expected_len = iqp_full_data_len(num_qubits);
     let data: Vec<f64> = (0..expected_len).map(|i| (i as f64) * 0.1).collect();
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => return,
+    let Some(device) = common::cuda_device() else {
+        return;
     };
     let data_d = match device.htod_sync_copy(data.as_slice()) {
         Ok(b) => b,
@@ -925,17 +853,15 @@ fn test_encode_from_gpu_ptr_iqp_three_qubits() {
 
 #[test]
 fn test_encode_from_gpu_ptr_iqp_z_three_qubits() {
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        return;
     };
     let num_qubits = 3;
     let state_len = 1 << num_qubits;
     let expected_len = iqp_z_data_len(num_qubits);
     let data: Vec<f64> = (0..expected_len).map(|i| (i as f64) * 0.1).collect();
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => return,
+    let Some(device) = common::cuda_device() else {
+        return;
     };
     let data_d = match device.htod_sync_copy(data.as_slice()) {
         Ok(b) => b,
@@ -1043,12 +969,9 @@ fn test_encode_from_gpu_ptr_f32_with_stream_non_default_success() {
 
 #[test]
 fn test_encode_from_gpu_ptr_f32_success_f64_engine() {
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64).ok() {
-        Some(e) => e,
-        None => {
-            println!("SKIP: No GPU");
-            return;
-        }
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        println!("SKIP: No GPU");
+        return;
     };
     let (_device, input_d) = match device_and_f32_slice(&[1.0, 0.0, 0.0, 0.0]) {
         Some(t) => t,
@@ -1203,12 +1126,9 @@ fn test_encode_batch_from_gpu_ptr_f32_with_stream_success() {
 
 #[test]
 fn test_encode_batch_from_gpu_ptr_f32_success_f64_engine() {
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64).ok() {
-        Some(e) => e,
-        None => {
-            println!("SKIP: No GPU");
-            return;
-        }
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        println!("SKIP: No GPU");
+        return;
     };
     let (_device, input_d) = match device_and_f32_slice(&[1.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 0.5]) {
         Some(t) => t,

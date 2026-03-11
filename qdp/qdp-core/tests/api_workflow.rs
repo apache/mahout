@@ -17,8 +17,6 @@
 // API workflow tests: Engine initialization and encoding
 
 #[cfg(target_os = "linux")]
-use cudarc::driver::CudaDevice;
-#[cfg(target_os = "linux")]
 use qdp_core::MahoutError;
 use qdp_core::QdpEngine;
 #[cfg(target_os = "linux")]
@@ -52,12 +50,9 @@ fn test_engine_initialization() {
 fn test_amplitude_encoding_workflow() {
     println!("Testing amplitude encoding workflow...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let data = common::create_test_data(1024);
@@ -88,12 +83,9 @@ fn test_amplitude_encoding_workflow() {
 fn test_amplitude_encoding_async_pipeline() {
     println!("Testing amplitude encoding async pipeline path...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     // Use 200000 elements to trigger async pipeline path (ASYNC_THRESHOLD = 131072)
@@ -124,12 +116,9 @@ fn test_amplitude_encoding_async_pipeline() {
 fn test_angle_encoding_async_pipeline() {
     println!("Testing angle encoding async pipeline path...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let num_qubits = 4;
@@ -161,12 +150,9 @@ fn test_angle_encoding_async_pipeline() {
 fn test_angle_async_alignment_error() {
     println!("Testing angle async pipeline alignment error...");
 
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(device) = common::cuda_device() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let misaligned_data = vec![0.0_f64; 10];
@@ -192,12 +178,9 @@ fn test_angle_async_alignment_error() {
 fn test_batch_dlpack_2d_shape() {
     println!("Testing batch DLPack 2D shape...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     // Create batch data: 3 samples, each with 4 elements (2 qubits)
@@ -268,12 +251,9 @@ fn test_batch_dlpack_2d_shape() {
 fn test_single_encode_dlpack_2d_shape() {
     println!("Testing single encode returns 2D shape...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let data = common::create_test_data(16);
@@ -324,12 +304,9 @@ fn test_single_encode_dlpack_2d_shape() {
 fn test_dlpack_device_id() {
     println!("Testing DLPack device_id propagation...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let data = common::create_test_data(16);

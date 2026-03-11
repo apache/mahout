@@ -14,6 +14,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[cfg(target_os = "linux")]
+use std::sync::Arc;
+
+#[cfg(target_os = "linux")]
+use cudarc::driver::CudaDevice;
+#[cfg(target_os = "linux")]
+use qdp_core::{Precision, QdpEngine};
+
 /// Creates normalized test data (f64)
 #[allow(dead_code)] // Used by multiple test modules
 pub fn create_test_data(size: usize) -> Vec<f64> {
@@ -24,4 +32,25 @@ pub fn create_test_data(size: usize) -> Vec<f64> {
 #[allow(dead_code)]
 pub fn create_test_data_f32(size: usize) -> Vec<f32> {
     (0..size).map(|i| (i as f32) / (size as f32)).collect()
+}
+
+/// Returns a CUDA device handle, or `None` when CUDA is unavailable for the test environment.
+#[cfg(target_os = "linux")]
+#[allow(dead_code)]
+pub fn cuda_device() -> Option<Arc<CudaDevice>> {
+    CudaDevice::new(0).ok()
+}
+
+/// Returns a QDP engine, or `None` when GPU-backed engine initialization is unavailable.
+#[cfg(target_os = "linux")]
+#[allow(dead_code)]
+pub fn qdp_engine() -> Option<QdpEngine> {
+    QdpEngine::new(0).ok()
+}
+
+/// Returns a QDP engine with the requested precision, or `None` when unavailable.
+#[cfg(target_os = "linux")]
+#[allow(dead_code)]
+pub fn qdp_engine_with_precision(precision: Precision) -> Option<QdpEngine> {
+    QdpEngine::new_with_precision(0, precision).ok()
 }

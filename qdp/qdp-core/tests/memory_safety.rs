@@ -16,7 +16,7 @@
 
 // Memory safety tests: DLPack lifecycle, RAII, Arc reference counting
 
-use qdp_core::{Precision, QdpEngine};
+use qdp_core::Precision;
 
 mod common;
 
@@ -26,12 +26,9 @@ fn test_memory_pressure() {
     println!("Testing memory pressure (leak detection)");
     println!("Running 100 iterations of encode + free");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let data = common::create_test_data(1024);
@@ -63,9 +60,8 @@ fn test_memory_pressure() {
 fn test_multiple_concurrent_states() {
     println!("Testing multiple concurrent state vectors...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data1 = common::create_test_data(256);
@@ -94,9 +90,8 @@ fn test_multiple_concurrent_states() {
 fn test_dlpack_tensor_metadata_default() {
     println!("Testing DLPack tensor metadata...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data = common::create_test_data(1024);
@@ -149,9 +144,8 @@ fn test_dlpack_tensor_metadata_default() {
 fn test_dlpack_tensor_metadata_f64() {
     println!("Testing DLPack tensor metadata...");
 
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        return;
     };
 
     let data = common::create_test_data(1024);
