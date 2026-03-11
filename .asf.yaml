@@ -49,7 +49,7 @@ github:
 
   pull_requests:
     # allow auto-merge
-    allow_auto_merge: false
+    allow_auto_merge: true
     # auto-delete head branches after being merged
     del_branch_on_merge: true
     # enable updating head branches of pull requests
