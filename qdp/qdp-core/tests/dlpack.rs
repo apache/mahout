@@ -45,24 +45,13 @@ mod dlpack_tests {
                 .expect("Failed to create batch state vector");
 
         let dlpack_ptr = state_vector.to_dlpack();
-        assert!(!dlpack_ptr.is_null());
-
         unsafe {
-            let tensor = &(*dlpack_ptr).dl_tensor;
-
-            // Verify ndim is 2
-            assert_eq!(tensor.ndim, 2, "DLPack tensor should be 2D for batch");
-
-            // Verify shape
-            let shape = std::slice::from_raw_parts(tensor.shape, 2);
-            assert_eq!(shape[0], num_samples as i64, "Batch size mismatch");
-            assert_eq!(shape[1], (1 << num_qubits) as i64, "State size mismatch");
-
-            // Clean up using the deleter
-            if let Some(deleter) = (*dlpack_ptr).deleter {
-                deleter(dlpack_ptr);
-            }
-        }
+            common::assert_dlpack_shape_2d_and_delete(
+                dlpack_ptr,
+                num_samples as i64,
+                (1 << num_qubits) as i64,
+            )
+        };
     }
 
     #[test]
@@ -76,27 +65,9 @@ mod dlpack_tests {
             .expect("Failed to create state vector");
 
         let dlpack_ptr = state_vector.to_dlpack();
-        assert!(!dlpack_ptr.is_null());
-
         unsafe {
-            let tensor = &(*dlpack_ptr).dl_tensor;
-
-            // Verify ndim is 2 (even for single sample, per the fix)
-            assert_eq!(
-                tensor.ndim, 2,
-                "DLPack tensor should be 2D for single sample"
-            );
-
-            // Verify shape
-            let shape = std::slice::from_raw_parts(tensor.shape, 2);
-            assert_eq!(shape[0], 1, "Batch size should be 1 for single sample");
-            assert_eq!(shape[1], (1 << num_qubits) as i64, "State size mismatch");
-
-            // Clean up using the deleter
-            if let Some(deleter) = (*dlpack_ptr).deleter {
-                deleter(dlpack_ptr);
-            }
-        }
+            common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 1, (1 << num_qubits) as i64)
+        };
     }
 
     #[test]
@@ -120,18 +91,9 @@ mod dlpack_tests {
         );
 
         let dlpack_ptr = state_vector.to_dlpack();
-        assert!(!dlpack_ptr.is_null());
-
         unsafe {
-            let tensor = &(*dlpack_ptr).dl_tensor;
-            assert_eq!(tensor.ndim, 2, "DLPack tensor should be 2D");
-            let shape = std::slice::from_raw_parts(tensor.shape, 2);
-            assert_eq!(shape[0], 1);
-            assert_eq!(shape[1], (1 << num_qubits) as i64);
-            if let Some(deleter) = (*dlpack_ptr).deleter {
-                deleter(dlpack_ptr);
-            }
-        }
+            common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 1, (1 << num_qubits) as i64)
+        };
     }
 
     #[test]
@@ -157,18 +119,13 @@ mod dlpack_tests {
         );
 
         let dlpack_ptr = state_vector.to_dlpack();
-        assert!(!dlpack_ptr.is_null());
-
         unsafe {
-            let tensor = &(*dlpack_ptr).dl_tensor;
-            assert_eq!(tensor.ndim, 2, "DLPack tensor should be 2D");
-            let shape = std::slice::from_raw_parts(tensor.shape, 2);
-            assert_eq!(shape[0], num_samples as i64);
-            assert_eq!(shape[1], (1 << num_qubits) as i64);
-            if let Some(deleter) = (*dlpack_ptr).deleter {
-                deleter(dlpack_ptr);
-            }
-        }
+            common::assert_dlpack_shape_2d_and_delete(
+                dlpack_ptr,
+                num_samples as i64,
+                (1 << num_qubits) as i64,
+            )
+        };
     }
 
     /// synchronize_stream(null) is a no-op and returns Ok(()) on all platforms.

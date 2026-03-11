@@ -39,12 +39,7 @@ fn test_memory_pressure() {
             .expect("Encoding should succeed");
 
         unsafe {
-            let managed = &mut *ptr;
-            let deleter = managed
-                .deleter
-                .take()
-                .expect("Deleter missing in pressure test!");
-            deleter(ptr);
+            common::take_deleter_and_delete(ptr);
         }
 
         if (i + 1) % 25 == 0 {
@@ -77,9 +72,9 @@ fn test_multiple_concurrent_states() {
     // Free in different order to test Arc reference counting
     unsafe {
         println!("Freeing in order: 2, 1, 3");
-        (&mut *ptr2).deleter.take().expect("Deleter missing!")(ptr2);
-        (&mut *ptr1).deleter.take().expect("Deleter missing!")(ptr1);
-        (&mut *ptr3).deleter.take().expect("Deleter missing!")(ptr3);
+        common::take_deleter_and_delete(ptr2);
+        common::take_deleter_and_delete(ptr1);
+        common::take_deleter_and_delete(ptr3);
     }
 
     println!("PASS: All states freed successfully");
@@ -131,11 +126,7 @@ fn test_dlpack_tensor_metadata_default() {
             tensor.dtype.code, tensor.dtype.bits
         );
 
-        let deleter = managed
-            .deleter
-            .take()
-            .expect("Deleter missing in metadata test!");
-        deleter(ptr);
+        common::take_deleter_and_delete(ptr);
     }
 }
 
@@ -186,10 +177,6 @@ fn test_dlpack_tensor_metadata_f64() {
             tensor.dtype.code, tensor.dtype.bits
         );
 
-        let deleter = managed
-            .deleter
-            .take()
-            .expect("Deleter missing in metadata test!");
-        deleter(ptr);
+        common::take_deleter_and_delete(ptr);
     }
 }

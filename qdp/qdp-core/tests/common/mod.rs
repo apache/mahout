@@ -18,7 +18,9 @@
 use std::sync::Arc;
 
 #[cfg(target_os = "linux")]
-use cudarc::driver::CudaDevice;
+use cudarc::driver::{CudaDevice, CudaSlice};
+#[cfg(target_os = "linux")]
+use qdp_core::dlpack::DLManagedTensor;
 #[cfg(target_os = "linux")]
 use qdp_core::{Precision, QdpEngine};
 
@@ -53,4 +55,72 @@ pub fn qdp_engine() -> Option<QdpEngine> {
 #[allow(dead_code)]
 pub fn qdp_engine_with_precision(precision: Precision) -> Option<QdpEngine> {
     QdpEngine::new_with_precision(0, precision).ok()
+}
+
+/// Copies f64 host data to the default CUDA device, or returns `None` when unavailable.
+#[cfg(target_os = "linux")]
+#[allow(dead_code)]
+pub fn copy_f64_to_device(data: &[f64]) -> Option<(Arc<CudaDevice>, CudaSlice<f64>)> {
+    let device = cuda_device()?;
+    let slice = device.htod_sync_copy(data).ok()?;
+    Some((device, slice))
+}
+
+/// Copies f32 host data to the default CUDA device, or returns `None` when unavailable.
+#[cfg(target_os = "linux")]
+#[allow(dead_code)]
+pub fn copy_f32_to_device(data: &[f32]) -> Option<(Arc<CudaDevice>, CudaSlice<f32>)> {
+    let device = cuda_device()?;
+    let slice = device.htod_sync_copy(data).ok()?;
+    Some((device, slice))
+}
+
+/// Copies usize host data to the default CUDA device, or returns `None` when unavailable.
+#[cfg(target_os = "linux")]
+#[allow(dead_code)]
+pub fn copy_usize_to_device(data: &[usize]) -> Option<(Arc<CudaDevice>, CudaSlice<usize>)> {
+    let device = cuda_device()?;
+    let slice = device.htod_sync_copy(data).ok()?;
+    Some((device, slice))
+}
+
+/// Asserts a DLPack tensor is 2D with the expected shape.
+#[cfg(target_os = "linux")]
+#[allow(dead_code)]
+pub unsafe fn assert_dlpack_shape_2d(dlpack_ptr: *mut DLManagedTensor, dim0: i64, dim1: i64) {
+    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
+
+    let tensor = unsafe { &(*dlpack_ptr).dl_tensor };
+    assert_eq!(tensor.ndim, 2, "DLPack tensor should be 2D");
+
+    let shape = unsafe { std::slice::from_raw_parts(tensor.shape, 2) };
+    assert_eq!(shape[0], dim0, "Unexpected first dimension");
+    assert_eq!(shape[1], dim1, "Unexpected second dimension");
+}
+
+/// Asserts a DLPack tensor is 2D with the expected shape and then frees it via its deleter.
+#[cfg(target_os = "linux")]
+#[allow(dead_code)]
+pub unsafe fn assert_dlpack_shape_2d_and_delete(
+    dlpack_ptr: *mut DLManagedTensor,
+    dim0: i64,
+    dim1: i64,
+) {
+    unsafe { assert_dlpack_shape_2d(dlpack_ptr, dim0, dim1) };
+
+    unsafe { take_deleter_and_delete(dlpack_ptr) };
+}
+
+/// Takes the DLPack deleter from the managed tensor and invokes it exactly once.
+#[cfg(target_os = "linux")]
+#[allow(dead_code)]
+pub unsafe fn take_deleter_and_delete(dlpack_ptr: *mut DLManagedTensor) {
+    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
+
+    let managed = unsafe { &mut *dlpack_ptr };
+    let deleter = managed
+        .deleter
+        .take()
+        .expect("DLPack deleter should be present");
+    unsafe { deleter(dlpack_ptr) };
 }

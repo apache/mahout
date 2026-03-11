@@ -65,15 +65,8 @@ fn test_amplitude_encoding_workflow() {
 
     // Simulate PyTorch behavior: manually call deleter to free GPU memory
     unsafe {
-        let managed = &mut *dlpack_ptr;
-        assert!(managed.deleter.is_some(), "Deleter must be present");
-
         println!("Calling deleter to free GPU memory");
-        let deleter = managed
-            .deleter
-            .take()
-            .expect("Deleter function pointer is missing!");
-        deleter(dlpack_ptr);
+        common::take_deleter_and_delete(dlpack_ptr);
         println!("PASS: Memory freed successfully");
     }
 }
@@ -98,15 +91,8 @@ fn test_amplitude_encoding_async_pipeline() {
     println!("PASS: Encoding succeeded, DLPack pointer valid");
 
     unsafe {
-        let managed = &mut *dlpack_ptr;
-        assert!(managed.deleter.is_some(), "Deleter must be present");
-
         println!("Calling deleter to free GPU memory");
-        let deleter = managed
-            .deleter
-            .take()
-            .expect("Deleter function pointer is missing!");
-        deleter(dlpack_ptr);
+        common::take_deleter_and_delete(dlpack_ptr);
         println!("PASS: Memory freed successfully");
     }
 }
@@ -132,15 +118,8 @@ fn test_angle_encoding_async_pipeline() {
     println!("PASS: Angle batch encoding succeeded, DLPack pointer valid");
 
     unsafe {
-        let managed = &mut *dlpack_ptr;
-        assert!(managed.deleter.is_some(), "Deleter must be present");
-
         println!("Calling deleter to free GPU memory");
-        let deleter = managed
-            .deleter
-            .take()
-            .expect("Deleter function pointer is missing!");
-        deleter(dlpack_ptr);
+        common::take_deleter_and_delete(dlpack_ptr);
         println!("PASS: Memory freed successfully");
     }
 }
@@ -199,25 +178,12 @@ fn test_batch_dlpack_2d_shape() {
         "amplitude",
     );
     let dlpack_ptr = result.expect("Batch encoding should succeed");
-    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
 
     unsafe {
-        let managed = &*dlpack_ptr;
+        let managed = &mut *dlpack_ptr;
         let tensor = &managed.dl_tensor;
 
-        // Verify 2D shape for batch tensor
-        assert_eq!(tensor.ndim, 2, "Batch tensor should be 2D");
-
-        let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
-        assert_eq!(
-            shape_slice[0], num_samples as i64,
-            "First dimension should be num_samples"
-        );
-        assert_eq!(
-            shape_slice[1],
-            (1 << num_qubits) as i64,
-            "Second dimension should be 2^num_qubits"
-        );
+        common::assert_dlpack_shape_2d(dlpack_ptr, num_samples as i64, (1 << num_qubits) as i64);
 
         let strides_slice = std::slice::from_raw_parts(tensor.strides, tensor.ndim as usize);
         let state_len = 1 << num_qubits;
@@ -232,17 +198,15 @@ fn test_batch_dlpack_2d_shape() {
 
         println!(
             "PASS: Batch DLPack tensor has correct 2D shape: [{}, {}]",
-            shape_slice[0], shape_slice[1]
+            num_samples,
+            1 << num_qubits
         );
         println!(
             "PASS: Strides are correct: [{}, {}]",
             strides_slice[0], strides_slice[1]
         );
 
-        // Free memory
-        if let Some(deleter) = managed.deleter {
-            deleter(dlpack_ptr);
-        }
+        common::take_deleter_and_delete(dlpack_ptr);
     }
 }
 
@@ -261,21 +225,12 @@ fn test_single_encode_dlpack_2d_shape() {
     assert!(result.is_ok(), "Encoding should succeed");
 
     let dlpack_ptr = result.unwrap();
-    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
 
     unsafe {
-        let managed = &*dlpack_ptr;
+        let managed = &mut *dlpack_ptr;
         let tensor = &managed.dl_tensor;
 
-        // Verify 2D shape for single encode: [1, 2^num_qubits]
-        assert_eq!(tensor.ndim, 2, "Single encode should be 2D");
-
-        let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
-        assert_eq!(
-            shape_slice[0], 1,
-            "First dimension should be 1 for single encode"
-        );
-        assert_eq!(shape_slice[1], 16, "Second dimension should be [2^4]");
+        common::assert_dlpack_shape_2d(dlpack_ptr, 1, 16);
 
         let strides_slice = std::slice::from_raw_parts(tensor.strides, tensor.ndim as usize);
         assert_eq!(
@@ -287,15 +242,9 @@ fn test_single_encode_dlpack_2d_shape() {
             "Stride for second dimension should be 1"
         );
 
-        println!(
-            "PASS: Single encode returns 2D shape: [{}, {}]",
-            shape_slice[0], shape_slice[1]
-        );
+        println!("PASS: Single encode returns 2D shape: [{}, {}]", 1, 16);
 
-        // Free memory
-        if let Some(deleter) = managed.deleter {
-            deleter(dlpack_ptr);
-        }
+        common::take_deleter_and_delete(dlpack_ptr);
     }
 }
 
@@ -339,8 +288,6 @@ fn test_dlpack_device_id() {
         );
 
         // Free memory
-        if let Some(deleter) = managed.deleter {
-            deleter(dlpack_ptr);
-        }
+        common::take_deleter_and_delete(dlpack_ptr);
     }
 }
