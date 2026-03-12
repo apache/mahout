@@ -380,7 +380,7 @@ impl QdpEngine {
     }
 
     /// Internal helper to encode from file based on extension.
-    /// When the `remote-io` feature is enabled, `s3://` URLs are supported.
+    /// When the `remote-io` feature is enabled, `s3://` and `gs://` URLs are supported.
     fn encode_from_file(
         &self,
         path: &str,
@@ -667,7 +667,7 @@ impl QdpEngine {
             nh,
         );
         let engine = self.engine.clone();
-        // Resolve S3 URLs before detaching from GIL. The _resolved guard keeps the
+        // Resolve remote URLs before detaching from GIL. The _resolved guard keeps the
         // temp file alive until after the file is fully read inside py.detach.
         #[cfg(feature = "remote-io")]
         let _resolved = qdp_core::remote::resolve_path(path_str.as_str()).map_err(|e| {
@@ -715,7 +715,7 @@ impl QdpEngine {
             nh,
         );
         let engine = self.engine.clone();
-        // Resolve S3 URLs before detaching from GIL. The _resolved guard keeps the
+        // Resolve remote URLs before detaching from GIL. The _resolved guard keeps the
         // temp file alive; the streaming reader's open fd preserves data after drop.
         #[cfg(feature = "remote-io")]
         let _resolved = qdp_core::remote::resolve_path(path_str.as_str()).map_err(|e| {

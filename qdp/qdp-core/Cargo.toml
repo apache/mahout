@@ -16,7 +16,7 @@ ndarray-npy = { workspace = true }
 prost = { workspace = true }
 bytes = { workspace = true }
 tch = { workspace = true, optional = true }
-object_store = { workspace = true, features = ["aws"], optional = true }
+object_store = { workspace = true, features = ["aws", "gcp"], optional = true }
 tokio = { workspace = true, features = ["rt"], optional = true }
 tempfile = { workspace = true, optional = true }
 futures = { version = "0.3", default-features = false, optional = true }

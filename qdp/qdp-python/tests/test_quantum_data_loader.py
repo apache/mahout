@@ -187,7 +187,7 @@ def test_null_handling_default_is_none() -> None:
     assert loader._null_handling is None
 
 
-# --- S3 URL (source_file) builder tests ---
+# --- Remote URL (source_file) builder tests ---
 
 
 @pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
@@ -196,20 +196,22 @@ def test_null_handling_default_is_none() -> None:
     [
         ("s3://my-bucket/data.parquet", False),
         ("s3://bucket/path/to/data.parquet", True),
-        ("s3://bucket/data.parquet?versionId=abc123", False),
-        ("s3://bucket/data.parquet?versionId=abc123", True),
         ("s3://bucket/data.npy", False),
+        ("gs://my-bucket/data.parquet", False),
+        ("gs://bucket/path/to/data.parquet", True),
+        ("gs://bucket/data.npy", False),
     ],
     ids=[
         "parquet-no-stream",
         "parquet-stream",
-        "parquet-query-no-stream",
-        "parquet-query-stream",
         "npy-no-stream",
+        "gcs-parquet-no-stream",
+        "gcs-parquet-stream",
+        "gcs-npy-no-stream",
     ],
 )
-def test_source_file_s3_accepted(path, streaming):
-    """source_file() accepts valid S3 URLs at builder level."""
+def test_source_file_remote_url_accepted(path, streaming):
+    """source_file() accepts valid remote URLs at builder level."""
     loader = (
         QuantumDataLoader(device_id=0)
         .qubits(4)
@@ -226,15 +228,34 @@ def test_source_file_s3_accepted(path, streaming):
     "path",
     [
         "s3://bucket/data.npy",
-        "s3://bucket/data.npy?versionId=abc",
+        "gs://bucket/data.npy",
     ],
-    ids=["npy", "npy-query"],
+    ids=["s3-npy", "gcs-npy"],
 )
-def test_source_file_s3_streaming_non_parquet_raises(path):
-    """source_file(s3://..., streaming=True) with non-.parquet raises ValueError."""
+def test_source_file_remote_streaming_non_parquet_raises(path):
+    """source_file(remote://..., streaming=True) with non-.parquet raises ValueError."""
     with pytest.raises(ValueError) as exc_info:
         QuantumDataLoader(device_id=0).qubits(4).batches(10, size=4).source_file(
             path, streaming=True
         )
     msg = str(exc_info.value).lower()
     assert "parquet" in msg or "streaming" in msg
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+@pytest.mark.parametrize(
+    "path",
+    [
+        "s3://bucket/data.parquet?versionId=abc",
+        "s3://bucket/data.parquet#v1",
+        "gs://bucket/data.parquet?generation=123",
+        "gs://bucket/data.parquet#v2",
+    ],
+    ids=["s3-query", "s3-fragment", "gcs-query", "gcs-fragment"],
+)
+def test_source_file_remote_query_fragment_raises(path):
+    """source_file(remote://...?... or ...#...) raises ValueError."""
+    with pytest.raises(ValueError) as exc_info:
+        QuantumDataLoader(device_id=0).qubits(4).batches(10, size=4).source_file(path)
+    msg = str(exc_info.value).lower()
+    assert "query" in msg or "fragment" in msg or "scheme://bucket/key" in msg
