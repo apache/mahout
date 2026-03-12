@@ -25,6 +25,9 @@ use std::ffi::c_void;
 #[cfg(target_os = "linux")]
 use std::sync::Arc;
 
+#[cfg(target_os = "linux")]
+use crate::error::cuda_error_to_string;
+
 /// Precision of the GPU state vector.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Precision {
@@ -38,17 +41,6 @@ use crate::gpu::cuda_ffi::{cudaFreeHost, cudaHostAlloc, cudaMemGetInfo};
 #[cfg(target_os = "linux")]
 fn bytes_to_mib(bytes: usize) -> f64 {
     bytes as f64 / (1024.0 * 1024.0)
-}
-
-#[cfg(target_os = "linux")]
-fn cuda_error_to_string(code: i32) -> &'static str {
-    match code {
-        0 => "cudaSuccess",
-        2 => "cudaErrorMemoryAllocation",
-        3 => "cudaErrorInitializationError",
-        30 => "cudaErrorUnknown",
-        _ => "Unknown CUDA error",
-    }
 }
 
 #[cfg(target_os = "linux")]
@@ -342,9 +334,14 @@ impl GpuStateVector {
         self.size_elements
     }
 
-    /// Create GPU state vector for a batch of samples
-    /// Allocates num_samples * 2^qubits complex numbers on GPU
-    pub fn new_batch(_device: &Arc<CudaDevice>, num_samples: usize, qubits: usize) -> Result<Self> {
+    /// Create GPU state vector for a batch of samples with the given precision.
+    /// Allocates `num_samples * 2^qubits` complex numbers on GPU.
+    pub fn new_batch(
+        _device: &Arc<CudaDevice>,
+        num_samples: usize,
+        qubits: usize,
+        precision: Precision,
+    ) -> Result<Self> {
         let single_state_size: usize = 1usize << qubits;
         let total_elements = num_samples.checked_mul(single_state_size).ok_or_else(|| {
             MahoutError::MemoryAllocation(format!(
@@ -355,34 +352,51 @@ impl GpuStateVector {
 
         #[cfg(target_os = "linux")]
         {
-            let requested_bytes = total_elements
-                .checked_mul(std::mem::size_of::<CuDoubleComplex>())
-                .ok_or_else(|| {
-                    MahoutError::MemoryAllocation(format!(
-                        "Requested GPU allocation size overflow (elements={})",
-                        total_elements
-                    ))
-                })?;
+            let buffer = match precision {
+                Precision::Float32 => {
+                    let requested_bytes = total_elements
+                        .checked_mul(std::mem::size_of::<CuComplex>())
+                        .ok_or_else(|| {
+                            MahoutError::MemoryAllocation(format!(
+                                "Requested GPU allocation size overflow (elements={})",
+                                total_elements
+                            ))
+                        })?;
 
-            // Pre-flight check
-            ensure_device_memory_available(
-                requested_bytes,
-                "batch state vector allocation",
-                Some(qubits),
-            )?;
+                    let context = "batch state vector allocation (f32)";
+                    ensure_device_memory_available(requested_bytes, context, Some(qubits))?;
 
-            let slice =
-                unsafe { _device.alloc::<CuDoubleComplex>(total_elements) }.map_err(|e| {
-                    map_allocation_error(
-                        requested_bytes,
-                        "batch state vector allocation",
-                        Some(qubits),
-                        e,
-                    )
-                })?;
+                    let slice =
+                        unsafe { _device.alloc::<CuComplex>(total_elements) }.map_err(|e| {
+                            map_allocation_error(requested_bytes, context, Some(qubits), e)
+                        })?;
+
+                    BufferStorage::F32(GpuBufferRaw { slice })
+                }
+                Precision::Float64 => {
+                    let requested_bytes = total_elements
+                        .checked_mul(std::mem::size_of::<CuDoubleComplex>())
+                        .ok_or_else(|| {
+                            MahoutError::MemoryAllocation(format!(
+                                "Requested GPU allocation size overflow (elements={})",
+                                total_elements
+                            ))
+                        })?;
+
+                    let context = "batch state vector allocation";
+                    ensure_device_memory_available(requested_bytes, context, Some(qubits))?;
+
+                    let slice = unsafe { _device.alloc::<CuDoubleComplex>(total_elements) }
+                        .map_err(|e| {
+                            map_allocation_error(requested_bytes, context, Some(qubits), e)
+                        })?;
+
+                    BufferStorage::F64(GpuBufferRaw { slice })
+                }
+            };
 
             Ok(Self {
-                buffer: Arc::new(BufferStorage::F64(GpuBufferRaw { slice })),
+                buffer: Arc::new(buffer),
                 num_qubits: qubits,
                 size_elements: total_elements,
                 num_samples: Some(num_samples),

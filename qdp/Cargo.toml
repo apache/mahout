@@ -39,6 +39,12 @@ bytes = "1.11"
 tch = "0.22"
 # Optional: vendored protoc to avoid build failures when protoc is missing
 protoc-bin-vendored = "3"
+# Remote I/O (S3, GCS, Azure) via object_store
+object_store = "0.11"
+# Minimal tokio runtime for async object_store calls
+tokio = { version = "1", default-features = false }
+# Temp file for remote downloads
+tempfile = "3"
 
 # Release profile optimizations
 [profile.release]

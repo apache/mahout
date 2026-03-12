@@ -24,12 +24,13 @@ use arrow::datatypes::DataType;
 use arrow::ipc::reader::FileReader as ArrowFileReader;
 
 use crate::error::{MahoutError, Result};
-use crate::reader::DataReader;
+use crate::reader::{DataReader, NullHandling, handle_float64_nulls};
 
 /// Reader for Arrow IPC files containing FixedSizeList<Float64> or List<Float64> columns.
 pub struct ArrowIPCReader {
     path: std::path::PathBuf,
     read: bool,
+    null_handling: NullHandling,
 }
 
 impl ArrowIPCReader {
@@ -37,7 +38,8 @@ impl ArrowIPCReader {
     ///
     /// # Arguments
     /// * `path` - Path to the Arrow IPC file (.arrow or .feather)
-    pub fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
+    /// * `null_handling` - Policy for null values (defaults to `FillZero`)
+    pub fn new<P: AsRef<Path>>(path: P, null_handling: NullHandling) -> Result<Self> {
         let path = path.as_ref();
 
         // Verify file exists
@@ -49,11 +51,14 @@ impl ArrowIPCReader {
                 )));
             }
             Err(e) => {
-                return Err(MahoutError::Io(format!(
-                    "Failed to check if Arrow IPC file exists at {}: {}",
-                    path.display(),
-                    e
-                )));
+                return Err(MahoutError::IoWithSource {
+                    message: format!(
+                        "Failed to check if Arrow IPC file exists at {}: {}",
+                        path.display(),
+                        e
+                    ),
+                    source: e,
+                });
             }
             Ok(true) => {}
         }
@@ -61,6 +66,7 @@ impl ArrowIPCReader {
         Ok(Self {
             path: path.to_path_buf(),
             read: false,
+            null_handling,
         })
     }
 }
@@ -74,8 +80,10 @@ impl DataReader for ArrowIPCReader {
         }
         self.read = true;
 
-        let file = File::open(&self.path)
-            .map_err(|e| MahoutError::Io(format!("Failed to open Arrow IPC file: {}", e)))?;
+        let file = File::open(&self.path).map_err(|e| MahoutError::IoWithSource {
+            message: format!("Failed to open Arrow IPC file: {}", e),
+            source: e,
+        })?;
 
         let reader = ArrowFileReader::try_new(file, None)
             .map_err(|e| MahoutError::Io(format!("Failed to create Arrow IPC reader: {}", e)))?;
@@ -131,11 +139,7 @@ impl DataReader for ArrowIPCReader {
                         .downcast_ref::<Float64Array>()
                         .ok_or_else(|| MahoutError::Io("Values must be Float64".to_string()))?;
 
-                    if float_array.null_count() == 0 {
-                        all_data.extend_from_slice(float_array.values());
-                    } else {
-                        all_data.extend(float_array.iter().map(|opt| opt.unwrap_or(0.0)));
-                    }
+                    handle_float64_nulls(&mut all_data, float_array, self.null_handling)?;
 
                     num_samples += list_array.len();
                 }
@@ -177,11 +181,7 @@ impl DataReader for ArrowIPCReader {
                             all_data.reserve(new_capacity);
                         }
 
-                        if float_array.null_count() == 0 {
-                            all_data.extend_from_slice(float_array.values());
-                        } else {
-                            all_data.extend(float_array.iter().map(|opt| opt.unwrap_or(0.0)));
-                        }
+                        handle_float64_nulls(&mut all_data, float_array, self.null_handling)?;
 
                         num_samples += 1;
                     }

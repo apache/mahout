@@ -1,0 +1,293 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one or more
+// contributor license agreements.  See the NOTICE file distributed with
+// this work for additional information regarding copyright ownership.
+// The ASF licenses this file to You under the Apache License, Version 2.0
+// (the "License"); you may not use this file except in compliance with
+// the License.  You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// API workflow tests: Engine initialization and encoding
+
+#[cfg(target_os = "linux")]
+use qdp_core::MahoutError;
+use qdp_core::QdpEngine;
+#[cfg(target_os = "linux")]
+use qdp_core::gpu::pipeline::run_dual_stream_pipeline_aligned;
+
+mod common;
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_engine_initialization() {
+    println!("Testing QdpEngine initialization...");
+
+    let engine = QdpEngine::new(0);
+
+    match engine {
+        Ok(_) => println!("PASS: Engine initialized successfully"),
+        Err(e) => {
+            println!(
+                "SKIP: CUDA initialization failed (no GPU available): {:?}",
+                e
+            );
+            return;
+        }
+    }
+
+    assert!(engine.is_ok());
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_amplitude_encoding_workflow() {
+    println!("Testing amplitude encoding workflow...");
+
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
+    };
+
+    let data = common::create_test_data(1024);
+    println!("Created test data: {} elements", data.len());
+
+    let result = engine.encode(&data, 10, "amplitude");
+    let dlpack_ptr = result.expect("Encoding should succeed");
+    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
+    println!("PASS: Encoding succeeded, DLPack pointer valid");
+
+    // Simulate PyTorch behavior: manually call deleter to free GPU memory
+    unsafe {
+        println!("Calling deleter to free GPU memory");
+        common::take_deleter_and_delete(dlpack_ptr);
+        println!("PASS: Memory freed successfully");
+    }
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_amplitude_encoding_async_pipeline() {
+    println!("Testing amplitude encoding async pipeline path...");
+
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
+    };
+
+    // Use 200000 elements to trigger async pipeline path (ASYNC_THRESHOLD = 131072)
+    let data = common::create_test_data(200000);
+    println!("Created test data: {} elements", data.len());
+
+    let result = engine.encode(&data, 18, "amplitude");
+    let dlpack_ptr = result.expect("Encoding should succeed");
+    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
+    println!("PASS: Encoding succeeded, DLPack pointer valid");
+
+    unsafe {
+        println!("Calling deleter to free GPU memory");
+        common::take_deleter_and_delete(dlpack_ptr);
+        println!("PASS: Memory freed successfully");
+    }
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_angle_encoding_async_pipeline() {
+    println!("Testing angle encoding async pipeline path...");
+
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
+    };
+
+    let num_qubits = 4;
+    let sample_size = num_qubits;
+    let num_samples = 32768; // 32768 * 4 = 131072 elements (>= 1MB threshold)
+    let batch_data = common::create_test_data(num_samples * sample_size);
+
+    let result = engine.encode_batch(&batch_data, num_samples, sample_size, num_qubits, "angle");
+    let dlpack_ptr = result.expect("Angle batch encoding should succeed");
+    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
+    println!("PASS: Angle batch encoding succeeded, DLPack pointer valid");
+
+    unsafe {
+        println!("Calling deleter to free GPU memory");
+        common::take_deleter_and_delete(dlpack_ptr);
+        println!("PASS: Memory freed successfully");
+    }
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_angle_async_alignment_error() {
+    println!("Testing angle async pipeline alignment error...");
+
+    let Some(device) = common::cuda_device() else {
+        println!("SKIP: No GPU available");
+        return;
+    };
+
+    let misaligned_data = vec![0.0_f64; 10];
+    let result =
+        run_dual_stream_pipeline_aligned(&device, &misaligned_data, 4, |_, _, _, _| Ok(()));
+
+    match result {
+        Err(MahoutError::InvalidInput(msg)) => {
+            assert!(
+                msg.contains("not aligned"),
+                "Expected alignment error, got: {}",
+                msg
+            );
+            println!("PASS: Alignment error surfaced as expected");
+        }
+        Err(e) => panic!("Unexpected error: {:?}", e),
+        Ok(_) => panic!("Expected alignment error, got Ok"),
+    }
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_batch_dlpack_2d_shape() {
+    println!("Testing batch DLPack 2D shape...");
+
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
+    };
+
+    // Create batch data: 3 samples, each with 4 elements (2 qubits)
+    let num_samples = 3;
+    let num_qubits = 2;
+    let sample_size = 4;
+    let batch_data: Vec<f64> = (0..num_samples * sample_size)
+        .map(|i| (i as f64) / 10.0)
+        .collect();
+
+    let result = engine.encode_batch(
+        &batch_data,
+        num_samples,
+        sample_size,
+        num_qubits,
+        "amplitude",
+    );
+    let dlpack_ptr = result.expect("Batch encoding should succeed");
+
+    unsafe {
+        let managed = &mut *dlpack_ptr;
+        let tensor = &managed.dl_tensor;
+
+        common::assert_dlpack_shape_2d(dlpack_ptr, num_samples as i64, (1 << num_qubits) as i64);
+
+        let strides_slice = std::slice::from_raw_parts(tensor.strides, tensor.ndim as usize);
+        let state_len = 1 << num_qubits;
+        assert_eq!(
+            strides_slice[0], state_len as i64,
+            "Stride for first dimension should be state_len"
+        );
+        assert_eq!(
+            strides_slice[1], 1,
+            "Stride for second dimension should be 1"
+        );
+
+        println!(
+            "PASS: Batch DLPack tensor has correct 2D shape: [{}, {}]",
+            num_samples,
+            1 << num_qubits
+        );
+        println!(
+            "PASS: Strides are correct: [{}, {}]",
+            strides_slice[0], strides_slice[1]
+        );
+
+        common::take_deleter_and_delete(dlpack_ptr);
+    }
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_single_encode_dlpack_2d_shape() {
+    println!("Testing single encode returns 2D shape...");
+
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
+    };
+
+    let data = common::create_test_data(16);
+    let result = engine.encode(&data, 4, "amplitude");
+    assert!(result.is_ok(), "Encoding should succeed");
+
+    let dlpack_ptr = result.unwrap();
+
+    unsafe {
+        let managed = &mut *dlpack_ptr;
+        let tensor = &managed.dl_tensor;
+
+        common::assert_dlpack_shape_2d(dlpack_ptr, 1, 16);
+
+        let strides_slice = std::slice::from_raw_parts(tensor.strides, tensor.ndim as usize);
+        assert_eq!(
+            strides_slice[0], 16,
+            "Stride for first dimension should be state_len"
+        );
+        assert_eq!(
+            strides_slice[1], 1,
+            "Stride for second dimension should be 1"
+        );
+
+        println!("PASS: Single encode returns 2D shape: [{}, {}]", 1, 16);
+
+        common::take_deleter_and_delete(dlpack_ptr);
+    }
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_dlpack_device_id() {
+    println!("Testing DLPack device_id propagation...");
+
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
+    };
+
+    let data = common::create_test_data(16);
+    let result = engine.encode(&data, 4, "amplitude");
+    assert!(result.is_ok(), "Encoding should succeed");
+
+    let dlpack_ptr = result.unwrap();
+    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
+
+    unsafe {
+        let managed = &*dlpack_ptr;
+        let tensor = &managed.dl_tensor;
+
+        // Verify device_id is correctly set (0 for device 0)
+        assert_eq!(
+            tensor.device.device_id, 0,
+            "device_id should be 0 for device 0"
+        );
+
+        // Verify device_type is CUDA (kDLCUDA = 2)
+        use qdp_core::dlpack::DLDeviceType;
+        match tensor.device.device_type {
+            DLDeviceType::kDLCUDA => println!("PASS: Device type is CUDA"),
+            _ => panic!("Expected CUDA device type"),
+        }
+
+        println!(
+            "PASS: DLPack device_id correctly set to {}",
+            tensor.device.device_id
+        );
+
+        // Free memory
+        common::take_deleter_and_delete(dlpack_ptr);
+    }
+}

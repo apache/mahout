@@ -10,12 +10,14 @@ Mahout follows the principles of the Apache Software Foundation — openness, tr
 
 This page explains the official communication channels, how to participate, and how to contribute to the project.
 
-<!-- <<<<<<< other -->
 There are numerous ways to engage with the Mahout community, no matter your background or skill level. Some options include:
+
 ## Biweekly Community Meeting
-Apache Mahout is committed to work consistently and conducts its meetings once in two weeks. To get invovled, please subscribe Google Calendar to view and join the meeting.
+
+Apache Mahout holds a community meeting every two weeks. To get involved, subscribe to the Google Calendar to view and join the meeting.
+
 [Meeting Link](https://calendar.google.com/calendar/u/0/r?cid=ZGM4MWY4MTYxYjcyYTRkNGM4ZTVkYjU4MjI5MzYzZWUxMzkxZDllNWU5ZWI1NzUyNzliZTdmN2NhOGQ2ODUzMUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t)
-=======
+
 ---
 
 ## How to Participate
@@ -32,7 +34,6 @@ All official communication for Mahout happens on Apache-managed public mailing l
   https://lists.apache.org/list.html?dev@mahout.apache.org
 
 To subscribe, send an empty email to:
-<!-- >>>>>>> main -->
 
 - `user-subscribe@mahout.apache.org`
 - `dev-subscribe@mahout.apache.org`

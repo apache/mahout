@@ -1,3 +1,8 @@
+---
+title: QDP Core Test Suite
+sidebar_label: Testing
+---
+
 # QDP Core Test Suite
 
 Unit tests for QDP core library covering input validation, API workflows, and memory safety.
@@ -42,9 +47,9 @@ Unit tests for QDP core library covering input validation, API workflows, and me
 cargo test --package qdp-core
 
 # Run specific test file
-cargo test --package qdp-core --test validation
-cargo test --package qdp-core --test api_workflow
-cargo test --package qdp-core --test memory_safety
+cargo test --package qdp-core --test gpu_validation
+cargo test --package qdp-core --test gpu_api_workflow
+cargo test --package qdp-core --test gpu_memory_safety
 ```
 
 ## Requirements

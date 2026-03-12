@@ -14,8 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import numpy as np
 from functools import reduce
+
+import numpy as np
+
 from qumat.qumat import QuMat
 
 
@@ -49,7 +51,7 @@ def get_backend_config(backend_name: str) -> dict | None:
 
 
 class BinaryString(str):
-    def __new__(cls, value):
+    def __new__(cls, value):  # noqa: ANN204
         if not all(char in ["0", "1"] for char in value):
             raise ValueError("String contains characters other than '0' and '1'")
         return str.__new__(cls, value)
@@ -57,20 +59,22 @@ class BinaryString(str):
 
 def create_np_computational_basis_state(
     ket_str: BinaryString, np_dtype: str = "complex128"
-) -> np.array:
+) -> np.ndarray:
     single_qubit_state_dict = {
         "0": np.array([1, 0], dtype=np_dtype),
         "1": np.array([0, 1], dtype=np_dtype),
     }
 
-    single_qubit_vectors = map(single_qubit_state_dict.get, ket_str)
-    computational_basis_vector = reduce(np.kron, single_qubit_vectors)
+    single_qubit_vectors = [single_qubit_state_dict[c] for c in ket_str]
+    computational_basis_vector = reduce(
+        lambda a, b: np.kron(a, b), single_qubit_vectors
+    )
 
     return computational_basis_vector
 
 
 def get_qumat_example_final_state_vector(
-    backend_config: dict, initial_state_ket_str: BinaryString = BinaryString("000")
+    backend_config: dict, initial_state_ket_str: str = "000"
 ):
     n_qubits = len(initial_state_ket_str)
     assert n_qubits == 3, print(

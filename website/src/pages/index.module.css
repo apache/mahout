@@ -68,22 +68,23 @@
   margin-bottom: 0.5rem;
 }
 
-.downloadButton {
-  background-color: white;
-  color: #00838f;
-  border: 2px solid white;
-  font-weight: 600;
-  padding: 1rem 2rem;
-  box-shadow: 0 0.1rem 0.5rem rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease;
+.pipInstall {
+  display: inline-block;
+  background-color: rgba(0, 0, 0, 0.35);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  font-size: 1.25rem;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
 }
 
-.downloadButton:hover {
-  background-color: #f5f5f5;
-  border-color: #f5f5f5;
-  color: #333;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.pipInstall:hover {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  text-decoration: none;
 }
 
 .versionText {
@@ -220,7 +221,8 @@
     width: auto;
   }
 
-  .downloadButton {
-    padding: 0.75rem 1.5rem;
+  .pipInstall {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
   }
 }

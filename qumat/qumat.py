@@ -31,7 +31,7 @@ class QuMat:
     :type backend_config: dict
     """
 
-    def __init__(self, backend_config):
+    def __init__(self, backend_config) -> None:
         """Create a QuMat instance with the specified backend configuration.
 
         :param backend_config: Configuration dictionary containing backend name
@@ -60,17 +60,17 @@ class QuMat:
                 "Please provide a dictionary with backend-specific options "
             )
 
-        self.backend_config = backend_config
-        self.backend_name = backend_config["backend_name"]
+        self.backend_config = backend_config.copy()
+        self.backend_name = self.backend_config["backend_name"]
         self.backend_module = import_module(
             f".{self.backend_name}_backend", package="qumat"
         )
-        self.backend = self.backend_module.initialize_backend(backend_config)
+        self.backend = self.backend_module.initialize_backend(self.backend_config)
         self.circuit = None
         self.num_qubits = None
         self.parameters = {}
 
-    def create_empty_circuit(self, num_qubits: int | None = None):
+    def create_empty_circuit(self, num_qubits: int | None = None) -> None:
         """Create an empty quantum circuit with the specified number of qubits.
 
         Must be called before applying any gates or executing operations.
@@ -82,7 +82,7 @@ class QuMat:
         self.num_qubits = num_qubits
         self.circuit = self.backend_module.create_empty_circuit(num_qubits)
 
-    def _ensure_circuit_initialized(self):
+    def _ensure_circuit_initialized(self) -> None:
         """Ensure the circuit has been created before operations.
 
         Checks if the circuit has been initialized via ``create_empty_circuit()``.
@@ -96,7 +96,7 @@ class QuMat:
                 "before applying gates or executing operations."
             )
 
-    def _validate_qubit_index(self, qubit_index, param_name="qubit_index"):
+    def _validate_qubit_index(self, qubit_index, param_name="qubit_index") -> None:
         """validate qubit index is within circuit bounds.
 
         :param qubit_index: the qubit index to validate.
@@ -118,7 +118,7 @@ class QuMat:
                 f"{self.num_qubits} qubits (valid range: 0-{self.num_qubits - 1})"
             )
 
-    def apply_not_gate(self, qubit_index):
+    def apply_not_gate(self, qubit_index) -> None:
         """Apply a NOT gate (Pauli-X gate) to the specified qubit.
 
         Flips the qubit state from |0⟩ to |1⟩ or |1⟩ to |0⟩.
@@ -132,7 +132,7 @@ class QuMat:
         self._validate_qubit_index(qubit_index)
         self.backend_module.apply_not_gate(self.circuit, qubit_index)
 
-    def apply_hadamard_gate(self, qubit_index):
+    def apply_hadamard_gate(self, qubit_index) -> None:
         """Apply a Hadamard gate to the specified qubit.
 
         Creates a superposition state, transforming |0⟩ to (|0⟩ + |1⟩)/√2
@@ -146,7 +146,7 @@ class QuMat:
         self._validate_qubit_index(qubit_index)
         self.backend_module.apply_hadamard_gate(self.circuit, qubit_index)
 
-    def apply_cnot_gate(self, control_qubit_index, target_qubit_index):
+    def apply_cnot_gate(self, control_qubit_index, target_qubit_index) -> None:
         """Apply a Controlled-NOT (CNOT) gate between two qubits.
 
         Fundamental for entangling qubits. Flips the target qubit if and only
@@ -167,7 +167,7 @@ class QuMat:
 
     def apply_toffoli_gate(
         self, control_qubit_index1, control_qubit_index2, target_qubit_index
-    ):
+    ) -> None:
         """Apply a Toffoli gate (CCX gate) to three qubits.
 
         Acts as a quantum AND gate. Flips the target qubit if and only if
@@ -189,7 +189,7 @@ class QuMat:
             self.circuit, control_qubit_index1, control_qubit_index2, target_qubit_index
         )
 
-    def apply_swap_gate(self, qubit_index1, qubit_index2):
+    def apply_swap_gate(self, qubit_index1, qubit_index2) -> None:
         """Swap the states of two qubits.
 
         :param qubit_index1: Index of the first qubit.
@@ -205,7 +205,7 @@ class QuMat:
 
     def apply_cswap_gate(
         self, control_qubit_index, target_qubit_index1, target_qubit_index2
-    ):
+    ) -> None:
         """Apply a controlled-SWAP (Fredkin) gate.
 
         Swaps the states of two target qubits if and only if the control
@@ -227,7 +227,7 @@ class QuMat:
             self.circuit, control_qubit_index, target_qubit_index1, target_qubit_index2
         )
 
-    def apply_pauli_x_gate(self, qubit_index):
+    def apply_pauli_x_gate(self, qubit_index) -> None:
         """Apply a Pauli-X gate to the specified qubit.
 
         Equivalent to the NOT gate. Flips the qubit state from |0⟩ to |1⟩
@@ -241,7 +241,7 @@ class QuMat:
         self._validate_qubit_index(qubit_index)
         self.backend_module.apply_pauli_x_gate(self.circuit, qubit_index)
 
-    def apply_pauli_y_gate(self, qubit_index):
+    def apply_pauli_y_gate(self, qubit_index) -> None:
         """Apply a Pauli-Y gate to the specified qubit.
 
         Rotates the qubit around the Y-axis of the Bloch sphere, affecting
@@ -255,7 +255,7 @@ class QuMat:
         self._validate_qubit_index(qubit_index)
         self.backend_module.apply_pauli_y_gate(self.circuit, qubit_index)
 
-    def apply_pauli_z_gate(self, qubit_index):
+    def apply_pauli_z_gate(self, qubit_index) -> None:
         """Apply a Pauli-Z gate to the specified qubit.
 
         Rotates the qubit around the Z-axis of the Bloch sphere, altering
@@ -269,7 +269,7 @@ class QuMat:
         self._validate_qubit_index(qubit_index)
         self.backend_module.apply_pauli_z_gate(self.circuit, qubit_index)
 
-    def apply_t_gate(self, qubit_index):
+    def apply_t_gate(self, qubit_index) -> None:
         """Apply a T-gate (π/8 gate) to the specified qubit.
 
         Applies a relative pi/4 phase (multiplies the |1> state by e^{i*pi/4}).
@@ -332,7 +332,7 @@ class QuMat:
             self.circuit, self.backend, self.backend_config
         )
 
-    def bind_parameters(self, parameter_values):
+    def bind_parameters(self, parameter_values) -> None:
         """Bind numerical values to circuit parameters.
 
         Assigns numerical values to symbolic parameters defined in parameterized
@@ -413,7 +413,7 @@ class QuMat:
         """
         return self.draw_circuit()
 
-    def apply_rx_gate(self, qubit_index, angle):
+    def apply_rx_gate(self, qubit_index, angle) -> None:
         """Apply a rotation around the X-axis to the specified qubit.
 
         Rotates the qubit by the given angle around the X-axis of the Bloch
@@ -432,7 +432,7 @@ class QuMat:
         self._handle_parameter(angle)
         self.backend_module.apply_rx_gate(self.circuit, qubit_index, angle)
 
-    def apply_ry_gate(self, qubit_index, angle):
+    def apply_ry_gate(self, qubit_index, angle) -> None:
         """Apply a rotation around the Y-axis to the specified qubit.
 
         Rotates the qubit by the given angle around the Y-axis of the Bloch
@@ -451,7 +451,7 @@ class QuMat:
         self._handle_parameter(angle)
         self.backend_module.apply_ry_gate(self.circuit, qubit_index, angle)
 
-    def apply_rz_gate(self, qubit_index, angle):
+    def apply_rz_gate(self, qubit_index, angle) -> None:
         """Apply a rotation around the Z-axis to the specified qubit.
 
         Rotates the qubit by the given angle around the Z-axis of the Bloch
@@ -470,7 +470,7 @@ class QuMat:
         self._handle_parameter(angle)
         self.backend_module.apply_rz_gate(self.circuit, qubit_index, angle)
 
-    def _handle_parameter(self, param_name):
+    def _handle_parameter(self, param_name) -> None:
         """Register parameter names when parameterized gates are applied.
 
         Automatically adds string parameter names to the parameters dictionary
@@ -483,7 +483,7 @@ class QuMat:
         if isinstance(param_name, str) and param_name not in self.parameters:
             self.parameters[param_name] = None
 
-    def apply_u_gate(self, qubit_index, theta, phi, lambd):
+    def apply_u_gate(self, qubit_index, theta, phi, lambd) -> None:
         """Apply a U gate (universal single-qubit gate) to the specified qubit.
 
         A universal single-qubit gate parameterized by three angles (theta,
@@ -503,7 +503,7 @@ class QuMat:
         self._validate_qubit_index(qubit_index)
         self.backend_module.apply_u_gate(self.circuit, qubit_index, theta, phi, lambd)
 
-    def swap_test(self, ancilla_qubit, qubit1, qubit2):
+    def swap_test(self, ancilla_qubit, qubit1, qubit2) -> None:
         """Implement the swap test circuit for measuring overlap between two quantum states.
 
         Measures the inner product between the states on ``qubit1`` and ``qubit2``.

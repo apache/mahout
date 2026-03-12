@@ -20,6 +20,7 @@
 #include <cuComplex.h>
 #include <vector_types.h>
 #include <math.h>
+#include <stdint.h>
 #include "kernel_config.h"
 
 __global__ void amplitude_encode_kernel(
@@ -231,10 +232,10 @@ int launch_amplitude_encode_f32(
 /// - state_batch: [sample0_state | sample1_state | ... | sampleN_state]
 ///
 /// Optimizations:
-/// 1. Vectorized double2 loads for 128-bit memory transactions
+/// 1. Vectorized double2 loads for 128-bit memory transactions when aligned
 /// 2. Grid-stride loop for arbitrary batch sizes
 /// 3. Coalesced memory access within warps
-/// 4. Minimized register pressure
+/// 4. Scalar fallback for misaligned sample bases and odd tails
 __global__ void amplitude_encode_batch_kernel(
     const double* __restrict__ input_batch,
     cuDoubleComplex* __restrict__ state_batch,
@@ -264,17 +265,21 @@ __global__ void amplitude_encode_batch_kernel(
         // Load inverse norm (cached by L1)
         const double inv_norm = inv_norms[sample_idx];
 
-        // Vectorized load: read 2 doubles as double2 for 128-bit transaction
         double v1, v2;
-        if (elem_offset + 1 < input_len) {
-            // Aligned vectorized load
-            const double2 vec_data = __ldg(reinterpret_cast<const double2*>(input_batch + input_base) + elem_pair);
+        const double* sample_input = input_batch + input_base;
+        const bool sample_input_aligned =
+            (reinterpret_cast<uintptr_t>(sample_input) & (alignof(double2) - 1)) == 0;
+
+        if (sample_input_aligned && elem_offset + 1 < input_len) {
+            const double2 vec_data =
+                __ldg(reinterpret_cast<const double2*>(sample_input) + elem_pair);
             v1 = vec_data.x;
             v2 = vec_data.y;
         } else if (elem_offset < input_len) {
-            // Edge case: single element load
-            v1 = __ldg(input_batch + input_base + elem_offset);
-            v2 = 0.0;
+            v1 = __ldg(sample_input + elem_offset);
+            v2 = (elem_offset + 1 < input_len)
+                ? __ldg(sample_input + elem_offset + 1)
+                : 0.0;
         } else {
             // Padding region
             v1 = v2 = 0.0;
@@ -284,6 +289,77 @@ __global__ void amplitude_encode_batch_kernel(
         // Compiler will optimize multiplications
         const cuDoubleComplex c1 = make_cuDoubleComplex(v1 * inv_norm, 0.0);
         const cuDoubleComplex c2 = make_cuDoubleComplex(v2 * inv_norm, 0.0);
+
+        // Write to global memory (coalesced within warp)
+        state_batch[state_base + elem_offset] = c1;
+        if (elem_offset + 1 < state_len) {
+            state_batch[state_base + elem_offset + 1] = c2;
+        }
+    }
+}
+
+/// Optimized batch amplitude encoding kernel (float32)
+///
+/// Memory Layout (row-major):
+/// - input_batch: [sample0_data | sample1_data | ... | sampleN_data]
+/// - state_batch: [sample0_state | sample1_state | ... | sampleN_state]
+///
+/// Optimizations:
+/// 1. Vectorized float2 loads for 64-bit memory transactions
+/// 2. Grid-stride loop for arbitrary batch sizes
+/// 3. Coalesced memory access within warps
+/// 4. Minimized register pressure
+__global__ void amplitude_encode_batch_kernel_f32(
+    const float* __restrict__ input_batch,
+    cuComplex* __restrict__ state_batch,
+    const float* __restrict__ inv_norms,
+    size_t num_samples,
+    size_t input_len,
+    size_t state_len
+) {
+    // Grid-stride loop pattern for flexibility
+    const size_t elements_per_sample = state_len / 2;
+    const size_t total_work = num_samples * elements_per_sample;
+    const size_t stride = gridDim.x * blockDim.x;
+
+    size_t global_idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // Process elements in grid-stride fashion
+    for (size_t idx = global_idx; idx < total_work; idx += stride) {
+        // Decompose linear index into (sample, element_pair)
+        const size_t sample_idx = idx / elements_per_sample;
+        const size_t elem_pair = idx % elements_per_sample;
+
+        // Calculate base addresses (strength-reduced)
+        const size_t input_base = sample_idx * input_len;
+        const size_t state_base = sample_idx * state_len;
+        const size_t elem_offset = elem_pair * 2;
+
+        // Load inverse norm (cached by L1)
+        const float inv_norm = inv_norms[sample_idx];
+
+        float v1, v2;
+        const float* sample_input = input_batch + input_base;
+        const bool sample_input_aligned =
+            (reinterpret_cast<uintptr_t>(sample_input) & (alignof(float2) - 1)) == 0;
+
+        if (sample_input_aligned && elem_offset + 1 < input_len) {
+            const float2 vec_data =
+                __ldg(reinterpret_cast<const float2*>(sample_input) + elem_pair);
+            v1 = vec_data.x;
+            v2 = vec_data.y;
+        } else if (elem_offset < input_len) {
+            v1 = __ldg(sample_input + elem_offset);
+            v2 = (elem_offset + 1 < input_len)
+                ? __ldg(sample_input + elem_offset + 1)
+                : 0.0f;
+        } else {
+            v1 = v2 = 0.0f;
+        }
+
+        // Normalize and write as complex numbers
+        const cuComplex c1 = make_cuComplex(v1 * inv_norm, 0.0f);
+        const cuComplex c2 = make_cuComplex(v2 * inv_norm, 0.0f);
 
         // Write to global memory (coalesced within warp)
         state_batch[state_base + elem_offset] = c1;
@@ -334,6 +410,40 @@ int launch_amplitude_encode_batch(
     const size_t gridSize = (blocks_needed < max_blocks) ? blocks_needed : max_blocks;
 
     amplitude_encode_batch_kernel<<<gridSize, blockSize, 0, stream>>>(
+        input_batch_d,
+        state_complex_d,
+        inv_norms_d,
+        num_samples,
+        input_len,
+        state_len
+    );
+
+    return (int)cudaGetLastError();
+}
+
+/// Launch optimized batch amplitude encoding kernel for float32 input/output.
+int launch_amplitude_encode_batch_f32(
+    const float* input_batch_d,
+    void* state_batch_d,
+    const float* inv_norms_d,
+    size_t num_samples,
+    size_t input_len,
+    size_t state_len,
+    cudaStream_t stream
+) {
+    if (num_samples == 0 || state_len == 0) {
+        return cudaErrorInvalidValue;
+    }
+
+    cuComplex* state_complex_d = static_cast<cuComplex*>(state_batch_d);
+
+    const int blockSize = DEFAULT_BLOCK_SIZE;
+    const size_t total_work = num_samples * (state_len / 2);
+    const size_t blocks_needed = (total_work + blockSize - 1) / blockSize;
+    const size_t max_blocks = MAX_GRID_BLOCKS;
+    const size_t gridSize = (blocks_needed < max_blocks) ? blocks_needed : max_blocks;
+
+    amplitude_encode_batch_kernel_f32<<<gridSize, blockSize, 0, stream>>>(
         input_batch_d,
         state_complex_d,
         inv_norms_d,
@@ -432,20 +542,33 @@ __global__ void l2_norm_batch_kernel(
 
     const size_t vec_idx = block_in_sample * blockDim.x + threadIdx.x;
     const size_t stride = blockDim.x * blocks_per_sample;
+    const double* sample_input = input_batch + base;
+    const bool sample_input_aligned =
+        (reinterpret_cast<uintptr_t>(sample_input) & (alignof(double2) - 1)) == 0;
 
     double local_sum = 0.0;
 
     size_t vec_offset = vec_idx;
     size_t offset = vec_offset * 2;
-    while (offset + 1 < sample_len) {
-        const double2 v = __ldg(reinterpret_cast<const double2*>(input_batch + base) + vec_offset);
-        local_sum += v.x * v.x + v.y * v.y;
-        vec_offset += stride;
-        offset = vec_offset * 2;
+    if (sample_input_aligned) {
+        while (offset + 1 < sample_len) {
+            const double2 v = __ldg(reinterpret_cast<const double2*>(sample_input) + vec_offset);
+            local_sum += v.x * v.x + v.y * v.y;
+            vec_offset += stride;
+            offset = vec_offset * 2;
+        }
+    } else {
+        while (offset + 1 < sample_len) {
+            const double v1 = __ldg(sample_input + offset);
+            const double v2 = __ldg(sample_input + offset + 1);
+            local_sum += v1 * v1 + v2 * v2;
+            vec_offset += stride;
+            offset = vec_offset * 2;
+        }
     }
 
     if (offset < sample_len) {
-        const double v = __ldg(input_batch + base + offset);
+        const double v = __ldg(sample_input + offset);
         local_sum += v * v;
     }
 
@@ -472,20 +595,33 @@ __global__ void l2_norm_batch_kernel_f32(
 
     const size_t vec_idx = block_in_sample * blockDim.x + threadIdx.x;
     const size_t stride = blockDim.x * blocks_per_sample;
+    const float* sample_input = input_batch + base;
+    const bool sample_input_aligned =
+        (reinterpret_cast<uintptr_t>(sample_input) & (alignof(float2) - 1)) == 0;
 
     float local_sum = 0.0f;
 
     size_t vec_offset = vec_idx;
     size_t offset = vec_offset * 2;
-    while (offset + 1 < sample_len) {
-        const float2 v = __ldg(reinterpret_cast<const float2*>(input_batch + base) + vec_offset);
-        local_sum += v.x * v.x + v.y * v.y;
-        vec_offset += stride;
-        offset = vec_offset * 2;
+    if (sample_input_aligned) {
+        while (offset + 1 < sample_len) {
+            const float2 v = __ldg(reinterpret_cast<const float2*>(sample_input) + vec_offset);
+            local_sum += v.x * v.x + v.y * v.y;
+            vec_offset += stride;
+            offset = vec_offset * 2;
+        }
+    } else {
+        while (offset + 1 < sample_len) {
+            const float v1 = __ldg(sample_input + offset);
+            const float v2 = __ldg(sample_input + offset + 1);
+            local_sum += v1 * v1 + v2 * v2;
+            vec_offset += stride;
+            offset = vec_offset * 2;
+        }
     }
 
     if (offset < sample_len) {
-        const float v = __ldg(input_batch + base + offset);
+        const float v = __ldg(sample_input + offset);
         local_sum += v * v;
     }
 

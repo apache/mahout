@@ -17,8 +17,9 @@
 
 import pytest
 
-from ..utils import TESTING_BACKENDS, get_backend_config, get_state_probability
 from qumat import QuMat
+
+from ..utils import TESTING_BACKENDS, get_backend_config, get_state_probability
 
 
 def create_qumat_instance(backend_name, num_qubits):
@@ -70,7 +71,7 @@ class TestCNOTGate:
     """Test class for CNOT gate functionality."""
 
     @pytest.mark.parametrize(
-        "initial_state, control_qubit, target_qubit, expected_state",
+        ("initial_state", "control_qubit", "target_qubit", "expected_state"),
         [
             ("00", 0, 1, "00"),  # |00⟩ -> CNOT(0,1) -> |00⟩ (control=0, no flip)
             ("01", 0, 1, "01"),  # |01⟩ -> CNOT(0,1) -> |01⟩ (control=0, no flip)
@@ -101,7 +102,7 @@ class TestCNOTGate:
         )
 
     @pytest.mark.parametrize(
-        "initial_state, num_applications, expected_state",
+        ("initial_state", "num_applications", "expected_state"),
         [
             ("00", 1, "00"),  # |00⟩ -> CNOT -> |00⟩
             ("00", 2, "00"),  # |00⟩ -> CNOT -> CNOT -> |00⟩ (CNOT² = I)
@@ -131,7 +132,7 @@ class TestCNOTGate:
         )
 
     @pytest.mark.parametrize(
-        "control_qubit, target_qubit, num_qubits",
+        ("control_qubit", "target_qubit", "num_qubits"),
         [
             # 3-qubit circuits
             (0, 1, 3),  # CNOT on qubits 0 and 1 in 3-qubit circuit
@@ -171,7 +172,7 @@ class TestCNOTGate:
         )
 
     @pytest.mark.parametrize(
-        "control_qubit, target_qubit, expected_states",
+        ("control_qubit", "target_qubit", "expected_states"),
         [
             # Standard Bell state: |00⟩ + |11⟩
             (0, 1, ["00", "11"]),
@@ -204,7 +205,7 @@ class TestToffoliGate:
     """Test class for Toffoli gate functionality."""
 
     @pytest.mark.parametrize(
-        "initial_state, control1, control2, target, expected_state",
+        ("initial_state", "control1", "control2", "target", "expected_state"),
         [
             # Toffoli(0,1,2): flip target only if both controls are |1⟩
             ("000", 0, 1, 2, "000"),  # |000⟩ -> Toffoli -> |000⟩
@@ -286,7 +287,7 @@ class TestToffoliGate:
         )
 
     @pytest.mark.parametrize(
-        "initial_state, num_applications, expected_state",
+        ("initial_state", "num_applications", "expected_state"),
         [
             ("000", 1, "000"),  # |000⟩ -> Toffoli -> |000⟩
             ("000", 2, "000"),  # |000⟩ -> Toffoli -> Toffoli -> |000⟩ (Toffoli² = I)
@@ -324,7 +325,7 @@ class TestToffoliGate:
         )
 
     @pytest.mark.parametrize(
-        "control1, control2, target, num_qubits",
+        ("control1", "control2", "target", "num_qubits"),
         [
             # 4-qubit circuits
             (0, 1, 2, 4),  # Toffoli on qubits 0, 1, 2 in 4-qubit circuit
@@ -361,7 +362,7 @@ class TestToffoliGate:
         )
 
     @pytest.mark.parametrize(
-        "initial_state, expected_state, control1, control2, target",
+        ("initial_state", "expected_state", "control1", "control2", "target"),
         [
             # Toffoli(0,1,2): target = control0 AND control1
             ("000", "000", 0, 1, 2),  # 0 AND 0 = 0
@@ -404,7 +405,7 @@ class TestMultiQubitGatesEdgeCases:
     """Test class for edge cases of multi-qubit gates."""
 
     @pytest.mark.parametrize(
-        "gate_name, gate_args",
+        ("gate_name", "gate_args"),
         [
             ("cnot", (0, 1)),
             ("toffoli", (0, 1, 2)),
@@ -414,14 +415,15 @@ class TestMultiQubitGatesEdgeCases:
         """Test that gates raise error on uninitialized circuit."""
         backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
-        with pytest.raises(RuntimeError, match="circuit not initialized"):
-            if gate_name == "cnot":
+        if gate_name == "cnot":
+            with pytest.raises(RuntimeError, match="circuit not initialized"):
                 qumat.apply_cnot_gate(*gate_args)
-            else:
+        else:
+            with pytest.raises(RuntimeError, match="circuit not initialized"):
                 qumat.apply_toffoli_gate(*gate_args)
 
     @pytest.mark.parametrize(
-        "num_qubits, gate_name, gate_args",
+        ("num_qubits", "gate_name", "gate_args"),
         [
             (2, "cnot", (5, 6)),
             (3, "cnot", (10, 11)),
@@ -445,7 +447,7 @@ class TestMultiQubitGatesEdgeCases:
             pass
 
     @pytest.mark.parametrize(
-        "num_qubits, gate_name, gate_args",
+        ("num_qubits", "gate_name", "gate_args"),
         [
             (2, "cnot", (0, 0)),
             (3, "cnot", (1, 1)),
@@ -490,3 +492,19 @@ class TestMultiQubitGatesEdgeCases:
                 assert abs(probabilities[i] - probabilities[j]) < 0.05, (
                     f"Backends have inconsistent CNOT results: {results_dict}"
                 )
+
+
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+def test_apply_swap_gate(backend_name):
+    """Test that the SWAP gate applies correctly across backends."""
+    backend_config = get_backend_config(backend_name)
+    qumat = QuMat(backend_config)
+
+    qumat.create_empty_circuit(num_qubits=2)
+
+    qumat.apply_pauli_x_gate(0)
+
+    qumat.apply_swap_gate(0, 1)
+
+    results = qumat.execute_circuit()
+    assert results is not None

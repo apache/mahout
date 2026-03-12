@@ -1,3 +1,8 @@
+---
+title: NVTX Profiling Guide
+sidebar_label: Observability
+---
+
 # NVTX Profiling Guide
 
 ## Overview

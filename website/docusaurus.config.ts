@@ -1,5 +1,5 @@
-import {themes as prismThemes} from 'prism-react-renderer';
-import type {Config} from '@docusaurus/types';
+import { themes as prismThemes } from 'prism-react-renderer';
+import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -41,15 +41,20 @@ const config: Config = {
       'classic',
       {
         docs: {
+          path: '../docs/',
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/apache/mahout/tree/main/docs/',
           remarkPlugins: [remarkMath],
           rehypePlugins: [rehypeKatex],
           // Versioning configuration
-          lastVersion: 'current',
+          lastVersion: '0.5',
           versions: {
             current: {
-              label: '0.5',
+              label: 'next',
+              path: 'next',
+            },
+            '0.5': {
+              label: 'latest', // or '0.5' if preferred
               path: '',
             },
             '0.4': {
@@ -102,6 +107,15 @@ const config: Config = {
           if (existingPath === '/blog') {
             return ['/news.html', '/news'];
           }
+          // Keep /docs/qumat/getting-started as the canonical getting-started URL.
+          if (existingPath === '/docs/qumat/getting-started') {
+            return [
+              '/docs/download',
+              '/docs/download/quickstart',
+              '/docs/next/download',
+              '/docs/next/download/quickstart',
+            ];
+          }
           return undefined;
         },
       },
@@ -132,8 +146,9 @@ const config: Config = {
               href: 'https://www.apache.org/foundation/how-it-works.html',
             },
             {
+              type: 'doc',
+              docId: 'about/how-to-contribute',
               label: 'How to Contribute',
-              to: '/docs/about/how-to-contribute',
             },
           ],
         },
@@ -144,30 +159,36 @@ const config: Config = {
           position: 'left',
           items: [
             {
+              type: 'doc',
+              docId: 'qumat/index',
               label: 'Overview',
-              to: '/docs/qumat',
             },
             {
+              type: 'doc',
+              docId: 'qumat/getting-started',
               label: 'Getting Started',
-              to: '/docs/qumat/getting-started',
             },
             {
+              type: 'doc',
+              docId: 'qdp/index',
               label: 'QDP (Data Encoding)',
-              to: '/docs/qdp',
             },
             {
+              type: 'doc',
+              docId: 'learning/quantum-computing-primer/index',
               label: 'Quantum Computing Primer',
-              to: '/docs/learning/quantum-computing-primer',
             },
             {
+              type: 'doc',
+              docId: 'learning/papers/index',
               label: 'Research Papers',
-              to: '/docs/learning/papers',
             },
           ],
         },
         // Download
         {
-          to: '/docs/download',
+          type: 'doc',
+          docId: 'qumat/getting-started',
           label: 'Download',
           position: 'left',
         },
@@ -178,24 +199,28 @@ const config: Config = {
           position: 'left',
           items: [
             {
+              type: 'doc',
+              docId: 'community/index',
               label: 'Overview',
-              to: '/docs/community',
             },
             {
+              type: 'doc',
+              docId: 'community/who-we-are',
               label: 'Who We Are',
-              to: '/docs/community/who-we-are',
             },
             {
+              type: 'doc',
+              docId: 'community/mailing-lists',
               label: 'Mailing Lists',
-              to: '/docs/community/mailing-lists',
             },
             {
               label: 'Issue Tracker',
               href: 'https://issues.apache.org/jira/browse/MAHOUT',
             },
             {
+              type: 'doc',
+              docId: 'community/code-of-conduct',
               label: 'Code of Conduct',
-              to: '/docs/community/code-of-conduct',
             },
           ],
         },
@@ -270,6 +295,14 @@ const config: Config = {
             {
               label: 'Apache Software Foundation',
               href: 'https://www.apache.org/',
+            },
+            {
+              label: 'Security',
+              href: 'https://www.apache.org/security/',
+            },
+            {
+              label: 'Privacy',
+              href: 'https://privacy.apache.org/policies/privacy-policy-public.html',
             },
           ],
         },

@@ -16,10 +16,12 @@
 #
 
 import math
+
 import pytest
 
-from ..utils import TESTING_BACKENDS, get_backend_config, get_state_probability
 from qumat import QuMat
+
+from ..utils import TESTING_BACKENDS, get_backend_config, get_state_probability
 
 
 def get_superposition_probabilities(results, num_qubits=1):
@@ -63,7 +65,7 @@ class TestPauliXGate:
     """Test class for Pauli X gate functionality."""
 
     @pytest.mark.parametrize(
-        "initial_state, num_applications, expected_state",
+        ("initial_state", "num_applications", "expected_state"),
         [
             ("0", 1, "1"),  # |0⟩ -> X -> |1⟩
             ("1", 1, "0"),  # |1⟩ -> X -> |0⟩
@@ -105,7 +107,7 @@ class TestPauliXGate:
         )
 
     @pytest.mark.parametrize(
-        "qubits_to_flip, num_qubits, expected_state",
+        ("qubits_to_flip", "num_qubits", "expected_state"),
         [
             ([0], 1, "1"),  # Single qubit: flip qubit 0 -> |1⟩
             ([0, 2], 3, "101"),  # Three qubits: flip qubits 0 and 2 -> |101⟩
@@ -145,7 +147,7 @@ class TestPauliYGate:
     """Test class for Pauli Y gate functionality."""
 
     @pytest.mark.parametrize(
-        "initial_state, num_applications, expected_state",
+        ("initial_state", "num_applications", "expected_state"),
         [
             ("0", 1, "1"),  # |0⟩ -> Y -> i|1⟩ (phase doesn't affect measurement)
             ("1", 1, "0"),  # |1⟩ -> Y -> -i|0⟩
@@ -192,7 +194,7 @@ class TestHadamardGate:
     """Test class for Hadamard gate functionality."""
 
     @pytest.mark.parametrize(
-        "initial_state, num_applications",
+        ("initial_state", "num_applications"),
         [
             ("0", 1),  # |0⟩ -> H -> |+⟩ (superposition)
             ("1", 1),  # |1⟩ -> H -> |-⟩ (superposition)
@@ -250,7 +252,7 @@ class TestNOTGate:
     """Test class for NOT gate functionality."""
 
     @pytest.mark.parametrize(
-        "initial_state, num_applications, expected_state",
+        ("initial_state", "num_applications", "expected_state"),
         [
             ("0", 1, "1"),  # |0⟩ -> NOT -> |1⟩ (equivalent to Pauli X)
             ("1", 1, "0"),  # |1⟩ -> NOT -> |0⟩
@@ -297,7 +299,7 @@ class TestUGate:
     """Test class for U gate (universal single-qubit gate) functionality."""
 
     @pytest.mark.parametrize(
-        "theta, phi, lambd, expected_behavior",
+        ("theta", "phi", "lambd", "expected_behavior"),
         [
             (0, 0, 0, "identity"),  # U(0, 0, 0) should be identity
             (
@@ -396,13 +398,16 @@ class TestUGate:
             assert prob_zero > 0.1 or prob_one > 0.1, (
                 f"Expected superposition after U({theta},{phi},{lambd}), got prob_zero={prob_zero:.4f}, prob_one={prob_one:.4f}"
             )
-            assert prob_zero < 0.9 and prob_one < 0.9, (
+            assert prob_zero < 0.9, (
+                f"Expected superposition after U({theta},{phi},{lambd}), got prob_zero={prob_zero:.4f}, prob_one={prob_one:.4f}"
+            )
+            assert prob_one < 0.9, (
                 f"Expected superposition after U({theta},{phi},{lambd}), got prob_zero={prob_zero:.4f}, prob_one={prob_one:.4f}"
             )
 
 
 @pytest.mark.parametrize(
-    "theta, phi, lambd",
+    ("theta", "phi", "lambd"),
     [
         (math.pi / 4, math.pi / 4, math.pi / 4),
         (math.pi / 2, math.pi / 4, 0),
@@ -459,7 +464,7 @@ class TestPauliZGate:
     """Test class for Pauli Z gate functionality."""
 
     @pytest.mark.parametrize(
-        "initial_state, num_applications, expected_state",
+        ("initial_state", "num_applications", "expected_state"),
         [
             ("0", 1, "0"),  # |0⟩ -> Z -> |0⟩ (Z leaves |0⟩ unchanged)
             ("1", 1, "1"),  # |1⟩ -> Z -> -|1⟩ (phase flip doesn't affect measurement)
@@ -532,7 +537,7 @@ class TestTGate:
     """Test class for T gate functionality."""
 
     @pytest.mark.parametrize(
-        "initial_state, expected_state",
+        ("initial_state", "expected_state"),
         [
             ("0", "0"),  # T leaves |0> unchanged
             ("1", "1"),  # T applies phase to |1>, measurement unchanged
@@ -750,7 +755,7 @@ class TestSingleQubitGatesEdgeCases:
 
 
 @pytest.mark.parametrize(
-    "gate_name, expected_state_or_behavior",
+    ("gate_name", "expected_state_or_behavior"),
     [
         ("pauli_x", "1"),  # Pauli X should flip |0⟩ to |1⟩
         ("hadamard", "superposition"),  # Hadamard creates superposition

@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import copy
+
 import cirq
 import sympy
 
@@ -40,17 +42,17 @@ def create_empty_circuit(num_qubits: int | None = None):
     return circuit
 
 
-def apply_not_gate(circuit, qubit_index):
+def apply_not_gate(circuit, qubit_index) -> None:
     qubit = cirq.LineQubit(qubit_index)
     circuit.append(cirq.X(qubit))
 
 
-def apply_hadamard_gate(circuit, qubit_index):
+def apply_hadamard_gate(circuit, qubit_index) -> None:
     qubit = cirq.LineQubit(qubit_index)
     circuit.append(cirq.H(qubit))
 
 
-def apply_cnot_gate(circuit, control_qubit_index, target_qubit_index):
+def apply_cnot_gate(circuit, control_qubit_index, target_qubit_index) -> None:
     control_qubit = cirq.LineQubit(control_qubit_index)
     target_qubit = cirq.LineQubit(target_qubit_index)
     circuit.append(cirq.CNOT(control_qubit, target_qubit))
@@ -58,14 +60,14 @@ def apply_cnot_gate(circuit, control_qubit_index, target_qubit_index):
 
 def apply_toffoli_gate(
     circuit, control_qubit_index1, control_qubit_index2, target_qubit_index
-):
+) -> None:
     control_qubit1 = cirq.LineQubit(control_qubit_index1)
     control_qubit2 = cirq.LineQubit(control_qubit_index2)
     target_qubit = cirq.LineQubit(target_qubit_index)
     circuit.append(cirq.CCX(control_qubit1, control_qubit2, target_qubit))
 
 
-def apply_swap_gate(circuit, qubit_index1, qubit_index2):
+def apply_swap_gate(circuit, qubit_index1, qubit_index2) -> None:
     qubit1 = cirq.LineQubit(qubit_index1)
     qubit2 = cirq.LineQubit(qubit_index2)
     circuit.append(cirq.SWAP(qubit1, qubit2))
@@ -73,29 +75,29 @@ def apply_swap_gate(circuit, qubit_index1, qubit_index2):
 
 def apply_cswap_gate(
     circuit, control_qubit_index, target_qubit_index1, target_qubit_index2
-):
+) -> None:
     control_qubit = cirq.LineQubit(control_qubit_index)
     target_qubit1 = cirq.LineQubit(target_qubit_index1)
     target_qubit2 = cirq.LineQubit(target_qubit_index2)
     circuit.append(cirq.CSWAP(control_qubit, target_qubit1, target_qubit2))
 
 
-def apply_pauli_x_gate(circuit, qubit_index):
+def apply_pauli_x_gate(circuit, qubit_index) -> None:
     qubit = cirq.LineQubit(qubit_index)
     circuit.append(cirq.X(qubit))
 
 
-def apply_pauli_y_gate(circuit, qubit_index):
+def apply_pauli_y_gate(circuit, qubit_index) -> None:
     qubit = cirq.LineQubit(qubit_index)
     circuit.append(cirq.Y(qubit))
 
 
-def apply_pauli_z_gate(circuit, qubit_index):
+def apply_pauli_z_gate(circuit, qubit_index) -> None:
     qubit = cirq.LineQubit(qubit_index)
     circuit.append(cirq.Z(qubit))
 
 
-def apply_t_gate(circuit, qubit_index):
+def apply_t_gate(circuit, qubit_index) -> None:
     qubit = cirq.LineQubit(qubit_index)
     circuit.append(cirq.T(qubit))
 
@@ -106,23 +108,29 @@ def execute_circuit(circuit, backend, backend_config):
         shots = backend_config["backend_options"].get("shots", 1)
         return [{0: shots}]
 
+    # Create a working copy to avoid mutating the original circuit
+    working_circuit = copy.deepcopy(circuit)
+
     # Ensure measurement is added to capture the results
-    if not circuit.has_measurements():
-        circuit.append(cirq.measure(*circuit.all_qubits(), key="result"))
+    if not working_circuit.has_measurements():
+        working_circuit.append(
+            cirq.measure(*working_circuit.all_qubits(), key="result")
+        )
     simulator = cirq.Simulator()
     parameter_values = backend_config.get("parameter_values", None)
     if parameter_values:
         # Convert parameter_values to applicable resolvers
         res = [cirq.ParamResolver(parameter_values)]
         results = simulator.run_sweep(
-            circuit,
+            working_circuit,
             repetitions=backend_config["backend_options"].get("shots", 1),
             params=res,
         )
         return [result.histogram(key="result") for result in results]
     else:
         result = simulator.run(
-            circuit, repetitions=backend_config["backend_options"].get("shots", 1)
+            working_circuit,
+            repetitions=backend_config["backend_options"].get("shots", 1),
         )
         return [result.histogram(key="result")]
 
@@ -132,25 +140,25 @@ def draw_circuit(circuit):
     return str(circuit)
 
 
-def apply_rx_gate(circuit, qubit_index, angle):
+def apply_rx_gate(circuit, qubit_index, angle) -> None:
     param = sympy.Symbol(angle) if isinstance(angle, str) else angle
     qubit = cirq.LineQubit(qubit_index)
     circuit.append(cirq.rx(param).on(qubit))
 
 
-def apply_ry_gate(circuit, qubit_index, angle):
+def apply_ry_gate(circuit, qubit_index, angle) -> None:
     param = sympy.Symbol(angle) if isinstance(angle, str) else angle
     qubit = cirq.LineQubit(qubit_index)
     circuit.append(cirq.ry(param).on(qubit))
 
 
-def apply_rz_gate(circuit, qubit_index, angle):
+def apply_rz_gate(circuit, qubit_index, angle) -> None:
     param = sympy.Symbol(angle) if isinstance(angle, str) else angle
     qubit = cirq.LineQubit(qubit_index)
     circuit.append(cirq.rz(param).on(qubit))
 
 
-def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
+def apply_u_gate(circuit, qubit_index, theta, phi, lambd) -> None:
     qubit = cirq.LineQubit(qubit_index)
     circuit.append(cirq.rz(lambd).on(qubit))
     circuit.append(cirq.ry(theta).on(qubit))

@@ -163,7 +163,7 @@ def test_pytorch_integration():
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "precision,expected_dtype",
+    ("precision", "expected_dtype"),
     [
         ("float32", "complex64"),
         ("float64", "complex128"),
@@ -188,7 +188,7 @@ def test_precision(precision, expected_dtype):
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "data_shape,expected_shape",
+    ("data_shape", "expected_shape"),
     [
         ([1.0, 2.0, 3.0, 4.0], (1, 4)),  # 1D tensor -> single sample
         (
@@ -224,10 +224,11 @@ def test_encode_from_tensorflow_binding():
     """Test TensorFlow TensorProto binding path (requires GPU and TensorFlow)."""
     pytest.importorskip("torch")
     tf = pytest.importorskip("tensorflow")
-    import numpy as np
-    from _qdp import QdpEngine
     import os
     import tempfile
+
+    import numpy as np
+    from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
         pytest.skip("GPU required for QdpEngine")
@@ -277,7 +278,7 @@ def test_encode_errors():
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "data_shape,expected_shape,expected_batch_size",
+    ("data_shape", "expected_shape", "expected_batch_size"),
     [
         ([1.0, 2.0, 3.0, 4.0], (1, 4), 1),  # 1D tensor -> single sample
         (
@@ -315,7 +316,7 @@ def test_encode_cuda_tensor(data_shape, expected_shape, expected_batch_size):
 @requires_qdp
 @pytest.mark.gpu
 def test_encode_cuda_tensor_wrong_dtype():
-    """Test error when CUDA tensor has wrong dtype (non-float64)."""
+    """Test error when CUDA tensor has wrong dtype for amplitude (e.g. float16)."""
     pytest.importorskip("torch")
     from _qdp import QdpEngine
 
@@ -324,9 +325,9 @@ def test_encode_cuda_tensor_wrong_dtype():
 
     engine = QdpEngine(0)
 
-    # Create CUDA tensor with float32 dtype (wrong)
-    data = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float32, device="cuda:0")
-    with pytest.raises(RuntimeError, match="CUDA tensor must have dtype float64"):
+    # Amplitude encoding accepts float64 or float32 only; float16 is invalid
+    data = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float16, device="cuda:0")
+    with pytest.raises(RuntimeError, match="float64 or float32"):
         engine.encode(data, 2, "amplitude")
 
 
@@ -392,7 +393,7 @@ def test_encode_cuda_tensor_empty():
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "data_shape,is_batch",
+    ("data_shape", "is_batch"),
     [
         ([1.0, 2.0, 3.0, 4.0], False),  # 1D tensor
         ([[1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, 8.0]], True),  # 2D tensor (batch)
@@ -422,9 +423,34 @@ def test_encode_cuda_tensor_preserves_input(data_shape, is_batch):
 
 @requires_qdp
 @pytest.mark.gpu
-@pytest.mark.parametrize("encoding_method", ["iqp"])
-def test_encode_cuda_tensor_unsupported_encoding(encoding_method):
-    """Test error when using CUDA tensor with an encoding not supported on GPU (only amplitude, angle, basis)."""
+@pytest.mark.parametrize(
+    ("encoding_method", "data"),
+    [
+        ("iqp-z", [0.1, -0.2]),
+        ("iqp", [0.1, -0.2, 0.3]),
+    ],
+)
+def test_encode_cuda_tensor_iqp_methods(encoding_method, data):
+    """Test CUDA tensor path supports IQP-family encodings."""
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+    cuda_data = torch.tensor(data, dtype=torch.float64, device="cuda:0")
+
+    qtensor = engine.encode(cuda_data, 2, encoding_method)
+    output = torch.from_dlpack(qtensor)
+
+    assert tuple(output.shape) == (1, 4)
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_encode_cuda_tensor_invalid_encoding_method():
+    """Test error when using CUDA tensor with an unknown encoding method."""
     pytest.importorskip("torch")
     from _qdp import QdpEngine
 
@@ -433,20 +459,20 @@ def test_encode_cuda_tensor_unsupported_encoding(encoding_method):
 
     engine = QdpEngine(0)
 
-    # CUDA path only supports amplitude, angle, basis; iqp/iqp-z should raise unsupported error
+    # Unknown encoding should fail with supported-method guidance.
     data = torch.tensor([1.0, 0.0, 0.0, 0.0], dtype=torch.float64, device="cuda:0")
 
     with pytest.raises(
         RuntimeError,
-        match="only supports .*amplitude.*angle.*basis.*Use tensor.cpu",
+        match="only supports .*amplitude.*angle.*basis.*iqp.*iqp-z.*Use tensor.cpu",
     ):
-        engine.encode(data, 2, encoding_method)
+        engine.encode(data, 2, "unknown-encoding")
 
 
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "input_type,error_match",
+    ("input_type", "error_match"),
     [
         ("cuda_tensor", "Unsupported CUDA tensor shape: 3D"),
         ("cpu_tensor", "Unsupported tensor shape: 3D"),
@@ -481,7 +507,7 @@ def test_encode_3d_rejected(input_type, error_match):
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "tensor_factory,description",
+    ("tensor_factory", "description"),
     [
         (lambda: torch.zeros(4, dtype=torch.float64, device="cuda:0"), "zeros"),
         (
@@ -516,7 +542,7 @@ def test_encode_cuda_tensor_non_finite_values(tensor_factory, description):
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "precision,expected_dtype",
+    ("precision", "expected_dtype"),
     [
         ("float32", torch.complex64),
         ("float64", torch.complex128),
@@ -532,6 +558,31 @@ def test_encode_cuda_tensor_output_dtype(precision, expected_dtype):
 
     engine = QdpEngine(0, precision=precision)
     data = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float64, device="cuda:0")
+    result = torch.from_dlpack(engine.encode(data, 2, "amplitude"))
+    assert result.dtype == expected_dtype, (
+        f"Expected {expected_dtype}, got {result.dtype}"
+    )
+
+
+@requires_qdp
+@pytest.mark.gpu
+@pytest.mark.parametrize(
+    ("precision", "expected_dtype"),
+    [
+        ("float32", torch.complex64),
+        ("float64", torch.complex128),
+    ],
+)
+def test_encode_cuda_tensor_float32_input_output_dtype(precision, expected_dtype):
+    """Test that 1D float32 CUDA amplitude encoding respects engine precision (f32 path)."""
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0, precision=precision)
+    data = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float32, device="cuda:0")
     result = torch.from_dlpack(engine.encode(data, 2, "amplitude"))
     assert result.dtype == expected_dtype, (
         f"Expected {expected_dtype}, got {result.dtype}"
@@ -744,7 +795,7 @@ def test_angle_encode_errors():
 @requires_qdp
 @pytest.mark.gpu
 @pytest.mark.parametrize(
-    "data_shape,expected_shape",
+    ("data_shape", "expected_shape"),
     [
         ([1.0, 2.0, 3.0, 4.0], (1, 4)),  # 1D array -> single sample
         (
@@ -777,10 +828,11 @@ def test_encode_numpy_array(data_shape, expected_shape):
 def test_encode_pathlib_path():
     """Test encoding from pathlib.Path object."""
     pytest.importorskip("torch")
-    import numpy as np
-    from pathlib import Path
-    import tempfile
     import os
+    import tempfile
+    from pathlib import Path
+
+    import numpy as np
     from _qdp import QdpEngine
 
     if not torch.cuda.is_available():
@@ -939,8 +991,8 @@ def test_iqp_encode_3_qubits():
     assert torch_tensor.shape == (1, 8)
 
     # Should get |000⟩ state: amplitude 1 at index 0, 0 elsewhere
-    expected = torch.zeros((1, 8), dtype=torch.complex128, device="cuda:0")
-    expected[0, 0] = 1.0 + 0j
+    row = [1.0 + 0j] + [0.0 + 0j] * 7
+    expected = torch.tensor([row], dtype=torch.complex128, device="cuda:0")
     assert torch.allclose(torch_tensor, expected, atol=1e-6)
 
 
@@ -1143,10 +1195,8 @@ def test_iqp_fwt_zero_params_gives_zero_state():
 
         # Should get |0...0⟩: amplitude 1 at index 0, 0 elsewhere
         state_len = 1 << num_qubits
-        expected = torch.zeros(
-            (1, state_len), dtype=torch_tensor.dtype, device="cuda:0"
-        )
-        expected[0, 0] = 1.0 + 0j
+        row = [1.0 + 0j] + [0.0 + 0j] * (state_len - 1)
+        expected = torch.tensor([row], dtype=torch_tensor.dtype, device="cuda:0")
 
         assert torch.allclose(torch_tensor, expected, atol=1e-6), (
             f"IQP {num_qubits} qubits with zero params should give |0⟩ state"

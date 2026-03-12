@@ -29,7 +29,7 @@ def _loader_available():
 
 
 @pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
-def test_mutual_exclusion_both_sources_raises():
+def test_mutual_exclusion_both_sources_raises() -> None:
     """Calling both .source_synthetic() and .source_file() then __iter__ raises ValueError."""
     loader = (
         QuantumDataLoader(device_id=0)
@@ -42,11 +42,12 @@ def test_mutual_exclusion_both_sources_raises():
         list(loader)
     msg = str(exc_info.value)
     assert "Cannot set both synthetic and file sources" in msg
-    assert "source_synthetic" in msg and "source_file" in msg
+    assert "source_synthetic" in msg
+    assert "source_file" in msg
 
 
 @pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
-def test_mutual_exclusion_exact_message():
+def test_mutual_exclusion_exact_message() -> None:
     """ValueError when both sources set: message mentions source_synthetic and source_file."""
     loader = (
         QuantumDataLoader(device_id=0)
@@ -61,7 +62,7 @@ def test_mutual_exclusion_exact_message():
 
 
 @pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
-def test_source_file_empty_path_raises():
+def test_source_file_empty_path_raises() -> None:
     """source_file() with empty path raises ValueError."""
     loader = QuantumDataLoader(device_id=0).qubits(4).batches(10, size=4)
     with pytest.raises(ValueError) as exc_info:
@@ -70,7 +71,7 @@ def test_source_file_empty_path_raises():
 
 
 @pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
-def test_synthetic_loader_batch_count():
+def test_synthetic_loader_batch_count() -> None:
     """Synthetic loader yields exactly total_batches batches."""
     total = 5
     batch_size = 4
@@ -90,7 +91,7 @@ def test_synthetic_loader_batch_count():
 
 
 @pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
-def test_file_loader_unsupported_extension_raises():
+def test_file_loader_unsupported_extension_raises() -> None:
     """source_file with unsupported extension raises at __iter__."""
     loader = (
         QuantumDataLoader(device_id=0)
@@ -119,7 +120,7 @@ def test_file_loader_unsupported_extension_raises():
 
 
 @pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
-def test_streaming_requires_parquet():
+def test_streaming_requires_parquet() -> None:
     """source_file(path, streaming=True) with non-.parquet path raises ValueError."""
     with pytest.raises(ValueError) as exc_info:
         QuantumDataLoader(device_id=0).qubits(4).batches(10, size=4).source_file(
@@ -130,7 +131,7 @@ def test_streaming_requires_parquet():
 
 
 @pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
-def test_streaming_parquet_extension_ok():
+def test_streaming_parquet_extension_ok() -> None:
     """source_file(path, streaming=True) with .parquet path does not raise at builder."""
     loader = (
         QuantumDataLoader(device_id=0)
@@ -141,3 +142,99 @@ def test_streaming_parquet_extension_ok():
     # Iteration may raise RuntimeError (no CUDA) or fail on missing file; we only check builder accepts.
     assert loader._streaming_requested is True
     assert loader._file_path == "/tmp/data.parquet"
+
+
+# --- NullHandling builder tests ---
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+def test_null_handling_fill_zero() -> None:
+    """null_handling('fill_zero') sets the field correctly."""
+    loader = (
+        QuantumDataLoader(device_id=0)
+        .qubits(4)
+        .batches(10, size=4)
+        .null_handling("fill_zero")
+    )
+    assert loader._null_handling == "fill_zero"
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+def test_null_handling_reject() -> None:
+    """null_handling('reject') sets the field correctly."""
+    loader = (
+        QuantumDataLoader(device_id=0)
+        .qubits(4)
+        .batches(10, size=4)
+        .null_handling("reject")
+    )
+    assert loader._null_handling == "reject"
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+def test_null_handling_invalid_raises() -> None:
+    """null_handling with an invalid string raises ValueError."""
+    with pytest.raises(ValueError) as exc_info:
+        QuantumDataLoader(device_id=0).null_handling("invalid_policy")
+    msg = str(exc_info.value)
+    assert "fill_zero" in msg or "reject" in msg
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+def test_null_handling_default_is_none() -> None:
+    """By default, _null_handling is None (Rust will use FillZero)."""
+    loader = QuantumDataLoader(device_id=0)
+    assert loader._null_handling is None
+
+
+# --- S3 URL (source_file) builder tests ---
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+@pytest.mark.parametrize(
+    ("path", "streaming"),
+    [
+        ("s3://my-bucket/data.parquet", False),
+        ("s3://bucket/path/to/data.parquet", True),
+        ("s3://bucket/data.parquet?versionId=abc123", False),
+        ("s3://bucket/data.parquet?versionId=abc123", True),
+        ("s3://bucket/data.npy", False),
+    ],
+    ids=[
+        "parquet-no-stream",
+        "parquet-stream",
+        "parquet-query-no-stream",
+        "parquet-query-stream",
+        "npy-no-stream",
+    ],
+)
+def test_source_file_s3_accepted(path, streaming):
+    """source_file() accepts valid S3 URLs at builder level."""
+    loader = (
+        QuantumDataLoader(device_id=0)
+        .qubits(4)
+        .batches(10, size=4)
+        .source_file(path, streaming=streaming)
+    )
+    assert loader._file_path == path
+    assert loader._file_requested is True
+    assert loader._streaming_requested is streaming
+
+
+@pytest.mark.skipif(not _loader_available(), reason="QuantumDataLoader not available")
+@pytest.mark.parametrize(
+    "path",
+    [
+        "s3://bucket/data.npy",
+        "s3://bucket/data.npy?versionId=abc",
+    ],
+    ids=["npy", "npy-query"],
+)
+def test_source_file_s3_streaming_non_parquet_raises(path):
+    """source_file(s3://..., streaming=True) with non-.parquet raises ValueError."""
+    with pytest.raises(ValueError) as exc_info:
+        QuantumDataLoader(device_id=0).qubits(4).batches(10, size=4).source_file(
+            path, streaming=True
+        )
+    msg = str(exc_info.value).lower()
+    assert "parquet" in msg or "streaming" in msg

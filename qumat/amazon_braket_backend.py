@@ -16,8 +16,8 @@
 #
 import boto3
 from braket.aws import AwsDevice, AwsSession
-from braket.devices import LocalSimulator
 from braket.circuits import Circuit, FreeParameter
+from braket.devices import LocalSimulator
 
 
 def initialize_backend(backend_config):
@@ -52,51 +52,51 @@ def create_empty_circuit(num_qubits: int | None = None):
     circuit = Circuit()
     if num_qubits is not None:
         for i in range(num_qubits):
-            circuit.i(i)
+            circuit.i(i)  # type: ignore[unresolved-attribute]
     return circuit
 
 
-def apply_not_gate(circuit, qubit_index):
+def apply_not_gate(circuit, qubit_index) -> None:
     circuit.x(qubit_index)
 
 
-def apply_hadamard_gate(circuit, qubit_index):
+def apply_hadamard_gate(circuit, qubit_index) -> None:
     circuit.h(qubit_index)
 
 
-def apply_cnot_gate(circuit, control_qubit_index, target_qubit_index):
+def apply_cnot_gate(circuit, control_qubit_index, target_qubit_index) -> None:
     circuit.cnot(control_qubit_index, target_qubit_index)
 
 
 def apply_toffoli_gate(
     circuit, control_qubit_index1, control_qubit_index2, target_qubit_index
-):
+) -> None:
     circuit.ccnot(control_qubit_index1, control_qubit_index2, target_qubit_index)
 
 
-def apply_swap_gate(circuit, qubit_index1, qubit_index2):
+def apply_swap_gate(circuit, qubit_index1, qubit_index2) -> None:
     circuit.swap(qubit_index1, qubit_index2)
 
 
 def apply_cswap_gate(
     circuit, control_qubit_index, target_qubit_index1, target_qubit_index2
-):
+) -> None:
     circuit.cswap(control_qubit_index, target_qubit_index1, target_qubit_index2)
 
 
-def apply_pauli_x_gate(circuit, qubit_index):
+def apply_pauli_x_gate(circuit, qubit_index) -> None:
     circuit.x(qubit_index)
 
 
-def apply_pauli_y_gate(circuit, qubit_index):
+def apply_pauli_y_gate(circuit, qubit_index) -> None:
     circuit.y(qubit_index)
 
 
-def apply_pauli_z_gate(circuit, qubit_index):
+def apply_pauli_z_gate(circuit, qubit_index) -> None:
     circuit.z(qubit_index)
 
 
-def apply_t_gate(circuit, qubit_index):
+def apply_t_gate(circuit, qubit_index) -> None:
     circuit.t(qubit_index)
 
 
@@ -143,7 +143,7 @@ def draw_circuit(circuit):
     return str(circuit)
 
 
-def apply_rx_gate(circuit, qubit_index, angle):
+def apply_rx_gate(circuit, qubit_index, angle) -> None:
     if isinstance(angle, (int, float)):
         circuit.rx(qubit_index, angle)
     else:
@@ -151,7 +151,7 @@ def apply_rx_gate(circuit, qubit_index, angle):
         circuit.rx(qubit_index, param)
 
 
-def apply_ry_gate(circuit, qubit_index, angle):
+def apply_ry_gate(circuit, qubit_index, angle) -> None:
     if isinstance(angle, (int, float)):
         circuit.ry(qubit_index, angle)
     else:
@@ -159,7 +159,7 @@ def apply_ry_gate(circuit, qubit_index, angle):
         circuit.ry(qubit_index, param)
 
 
-def apply_rz_gate(circuit, qubit_index, angle):
+def apply_rz_gate(circuit, qubit_index, angle) -> None:
     if isinstance(angle, (int, float)):
         circuit.rz(qubit_index, angle)
     else:
@@ -167,7 +167,7 @@ def apply_rz_gate(circuit, qubit_index, angle):
         circuit.rz(qubit_index, param)
 
 
-def apply_u_gate(circuit, qubit_index, theta, phi, lambd):
+def apply_u_gate(circuit, qubit_index, theta, phi, lambd) -> None:
     # U(θ, φ, λ) = Rz(φ) · Ry(θ) · Rz(λ)
     circuit.rz(qubit_index, lambd)
     circuit.ry(qubit_index, theta)

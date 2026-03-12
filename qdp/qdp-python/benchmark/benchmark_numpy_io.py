@@ -38,7 +38,6 @@ import time
 
 import numpy as np
 import torch
-
 from _qdp import QdpEngine
 from utils import normalize_batch
 
@@ -166,7 +165,7 @@ def run_pennylane_numpy(num_qubits: int, num_samples: int, npy_path: str):
         return 0.0, 0.0, 0.0
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Benchmark NumPy I/O + Encoding: Mahout vs PennyLane"
     )

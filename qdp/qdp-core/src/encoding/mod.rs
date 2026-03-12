@@ -134,6 +134,14 @@ pub(crate) trait ChunkEncoder {
 ///
 /// This function handles all the common IO, buffering, and GPU memory
 /// management logic. The actual encoding is delegated to the `ChunkEncoder`.
+///
+/// # Null handling
+///
+/// The streaming Parquet path always uses [`crate::reader::NullHandling::FillZero`]
+/// when constructing the [`crate::io::ParquetBlockReader`]. This replaces any
+/// null values in the input with `0.0`, matching Mahout's historical behavior
+/// and keeping the API backward compatible. Callers that require stricter
+/// validation should ensure the input data contains no nulls.
 pub(crate) fn stream_encode<E: ChunkEncoder>(
     engine: &QdpEngine,
     path: &str,
@@ -141,11 +149,17 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
     encoder: E,
 ) -> Result<*mut DLManagedTensor> {
     // Initialize reader
-    let mut reader_core = crate::io::ParquetBlockReader::new(path, None)?;
+    let mut reader_core =
+        crate::io::ParquetBlockReader::new(path, None, crate::reader::NullHandling::FillZero)?;
     let num_samples = reader_core.total_rows;
 
     // Allocate output state vector
-    let total_state_vector = GpuStateVector::new_batch(&engine.device, num_samples, num_qubits)?;
+    let total_state_vector = GpuStateVector::new_batch(
+        &engine.device,
+        num_samples,
+        num_qubits,
+        crate::Precision::Float64,
+    )?;
     const PIPELINE_EVENT_SLOTS: usize = 2;
     let ctx = PipelineContext::new(&engine.device, PIPELINE_EVENT_SLOTS)?;
 

@@ -29,7 +29,7 @@ if _qdp_python.exists() and str(_qdp_python) not in _sys.path:
 if _bench_dir.exists() and str(_bench_dir) not in _sys.path:
     _sys.path.insert(0, str(_bench_dir))
 
-from .qdp_test_utils import requires_qdp  # noqa: E402
+from .qdp_test_utils import requires_qdp
 
 
 @requires_qdp

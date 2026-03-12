@@ -40,9 +40,9 @@ from qumat_qdp.api import (
 )
 from qumat_qdp.loader import QuantumDataLoader
 
-# Re-export Rust extension types
-QdpEngine = _qdp.QdpEngine
-QuantumTensor = _qdp.QuantumTensor
+# Re-export Rust extension types (getattr for compiled extension module)
+QdpEngine = getattr(_qdp, "QdpEngine")
+QuantumTensor = getattr(_qdp, "QuantumTensor")
 run_throughput_pipeline_py = getattr(_qdp, "run_throughput_pipeline_py", None)
 
 __all__ = [

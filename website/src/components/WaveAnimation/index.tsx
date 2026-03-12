@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import type {ReactNode} from 'react';
 import {useEffect, useRef} from 'react';
 import styles from './styles.module.css';
 
@@ -27,9 +28,9 @@ interface Wave {
   strokeStyle?: string | CanvasGradient;
 }
 
-export default function WaveAnimation(): JSX.Element {
+export default function WaveAnimation(): ReactNode {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
   const timeRef = useRef(0);
 
   useEffect(() => {

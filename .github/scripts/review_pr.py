@@ -17,11 +17,12 @@
 #
 import os
 import sys
+
 from github import Github
 from gofannon.github.pr_review_tool import PRReviewTool
 
 
-def check_env_vars():
+def check_env_vars() -> None:
     required_vars = [
         "GITHUB_TOKEN",
         "OPENAI_API_KEY",
@@ -38,7 +39,7 @@ def check_env_vars():
 check_env_vars()
 
 
-def main():
+def main() -> None:
     pr_number = int(os.environ["PR_NUMBER"])
     repo_name = os.environ["REPO_NAME"]
     pr_review_tool = PRReviewTool()

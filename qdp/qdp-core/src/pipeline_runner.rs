@@ -26,7 +26,7 @@ use crate::QdpEngine;
 use crate::dlpack::DLManagedTensor;
 use crate::error::{MahoutError, Result};
 use crate::io;
-use crate::reader::StreamingDataReader;
+use crate::reader::{NullHandling, StreamingDataReader};
 use crate::readers::ParquetStreamingReader;
 
 /// Configuration for throughput/latency pipeline runs (Python run_throughput_pipeline_py).
@@ -39,6 +39,7 @@ pub struct PipelineConfig {
     pub encoding_method: String,
     pub seed: Option<u64>,
     pub warmup_batches: usize,
+    pub null_handling: NullHandling,
 }
 
 impl Default for PipelineConfig {
@@ -51,6 +52,7 @@ impl Default for PipelineConfig {
             encoding_method: "amplitude".to_string(),
             seed: None,
             warmup_batches: 0,
+            null_handling: NullHandling::FillZero,
         }
     }
 }
@@ -154,12 +156,23 @@ fn path_extension_lower(path: &Path) -> Option<String> {
 
 /// Dispatches by path extension to the appropriate io reader. Returns (data, num_samples, sample_size).
 /// Unsupported or missing extension returns Err with message listing supported formats.
-fn read_file_by_extension(path: &Path) -> Result<(Vec<f64>, usize, usize)> {
+fn read_file_by_extension(
+    path: &Path,
+    null_handling: NullHandling,
+) -> Result<(Vec<f64>, usize, usize)> {
     let ext_lower = path_extension_lower(path);
     let ext = ext_lower.as_deref();
     match ext {
-        Some("parquet") => io::read_parquet_batch(path),
-        Some("arrow") | Some("feather") | Some("ipc") => io::read_arrow_ipc_batch(path),
+        Some("parquet") => {
+            use crate::reader::DataReader;
+            let mut reader = crate::readers::ParquetReader::new(path, None, null_handling)?;
+            reader.read_batch()
+        }
+        Some("arrow") | Some("feather") | Some("ipc") => {
+            use crate::reader::DataReader;
+            let mut reader = crate::readers::ArrowIPCReader::new(path, null_handling)?;
+            reader.read_batch()
+        }
         Some("npy") => io::read_numpy_batch(path),
         Some("pt") | Some("pth") => io::read_torch_batch(path),
         Some("pb") => io::read_tensorflow_batch(path),
@@ -211,7 +224,7 @@ impl PipelineIterator {
         batch_limit: usize,
     ) -> Result<Self> {
         let path = path.as_ref();
-        let (data, num_samples, sample_size) = read_file_by_extension(path)?;
+        let (data, num_samples, sample_size) = read_file_by_extension(path, config.null_handling)?;
         let vector_len = vector_len(config.num_qubits, &config.encoding_method);
 
         // Dimension validation at construction.
@@ -263,7 +276,11 @@ impl PipelineIterator {
             )));
         }
 
-        let mut reader = ParquetStreamingReader::new(path, Some(DEFAULT_PARQUET_ROW_GROUP_SIZE))?;
+        let mut reader = ParquetStreamingReader::new(
+            path,
+            Some(DEFAULT_PARQUET_ROW_GROUP_SIZE),
+            config.null_handling,
+        )?;
         let vector_len = vector_len(config.num_qubits, &config.encoding_method);
 
         // Read first chunk to learn sample_size; reuse as initial buffer.
@@ -438,14 +455,16 @@ pub fn vector_len(num_qubits: u32, encoding_method: &str) -> usize {
 }
 
 /// Deterministic sample generation matching Python utils.build_sample (amplitude/angle/basis).
-fn fill_sample(seed: u64, out: &mut [f64], encoding_method: &str) -> Result<()> {
+fn fill_sample(seed: u64, out: &mut [f64], encoding_method: &str, num_qubits: usize) -> Result<()> {
     let len = out.len();
     if len == 0 {
         return Ok(());
     }
     match encoding_method.to_lowercase().as_str() {
         "basis" => {
-            let mask = len.saturating_sub(1) as u64;
+            // For basis encoding, use 2^num_qubits as the state space size for mask calculation
+            let state_space_size = 1 << num_qubits;
+            let mask = (state_space_size - 1) as u64;
             let idx = seed & mask;
             out[0] = idx as f64;
         }
@@ -471,20 +490,32 @@ fn fill_sample(seed: u64, out: &mut [f64], encoding_method: &str) -> Result<()> 
 
 /// Generate one batch (batch_size * vector_len elements, or batch_size * 1 for basis).
 fn generate_batch(config: &PipelineConfig, batch_idx: usize, vector_len: usize) -> Vec<f64> {
+    let mut batch = vec![0.0f64; config.batch_size * vector_len];
+    fill_batch_inplace(config, batch_idx, vector_len, &mut batch);
+    batch
+}
+
+/// Fill an existing batch buffer in-place (avoids per-iteration allocations in benchmarks).
+fn fill_batch_inplace(
+    config: &PipelineConfig,
+    batch_idx: usize,
+    vector_len: usize,
+    batch_buf: &mut [f64],
+) {
+    debug_assert_eq!(batch_buf.len(), config.batch_size * vector_len);
     let seed_base = config
         .seed
         .unwrap_or(0)
         .wrapping_add((batch_idx * config.batch_size) as u64);
-    let mut batch = vec![0.0f64; config.batch_size * vector_len];
     for i in 0..config.batch_size {
         let offset = i * vector_len;
         let _ = fill_sample(
             seed_base + i as u64,
-            &mut batch[offset..offset + vector_len],
+            &mut batch_buf[offset..offset + vector_len],
             &config.encoding_method,
+            config.num_qubits as usize,
         );
     }
-    batch
 }
 
 /// Release DLPack tensor (call deleter so GPU memory is freed).
@@ -504,11 +535,14 @@ pub fn run_throughput_pipeline(config: &PipelineConfig) -> Result<PipelineRunRes
     let vector_len = vector_len(config.num_qubits, &config.encoding_method);
     let num_qubits = config.num_qubits as usize;
 
+    // Reuse a single CPU batch buffer to avoid per-iteration allocations in throughput benchmarks.
+    let mut batch_buf = vec![0.0f64; config.batch_size * vector_len];
+
     // Warmup
     for b in 0..config.warmup_batches {
-        let batch = generate_batch(config, b, vector_len);
+        fill_batch_inplace(config, b, vector_len, &mut batch_buf);
         let ptr = engine.encode_batch(
-            &batch,
+            &batch_buf,
             config.batch_size,
             vector_len,
             num_qubits,
@@ -522,9 +556,9 @@ pub fn run_throughput_pipeline(config: &PipelineConfig) -> Result<PipelineRunRes
 
     let start = Instant::now();
     for b in 0..config.total_batches {
-        let batch = generate_batch(config, b, vector_len);
+        fill_batch_inplace(config, b, vector_len, &mut batch_buf);
         let ptr = engine.encode_batch(
-            &batch,
+            &batch_buf,
             config.batch_size,
             vector_len,
             num_qubits,
@@ -551,4 +585,211 @@ pub fn run_throughput_pipeline(config: &PipelineConfig) -> Result<PipelineRunRes
 /// Run latency pipeline (same as throughput; returns same stats; name for API parity).
 pub fn run_latency_pipeline(config: &PipelineConfig) -> Result<PipelineRunResult> {
     run_throughput_pipeline(config)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn assert_generate_and_inplace_match(encoding_method: &str) {
+        let config = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 8,
+            encoding_method: encoding_method.to_string(),
+            seed: Some(123),
+            ..Default::default()
+        };
+
+        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+
+        // Test edge cases: 0 and batch_size-1
+        for batch_idx in [0, config.batch_size - 1, 7] {
+            let generated = generate_batch(&config, batch_idx, vector_len);
+            let mut buf = vec![0.0f64; config.batch_size * vector_len];
+            fill_batch_inplace(&config, batch_idx, vector_len, &mut buf);
+
+            assert_eq!(generated, buf);
+        }
+    }
+
+    fn assert_adjacent_batches_differ(encoding_method: &str) {
+        let config = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 8,
+            encoding_method: encoding_method.to_string(),
+            seed: Some(123),
+            ..Default::default()
+        };
+
+        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+
+        let batch0 = generate_batch(&config, 0, vector_len);
+        let batch1 = generate_batch(&config, 1, vector_len);
+        assert_ne!(batch0, batch1);
+    }
+
+    #[test]
+    fn generate_batch_matches_fill_batch_inplace_amplitude() {
+        assert_generate_and_inplace_match("amplitude");
+    }
+
+    #[test]
+    fn generate_batch_matches_fill_batch_inplace_angle() {
+        assert_generate_and_inplace_match("angle");
+    }
+
+    #[test]
+    fn generate_batch_matches_fill_batch_inplace_basis() {
+        assert_generate_and_inplace_match("basis");
+    }
+
+    #[test]
+    fn adjacent_batches_differ_amplitude() {
+        assert_adjacent_batches_differ("amplitude");
+    }
+
+    #[test]
+    fn adjacent_batches_differ_angle() {
+        assert_adjacent_batches_differ("angle");
+    }
+
+    #[test]
+    fn adjacent_batches_differ_basis() {
+        assert_adjacent_batches_differ("basis");
+    }
+
+    #[test]
+    fn test_seed_none() {
+        let config = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 8,
+            encoding_method: "amplitude".to_string(),
+            seed: None,
+            ..Default::default()
+        };
+
+        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let batch = generate_batch(&config, 0, vector_len);
+        assert_eq!(batch.len(), config.batch_size * vector_len);
+
+        let mut buf = vec![0.0f64; config.batch_size * vector_len];
+        fill_batch_inplace(&config, 0, vector_len, &mut buf);
+        assert_eq!(batch, buf);
+    }
+
+    #[test]
+    fn test_batch_size_one() {
+        let config = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 1,
+            encoding_method: "amplitude".to_string(),
+            seed: Some(123),
+            ..Default::default()
+        };
+
+        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let batch = generate_batch(&config, 0, vector_len);
+        assert_eq!(batch.len(), vector_len);
+
+        let mut buf = vec![0.0f64; vector_len];
+        fill_batch_inplace(&config, 0, vector_len, &mut buf);
+        assert_eq!(batch, buf);
+
+        let batch0 = generate_batch(&config, 0, vector_len);
+        let batch1 = generate_batch(&config, 1, vector_len);
+        assert_ne!(batch0, batch1);
+    }
+
+    #[test]
+    fn test_amplitude_encoding_case_insensitive() {
+        let config_lower = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 8,
+            encoding_method: "amplitude".to_string(),
+            seed: Some(123),
+            ..Default::default()
+        };
+
+        let config_upper = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 8,
+            encoding_method: "AMPLITUDE".to_string(),
+            seed: Some(123),
+            ..Default::default()
+        };
+
+        let vector_len = vector_len(config_lower.num_qubits, &config_lower.encoding_method);
+        let batch_lower = generate_batch(&config_lower, 0, vector_len);
+        let batch_upper = generate_batch(&config_upper, 0, vector_len);
+        assert_eq!(batch_lower, batch_upper);
+    }
+
+    #[test]
+    fn test_amplitude_samples_in_range() {
+        let config = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 8,
+            encoding_method: "amplitude".to_string(),
+            seed: Some(123),
+            ..Default::default()
+        };
+
+        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+
+        for batch_idx in 0..5 {
+            let batch = generate_batch(&config, batch_idx, vector_len);
+            for &value in &batch {
+                assert!(
+                    (0.0..1.0).contains(&value),
+                    "amplitude value should be in [0, 1), got {} at batch_idx={}",
+                    value,
+                    batch_idx
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_amplitude_samples_in_range_with_seed_none() {
+        let config = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 8,
+            encoding_method: "amplitude".to_string(),
+            seed: None,
+            ..Default::default()
+        };
+
+        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let batch = generate_batch(&config, 0, vector_len);
+
+        for &value in &batch {
+            assert!(
+                (0.0..1.0).contains(&value),
+                "amplitude value should be in [0, 1) with seed=None, got {}",
+                value
+            );
+        }
+    }
+
+    #[test]
+    fn test_amplitude_samples_in_range_batch_size_one() {
+        let config = PipelineConfig {
+            num_qubits: 5,
+            batch_size: 1,
+            encoding_method: "amplitude".to_string(),
+            seed: Some(123),
+            ..Default::default()
+        };
+
+        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let batch = generate_batch(&config, 0, vector_len);
+
+        for &value in &batch {
+            assert!(
+                (0.0..1.0).contains(&value),
+                "amplitude value should be in [0, 1) with batch_size=1, got {}",
+                value
+            );
+        }
+    }
 }

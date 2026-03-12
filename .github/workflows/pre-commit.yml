@@ -41,7 +41,7 @@ jobs:
         run: pip install uv
 
       - name: Install dependencies
-        run: uv sync --extra qdp --group dev
+        run: uv sync --group dev
 
       - name: Run pre-commit hooks
         run: uv run pre-commit run --all-files

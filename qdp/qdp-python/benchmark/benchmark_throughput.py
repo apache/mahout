@@ -32,9 +32,9 @@ import time
 
 import numpy as np
 import torch
+from qumat_qdp import QdpBenchmark
 
 from benchmark.utils import normalize_batch, prefetched_batches
-from qumat_qdp import QdpBenchmark
 
 BAR = "=" * 70
 SEP = "-" * 70
@@ -179,7 +179,7 @@ def run_qiskit(num_qubits: int, total_batches: int, batch_size: int, prefetch: i
     return duration, throughput
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Benchmark DataLoader throughput across frameworks."
     )
