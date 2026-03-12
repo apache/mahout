@@ -141,7 +141,7 @@ Apache Mahout includes several subprojects. Use the root workflow above for issu
 |------------|-------|-------------|
 | **Qumat** | *(this document)* | Core Python library; use root Quick Start and [Testing](#testing). |
 | **QDP** (Quantum Data Plane) | [qdp/DEVELOPMENT.md](qdp/DEVELOPMENT.md) | GPU-accelerated pipeline: Rust/CUDA, DevContainer, build, install, benchmarks, profiling. |
-| **Website** | [website/CONTRIBUTING.md](website/CONTRIBUTING.md) | Docusaurus site: docs source in `/docs`, sync, versioning, deployment. |
+| **Website** | [website/README.md](website/README.md) | Docusaurus site: docs source in `/docs`, sync, versioning, deployment. |
 
 ---
 

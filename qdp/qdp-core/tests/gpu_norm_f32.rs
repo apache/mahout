@@ -21,27 +21,24 @@
 #![cfg(target_os = "linux")]
 
 use approx::assert_relative_eq;
-use cudarc::driver::{CudaDevice, DevicePtr};
+use cudarc::driver::DevicePtr;
 use qdp_core::gpu::encodings::amplitude::AmplitudeEncoder;
+
+mod common;
 
 #[test]
 fn test_calculate_inv_norm_gpu_f32_basic() {
     println!("Testing AmplitudeEncoder::calculate_inv_norm_gpu_f32 (basic case)...");
-
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => {
-            println!("SKIP: No CUDA device available");
-            return;
-        }
-    };
 
     // Input: [3.0, 4.0] -> norm = 5.0, inv_norm = 0.2
     let input: Vec<f32> = vec![3.0, 4.0];
     let expected_norm = (3.0_f32.powi(2) + 4.0_f32.powi(2)).sqrt();
     let expected_inv_norm = 1.0_f32 / expected_norm;
 
-    let input_d = device.htod_sync_copy(input.as_slice()).unwrap();
+    let Some((device, input_d)) = common::copy_f32_to_device(input.as_slice()) else {
+        println!("SKIP: No CUDA device available");
+        return;
+    };
     let inv = unsafe {
         AmplitudeEncoder::calculate_inv_norm_gpu_f32(
             &device,
@@ -58,16 +55,11 @@ fn test_calculate_inv_norm_gpu_f32_basic() {
 fn test_calculate_inv_norm_gpu_f32_invalid_zero() {
     println!("Testing AmplitudeEncoder::calculate_inv_norm_gpu_f32 with zero vector...");
 
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => {
-            println!("SKIP: No CUDA device available");
-            return;
-        }
-    };
-
     let input: Vec<f32> = vec![0.0, 0.0, 0.0];
-    let input_d = device.htod_sync_copy(input.as_slice()).unwrap();
+    let Some((device, input_d)) = common::copy_f32_to_device(input.as_slice()) else {
+        println!("SKIP: No CUDA device available");
+        return;
+    };
 
     let result = unsafe {
         AmplitudeEncoder::calculate_inv_norm_gpu_f32(
