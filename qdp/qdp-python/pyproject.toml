@@ -49,10 +49,12 @@ benchmark = [
 
 [tool.uv.sources]
 qumat = { path = "../..", editable = true }
+torch = { index = "pytorch" }
 
+# CUDA 12.6 wheels to match driver (libnvJitLink 12_6); cu122 pulls libs that need 12_8 and fail.
 [[tool.uv.index]]
 name = "pytorch"
-url = "https://download.pytorch.org/whl/cu122"
+url = "https://download.pytorch.org/whl/cu126"
 explicit = true
 
 # Invalidate uv cache when Rust or Cargo changes so extension is rebuilt (run_throughput_pipeline_py etc.).
