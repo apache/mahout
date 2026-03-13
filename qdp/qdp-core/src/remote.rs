@@ -16,9 +16,9 @@
 
 //! Remote I/O support for cloud object storage.
 //!
-//! When the `remote-io` feature is enabled, cloud URLs (currently `s3://`)
+//! When the `remote-io` feature is enabled, cloud URLs (`s3://`, `gs://`)
 //! are transparently downloaded to a local temp file before being passed to
-//! readers. Adding GCS (`gs://`) or Azure (`az://`) support requires only a
+//! readers. Adding more providers (for example Azure `az://`) requires only a
 //! new match arm in [`build_store`] and the corresponding `object_store`
 //! cargo feature.
 
@@ -33,7 +33,7 @@ use tempfile::NamedTempFile;
 use crate::error::{MahoutError, Result};
 
 /// Recognized cloud URL schemes.
-const REMOTE_SCHEMES: &[&str] = &["s3://"];
+const REMOTE_SCHEMES: &[&str] = &["s3://", "gs://"];
 
 /// Returns true if `path` is a recognized remote URL.
 pub fn is_remote_path(path: &str) -> bool {
@@ -41,7 +41,14 @@ pub fn is_remote_path(path: &str) -> bool {
 }
 
 /// Parse a cloud URL into (scheme, bucket, key).
+/// Query/fragment components are intentionally rejected.
 fn parse_url(url: &str) -> Result<(&str, &str, &str)> {
+    if url.contains('?') || url.contains('#') {
+        return Err(MahoutError::InvalidInput(format!(
+            "Remote URL query/fragment is not supported: {}",
+            url
+        )));
+    }
     let (scheme, rest) = url
         .split_once("://")
         .ok_or_else(|| MahoutError::InvalidInput(format!("Not a remote URL: {}", url)))?;
@@ -76,7 +83,18 @@ fn build_store(scheme: &str, bucket: &str) -> Result<Arc<dyn ObjectStore>> {
                 })?;
             Ok(Arc::new(store))
         }
-        // To add GCS:  "gs" => { ... GoogleCloudStorageBuilder ... }
+        "gs" => {
+            let store = object_store::gcp::GoogleCloudStorageBuilder::from_env()
+                .with_bucket_name(bucket)
+                .build()
+                .map_err(|e| {
+                    MahoutError::Io(format!(
+                        "Failed to build GCS client for bucket '{}': {}",
+                        bucket, e
+                    ))
+                })?;
+            Ok(Arc::new(store))
+        }
         // To add Azure: "az" | "abfs" => { ... MicrosoftAzureBuilder ... }
         _ => Err(MahoutError::InvalidInput(format!(
             "Unsupported remote scheme '{}://'. Supported: {}",
@@ -174,6 +192,7 @@ mod tests {
     #[test]
     fn test_is_remote_path() {
         assert!(is_remote_path("s3://bucket/key.parquet"));
+        assert!(is_remote_path("gs://bucket/key.parquet"));
         assert!(!is_remote_path("/tmp/local.parquet"));
         assert!(!is_remote_path("data.parquet"));
     }
@@ -182,6 +201,14 @@ mod tests {
     fn test_parse_url_s3() {
         let (scheme, bucket, key) = parse_url("s3://my-bucket/path/to/data.parquet").unwrap();
         assert_eq!(scheme, "s3");
+        assert_eq!(bucket, "my-bucket");
+        assert_eq!(key, "path/to/data.parquet");
+    }
+
+    #[test]
+    fn test_parse_url_gs() {
+        let (scheme, bucket, key) = parse_url("gs://my-bucket/path/to/data.parquet").unwrap();
+        assert_eq!(scheme, "gs");
         assert_eq!(bucket, "my-bucket");
         assert_eq!(key, "path/to/data.parquet");
     }
@@ -198,6 +225,12 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_url_rejects_query_and_fragment() {
+        assert!(parse_url("s3://bucket/data.parquet?versionId=abc").is_err());
+        assert!(parse_url("gs://bucket/data.parquet#generation").is_err());
+    }
+
+    #[test]
     fn test_unsupported_scheme() {
         let err = build_store("gcs", "bucket").unwrap_err();
         assert!(err.to_string().contains("Unsupported remote scheme"));
@@ -209,24 +242,7 @@ mod tests {
         assert_eq!(resolved.path, PathBuf::from("/tmp/local.parquet"));
     }
 
-    /// Integration test: download from a real S3-compatible endpoint (MinIO).
-    ///
-    /// Requires a running MinIO with a test file uploaded. Skipped unless
-    /// `MAHOUT_TEST_S3` env var is set. Run with:
-    ///
-    /// ```sh
-    /// MAHOUT_TEST_S3=1 \
-    /// AWS_ACCESS_KEY_ID=minioadmin AWS_SECRET_ACCESS_KEY=minioadmin \
-    /// AWS_ENDPOINT=http://localhost:9123 AWS_REGION=us-east-1 AWS_ALLOW_HTTP=true \
-    /// cargo test -p qdp-core --features remote-io -- test_download_from_minio
-    /// ```
-    #[test]
-    fn test_download_from_minio() {
-        if std::env::var("MAHOUT_TEST_S3").is_err() {
-            eprintln!("skipping test_download_from_minio (set MAHOUT_TEST_S3=1 to run)");
-            return;
-        }
-        let resolved = resolve_path("s3://test-bucket/data.parquet").unwrap();
+    fn assert_downloaded_parquet(resolved: &ResolvedPath) {
         assert!(
             resolved.path.exists(),
             "temp file should exist after download"
@@ -251,5 +267,44 @@ mod tests {
         assert_eq!(num_samples, 8);
         assert_eq!(sample_size, 4);
         assert_eq!(data.len(), 32);
+    }
+
+    /// Integration test: download from a real S3-compatible endpoint (MinIO).
+    ///
+    /// Requires a running MinIO with a test file uploaded. Skipped unless
+    /// `MAHOUT_TEST_S3` env var is set. Run with:
+    ///
+    /// ```sh
+    /// MAHOUT_TEST_S3=1 \
+    /// AWS_ACCESS_KEY_ID=minioadmin AWS_SECRET_ACCESS_KEY=minioadmin \
+    /// AWS_ENDPOINT=http://localhost:9123 AWS_REGION=us-east-1 AWS_ALLOW_HTTP=true \
+    /// cargo test -p qdp-core --features remote-io -- test_download_from_minio
+    /// ```
+    #[test]
+    fn test_download_from_minio() {
+        if std::env::var("MAHOUT_TEST_S3").is_err() {
+            eprintln!("skipping test_download_from_minio (set MAHOUT_TEST_S3=1 to run)");
+            return;
+        }
+        let resolved = resolve_path("s3://test-bucket/data.parquet").unwrap();
+        assert_downloaded_parquet(&resolved);
+    }
+
+    /// Integration test: download from a real GCS bucket.
+    ///
+    /// Skipped unless `MAHOUT_TEST_GCS` env var is set. The remote URL can be
+    /// overridden with `MAHOUT_TEST_GCS_URL` (default: gs://test-bucket/data.parquet).
+    /// Authentication must be configured via environment variables supported by
+    /// `GoogleCloudStorageBuilder::from_env`.
+    #[test]
+    fn test_download_from_gcs() {
+        if std::env::var("MAHOUT_TEST_GCS").is_err() {
+            eprintln!("skipping test_download_from_gcs (set MAHOUT_TEST_GCS=1 to run)");
+            return;
+        }
+        let url = std::env::var("MAHOUT_TEST_GCS_URL")
+            .unwrap_or_else(|_| "gs://test-bucket/data.parquet".to_string());
+        let resolved = resolve_path(&url).unwrap();
+        assert_downloaded_parquet(&resolved);
     }
 }
