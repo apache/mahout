@@ -64,7 +64,8 @@ __device__ double compute_phase(
     return phase;
 }
 
-// Compute the unnormalized amplitude for basis state |z> via naive O(4^n) sum:
+// Compute the unnormalized amplitude for basis state |z> via a naive O(2^n) sum over x
+// (O(4^n) total work if amplitudes for all 2^n basis states z are computed):
 //   sum_x exp(i*theta(x)) * (-1)^popcount(x AND z)
 __device__ cuDoubleComplex compute_amplitude_naive(
     const double* __restrict__ data,
@@ -90,7 +91,8 @@ __device__ cuDoubleComplex compute_amplitude_naive(
 }
 
 // ============================================================================
-// Naive O(4^n) Implementation (kept as fallback for small n and verification)
+// Naive Implementation: O(2^n) per amplitude, O(4^n) for the full state
+// (kept as fallback for small n and verification)
 // ============================================================================
 
 __global__ void iqp_encode_kernel_naive(
