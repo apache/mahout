@@ -29,9 +29,20 @@ Usage:
 
 from __future__ import annotations
 
-# Rust extension (built by maturin). QdpEngine/QuantumTensor are public for
-# advanced use; QdpBenchmark and QuantumDataLoader are the recommended high-level API.
-import _qdp
+# Backend detection: gracefully degrade when _qdp (Rust extension) is unavailable.
+from qumat_qdp._backend import Backend, get_backend, get_qdp
+
+_qdp_mod = get_qdp()
+if _qdp_mod is not None:
+    QdpEngine = getattr(_qdp_mod, "QdpEngine")
+    QuantumTensor = getattr(_qdp_mod, "QuantumTensor")
+    run_throughput_pipeline_py = getattr(_qdp_mod, "run_throughput_pipeline_py", None)
+else:
+    QdpEngine = None
+    QuantumTensor = None
+    run_throughput_pipeline_py = None
+
+BACKEND = get_backend()
 
 from qumat_qdp.api import (
     LatencyResult,
@@ -40,12 +51,9 @@ from qumat_qdp.api import (
 )
 from qumat_qdp.loader import QuantumDataLoader
 
-# Re-export Rust extension types (getattr for compiled extension module)
-QdpEngine = getattr(_qdp, "QdpEngine")
-QuantumTensor = getattr(_qdp, "QuantumTensor")
-run_throughput_pipeline_py = getattr(_qdp, "run_throughput_pipeline_py", None)
-
 __all__ = [
+    "BACKEND",
+    "Backend",
     "LatencyResult",
     "QdpBenchmark",
     "QdpEngine",
