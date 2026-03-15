@@ -27,6 +27,7 @@ on:
 
 jobs:
   deploy:
+    if: ${{ github.repository == 'apache/mahout' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
