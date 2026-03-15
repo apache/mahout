@@ -16,9 +16,9 @@
 
 //! Streaming encoding implementations for different quantum encoding methods.
 
-mod amplitude;
-mod angle;
-mod basis;
+pub mod amplitude;
+pub mod angle;
+pub mod basis;
 
 use std::ffi::c_void;
 use std::sync::Arc;
@@ -66,8 +66,8 @@ use crate::reader::StreamingDataReader;
 use crate::{MahoutError, QdpEngine, Result};
 
 /// 512MB staging buffer for large Parquet row groups (reduces fragmentation)
-pub(crate) const STAGE_SIZE_BYTES: usize = 512 * 1024 * 1024;
-pub(crate) const STAGE_SIZE_ELEMENTS: usize = STAGE_SIZE_BYTES / std::mem::size_of::<f64>();
+pub const STAGE_SIZE_BYTES: usize = 512 * 1024 * 1024;
+pub const STAGE_SIZE_ELEMENTS: usize = STAGE_SIZE_BYTES / std::mem::size_of::<f64>();
 
 pub(crate) type FullBufferResult = std::result::Result<(PinnedHostBuffer, usize), MahoutError>;
 pub(crate) type FullBufferChannel = (SyncSender<FullBufferResult>, Receiver<FullBufferResult>);
@@ -76,7 +76,7 @@ pub(crate) type FullBufferChannel = (SyncSender<FullBufferResult>, Receiver<Full
 ///
 /// Implementations provide the encoding-specific logic while the shared
 /// streaming pipeline handles IO, buffering, and GPU memory management.
-pub(crate) trait ChunkEncoder {
+pub trait ChunkEncoder {
     /// Encoder-specific state (e.g., norm buffer for amplitude encoding).
     type State;
 

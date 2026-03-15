@@ -31,12 +31,12 @@ use crate::gpu::memory::PinnedHostBuffer;
 use crate::{MahoutError, QdpEngine, Result};
 
 /// Amplitude encoder state containing the norm buffer.
-pub(crate) struct AmplitudeEncoderState {
-    norm_buffer: CudaSlice<f64>,
+pub struct AmplitudeEncoderState {
+    pub(crate) norm_buffer: CudaSlice<f64>,
 }
 
 /// Amplitude encoding: maps classical vectors to quantum state amplitudes.
-pub(crate) struct AmplitudeEncoder;
+pub struct AmplitudeEncoder;
 
 impl ChunkEncoder for AmplitudeEncoder {
     type State = AmplitudeEncoderState;
