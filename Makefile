@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-.PHONY: test_rust test_python tests pre-commit setup-test-python install-llvm-cov
+.PHONY: test_rust test_python tests pre-commit setup-test-python install-llvm-cov benchmark setup-benchmark
 
 # Detect NVIDIA GPU
 HAS_NVIDIA := $(shell command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/dev/null 2>&1 && echo yes || echo no)
@@ -45,3 +45,34 @@ tests: test_rust test_python
 
 pre-commit: setup-test-python
 	uv run pre-commit run --all-files
+
+setup-benchmark: setup-test-python
+ifeq ($(HAS_NVIDIA),yes)
+	@echo "[INFO] Setting up benchmark environment..."
+	uv sync --group dev --extra qdp
+	uv sync --project qdp/qdp-python --group benchmark --active
+	unset CONDA_PREFIX && uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml
+else
+	@echo "[SKIP] No NVIDIA GPU detected, skipping maturin develop"
+	@echo "[INFO] Setting up benchmark environment (CPU-only)..."
+	uv sync --project qdp/qdp-python --group benchmark --active
+endif
+
+benchmark: setup-benchmark
+ifeq ($(HAS_NVIDIA),yes)
+	@echo "[INFO] Running benchmarks..."
+	@echo "[INFO] Available benchmark scripts:"
+	@echo "  - benchmark_e2e.py: End-to-end latency (Disk -> GPU VRAM)"
+	@echo "  - benchmark_latency.py: Data-to-State latency (CPU RAM -> GPU VRAM)"
+	@echo "  - benchmark_throughput.py: DataLoader-style throughput"
+	@echo ""
+	@echo "[INFO] Run specific benchmarks with:"
+	@echo "  uv run --active python qdp/qdp-python/benchmark/benchmark_e2e.py"
+	@echo "  uv run --active python qdp/qdp-python/benchmark/benchmark_latency.py"
+	@echo "  uv run --active python qdp/qdp-python/benchmark/benchmark_throughput.py"
+	@echo ""
+	@echo "[INFO] See qdp/qdp-python/benchmark/README.md for more options."
+else
+	@echo "[SKIP] No NVIDIA GPU detected, skipping benchmarks"
+	@echo "[INFO] Benchmarks require NVIDIA GPU. Setup completed for manual execution."
+endif
