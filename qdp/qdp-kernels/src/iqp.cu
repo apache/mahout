@@ -64,6 +64,31 @@ __device__ double compute_phase(
     return phase;
 }
 
+// Compute the unnormalized amplitude for basis state |z> via naive O(4^n) sum:
+//   sum_x exp(i*theta(x)) * (-1)^popcount(x AND z)
+__device__ cuDoubleComplex compute_amplitude_naive(
+    const double* __restrict__ data,
+    size_t z,
+    size_t state_len,
+    unsigned int num_qubits,
+    int enable_zz
+) {
+    double real_sum = 0.0;
+    double imag_sum = 0.0;
+
+    for (size_t x = 0; x < state_len; ++x) {
+        double phase = compute_phase(data, x, num_qubits, enable_zz);
+        int parity = __popcll(x & z) & 1;
+        double sign = (parity == 0) ? 1.0 : -1.0;
+        double cos_phase, sin_phase;
+        sincos(phase, &sin_phase, &cos_phase);
+        real_sum += sign * cos_phase;
+        imag_sum += sign * sin_phase;
+    }
+
+    return make_cuDoubleComplex(real_sum, imag_sum);
+}
+
 // ============================================================================
 // Naive O(4^n) Implementation (kept as fallback for small n and verification)
 // ============================================================================
@@ -78,27 +103,11 @@ __global__ void iqp_encode_kernel_naive(
     size_t z = blockIdx.x * blockDim.x + threadIdx.x;
     if (z >= state_len) return;
 
-    double real_sum = 0.0;
-    double imag_sum = 0.0;
-
-    // Sum over all input basis states x
-    for (size_t x = 0; x < state_len; ++x) {
-        double phase = compute_phase(data, x, num_qubits, enable_zz);
-
-        // Compute (-1)^{popcount(x AND z)} using __popcll intrinsic
-        int parity = __popcll(x & z) & 1;
-        double sign = (parity == 0) ? 1.0 : -1.0;
-
-        // Accumulate: sign * exp(i*phase) = sign * (cos(phase) + i*sin(phase))
-        double cos_phase, sin_phase;
-        sincos(phase, &sin_phase, &cos_phase);
-        real_sum += sign * cos_phase;
-        imag_sum += sign * sin_phase;
-    }
+    cuDoubleComplex amp = compute_amplitude_naive(data, z, state_len, num_qubits, enable_zz);
 
     // Normalize by 1/2^n (state_len = 2^n)
     double norm = 1.0 / (double)state_len;
-    state[z] = make_cuDoubleComplex(real_sum * norm, imag_sum * norm);
+    state[z] = make_cuDoubleComplex(cuCreal(amp) * norm, cuCimag(amp) * norm);
 }
 
 
@@ -248,25 +257,10 @@ __global__ void iqp_encode_batch_kernel_naive(
         const size_t z = global_idx & state_mask;
         const double* data = data_batch + sample_idx * data_len;
 
-        double real_sum = 0.0;
-        double imag_sum = 0.0;
-
-        // Sum over all input basis states x
-        for (size_t x = 0; x < state_len; ++x) {
-            double phase = compute_phase(data, x, num_qubits, enable_zz);
-
-            // Compute (-1)^{popcount(x AND z)}
-            int parity = __popcll(x & z) & 1;
-            double sign = (parity == 0) ? 1.0 : -1.0;
-
-            double cos_phase, sin_phase;
-            sincos(phase, &sin_phase, &cos_phase);
-            real_sum += sign * cos_phase;
-            imag_sum += sign * sin_phase;
-        }
+        cuDoubleComplex amp = compute_amplitude_naive(data, z, state_len, num_qubits, enable_zz);
 
         double norm = 1.0 / (double)state_len;
-        state_batch[global_idx] = make_cuDoubleComplex(real_sum * norm, imag_sum * norm);
+        state_batch[global_idx] = make_cuDoubleComplex(cuCreal(amp) * norm, cuCimag(amp) * norm);
     }
 }
 
