@@ -139,6 +139,7 @@ ignore = [
     "ANN001", # TODO: fix (missing-type-function-argument)
     "ANN201", # TODO: fix (missing-return-type-undocumented-public-function)
     "ANN202", # TODO: fix (missing-return-type-private-function)
+    "ANN401",
 ]
 
 [tool.ruff.lint.pyflakes]

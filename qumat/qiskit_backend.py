@@ -14,11 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from __future__ import annotations
+
+from collections.abc import Mapping, MutableMapping
+from typing import Any
+
 import qiskit
 from qiskit_aer import AerSimulator
 
 
-def initialize_backend(backend_config):
+def initialize_backend(backend_config: Mapping[str, Any]) -> AerSimulator:
     backend_options = backend_config["backend_options"]
     simulator_type = backend_options["simulator_type"]
     shots = backend_options.get("shots", 1)
@@ -36,74 +41,90 @@ def initialize_backend(backend_config):
     else:
         backend = AerSimulator(method=simulator_type)
 
-    backend.shots = shots  # type: ignore[unresolved-attribute]  # runtime-settable
+    backend.shots = shots  # type: ignore[assignment, misc]  # runtime-settable
     return backend
 
 
-def create_empty_circuit(num_qubits: int | None = None):
+def create_empty_circuit(num_qubits: int | None = None) -> qiskit.QuantumCircuit:
     if num_qubits is not None:
         return qiskit.QuantumCircuit(num_qubits)
     else:
         return qiskit.QuantumCircuit()
 
 
-def apply_not_gate(circuit, qubit_index) -> None:
+def apply_not_gate(circuit: qiskit.QuantumCircuit, qubit_index: int) -> None:
     # Apply a NOT gate (X gate) on the specified qubit
     circuit.x(qubit_index)
 
 
-def apply_hadamard_gate(circuit, qubit_index) -> None:
+def apply_hadamard_gate(circuit: qiskit.QuantumCircuit, qubit_index: int) -> None:
     # Apply a Hadamard gate on the specified qubit
     circuit.h(qubit_index)
 
 
-def apply_cnot_gate(circuit, control_qubit_index, target_qubit_index) -> None:
+def apply_cnot_gate(
+    circuit: qiskit.QuantumCircuit,
+    control_qubit_index: int,
+    target_qubit_index: int,
+) -> None:
     # Apply a CNOT gate (controlled-X gate) with the specified control and
     # target qubits
     circuit.cx(control_qubit_index, target_qubit_index)
 
 
 def apply_toffoli_gate(
-    circuit, control_qubit_index1, control_qubit_index2, target_qubit_index
+    circuit: qiskit.QuantumCircuit,
+    control_qubit_index1: int,
+    control_qubit_index2: int,
+    target_qubit_index: int,
 ) -> None:
     # Apply a Toffoli gate (controlled-controlled-X gate) with the
     # specified control and target qubits
     circuit.ccx(control_qubit_index1, control_qubit_index2, target_qubit_index)
 
 
-def apply_swap_gate(circuit, qubit_index1, qubit_index2) -> None:
+def apply_swap_gate(
+    circuit: qiskit.QuantumCircuit, qubit_index1: int, qubit_index2: int
+) -> None:
     # Apply a SWAP gate to exchange the states of two qubits
     circuit.swap(qubit_index1, qubit_index2)
 
 
 def apply_cswap_gate(
-    circuit, control_qubit_index, target_qubit_index1, target_qubit_index2
+    circuit: qiskit.QuantumCircuit,
+    control_qubit_index: int,
+    target_qubit_index1: int,
+    target_qubit_index2: int,
 ) -> None:
     # Apply a controlled-SWAP (Fredkin) gate with the specified control and target qubits
     circuit.cswap(control_qubit_index, target_qubit_index1, target_qubit_index2)
 
 
-def apply_pauli_x_gate(circuit, qubit_index) -> None:
+def apply_pauli_x_gate(circuit: qiskit.QuantumCircuit, qubit_index: int) -> None:
     # Apply a Pauli X gate on the specified qubit
     circuit.x(qubit_index)
 
 
-def apply_pauli_y_gate(circuit, qubit_index) -> None:
+def apply_pauli_y_gate(circuit: qiskit.QuantumCircuit, qubit_index: int) -> None:
     # Apply a Pauli Y gate on the specified qubit
     circuit.y(qubit_index)
 
 
-def apply_pauli_z_gate(circuit, qubit_index) -> None:
+def apply_pauli_z_gate(circuit: qiskit.QuantumCircuit, qubit_index: int) -> None:
     # Apply a Pauli Z gate on the specified qubit
     circuit.z(qubit_index)
 
 
-def apply_t_gate(circuit, qubit_index) -> None:
+def apply_t_gate(circuit: qiskit.QuantumCircuit, qubit_index: int) -> None:
     # Apply a T gate (π/8 gate) on the specified qubit
     circuit.t(qubit_index)
 
 
-def execute_circuit(circuit, backend, backend_config):
+def execute_circuit(
+    circuit: qiskit.QuantumCircuit,
+    backend: AerSimulator,
+    backend_config: MutableMapping[str, Any],
+) -> dict[str, int]:
     working_circuit = circuit.copy()
 
     # Add measurements if they are not already present
@@ -139,7 +160,11 @@ def execute_circuit(circuit, backend, backend_config):
 
 
 # placeholder method for use in the testing suite
-def get_final_state_vector(circuit, backend, backend_config):
+def get_final_state_vector(
+    circuit: qiskit.QuantumCircuit,
+    backend: AerSimulator,
+    backend_config: MutableMapping[str, Any],
+) -> Any:
     working_circuit = circuit.copy()
 
     simulator = AerSimulator(method="statevector")
@@ -163,32 +188,54 @@ def get_final_state_vector(circuit, backend, backend_config):
     return result.get_statevector()
 
 
-def draw_circuit(circuit):
+def draw_circuit(circuit: qiskit.QuantumCircuit) -> Any:
     # Use Qiskit's built-in drawing function
     return circuit.draw()
 
 
-def apply_rx_gate(circuit, qubit_index, angle) -> None:
+def apply_rx_gate(
+    circuit: qiskit.QuantumCircuit,
+    qubit_index: int,
+    angle: float | str | qiskit.circuit.Parameter,
+) -> None:
     param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
     circuit.rx(param, qubit_index)
 
 
-def apply_ry_gate(circuit, qubit_index, angle) -> None:
+def apply_ry_gate(
+    circuit: qiskit.QuantumCircuit,
+    qubit_index: int,
+    angle: float | str | qiskit.circuit.Parameter,
+) -> None:
     param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
     circuit.ry(param, qubit_index)
 
 
-def apply_rz_gate(circuit, qubit_index, angle) -> None:
+def apply_rz_gate(
+    circuit: qiskit.QuantumCircuit,
+    qubit_index: int,
+    angle: float | str | qiskit.circuit.Parameter,
+) -> None:
     param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
     circuit.rz(param, qubit_index)
 
 
-def apply_u_gate(circuit, qubit_index, theta, phi, lambd) -> None:
+def apply_u_gate(
+    circuit: qiskit.QuantumCircuit,
+    qubit_index: int,
+    theta: float,
+    phi: float,
+    lambd: float,
+) -> None:
     # Apply the U gate directly with specified parameters
     circuit.u(theta, phi, lambd, qubit_index)
 
 
-def calculate_prob_zero(results, ancilla_qubit, num_qubits):
+def calculate_prob_zero(
+    results: dict[str, int] | list[dict[str, int]],
+    ancilla_qubit: int,
+    num_qubits: int,
+) -> float:
     """
     Calculate the probability of measuring the ancilla qubit in |0> state.
 
