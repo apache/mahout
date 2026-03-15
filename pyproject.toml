@@ -95,7 +95,15 @@ exclude = [
 [tool.ty.analysis]
 # _qdp: compiled Rust extension (no type info for members)
 # api: benchmark module loaded via sys.path in tests
-allowed-unresolved-imports = ["_qdp", "_qdp.*", "api", "api.*"]
+# qumat_qdp: optional QDP Python package (editable install from qdp/qdp-python)
+allowed-unresolved-imports = [
+    "_qdp",
+    "_qdp.*",
+    "api",
+    "api.*",
+    "qumat_qdp",
+    "qumat_qdp.*",
+]
 
 [tool.ruff]
 target-version = "py310"

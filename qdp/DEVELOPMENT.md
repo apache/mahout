@@ -88,7 +88,7 @@ Run Python tests:
 
 ```bash
 uv run pytest testing/qdp -v
-uv run pytest qdp/qdp-python/tests -v
+uv run pytest testing/qdp_python -v
 ```
 
 ## 4. Benchmarks
