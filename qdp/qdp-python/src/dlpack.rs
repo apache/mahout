@@ -106,9 +106,11 @@ pub fn extract_dlpack_tensor(
             ));
         }
 
-        if dl_tensor.device.device_type != DLDeviceType::kDLCUDA {
+        if dl_tensor.device.device_type != DLDeviceType::kDLCUDA
+            && dl_tensor.device.device_type != DLDeviceType::kDLROCM
+        {
             return Err(PyRuntimeError::new_err(
-                "DLPack tensor must be on CUDA device",
+                "DLPack tensor must be on CUDA/ROCm device",
             ));
         }
 
@@ -197,4 +199,51 @@ pub fn extract_dlpack_tensor(
             device_id,
         })
     }
+}
+
+/// Acquire ownership of a DLManagedTensor pointer from a producer tensor.
+///
+/// This function is used when qdp-python acts as a pass-through producer:
+/// it takes ownership of the managed tensor pointer from `tensor.__dlpack__()`
+/// and returns it to be wrapped by `QuantumTensor`.
+pub fn steal_dlpack_managed_tensor(tensor: &Bound<'_, PyAny>) -> PyResult<*mut DLManagedTensor> {
+    let capsule = tensor.call_method0("__dlpack__")?;
+    const DLTENSOR_NAME: &[u8] = b"dltensor\0";
+
+    let managed_ptr = unsafe {
+        let capsule_ptr = capsule.as_ptr();
+        if ffi::PyCapsule_IsValid(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8) == 0 {
+            return Err(PyRuntimeError::new_err(
+                "Invalid DLPack capsule (expected 'dltensor')",
+            ));
+        }
+        let ptr = ffi::PyCapsule_GetPointer(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8)
+            as *mut DLManagedTensor;
+        if ptr.is_null() {
+            return Err(PyRuntimeError::new_err(
+                "Failed to extract DLManagedTensor from PyCapsule",
+            ));
+        }
+        ptr
+    };
+
+    unsafe {
+        let dl_tensor = &(*managed_ptr).dl_tensor;
+        if dl_tensor.data.is_null() {
+            return Err(PyRuntimeError::new_err(
+                "DLPack tensor has null data pointer",
+            ));
+        }
+        if dl_tensor.device.device_type != DLDeviceType::kDLCUDA
+            && dl_tensor.device.device_type != DLDeviceType::kDLROCM
+        {
+            return Err(PyRuntimeError::new_err(
+                "DLPack tensor must be on CUDA/ROCm device",
+            ));
+        }
+        const USED_DLTENSOR_NAME: &[u8] = b"used_dltensor\0";
+        ffi::PyCapsule_SetName(capsule.as_ptr(), USED_DLTENSOR_NAME.as_ptr() as *const i8);
+    }
+
+    Ok(managed_ptr)
 }

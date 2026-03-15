@@ -32,13 +32,18 @@ classifiers = [
 dynamic = ["version"]
 
 [dependency-groups]
-dev = ["pytest", "torch>=2.2,<=2.9.0"]
+dev = [
+    "pytest",
+    "torch>=2.2,<=2.9.0",
+    "triton>=3.0",
+]
 benchmark = [
     "numpy>=1.24,<2.0",
     "pandas>=2.0",
     "pyarrow>=14.0",
     "tensorflow>=2.20",
     "torch>=2.2,<=2.9.0",
+    "triton>=3.0",
     "qiskit>=1.0",
     "qiskit-aer>=0.17.2",
     "pennylane>=0.35",
