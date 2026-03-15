@@ -27,6 +27,7 @@ use super::QuantumEncoder;
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::{GpuStateVector, Precision};
+#[cfg(target_os = "linux")]
 use crate::gpu::pipeline::run_dual_stream_pipeline;
 use cudarc::driver::CudaDevice;
 
