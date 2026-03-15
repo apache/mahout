@@ -112,8 +112,7 @@ def load_svhn(
         / 255.0
     )
     X_test = (
-        test_mat["X"].transpose(3, 0, 1, 2).reshape(-1, 3072).astype(np.float64)
-        / 255.0
+        test_mat["X"].transpose(3, 0, 1, 2).reshape(-1, 3072).astype(np.float64) / 255.0
     )
     Y_train = train_mat["y"].ravel().astype(int) % 10
     Y_test = test_mat["y"].ravel().astype(int) % 10
@@ -129,16 +128,12 @@ CLASS_POS = 1
 CLASS_NEG = 7
 
 
-def _filter_binary(
-    X: np.ndarray, Y: np.ndarray
-) -> tuple[np.ndarray, np.ndarray]:
+def _filter_binary(X: np.ndarray, Y: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     mask = (Y == CLASS_POS) | (Y == CLASS_NEG)
     return X[mask], np.where(Y[mask] == CLASS_POS, 1, -1)
 
 
-def preprocess_pca(
-    X: np.ndarray, n_components: int
-) -> np.ndarray:
+def preprocess_pca(X: np.ndarray, n_components: int) -> np.ndarray:
     """StandardScaler -> PCA to n_components dimensions."""
     X_scaled = StandardScaler().fit_transform(X)
     return PCA(n_components=n_components).fit_transform(X_scaled)
@@ -173,9 +168,7 @@ def features_to_iqp_params(X: np.ndarray, n_qubits: int) -> np.ndarray:
     return params
 
 
-def encode_qdp(
-    X_params: np.ndarray, n_qubits: int, device_id: int = 0
-) -> torch.Tensor:
+def encode_qdp(X_params: np.ndarray, n_qubits: int, device_id: int = 0) -> torch.Tensor:
     """QdpEngine IQP batch encode -> CUDA complex tensor."""
     engine = QdpEngine(device_id=device_id, precision="float64")
     qt = engine.encode(
@@ -252,9 +245,7 @@ def run_training(
     Y_test_np = np.asarray(Y_test)
 
     # Weights and optimizer
-    weights_init = 0.01 * pnp.random.randn(
-        num_layers, n_qubits, 3, requires_grad=True
-    )
+    weights_init = 0.01 * pnp.random.randn(num_layers, n_qubits, 3, requires_grad=True)
     bias_init = pnp.array(0.0, requires_grad=True)
     if optimizer == "adam":
         opt = AdamOptimizer(lr)
@@ -282,9 +273,7 @@ def run_training(
             pred_test_now = np.sign(
                 np.array([model(weights, bias, x) for x in pnp.array(feats_test)])
             ).flatten()
-            test_acc_now = float(
-                np.mean(np.abs(pred_test_now - Y_test_np) < 1e-5)
-            )
+            test_acc_now = float(np.mean(np.abs(pred_test_now - Y_test_np) < 1e-5))
             if test_acc_now >= early_stop_target:
                 break
     train_sec = time.perf_counter() - t0
@@ -356,7 +345,9 @@ def main() -> None:
         default=0.2,
         help="Test fraction (default: 0.2)",
     )
-    parser.add_argument("--seed", type=int, default=42, help="Random seed (default: 42)")
+    parser.add_argument(
+        "--seed", type=int, default=42, help="Random seed (default: 42)"
+    )
     parser.add_argument(
         "--optimizer",
         type=str,
@@ -408,10 +399,7 @@ def main() -> None:
     X_all = np.concatenate([X_train_all, X_test_all], axis=0)
     Y_all = np.concatenate([Y_train_all, Y_test_all], axis=0)
     X_bin, Y_bin = _filter_binary(X_all, Y_all)
-    print(
-        f"  Binary filtered: {len(Y_bin):,} samples "
-        f"(pos={np.mean(Y_bin == 1):.2f})"
-    )
+    print(f"  Binary filtered: {len(Y_bin):,} samples (pos={np.mean(Y_bin == 1):.2f})")
 
     rng = np.random.default_rng(args.seed)
     if args.n_samples < len(Y_bin):
