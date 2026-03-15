@@ -29,9 +29,12 @@ Usage:
 
 from __future__ import annotations
 
+import math
+import warnings
 from collections.abc import Iterator
-from functools import lru_cache
 from typing import TYPE_CHECKING
+
+from qumat_qdp._backend import get_qdp as _get_qdp
 
 if TYPE_CHECKING:
     import _qdp
@@ -39,12 +42,10 @@ if TYPE_CHECKING:
 # Seed must fit Rust u64: 0 <= seed <= 2^64 - 1.
 _U64_MAX = 2**64 - 1
 
-
-@lru_cache(maxsize=1)
-def _get_qdp():
-    import _qdp as m
-
-    return m
+# Fallback-supported file extensions (loadable without _qdp).
+_TORCH_FILE_EXTS = frozenset({".pt", ".pth"})
+_NUMPY_FILE_EXTS = frozenset({".npy"})
+_FALLBACK_FILE_EXTS = _TORCH_FILE_EXTS | _NUMPY_FILE_EXTS
 
 
 def _validate_loader_args(
@@ -80,6 +81,29 @@ def _validate_loader_args(
             raise ValueError(
                 f"seed must be in range [0, {_U64_MAX}] (Rust u64), got {seed!r}"
             )
+
+
+def _build_sample(seed: int, vector_len: int, encoding_method: str) -> list[float]:
+    """Build a single deterministic sample vector (mirrors benchmark/utils.py:build_sample)."""
+    import numpy as np
+
+    if encoding_method == "basis":
+        mask = np.uint64(vector_len - 1)
+        idx = np.uint64(seed) & mask
+        return [float(idx)]
+    if encoding_method == "angle":
+        if vector_len == 0:
+            return []
+        scale = (2.0 * math.pi) / vector_len
+        idx = np.arange(vector_len, dtype=np.uint64)
+        mixed = (idx + np.uint64(seed)) % np.uint64(vector_len)
+        return (mixed.astype(np.float64) * scale).tolist()
+    # amplitude / iqp
+    mask = np.uint64(vector_len - 1)
+    scale = 1.0 / vector_len
+    idx = np.arange(vector_len, dtype=np.uint64)
+    mixed = (idx + np.uint64(seed)) & mask
+    return (mixed.astype(np.float64) * scale).tolist()
 
 
 class QuantumDataLoader:
@@ -210,7 +234,7 @@ class QuantumDataLoader:
         return self
 
     def _create_iterator(self) -> Iterator[object]:
-        """Build engine and return the Rust-backed loader iterator (synthetic or file)."""
+        """Build engine and return a loader iterator (Rust-backed or PyTorch fallback)."""
         if self._synthetic_requested and self._file_requested:
             raise ValueError(
                 "Cannot set both synthetic and file sources; use either .source_synthetic() or .source_file(path), not both."
@@ -230,11 +254,14 @@ class QuantumDataLoader:
                 seed=self._seed,
             )
         qdp = _get_qdp()
-        QdpEngine = getattr(qdp, "QdpEngine", None)
-        if QdpEngine is None:
-            raise RuntimeError(
-                "_qdp.QdpEngine not found. Build the extension with maturin develop."
-            )
+        QdpEngine = getattr(qdp, "QdpEngine", None) if qdp else None
+        if QdpEngine is not None:
+            return self._create_rust_iterator(QdpEngine, use_synthetic)
+        # Rust extension unavailable – fall back to PyTorch.
+        return self._create_pytorch_iterator(use_synthetic)
+
+    def _create_rust_iterator(self, QdpEngine, use_synthetic: bool) -> Iterator[object]:
+        """Create the Rust-backed loader iterator (original path)."""
         engine = QdpEngine(device_id=self._device_id)
         if not use_synthetic:
             if self._streaming_requested:
@@ -275,6 +302,123 @@ class QuantumDataLoader:
             )
         )
 
+    def _create_pytorch_iterator(self, use_synthetic: bool) -> Iterator[object]:
+        """Fallback iterator using pure-PyTorch encoding when _qdp is unavailable.
+
+        Yields ``torch.Tensor`` (not ``QuantumTensor``).
+
+        Supports synthetic data and ``.npy`` / ``.pt`` / ``.pth`` files.
+        Parquet, Arrow, and streaming sources require the Rust extension.
+        """
+        try:
+            import torch
+        except ImportError:
+            raise RuntimeError(
+                "Neither _qdp (Rust extension) nor torch (PyTorch) is available. "
+                "Install PyTorch with: pip install torch, or build _qdp with: maturin develop"
+            ) from None
+
+        from qumat_qdp.torch_ref import encode
+
+        warnings.warn(
+            "Using PyTorch fallback backend. Iteration yields torch.Tensor "
+            "instead of QuantumTensor (no torch.from_dlpack() needed).",
+            stacklevel=3,
+        )
+
+        device = f"cuda:{self._device_id}" if torch.cuda.is_available() else "cpu"
+
+        if use_synthetic:
+            return self._pytorch_synthetic_iter(torch, encode, device)
+        return self._pytorch_file_iter(torch, encode, device)
+
+    def _pytorch_synthetic_iter(
+        self, torch, encode_fn, device: str
+    ) -> Iterator[object]:
+        """Generate synthetic data and encode with PyTorch."""
+        import numpy as np
+
+        num_qubits = self._num_qubits
+        encoding_method = self._encoding_method
+        batch_size = self._batch_size
+        seed = self._seed if self._seed is not None else 0
+
+        if encoding_method == "basis":
+            sample_size = 1
+        elif encoding_method == "angle":
+            sample_size = num_qubits
+        elif encoding_method == "iqp":
+            sample_size = num_qubits + num_qubits * (num_qubits - 1) // 2
+        else:
+            sample_size = 1 << num_qubits
+
+        for batch_idx in range(self._total_batches):
+            base = batch_idx * batch_size
+            samples = []
+            for i in range(batch_size):
+                samples.append(
+                    _build_sample(base + i + seed, sample_size, encoding_method)
+                )
+            batch_np = np.stack(samples)
+            batch_tensor = torch.tensor(batch_np, dtype=torch.float64, device=device)
+            yield encode_fn(batch_tensor, num_qubits, encoding_method, device=device)
+
+    def _pytorch_file_iter(self, torch, encode_fn, device: str) -> Iterator[object]:
+        """Load file data and encode with PyTorch."""
+        import os
+
+        path = self._file_path
+        assert path is not None
+        ext = os.path.splitext(path)[1].lower()
+
+        if self._streaming_requested:
+            raise RuntimeError(
+                "Streaming file loading requires the _qdp Rust extension. "
+                "Build with: maturin develop"
+            )
+
+        if ext not in _FALLBACK_FILE_EXTS:
+            raise RuntimeError(
+                f"PyTorch fallback only supports {', '.join(sorted(_FALLBACK_FILE_EXTS))} files. "
+                f"Got {ext!r}. Build the _qdp extension for full format support: maturin develop"
+            )
+
+        # Load all data into memory.
+        if ext in _TORCH_FILE_EXTS:
+            raw = torch.load(path, weights_only=True)
+            if not isinstance(raw, torch.Tensor):
+                raise RuntimeError(
+                    f"Expected torch.Tensor in {path}, got {type(raw).__name__}"
+                )
+            all_data = raw.to(dtype=torch.float64, device=device)
+        else:
+            import numpy as np
+
+            arr = np.load(path)
+            all_data = torch.tensor(arr, dtype=torch.float64, device=device)
+
+        if all_data.ndim == 1:
+            all_data = all_data.unsqueeze(0)
+
+        num_qubits = self._num_qubits
+        encoding_method = self._encoding_method
+        batch_size = self._batch_size
+        total_samples = all_data.shape[0]
+        total_batches = min(
+            self._total_batches, (total_samples + batch_size - 1) // batch_size
+        )
+
+        for batch_idx in range(total_batches):
+            start = batch_idx * batch_size
+            end = min(start + batch_size, total_samples)
+            batch = all_data[start:end]
+            yield encode_fn(batch, num_qubits, encoding_method, device=device)
+
     def __iter__(self) -> Iterator[object]:
-        """Return Rust-backed iterator that yields one QuantumTensor per batch."""
+        """Return iterator that yields one encoded batch per step.
+
+        When the ``_qdp`` Rust extension is available, yields ``QuantumTensor``
+        (use ``torch.from_dlpack(qt)``).  When falling back to PyTorch, yields
+        ``torch.Tensor`` directly.
+        """
         return self._create_iterator()

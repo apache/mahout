@@ -58,15 +58,20 @@ def pytest_collection_modifyitems(config, items):
         "Build with: cd qdp/qdp-python && maturin develop"
     )
 
+    # Tests that work without _qdp (PyTorch fallback / reference tests).
+    _NO_QDP_OK = {"test_torch_ref.py", "test_fallback.py"}
+
     for item in items:
         # Skip tests explicitly marked with @pytest.mark.gpu
         if "gpu" in item.keywords:
             item.add_marker(skip_marker)
 
-        # Skip all tests in testing/qdp/ directory
+        # Skip all tests in testing/qdp/ directory, except those that
+        # explicitly do not require the Rust extension.
         fspath_str = str(item.fspath)
         if "testing/qdp" in fspath_str or "testing\\qdp" in fspath_str:
-            item.add_marker(skip_marker)
+            if not any(name in fspath_str for name in _NO_QDP_OK):
+                item.add_marker(skip_marker)
 
 
 @pytest.fixture
