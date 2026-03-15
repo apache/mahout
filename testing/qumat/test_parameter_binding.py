@@ -224,7 +224,9 @@ class TestParameterBinding:
     @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
     def test_execute_circuit_does_not_mutate_backend_config(self, backend_name):
         """Test that execute_circuit does not mutate the user's backend_config across all backends."""
-        backend_config = get_backend_config(backend_name).copy()
+        cfg = get_backend_config(backend_name)
+        assert cfg is not None
+        backend_config = cfg.copy()
         original_config = backend_config.copy()
 
         qumat = QuMat(backend_config)
@@ -240,7 +242,9 @@ class TestParameterBinding:
     @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
     def test_get_final_state_vector_does_not_mutate_backend_config(self, backend_name):
         """Test that get_final_state_vector does not mutate the user's backend_config across all backends."""
-        backend_config = get_backend_config(backend_name).copy()
+        cfg = get_backend_config(backend_name)
+        assert cfg is not None
+        backend_config = cfg.copy()
         original_config = backend_config.copy()
 
         qumat = QuMat(backend_config)

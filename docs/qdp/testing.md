@@ -52,6 +52,17 @@ cargo test --package qdp-core --test gpu_api_workflow
 cargo test --package qdp-core --test gpu_memory_safety
 ```
 
+## Python tests
+
+The Python test suite (qumat, QDP bindings, loader) runs with `make test_python`.
+
+Tests run in a single process by default to avoid GPU memory pressure (e.g. CUDA out of memory when multiple workers use the device). If you have enough compute and GPU memory, you can speed up the run with parallel workers with `make test_python` in `Makefile`:
+
+```bash
+uv run pytest -n auto --cov --cov-report=term-missing --cov-report=html:htmlcov
+# or specify the number of workers, e.g. -n 4
+```
+
 ## Requirements
 
 - Linux OS (tests skip on other platforms)
