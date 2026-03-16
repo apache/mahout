@@ -11,7 +11,7 @@ scripts:
 
 ## Quick Start
 
-From the repo root, the easiest way to set up and run benchmarks is:
+From the repo root, the easiest way to set up the benchmark environment is:
 
 ```bash
 make benchmark
@@ -19,10 +19,14 @@ make benchmark
 
 This will:
 1. Set up the benchmark environment in the unified root venv (`mahout/.venv`)
-2. Build the QDP extension (if GPU available)
-3. Display instructions for running specific benchmarks
+2. Attempt to build the QDP GPU extension (skipped on CPU-only systems)
+3. Display instructions for running specific benchmarks manually
 
-Then run individual benchmarks:
+> Note: These benchmarks require an NVIDIA GPU with compatible CUDA drivers. On
+> CPU-only systems, `make benchmark` will only prepare the environment and print
+> instructions; the GPU benchmarks themselves will not run.
+
+To run individual benchmarks after setup:
 
 ```bash
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_e2e.py
