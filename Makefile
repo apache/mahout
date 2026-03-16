@@ -59,7 +59,7 @@ endif
 
 benchmark: setup-benchmark
 ifeq ($(HAS_NVIDIA),yes)
-	@echo "[INFO] Running benchmarks..."
+	@echo "[INFO] Benchmark environment ready. The following benchmarks are available:"
 	@echo "[INFO] Available benchmark scripts:"
 	@echo "  - benchmark_e2e.py: End-to-end latency (Disk -> GPU VRAM)"
 	@echo "  - benchmark_latency.py: Data-to-State latency (CPU RAM -> GPU VRAM)"
