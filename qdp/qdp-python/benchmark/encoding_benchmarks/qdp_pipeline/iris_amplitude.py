@@ -216,7 +216,7 @@ def _run_training_cpu(
     Y_train: np.ndarray,
     Y_test: np.ndarray,
     *,
-    dev_qml: Any,  # noqa: ANN401
+    dev_qml: Any,
     num_layers: int,
     iterations: int,
     batch_size: int,
@@ -309,7 +309,7 @@ def _run_training_gpu(
     Y_train: np.ndarray,
     Y_test: np.ndarray,
     *,
-    dev_qml: Any,  # noqa: ANN401
+    dev_qml: Any,
     num_layers: int,
     iterations: int,
     batch_size: int,
