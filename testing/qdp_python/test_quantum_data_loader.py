@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 try:
     from qumat_qdp.loader import QuantumDataLoader
 except ImportError:
-    QuantumDataLoader = None
+    QuantumDataLoader: type[QuantumDataLoaderType] | None = None
 
 
 def _loader_available():
