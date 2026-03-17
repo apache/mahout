@@ -11,12 +11,24 @@ scripts:
 
 ## Quick Start
 
-From the repo root:
+From the repo root, the easiest way to set up the benchmark environment is:
 
 ```bash
-uv sync --group dev --extra qdp
-source .venv/bin/activate
-uv sync --project qdp/qdp-python --group benchmark --active
+make benchmark
+```
+
+This will:
+1. Set up the benchmark environment in the unified root venv (`mahout/.venv`)
+2. Attempt to build the QDP GPU extension (skipped on CPU-only systems)
+3. Display instructions for running specific benchmarks manually
+
+> Note: These benchmarks require an NVIDIA GPU with compatible CUDA drivers. On
+> CPU-only systems, `make benchmark` will only prepare the environment and print
+> instructions; the GPU benchmarks themselves will not run.
+
+To run individual benchmarks after setup:
+
+```bash
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_e2e.py
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_latency.py
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_throughput.py
@@ -26,9 +38,14 @@ This keeps all benchmark dependencies in the unified repo root venv (`mahout/.ve
 
 ## Manual Setup
 
+If you prefer to set up manually (or if `make benchmark` is not available):
+
 ```bash
+# First-time setup: install dependencies and build QDP extension
+uv sync --group dev --extra qdp
 source .venv/bin/activate
 uv sync --project qdp/qdp-python --group benchmark --active
+unset CONDA_PREFIX && uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml
 ```
 
 Then run benchmarks with `uv run --project qdp/qdp-python python ...`.
