@@ -12,7 +12,7 @@ repos:
 
   # Python linter and formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.6
+    rev: v0.15.5
     hooks:
       - id: ruff-check
         name: Lint and fix Python code
