@@ -223,12 +223,12 @@ def test_encode_numpy_angle_encoding_wrong_sample_size():
     ("theta", "expected_probs"),
     [
         pytest.param(0.0, [1.0, 0.0], id="theta=0"),
-        pytest.param(np.pi / 2, [0.5, 0.5], id="theta=pi/2"),
-        pytest.param(np.pi, [0.0, 1.0], id="theta=pi"),
+        pytest.param(np.pi / 2, [0.0, 1.0], id="theta=pi/2"),
+        pytest.param(np.pi, [1.0, 0.0], id="theta=pi"),
     ],
 )
 def test_encode_numpy_angle_encoding_1qubit_correctness(theta, expected_probs):
-    """Angle encoding: 1 qubit with known angle θ → probabilities [cos²(θ/2), sin²(θ/2)]"""
+    """Angle encoding: 1 qubit with known angle θ → probabilities [cos²(θ), sin²(θ)]"""
     from _qdp import QdpEngine
 
     engine = QdpEngine(device_id=0, precision="float64")
