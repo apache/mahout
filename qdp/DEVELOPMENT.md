@@ -96,7 +96,7 @@ uv run pytest qdp/qdp-python/tests -v
 From the repo root, set up and prepare benchmarks:
 
 ```bash
-make benchmark
+make setup-benchmark
 ```
 
 This will:
@@ -119,7 +119,7 @@ uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_e2e.py
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_throughput.py --qubits 16 --batches 200 --batch-size 64 --prefetch 16
 ```
 
-For manual setup (if `make benchmark` is not available):
+For manual setup (if `make setup-benchmark` is not available):
 
 ```bash
 source .venv/bin/activate

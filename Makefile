@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-.PHONY: test_rust test_python tests pre-commit setup-test-python install-llvm-cov benchmark setup-benchmark
+.PHONY: test_rust test_python tests pre-commit setup-test-python install-llvm-cov setup-benchmark
 
 # Detect NVIDIA GPU
 HAS_NVIDIA := $(shell command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/dev/null 2>&1 && echo yes || echo no)
@@ -51,14 +51,6 @@ ifeq ($(HAS_NVIDIA),yes)
 	uv sync --group dev --extra qdp
 	uv sync --project qdp/qdp-python --group benchmark --active
 	unset CONDA_PREFIX && uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml
-else
-	@echo "[SKIP] No NVIDIA GPU detected, skipping maturin develop"
-	@echo "[INFO] Setting up benchmark environment (CPU-only)..."
-	uv sync --project qdp/qdp-python --group benchmark --active
-endif
-
-benchmark: setup-benchmark
-ifeq ($(HAS_NVIDIA),yes)
 	@echo "[INFO] Benchmark environment ready. The following benchmarks are available:"
 	@echo "[INFO] Available benchmark scripts:"
 	@echo "  - benchmark_e2e.py: End-to-end latency (Disk -> GPU VRAM)"
@@ -72,6 +64,8 @@ ifeq ($(HAS_NVIDIA),yes)
 	@echo ""
 	@echo "[INFO] See qdp/qdp-python/benchmark/README.md for more options."
 else
-	@echo "[SKIP] No NVIDIA GPU detected, skipping benchmarks"
+	@echo "[SKIP] No NVIDIA GPU detected, skipping maturin develop"
+	@echo "[INFO] Setting up benchmark environment (CPU-only)..."
+	uv sync --project qdp/qdp-python --group benchmark --active
 	@echo "[INFO] Benchmarks require NVIDIA GPU. Setup completed for manual execution."
 endif
