@@ -93,14 +93,18 @@ uv run pytest testing/qdp_python -v
 
 ## 4. Benchmarks
 
-Install benchmark dependency group into the same root venv:
+From the repo root, set up and prepare benchmarks:
 
 ```bash
-source .venv/bin/activate
-uv sync --project qdp/qdp-python --group benchmark --active
+make setup-benchmark
 ```
 
-Run benchmark scripts:
+This will:
+1. Install benchmark dependencies into the unified root venv
+2. Build the QDP extension (if GPU available)
+3. Display instructions for running specific benchmarks
+
+Then run benchmark scripts:
 
 ```bash
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_e2e.py
@@ -114,6 +118,15 @@ Examples:
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_e2e.py --frameworks all
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_throughput.py --qubits 16 --batches 200 --batch-size 64 --prefetch 16
 ```
+
+For manual setup (if `make setup-benchmark` is not available):
+
+```bash
+source .venv/bin/activate
+uv sync --project qdp/qdp-python --group benchmark --active
+```
+
+See [qdp/qdp-python/benchmark/README.md](qdp-python/benchmark/README.md) for detailed benchmark documentation.
 
 ## 5. NVTX / nsys Profiling
 
