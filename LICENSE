@@ -232,3 +232,11 @@ Proper
 Files in the directory: website/assets/vendor/propper
 Are copied from the Propper project (https://popper.js.org/)
 which is licensed under the MIT license.
+
+================================================================
+KaTeX
+================================================================
+
+Files in the directory: website/static/css/katex.min.css
+Are copied from the KaTeX project (https://katex.org/)
+which is licensed under the MIT license.

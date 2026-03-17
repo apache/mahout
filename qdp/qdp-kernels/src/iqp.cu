@@ -251,6 +251,8 @@ __global__ void iqp_encode_batch_kernel_naive(
     const size_t total_elements = num_samples * state_len;
     const size_t stride = gridDim.x * blockDim.x;
     const size_t state_mask = state_len - 1;
+    // Normalize by 1/2^n (state_len = 2^n) - hoisted outside the loop
+    const double norm = 1.0 / (double)state_len;
 
     for (size_t global_idx = blockIdx.x * blockDim.x + threadIdx.x;
          global_idx < total_elements;
@@ -261,7 +263,6 @@ __global__ void iqp_encode_batch_kernel_naive(
 
         cuDoubleComplex amp = compute_amplitude_naive(data, z, state_len, num_qubits, enable_zz);
 
-        double norm = 1.0 / (double)state_len;
         state_batch[global_idx] = make_cuDoubleComplex(cuCreal(amp) * norm, cuCimag(amp) * norm);
     }
 }

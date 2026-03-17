@@ -29,7 +29,7 @@ Example:
     >>> torch_tensor = torch.from_dlpack(qtensor)
 """
 
-from typing import NoReturn
+from typing import Any, NoReturn
 
 _INSTALL_MSG = (
     "QDP requires the qumat-qdp native extension. "
@@ -37,7 +37,7 @@ _INSTALL_MSG = (
 )
 
 
-def _make_stub(name: str) -> type:
+def _make_stub(name: str) -> type[Any]:
     """Create a stub class that raises ImportError on instantiation."""
 
     def __init__(self, *args: object, **kwargs: object) -> NoReturn:
@@ -59,7 +59,7 @@ except ImportError as e:
         ImportWarning,
     )
 
-    QdpEngine = _make_stub("QdpEngine")
-    QuantumTensor = _make_stub("QuantumTensor")
+    QdpEngine: type[Any] = _make_stub("QdpEngine")
+    QuantumTensor: type[Any] = _make_stub("QuantumTensor")
 
-__all__ = ["QdpEngine", "QuantumTensor"]
+__all__: list[str] = ["QdpEngine", "QuantumTensor"]
