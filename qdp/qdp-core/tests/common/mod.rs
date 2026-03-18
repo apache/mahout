@@ -17,6 +17,12 @@
 #[cfg(target_os = "linux")]
 use std::sync::Arc;
 
+use arrow::array::{FixedSizeListArray, Float64Array};
+use arrow::datatypes::{DataType, Field, Schema};
+use arrow::record_batch::RecordBatch;
+use parquet::arrow::ArrowWriter;
+use parquet::file::properties::WriterProperties;
+
 #[cfg(target_os = "linux")]
 use cudarc::driver::{CudaDevice, CudaSlice};
 #[cfg(target_os = "linux")]
@@ -34,6 +40,37 @@ pub fn create_test_data(size: usize) -> Vec<f64> {
 #[allow(dead_code)]
 pub fn create_test_data_f32(size: usize) -> Vec<f32> {
     (0..size).map(|i| (i as f32) / (size as f32)).collect()
+}
+
+/// Writes a FixedSizeList<Float64, sample_size> Parquet file for streaming encoder tests.
+/// Each `sample_size` consecutive values in `data` form one row.
+#[allow(dead_code)]
+pub fn write_fixed_size_list_parquet(path: &str, data: &[f64], sample_size: usize) {
+    use std::fs::File;
+    use std::sync::Arc;
+
+    let item_field = Arc::new(Field::new("item", DataType::Float64, false));
+    let values_array = Float64Array::from(data.to_vec());
+    let list_array = FixedSizeListArray::new(
+        item_field.clone(),
+        sample_size as i32,
+        Arc::new(values_array),
+        None,
+    );
+
+    let schema = Arc::new(Schema::new(vec![Field::new(
+        "angles",
+        DataType::FixedSizeList(item_field, sample_size as i32),
+        false,
+    )]));
+
+    let batch = RecordBatch::try_new(schema.clone(), vec![Arc::new(list_array) as _]).unwrap();
+
+    let file = File::create(path).unwrap();
+    let props = WriterProperties::builder().build();
+    let mut writer = ArrowWriter::try_new(file, schema, Some(props)).unwrap();
+    writer.write(&batch).unwrap();
+    writer.close().unwrap();
 }
 
 /// Returns a CUDA device handle, or `None` when CUDA is unavailable for the test environment.
