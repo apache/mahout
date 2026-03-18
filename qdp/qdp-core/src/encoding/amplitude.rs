@@ -130,3 +130,58 @@ impl ChunkEncoder for AmplitudeEncoder {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::MahoutError;
+
+    #[test]
+    fn reject_sample_size_zero() {
+        let enc = AmplitudeEncoder;
+        match enc.validate_sample_size(0) {
+            Err(MahoutError::InvalidInput(msg)) => assert!(msg.contains("zero")),
+            other => panic!("expected InvalidInput, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn reject_sample_size_exceeds_stage() {
+        let enc = AmplitudeEncoder;
+        match enc.validate_sample_size(STAGE_SIZE_ELEMENTS + 1) {
+            Err(MahoutError::InvalidInput(msg)) => assert!(msg.contains("exceeds")),
+            other => panic!("expected InvalidInput, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn accept_valid_sample_size() {
+        let enc = AmplitudeEncoder;
+        assert!(enc.validate_sample_size(4).is_ok());
+    }
+
+    #[test]
+    fn accept_max_valid_sample_size() {
+        let enc = AmplitudeEncoder;
+        assert!(enc.validate_sample_size(STAGE_SIZE_ELEMENTS).is_ok());
+    }
+
+    #[test]
+    fn needs_staging_copy_returns_true() {
+        assert!(AmplitudeEncoder.needs_staging_copy());
+    }
+
+    #[test]
+    fn init_state_allocates_norm_buffer() {
+        let engine = match QdpEngine::new(0) {
+            Ok(e) => e,
+            Err(_) => return, // skip without GPU
+        };
+        let enc = AmplitudeEncoder;
+        let result = enc.init_state(&engine, 4, 2);
+        assert!(
+            result.is_ok(),
+            "init_state should succeed with valid params"
+        );
+    }
+}
