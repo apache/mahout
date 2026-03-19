@@ -1,0 +1,83 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+name: Wheel Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # Pure Python wheel (qumat)
+  build-qumat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Build qumat wheel and sdist
+        run: |
+          pip install uv
+          uv build
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: qumat
+          path: dist/*
+
+  # CUDA extension wheels (qumat-qdp) for each Python version
+  build-qdp:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: PyO3/maturin-action@v1
+        with:
+          working-directory: qdp/qdp-python
+          command: build
+          target: x86_64
+          args: --release --out dist --interpreter python${{ matrix.python-version }}
+          manylinux: 2_28
+          before-script-linux: |
+            # Install gcc 13 (CUDA 12.5 requires gcc <= 13)
+            dnf install -y gcc-toolset-13-gcc gcc-toolset-13-gcc-c++
+            export CC=/opt/rh/gcc-toolset-13/root/usr/bin/gcc
+            export CXX=/opt/rh/gcc-toolset-13/root/usr/bin/g++
+            # Install CUDA 12.5 toolkit (nvcc + headers + cudart) for kernel compilation
+            dnf install -y 'dnf-command(config-manager)'
+            dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
+            dnf install -y cuda-nvcc-12-5 cuda-cudart-devel-12-5
+            export CUDA_PATH=/usr/local/cuda-12.5
+            export PATH=/usr/local/cuda-12.5/bin:$PATH
+            nvcc --version
+          sccache: true
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: qumat-qdp-cp${{ matrix.python-version }}
+          path: qdp/qdp-python/dist/*.whl
