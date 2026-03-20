@@ -860,4 +860,153 @@ mod tests {
         };
         assert!(err_msg.contains("no data") || err_msg.contains("No data"));
     }
+
+    // --- NullHandling tests ---
+
+    fn write_list_parquet_with_nulls() -> TempTestFile {
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::List(item_field.clone()), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = ListBuilder::new(Float64Builder::new());
+        builder.values().append_value(1.0);
+        builder.values().append_null();
+        builder.append(true);
+        builder.values().append_value(3.0);
+        builder.values().append_value(4.0);
+        builder.append(true);
+        let array = Arc::new(builder.finish()) as ArrayRef;
+
+        write_test_parquet(schema, vec![array])
+    }
+
+    fn write_fixed_size_list_parquet_with_nulls() -> TempTestFile {
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::FixedSizeList(item_field.clone(), 2), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = FixedSizeListBuilder::new(Float64Builder::new(), 2);
+        builder.values().append_value(1.0);
+        builder.values().append_null();
+        builder.append(true);
+        builder.values().append_value(3.0);
+        builder.values().append_value(4.0);
+        builder.append(true);
+        let array = Arc::new(builder.finish()) as ArrayRef;
+
+        write_test_parquet(schema, vec![array])
+    }
+
+    #[test]
+    fn test_parquet_reader_list_f64_null_fill_zero() {
+        let file = write_list_parquet_with_nulls();
+        let mut reader = ParquetReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        let (data, num_samples, sample_size) = reader.read_batch().unwrap();
+        assert_eq!(data, vec![1.0, 0.0, 3.0, 4.0]);
+        assert_eq!(num_samples, 2);
+        assert_eq!(sample_size, 2);
+    }
+
+    #[test]
+    fn test_parquet_reader_list_f64_null_reject() {
+        let file = write_list_parquet_with_nulls();
+        let mut reader = ParquetReader::new(file.path(), None, NullHandling::Reject).unwrap();
+        let result = reader.read_batch();
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("Null value"));
+    }
+
+    #[test]
+    fn test_parquet_reader_fixed_size_list_null_fill_zero() {
+        let file = write_fixed_size_list_parquet_with_nulls();
+        let mut reader = ParquetReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        let (data, num_samples, sample_size) = reader.read_batch().unwrap();
+        assert_eq!(data, vec![1.0, 0.0, 3.0, 4.0]);
+        assert_eq!(num_samples, 2);
+        assert_eq!(sample_size, 2);
+    }
+
+    #[test]
+    fn test_parquet_reader_fixed_size_list_null_reject() {
+        let file = write_fixed_size_list_parquet_with_nulls();
+        let mut reader = ParquetReader::new(file.path(), None, NullHandling::Reject).unwrap();
+        let result = reader.read_batch();
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("Null value"));
+    }
+
+    // --- ParquetStreamingReader error-path tests ---
+
+    #[test]
+    fn test_parquet_streaming_reader_missing_file() {
+        let file = TempTestFile::new();
+        let path = file.path().to_path_buf();
+        drop(file);
+        let result = ParquetStreamingReader::new(&path, None, NullHandling::FillZero);
+        assert!(matches!(result, Err(MahoutError::Io(_))));
+    }
+
+    #[test]
+    fn test_parquet_streaming_reader_bad_schema() {
+        let schema = Arc::new(Schema::new(vec![Field::new("bad", DataType::Int32, false)]));
+        let array = Arc::new(Int32Array::from(vec![1, 2, 3])) as ArrayRef;
+        let file = write_test_parquet(schema, vec![array]);
+
+        let result = ParquetStreamingReader::new(file.path(), None, NullHandling::FillZero);
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("Expected"));
+    }
+
+    #[test]
+    fn test_parquet_streaming_reader_too_many_columns() {
+        let schema = Arc::new(Schema::new(vec![
+            Field::new("col1", DataType::Int32, false),
+            Field::new("col2", DataType::Int32, false),
+        ]));
+        let arr1 = Arc::new(Int32Array::from(vec![1, 2, 3])) as ArrayRef;
+        let arr2 = Arc::new(Int32Array::from(vec![1, 2, 3])) as ArrayRef;
+        let file = write_test_parquet(schema, vec![arr1, arr2]);
+
+        let result = ParquetStreamingReader::new(file.path(), None, NullHandling::FillZero);
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("Expected exactly one column"));
+    }
+
+    #[test]
+    fn test_parquet_streaming_reader_bad_list_type() {
+        let item_field = Arc::new(Field::new("item", DataType::Int32, true));
+        let list_field = Field::new("list_col", DataType::List(item_field.clone()), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = arrow::array::ListBuilder::new(arrow::array::Int32Builder::new());
+        builder.values().append_value(1);
+        builder.append(true);
+        let array = Arc::new(builder.finish()) as ArrayRef;
+
+        let file = write_test_parquet(schema, vec![array]);
+
+        let result = ParquetStreamingReader::new(file.path(), None, NullHandling::FillZero);
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("Expected List<Float64>"));
+    }
 }
