@@ -58,4 +58,3 @@ __pycache__/
 
 # coverage
 .coverage
-qdp/.cargo/config.toml
