@@ -632,11 +632,10 @@ mod tests {
 
     #[test]
     fn test_parquet_reader_missing_file() {
-        let result = ParquetReader::new(
-            "/tmp/nonexistent_file_12345.parquet",
-            None,
-            NullHandling::FillZero,
-        );
+        let file = TempTestFile::new();
+        let path = file.path().to_path_buf();
+        drop(file); // ensure file does not exist
+        let result = ParquetReader::new(&path, None, NullHandling::FillZero);
         assert!(matches!(result, Err(MahoutError::Io(_))));
     }
 
@@ -822,12 +821,11 @@ mod tests {
     }
 
     #[test]
-    fn test_parquet_streaming_reader_empty_data() {
+    fn test_parquet_reader_empty_data() {
         let item_field = Arc::new(Field::new("item", DataType::Float64, true));
         let list_field = Field::new("data", DataType::List(item_field.clone()), true);
         let schema = Arc::new(Schema::new(vec![list_field]));
 
-        // Empty array
         let mut builder = ListBuilder::new(Float64Builder::new());
         let array = Arc::new(builder.finish()) as ArrayRef;
         let file = write_test_parquet(schema, vec![array]);
@@ -840,5 +838,26 @@ mod tests {
             Ok(_) => panic!(),
         };
         assert!(err_msg.contains("no data") || err_msg.contains("no columns"));
+    }
+
+    #[test]
+    fn test_parquet_streaming_reader_empty_data() {
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::List(item_field.clone()), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = ListBuilder::new(Float64Builder::new());
+        let array = Arc::new(builder.finish()) as ArrayRef;
+        let file = write_test_parquet(schema, vec![array]);
+
+        let mut reader =
+            ParquetStreamingReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        let result = reader.read_batch();
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("no data") || err_msg.contains("No data"));
     }
 }
