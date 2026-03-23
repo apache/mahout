@@ -46,6 +46,13 @@ pub fn create_test_data_f32(size: usize) -> Vec<f32> {
 /// Each `sample_size` consecutive values in `data` form one row.
 #[allow(dead_code)]
 pub fn write_fixed_size_list_parquet(path: &str, data: &[f64], sample_size: usize) {
+    assert!(sample_size > 0, "sample_size must be > 0");
+    assert!(
+        data.len().is_multiple_of(sample_size),
+        "data.len() ({}) must be a multiple of sample_size ({})",
+        data.len(),
+        sample_size
+    );
     use std::fs::File;
     use std::sync::Arc;
 

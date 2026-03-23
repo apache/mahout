@@ -48,7 +48,9 @@ fn test_angle_mismatched_sample_vs_qubits_rejected() {
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
             assert!(
-                msg.contains("sample_size") && msg.contains(&num_qubits.to_string()),
+                msg.contains("sample_size")
+                    && msg.contains(&num_qubits.to_string())
+                    && msg.contains(&wrong_sample_size.to_string()),
                 "msg: {msg}"
             );
         }
@@ -76,6 +78,8 @@ fn test_angle_nan_rejected() {
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
             assert!(msg.contains("finite"), "msg: {msg}");
+            assert!(msg.contains("Sample 0"), "msg: {msg}");
+            assert!(msg.contains("angle 1"), "msg: {msg}");
         }
         _ => panic!("expected InvalidInput, got {:?}", result),
     }
@@ -101,6 +105,8 @@ fn test_angle_infinity_rejected() {
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
             assert!(msg.contains("finite"), "msg: {msg}");
+            assert!(msg.contains("Sample 0"), "msg: {msg}");
+            assert!(msg.contains("angle 0"), "msg: {msg}");
         }
         _ => panic!("expected InvalidInput, got {:?}", result),
     }
