@@ -270,6 +270,33 @@ unsafe extern "C" {
         enable_zz: i32,
         stream: *mut c_void,
     ) -> i32;
+
+    /// Launch phase encoding kernel
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before freeing
+    pub fn launch_phase_encode(
+        phases_d: *const f64,
+        state_d: *mut c_void,
+        state_len: usize,
+        num_qubits: u32,
+        stream: *mut c_void,
+    ) -> i32;
+
+    /// Launch batch phase encoding kernel
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before freeing
+    pub fn launch_phase_encode_batch(
+        phases_batch_d: *const f64,
+        state_batch_d: *mut c_void,
+        num_samples: usize,
+        state_len: usize,
+        num_qubits: u32,
+        stream: *mut c_void,
+    ) -> i32;
 }
 
 // Dummy implementation for non-Linux and Linux builds without CUDA (allows linking)
@@ -467,6 +494,31 @@ pub extern "C" fn launch_iqp_encode_batch(
     _num_qubits: u32,
     _data_len: u32,
     _enable_zz: i32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_phase_encode(
+    _phases_d: *const f64,
+    _state_d: *mut c_void,
+    _state_len: usize,
+    _num_qubits: u32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_phase_encode_batch(
+    _phases_batch_d: *const f64,
+    _state_batch_d: *mut c_void,
+    _num_samples: usize,
+    _state_len: usize,
+    _num_qubits: u32,
     _stream: *mut c_void,
 ) -> i32 {
     999

@@ -1299,3 +1299,206 @@ def test_iqp_fwt_shared_vs_global_memory_threshold():
         assert torch.isclose(norm, torch.tensor(1.0, device="cuda:0"), atol=1e-6), (
             f"IQP {num_qubits} qubits not normalized at threshold: got {norm.item()}"
         )
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_phase_encode_basic():
+    """Test basic phase encoding with zero phases (requires GPU).
+
+    phases = [0, 0] => each qubit is (1/√2)(|0> + e^{i·0}|1>) = |+>
+    full state = |+>⊗|+> = (1/2)(|00> + |01> + |10> + |11>)
+    all four amplitudes equal 1/2 + 0j.
+    """
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+    qtensor = engine.encode([0.0, 0.0], 2, "phase")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.is_cuda
+    assert torch_tensor.shape == (1, 4)
+
+    val = 0.5 + 0j  # 1/√2^2 = 1/2
+    expected = torch.tensor([[val, val, val, val]], device="cuda:0")
+    assert torch.allclose(
+        torch_tensor, expected.to(torch_tensor.dtype), atol=1e-6, rtol=1e-6
+    )
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_phase_encode_single_qubit():
+    """Test single-qubit phase encoding against the spec formula.
+
+    For one qubit: |x> = (1/√2)(|0> + e^{i x}|1>)
+    With x = π/2: amplitudes are (1/√2, i/√2).
+    """
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+    qtensor = engine.encode([torch.pi / 2], 1, "phase")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.shape == (1, 2)
+
+    inv_sqrt2 = 1.0 / (2.0**0.5)
+    expected = torch.tensor(
+        [[inv_sqrt2 + 0j, 0.0 + inv_sqrt2 * 1j]],
+        device="cuda:0",
+        dtype=torch.complex128,
+    )
+    assert torch.allclose(
+        torch_tensor, expected.to(torch_tensor.dtype), atol=1e-6, rtol=1e-6
+    )
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_phase_encode_pi_phase():
+    """Test phase encoding with x_k = π.
+
+    phases = [π, π]:
+      qubit 0: (1/√2)(|0> + e^{iπ}|1>) = (1/√2)(|0> - |1>)  = |->
+      qubit 1: same
+    full state = (1/2)(|00> - |01> - |10> + |11>)
+    amplitudes: [+1/2, -1/2, -1/2, +1/2]  (all real, no imaginary part).
+    """
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+    qtensor = engine.encode([torch.pi, torch.pi], 2, "phase")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.shape == (1, 4)
+
+    expected = torch.tensor(
+        [[0.5 + 0j, -0.5 + 0j, -0.5 + 0j, 0.5 + 0j]],
+        device="cuda:0",
+        dtype=torch.complex128,
+    )
+    assert torch.allclose(
+        torch_tensor, expected.to(torch_tensor.dtype), atol=1e-6, rtol=1e-6
+    )
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_phase_encode_normalization():
+    """State vector must be unit-norm for arbitrary phases."""
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+    phases = [0.3, 1.1, 2.7, 0.9]  # 4 qubits, arbitrary phases
+    qtensor = engine.encode(phases, 4, "phase")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    norm_sq = torch.sum(torch.abs(torch_tensor) ** 2).item()
+    assert abs(norm_sq - 1.0) < 1e-10, f"Expected unit norm, got {norm_sq}"
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_phase_encode_batch():
+    """Test batch phase encoding (requires GPU).
+
+    Sample 0: phases = [0, 0]  -> all amplitudes 1/2
+    Sample 1: phases = [π, π]  -> amplitudes [+1/2, -1/2, -1/2, +1/2]
+    """
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+    data = torch.tensor(
+        [[0.0, 0.0], [torch.pi, torch.pi]],
+        dtype=torch.float64,
+    )
+    qtensor = engine.encode(data, 2, "phase")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.shape == (2, 4)
+
+    expected = torch.tensor(
+        [
+            [0.5 + 0j, 0.5 + 0j, 0.5 + 0j, 0.5 + 0j],
+            [0.5 + 0j, -0.5 + 0j, -0.5 + 0j, 0.5 + 0j],
+        ],
+        device="cuda:0",
+        dtype=torch.complex128,
+    )
+    assert torch.allclose(
+        torch_tensor, expected.to(torch_tensor.dtype), atol=1e-6, rtol=1e-6
+    )
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_phase_encode_errors():
+    """Test error handling for phase encoding (requires GPU)."""
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # Wrong length (expects one phase per qubit)
+    with pytest.raises(RuntimeError, match="expects 2 values"):
+        engine.encode([0.0], 2, "phase")
+
+    # Non-finite phase
+    with pytest.raises(RuntimeError, match="must be finite"):
+        engine.encode([float("nan"), 0.0], 2, "phase")
+
+    # Inf also rejected
+    with pytest.raises(RuntimeError, match="must be finite"):
+        engine.encode([float("inf"), 0.0], 2, "phase")
+
+
+@requires_qdp
+@pytest.mark.gpu
+@pytest.mark.parametrize(
+    ("data_shape", "expected_shape"),
+    [
+        ([1.0, 2.0, 3.0, 4.0], (1, 16)),  # 1D list -> single sample, 4 qubits
+        (
+            torch.tensor(
+                [[1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, 8.0]], dtype=torch.float64
+            ),
+            (2, 16),
+        ),  # 2D tensor -> batch
+    ],
+)
+def test_phase_encode_shape(data_shape, expected_shape):
+    """Test that output tensor shape matches (num_samples, 2^num_qubits)."""
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+    qtensor = engine.encode(data_shape, 4, "phase")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.shape == expected_shape
