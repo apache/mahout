@@ -16,7 +16,7 @@
 # limitations under the License.
 
 """
-Quantum Kernel SVM — PennyLane baseline (CPU encoding) — SVHN dataset.
+Quantum Kernel SVM — CPU baseline (CPU encoding) — SVHN dataset.
 
 Pipeline:
   SVHN (32×32×3) → Flatten (3072) → L2-norm + zero-pad (4096, 12 qubits)
@@ -141,7 +141,7 @@ def compute_kernel(X1: np.ndarray, X2: np.ndarray) -> np.ndarray:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Quantum Kernel SVM — PennyLane baseline (CPU) — SVHN (12 qubits)"
+        description="Quantum Kernel SVM — CPU baseline (CPU) — SVHN (12 qubits)"
     )
     parser.add_argument(
         "--n-samples",

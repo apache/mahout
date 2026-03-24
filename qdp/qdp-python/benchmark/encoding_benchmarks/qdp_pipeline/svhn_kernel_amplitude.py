@@ -202,7 +202,6 @@ def main() -> None:
     print()
 
     # Step 1: StandardScaler + Encode (GPU)
-    torch.cuda.synchronize()
     t0 = time.perf_counter()
     scaler = StandardScaler().fit(X_bin)
     X_scaled = scaler.transform(X_bin)
