@@ -545,7 +545,6 @@ impl PipelineIterator {
     }
 
     /// Returns the next batch as a DLPack pointer; `Ok(None)` when exhausted.
-    /// For InMemory source, passes a slice reference to encode_batch (no per-batch copy).
     pub fn next_batch(&mut self) -> Result<Option<*mut DLManagedTensor>> {
         let batch = match self.rx.lock().unwrap().recv() {
             Ok(Ok(b)) => b,
