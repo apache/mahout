@@ -29,11 +29,12 @@ Usage:
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from functools import lru_cache
-from typing import TYPE_CHECKING, Iterator, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import _qdp  # noqa: F401 -- for type checkers only
+    import _qdp
 
 # Seed must fit Rust u64: 0 <= seed <= 2^64 - 1.
 _U64_MAX = 2**64 - 1
@@ -53,7 +54,7 @@ def _validate_loader_args(
     batch_size: int,
     total_batches: int,
     encoding_method: str,
-    seed: Optional[int],
+    seed: int | None,
 ) -> None:
     """Validate arguments before passing to Rust (PipelineConfig / create_synthetic_loader)."""
     if device_id < 0:
@@ -96,7 +97,7 @@ class QuantumDataLoader:
         batch_size: int = 64,
         total_batches: int = 100,
         encoding_method: str = "amplitude",
-        seed: Optional[int] = None,
+        seed: int | None = None,
     ) -> None:
         _validate_loader_args(
             device_id=device_id,
@@ -112,13 +113,13 @@ class QuantumDataLoader:
         self._total_batches = total_batches
         self._encoding_method = encoding_method
         self._seed = seed
-        self._file_path: Optional[str] = None
+        self._file_path: str | None = None
         self._streaming_requested = (
             False  # set True by source_file(streaming=True); Phase 2b
         )
         self._synthetic_requested = False  # set True only by source_synthetic()
         self._file_requested = False
-        self._null_handling: Optional[str] = None
+        self._null_handling: str | None = None
 
     def qubits(self, n: int) -> QuantumDataLoader:
         """Set number of qubits. Returns self for chaining."""
@@ -148,7 +149,7 @@ class QuantumDataLoader:
 
     def source_synthetic(
         self,
-        total_batches: Optional[int] = None,
+        total_batches: int | None = None,
     ) -> QuantumDataLoader:
         """Use synthetic data source (default). Optionally override total_batches. Returns self."""
         self._synthetic_requested = True
@@ -165,10 +166,18 @@ class QuantumDataLoader:
 
         For streaming=True (Phase 2b), only .parquet is supported; data is read in chunks to reduce memory.
         For streaming=False, supports .parquet, .arrow, .feather, .ipc, .npy, .pt, .pth, .pb.
+        Remote paths (s3://, gs://) are supported when the remote-io feature is enabled.
+        Remote URL query/fragment (for example ?versionId=... or #...) is not supported.
         """
         if not path or not isinstance(path, str):
             raise ValueError(f"path must be a non-empty string, got {path!r}")
-        if streaming and not (path.lower().endswith(".parquet")):
+        if "://" in path and ("?" in path or "#" in path):
+            raise ValueError(
+                "Remote URL query/fragment is not supported; use plain scheme://bucket/key path."
+            )
+        # For remote URLs, extract the key portion for extension checks.
+        check_path = path.split("?")[0].rsplit("/", 1)[-1] if "://" in path else path
+        if streaming and not (check_path.lower().endswith(".parquet")):
             raise ValueError(
                 "streaming=True supports only .parquet files; use streaming=False for other formats."
             )
@@ -177,7 +186,7 @@ class QuantumDataLoader:
         self._streaming_requested = streaming
         return self
 
-    def seed(self, s: Optional[int] = None) -> QuantumDataLoader:
+    def seed(self, s: int | None = None) -> QuantumDataLoader:
         """Set RNG seed for reproducible synthetic data (must fit Rust u64: 0 <= seed <= 2^64-1). Returns self."""
         if s is not None:
             if not isinstance(s, int):

@@ -52,5 +52,16 @@ jobs:
       - name: Install dependencies
         run: uv sync --group dev
 
+      - name: Build QDP extension
+        uses: PyO3/maturin-action@v1
+        with:
+          working-directory: qdp/qdp-python
+          command: develop
+          args: --release
+          sccache: true
+
+      - name: Install PyTorch (CPU)
+        run: uv pip install torch --index-url https://download.pytorch.org/whl/cpu
+
       - name: Run tests
-        run: uv run pytest testing/ -v
+        run: uv run pytest -n auto testing/ -v

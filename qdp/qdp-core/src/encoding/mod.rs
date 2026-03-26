@@ -134,6 +134,14 @@ pub(crate) trait ChunkEncoder {
 ///
 /// This function handles all the common IO, buffering, and GPU memory
 /// management logic. The actual encoding is delegated to the `ChunkEncoder`.
+///
+/// # Null handling
+///
+/// The streaming Parquet path always uses [`crate::reader::NullHandling::FillZero`]
+/// when constructing the [`crate::io::ParquetBlockReader`]. This replaces any
+/// null values in the input with `0.0`, matching Mahout's historical behavior
+/// and keeping the API backward compatible. Callers that require stricter
+/// validation should ensure the input data contains no nulls.
 pub(crate) fn stream_encode<E: ChunkEncoder>(
     engine: &QdpEngine,
     path: &str,

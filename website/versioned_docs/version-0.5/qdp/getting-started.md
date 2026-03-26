@@ -55,6 +55,17 @@ tensor = torch.from_dlpack(qtensor)  # Note: can only be consumed once
 engine.encode("data.parquet", num_qubits=10, encoding_method="amplitude")  # also: .arrow, .npy, .pt, .pb
 ```
 
+Remote object storage URLs are supported when QDP is built with `remote-io`:
+
+```python
+engine.encode("s3://my-bucket/path/data.parquet", num_qubits=10, encoding_method="amplitude")
+engine.encode("gs://my-bucket/path/data.parquet", num_qubits=10, encoding_method="amplitude")
+```
+
+Notes:
+- Remote URL query/fragment is not supported (`?versionId=...`, `#...`).
+- Streaming still requires `.parquet`.
+
 ## Tips
 
 - Use `precision="float64"` for higher precision: `QdpEngine(0, precision="float64")`
@@ -71,9 +82,9 @@ engine.encode("data.parquet", num_qubits=10, encoding_method="amplitude")  # als
 
 ## Next Steps
 
-- [Concepts](../concepts/) - Learn about quantum encoding concepts
-- [API Reference](../api/) - Detailed API documentation
-- [Examples](../examples/) - More usage examples
+- [Concepts](concepts/) - Learn about quantum encoding concepts
+- [API Reference](api/) - Detailed API documentation
+- [Examples](examples/) - More usage examples
 
 ## Help
 

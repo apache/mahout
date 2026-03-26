@@ -379,13 +379,27 @@ impl QdpEngine {
         })
     }
 
-    /// Internal helper to encode from file based on extension
+    /// Internal helper to encode from file based on extension.
+    /// When the `remote-io` feature is enabled, `s3://` and `gs://` URLs are supported.
     fn encode_from_file(
         &self,
         path: &str,
         num_qubits: usize,
         encoding_method: &str,
     ) -> PyResult<QuantumTensor> {
+        #[cfg(feature = "remote-io")]
+        let _resolved;
+        #[cfg(feature = "remote-io")]
+        let path = {
+            _resolved = qdp_core::remote::resolve_path(path).map_err(|e| {
+                PyRuntimeError::new_err(format!("Remote path resolution failed: {}", e))
+            })?;
+            _resolved
+                .path
+                .to_str()
+                .ok_or_else(|| PyRuntimeError::new_err("Resolved path is not valid UTF-8"))?
+        };
+
         let ptr = if path.ends_with(".parquet") {
             self.engine
                 .encode_from_parquet(path, num_qubits, encoding_method)
@@ -463,8 +477,8 @@ impl QdpEngine {
 
     /// Encode directly from a PyTorch CUDA tensor. Internal helper.
     ///
-    /// Dispatches to the core f32 GPU pointer API for 1D float32 amplitude encoding,
-    /// or to the float64/basis GPU pointer APIs for other dtypes and batch encoding.
+    /// Dispatches to the core f32 GPU pointer API for float32 amplitude encoding,
+    /// or to the float64/basis GPU pointer APIs for other dtypes and methods.
     fn _encode_from_cuda_tensor(
         &self,
         data: &Bound<'_, PyAny>,
@@ -479,6 +493,7 @@ impl QdpEngine {
         let is_f32 = dtype_str_lower.contains("float32");
         let method = encoding_method.to_ascii_lowercase();
         let ndim: usize = data.call_method0("dim")?.extract()?;
+        let tensor_info = extract_cuda_tensor_info(data)?;
 
         if method.as_str() == "amplitude" && is_f32 {
             match ndim {
@@ -506,10 +521,35 @@ impl QdpEngine {
                         consumed: false,
                     })
                 }
-                2 => Err(PyRuntimeError::new_err(
-                    "CUDA float32 batch amplitude encoding is not yet supported. \
-                     Use float64 (tensor.to(torch.float64)) or encode samples individually.",
-                )),
+                2 => {
+                    let num_samples = tensor_info.shape[0] as usize;
+                    let sample_size = tensor_info.shape[1] as usize;
+                    let stream_ptr = get_torch_cuda_stream_ptr(data)?;
+                    let data_ptr_u64: u64 = data.call_method0("data_ptr")?.extract()?;
+                    let data_ptr = data_ptr_u64 as *const f32;
+
+                    let ptr = unsafe {
+                        self.engine
+                            .encode_batch_from_gpu_ptr_f32_with_stream(
+                                data_ptr,
+                                num_samples,
+                                sample_size,
+                                num_qubits,
+                                stream_ptr,
+                            )
+                            .map_err(|e| {
+                                PyRuntimeError::new_err(format!(
+                                    "Encoding failed (float32 amplitude batch): {}",
+                                    e
+                                ))
+                            })?
+                    };
+
+                    Ok(QuantumTensor {
+                        ptr,
+                        consumed: false,
+                    })
+                }
                 _ => Err(PyRuntimeError::new_err(format!(
                     "Unsupported CUDA tensor shape: {}D. Expected 1D tensor for single \
                      sample encoding or 2D tensor (batch_size, features) for batch encoding.",
@@ -517,7 +557,6 @@ impl QdpEngine {
                 ))),
             }
         } else {
-            let tensor_info = extract_cuda_tensor_info(data)?;
             let stream_ptr = get_torch_cuda_stream_ptr(data)?;
 
             match ndim {
@@ -628,6 +667,14 @@ impl QdpEngine {
             nh,
         );
         let engine = self.engine.clone();
+        // Resolve remote URLs before detaching from GIL. The _resolved guard keeps the
+        // temp file alive until after the file is fully read inside py.detach.
+        #[cfg(feature = "remote-io")]
+        let _resolved = qdp_core::remote::resolve_path(path_str.as_str()).map_err(|e| {
+            PyRuntimeError::new_err(format!("Remote path resolution failed: {}", e))
+        })?;
+        #[cfg(feature = "remote-io")]
+        let path_str = _resolved.path.to_string_lossy().into_owned();
         let iter = py
             .detach(|| {
                 qdp_core::PipelineIterator::new_from_file(
@@ -668,6 +715,14 @@ impl QdpEngine {
             nh,
         );
         let engine = self.engine.clone();
+        // Resolve remote URLs before detaching from GIL. The _resolved guard keeps the
+        // temp file alive; the streaming reader's open fd preserves data after drop.
+        #[cfg(feature = "remote-io")]
+        let _resolved = qdp_core::remote::resolve_path(path_str.as_str()).map_err(|e| {
+            PyRuntimeError::new_err(format!("Remote path resolution failed: {}", e))
+        })?;
+        #[cfg(feature = "remote-io")]
+        let path_str = _resolved.path.to_string_lossy().into_owned();
         let iter = py
             .detach(|| {
                 qdp_core::PipelineIterator::new_from_file_streaming(

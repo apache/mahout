@@ -16,7 +16,7 @@
 
 // Unit tests for IQP (Instantaneous Quantum Polynomial) encoding
 
-use qdp_core::{MahoutError, QdpEngine};
+use qdp_core::MahoutError;
 
 mod common;
 
@@ -39,9 +39,8 @@ fn iqp_z_data_len(num_qubits: usize) -> usize {
 fn test_iqp_zero_qubits_rejected() {
     println!("Testing IQP zero qubits rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data = vec![0.5; 1];
@@ -65,9 +64,8 @@ fn test_iqp_zero_qubits_rejected() {
 fn test_iqp_max_qubits_exceeded() {
     println!("Testing IQP max qubits (>30) rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data = vec![0.5; iqp_full_data_len(31)];
@@ -88,9 +86,8 @@ fn test_iqp_max_qubits_exceeded() {
 fn test_iqp_wrong_data_length() {
     println!("Testing IQP wrong data length rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let num_qubits = 4;
@@ -126,9 +123,8 @@ fn test_iqp_wrong_data_length() {
 fn test_iqp_z_wrong_data_length() {
     println!("Testing IQP-Z wrong data length rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let num_qubits = 4;
@@ -156,9 +152,8 @@ fn test_iqp_z_wrong_data_length() {
 fn test_iqp_nan_value_rejected() {
     println!("Testing IQP NaN value rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let num_qubits = 3;
@@ -185,9 +180,8 @@ fn test_iqp_nan_value_rejected() {
 fn test_iqp_infinity_value_rejected() {
     println!("Testing IQP infinity value rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let num_qubits = 3;
@@ -218,12 +212,9 @@ fn test_iqp_infinity_value_rejected() {
 fn test_iqp_full_encoding_workflow() {
     println!("Testing IQP full encoding workflow...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let num_qubits = 4;
@@ -267,12 +258,9 @@ fn test_iqp_full_encoding_workflow() {
 fn test_iqp_z_encoding_workflow() {
     println!("Testing IQP-Z encoding workflow...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let num_qubits = 5;
@@ -315,12 +303,9 @@ fn test_iqp_z_encoding_workflow() {
 fn test_iqp_single_qubit() {
     println!("Testing IQP single qubit encoding...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     // Single qubit IQP full: 1 parameter (no ZZ terms with only 1 qubit)
@@ -358,12 +343,9 @@ fn test_iqp_single_qubit() {
 fn test_iqp_batch_encoding() {
     println!("Testing IQP batch encoding...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let num_qubits = 3;
@@ -411,12 +393,9 @@ fn test_iqp_batch_encoding() {
 fn test_iqp_z_batch_encoding() {
     println!("Testing IQP-Z batch encoding...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let num_qubits = 4;
@@ -464,9 +443,8 @@ fn test_iqp_z_batch_encoding() {
 fn test_iqp_batch_wrong_sample_size() {
     println!("Testing IQP batch wrong sample_size rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let num_qubits = 3;
@@ -501,9 +479,8 @@ fn test_iqp_batch_wrong_sample_size() {
 fn test_iqp_batch_data_length_mismatch() {
     println!("Testing IQP batch data length mismatch rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let num_qubits = 3;
@@ -533,9 +510,8 @@ fn test_iqp_batch_data_length_mismatch() {
 fn test_iqp_batch_nan_in_sample() {
     println!("Testing IQP batch NaN value rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let num_qubits = 3;
@@ -594,12 +570,9 @@ fn test_iqp_data_length_calculations() {
 fn test_iqp_fwt_threshold_boundary() {
     println!("Testing IQP FWT threshold boundary (n=4, where FWT kicks in)...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     // Test at FWT_MIN_QUBITS threshold (n=4)
@@ -640,12 +613,9 @@ fn test_iqp_fwt_threshold_boundary() {
 fn test_iqp_fwt_larger_qubit_counts() {
     println!("Testing IQP FWT with larger qubit counts (n=5,6,7,8)...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     for num_qubits in [5, 6, 7, 8] {
@@ -689,12 +659,9 @@ fn test_iqp_fwt_larger_qubit_counts() {
 fn test_iqp_z_fwt_correctness() {
     println!("Testing IQP-Z FWT correctness for various qubit counts...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     // Test IQP-Z across FWT threshold
@@ -734,12 +701,9 @@ fn test_iqp_z_fwt_correctness() {
 fn test_iqp_fwt_batch_various_sizes() {
     println!("Testing IQP FWT batch encoding with various qubit counts...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     // Test batch encoding across FWT threshold
@@ -787,12 +751,9 @@ fn test_iqp_fwt_batch_various_sizes() {
 fn test_iqp_fwt_zero_parameters_identity() {
     println!("Testing IQP FWT with zero parameters produces |0⟩ state...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     // For FWT-optimized path (n >= 4), zero parameters should still give |0⟩
@@ -833,12 +794,9 @@ fn test_iqp_fwt_zero_parameters_identity() {
 fn test_iqp_encoder_via_factory() {
     println!("Testing IQP encoder creation via get_encoder...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     // Test that "iqp" and "IQP" work (case insensitive)
@@ -873,12 +831,9 @@ fn test_iqp_encoder_via_factory() {
 fn test_iqp_z_encoder_via_factory() {
     println!("Testing IQP-Z encoder creation via get_encoder...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let num_qubits = 3;

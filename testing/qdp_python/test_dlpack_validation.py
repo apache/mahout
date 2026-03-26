@@ -32,7 +32,7 @@ def _engine():
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
-def test_cuda_float32_amplitude_supported():
+def test_cuda_float32_amplitude_supported() -> None:
     """1D float32 CUDA tensor should be supported for amplitude encoding via GPU pointer f32 path."""
     engine = _engine()
     # 1D float32 CUDA tensor (contiguous)
@@ -48,18 +48,75 @@ def test_cuda_float32_amplitude_supported():
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
-def test_cuda_float32_amplitude_2d_unsupported():
-    """2D float32 CUDA tensor with amplitude encoding should raise a clear error."""
+def test_cuda_float32_amplitude_2d_supported() -> None:
+    """2D float32 CUDA tensor should use the batch GPU-pointer float32 amplitude path."""
     engine = _engine()
-    t = torch.randn(2, 4, dtype=torch.float32, device="cuda")
-    with pytest.raises(
-        RuntimeError, match="float32 batch amplitude encoding is not yet supported"
-    ):
-        engine.encode(t, num_qubits=2, encoding_method="amplitude")
+    t = torch.tensor(
+        [[3.0, 4.0, 0.0, 0.0], [1.0, 2.0, 2.0, 1.0]],
+        dtype=torch.float32,
+        device="cuda",
+    )
+
+    result = engine.encode(t, num_qubits=2, encoding_method="amplitude")
+    assert result is not None
+
+    qt = torch.from_dlpack(result)
+    assert qt.is_cuda
+    assert qt.shape == (2, 4)
+    assert qt.dtype == torch.complex64
+
+    expected = torch.tensor(
+        [
+            [0.6, 0.8, 0.0, 0.0],
+            [
+                1.0 / (10.0**0.5),
+                2.0 / (10.0**0.5),
+                2.0 / (10.0**0.5),
+                1.0 / (10.0**0.5),
+            ],
+        ],
+        dtype=torch.complex64,
+        device="cuda",
+    )
+    assert torch.allclose(qt, expected)
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
-def test_stride_1d_non_contiguous_rejected():
+def test_cuda_float32_amplitude_2d_respects_engine_precision() -> None:
+    """2D float32 CUDA amplitude batch should still honor float64 engine output precision."""
+    engine = QdpEngine(0, precision="float64")
+    t = torch.tensor(
+        [[3.0, 4.0, 0.0, 0.0], [1.0, 2.0, 2.0, 1.0]],
+        dtype=torch.float32,
+        device="cuda",
+    )
+
+    result = engine.encode(t, num_qubits=2, encoding_method="amplitude")
+    assert result is not None
+
+    qt = torch.from_dlpack(result)
+    assert qt.is_cuda
+    assert qt.shape == (2, 4)
+    assert qt.dtype == torch.complex128
+
+    expected = torch.tensor(
+        [
+            [0.6, 0.8, 0.0, 0.0],
+            [
+                1.0 / (10.0**0.5),
+                2.0 / (10.0**0.5),
+                2.0 / (10.0**0.5),
+                1.0 / (10.0**0.5),
+            ],
+        ],
+        dtype=torch.complex128,
+        device="cuda",
+    )
+    assert torch.allclose(qt, expected)
+
+
+@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
+def test_stride_1d_non_contiguous_rejected() -> None:
     """Non-contiguous 1D CUDA tensor (stride != 1) should fail with contiguous requirement."""
     engine = _engine()
     # Slice so stride is 2: shape (2,), stride (2,)
@@ -74,14 +131,16 @@ def test_stride_1d_non_contiguous_rejected():
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
-def test_stride_2d_non_contiguous_rejected():
+def test_stride_2d_non_contiguous_rejected() -> None:
     """Non-contiguous 2D CUDA tensor should fail with contiguous requirement."""
     engine = _engine()
     # (4, 2) with strides (3, 2) -> not C-contiguous; expected for (4,2) is (2, 1)
     t = torch.randn(4, 3, dtype=torch.float64, device="cuda")[:, ::2]
-    assert t.dim() == 2 and t.shape == (4, 2)
+    assert t.dim() == 2
+    assert t.shape == (4, 2)
     # Strides should be (3, 2) not (2, 1)
-    assert t.stride(0) == 3 and t.stride(1) == 2
+    assert t.stride(0) == 3
+    assert t.stride(1) == 2
     with pytest.raises(RuntimeError) as exc_info:
         engine.encode(t, num_qubits=1, encoding_method="amplitude")
     msg = str(exc_info.value).lower()
@@ -91,7 +150,7 @@ def test_stride_2d_non_contiguous_rejected():
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
-def test_valid_cuda_float64_1d_succeeds():
+def test_valid_cuda_float64_1d_succeeds() -> None:
     """Valid 1D float64 contiguous CUDA tensor should encode successfully."""
     engine = _engine()
     t = torch.randn(4, dtype=torch.float64, device="cuda")
@@ -100,7 +159,7 @@ def test_valid_cuda_float64_1d_succeeds():
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
-def test_valid_cuda_float64_2d_succeeds():
+def test_valid_cuda_float64_2d_succeeds() -> None:
     """Valid 2D float64 contiguous CUDA tensor should encode successfully."""
     engine = _engine()
     t = torch.randn(3, 4, dtype=torch.float64, device="cuda")

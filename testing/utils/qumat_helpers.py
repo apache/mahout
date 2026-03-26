@@ -14,8 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import numpy as np
 from functools import reduce
+
+import numpy as np
+
 from qumat.qumat import QuMat
 
 
@@ -49,7 +51,7 @@ def get_backend_config(backend_name: str) -> dict | None:
 
 
 class BinaryString(str):
-    def __new__(cls, value):
+    def __new__(cls, value):  # noqa: ANN204
         if not all(char in ["0", "1"] for char in value):
             raise ValueError("String contains characters other than '0' and '1'")
         return str.__new__(cls, value)

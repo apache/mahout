@@ -52,6 +52,7 @@ qdp = ["qumat-qdp"]
 [dependency-groups]
 dev = [
     "pytest>=9.0.1",
+    "pytest-xdist>=3.8.0",
     "ruff>=0.13.1",
     "ty>=0.0.16",
     "pre-commit>=3.0.0",
@@ -94,7 +95,55 @@ exclude = [
 [tool.ty.analysis]
 # _qdp: compiled Rust extension (no type info for members)
 # api: benchmark module loaded via sys.path in tests
-allowed-unresolved-imports = ["_qdp", "_qdp.*", "api", "api.*"]
+# qumat_qdp: optional QDP Python package (editable install from qdp/qdp-python)
+allowed-unresolved-imports = [
+    "_qdp",
+    "_qdp.*",
+    "api",
+    "api.*",
+    "qumat_qdp",
+    "qumat_qdp.*",
+]
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    # flake8-annotations
+    "ANN",
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # isort
+    "I",
+    # pygrep-hooks
+    "PGH003",
+    "PGH004",
+    # unsorted-dunder-all
+    "RUF022",
+    # unused-noqa
+    "RUF100",
+    # flake8-pytest-style
+    "PT",
+]
+
+ignore = [
+    "E402",   # Module level import not at top of file
+    "E501",   # Line too long
+    # The following ignore rules are temporary and should be removed when the issues are fixed.
+    "PT011",  # TODO: `pytest.raises(ValueError)` is too broad
+    "ANN001", # TODO: fix (missing-type-function-argument)
+    "ANN201", # TODO: fix (missing-return-type-undocumented-public-function)
+    "ANN202", # TODO: fix (missing-return-type-private-function)
+    "ANN401",
+]
+
+[tool.ruff.lint.pyflakes]
+allowed-unused-imports = ["_qdp"]
 
 [build-system]
 requires = ["hatchling"]

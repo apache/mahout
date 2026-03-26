@@ -16,7 +16,7 @@
 
 // Input validation and error handling tests
 
-use qdp_core::{MahoutError, QdpEngine};
+use qdp_core::MahoutError;
 
 mod common;
 
@@ -25,9 +25,8 @@ mod common;
 fn test_input_validation_invalid_strategy() {
     println!("Testing invalid strategy name rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data = common::create_test_data(100);
@@ -52,9 +51,8 @@ fn test_input_validation_invalid_strategy() {
 fn test_input_validation_qubit_mismatch() {
     println!("Testing qubit size validation...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data = common::create_test_data(100);
@@ -83,9 +81,8 @@ fn test_input_validation_qubit_mismatch() {
 fn test_input_validation_zero_qubits() {
     println!("Testing zero qubits rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data = common::create_test_data(10);
@@ -110,9 +107,8 @@ fn test_input_validation_zero_qubits() {
 fn test_input_validation_max_qubits() {
     println!("Testing maximum qubit limit (30)...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data = common::create_test_data(100);
@@ -137,9 +133,8 @@ fn test_input_validation_max_qubits() {
 fn test_input_validation_batch_zero_samples() {
     println!("Testing zero num_samples rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let batch_data = vec![1.0, 2.0, 3.0, 4.0];
@@ -163,9 +158,8 @@ fn test_input_validation_batch_zero_samples() {
 fn test_empty_data() {
     println!("Testing empty data rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data: Vec<f64> = vec![];
@@ -187,9 +181,8 @@ fn test_empty_data() {
 fn test_zero_norm_data() {
     println!("Testing zero-norm data rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data = vec![0.0; 128];

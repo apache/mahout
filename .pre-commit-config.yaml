@@ -10,17 +10,15 @@ repos:
       - id: trailing-whitespace
         name: trim trailing whitespace
 
-  # Ruff linter and formatter
+  # Python linter and formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.5
+    rev: v0.15.5
     hooks:
-      - id: ruff
-        name: ruff linting
-        files: \.py$
+      - id: ruff-check
+        name: Lint and fix Python code
         args: [--fix]
       - id: ruff-format
-        name: ruff formatting
-        files: \.py$
+        name: Format Python code
 
   # Static type checking
   - repo: local
@@ -61,7 +59,7 @@ repos:
           - --comment-style
           - "//"
 
-# Rust Linter
+  # Rust Linter
   - repo: https://github.com/doublify/pre-commit-rust
     rev: v1.0
     hooks:
@@ -74,7 +72,7 @@ repos:
         name: cargo clippy
         language: system
         pass_filenames: false
-        entry: bash -c 'LIBTORCH_USE_PYTORCH=1 cargo clippy "$@"' --
+        entry: bash -c 'source .venv/bin/activate && LIBTORCH_USE_PYTORCH=1 cargo clippy "$@"' --
         args:
           - --manifest-path
           - qdp/Cargo.toml

@@ -87,13 +87,6 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Download',
-      collapsed: true,
-      link: {type: 'doc', id: 'download/index'},
-      items: ['download/quickstart'],
-    },
-    {
-      type: 'category',
       label: 'Community',
       collapsed: true,
       link: {type: 'doc', id: 'community/index'},
@@ -101,6 +94,7 @@ const sidebars: SidebarsConfig = {
         'community/who-we-are',
         'community/mailing-lists',
         'community/code-of-conduct',
+        'community/pr-policy-and-review-guidelines',
       ],
     },
     {

@@ -16,7 +16,7 @@
 
 // Memory safety tests: DLPack lifecycle, RAII, Arc reference counting
 
-use qdp_core::{Precision, QdpEngine};
+use qdp_core::Precision;
 
 mod common;
 
@@ -26,12 +26,9 @@ fn test_memory_pressure() {
     println!("Testing memory pressure (leak detection)");
     println!("Running 100 iterations of encode + free");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let data = common::create_test_data(1024);
@@ -42,12 +39,7 @@ fn test_memory_pressure() {
             .expect("Encoding should succeed");
 
         unsafe {
-            let managed = &mut *ptr;
-            let deleter = managed
-                .deleter
-                .take()
-                .expect("Deleter missing in pressure test!");
-            deleter(ptr);
+            common::take_deleter_and_delete(ptr);
         }
 
         if (i + 1) % 25 == 0 {
@@ -63,9 +55,8 @@ fn test_memory_pressure() {
 fn test_multiple_concurrent_states() {
     println!("Testing multiple concurrent state vectors...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data1 = common::create_test_data(256);
@@ -81,9 +72,9 @@ fn test_multiple_concurrent_states() {
     // Free in different order to test Arc reference counting
     unsafe {
         println!("Freeing in order: 2, 1, 3");
-        (&mut *ptr2).deleter.take().expect("Deleter missing!")(ptr2);
-        (&mut *ptr1).deleter.take().expect("Deleter missing!")(ptr1);
-        (&mut *ptr3).deleter.take().expect("Deleter missing!")(ptr3);
+        common::take_deleter_and_delete(ptr2);
+        common::take_deleter_and_delete(ptr1);
+        common::take_deleter_and_delete(ptr3);
     }
 
     println!("PASS: All states freed successfully");
@@ -94,9 +85,8 @@ fn test_multiple_concurrent_states() {
 fn test_dlpack_tensor_metadata_default() {
     println!("Testing DLPack tensor metadata...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data = common::create_test_data(1024);
@@ -136,11 +126,7 @@ fn test_dlpack_tensor_metadata_default() {
             tensor.dtype.code, tensor.dtype.bits
         );
 
-        let deleter = managed
-            .deleter
-            .take()
-            .expect("Deleter missing in metadata test!");
-        deleter(ptr);
+        common::take_deleter_and_delete(ptr);
     }
 }
 
@@ -149,9 +135,8 @@ fn test_dlpack_tensor_metadata_default() {
 fn test_dlpack_tensor_metadata_f64() {
     println!("Testing DLPack tensor metadata...");
 
-    let engine = match QdpEngine::new_with_precision(0, Precision::Float64) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        return;
     };
 
     let data = common::create_test_data(1024);
@@ -192,10 +177,6 @@ fn test_dlpack_tensor_metadata_f64() {
             tensor.dtype.code, tensor.dtype.bits
         );
 
-        let deleter = managed
-            .deleter
-            .take()
-            .expect("Deleter missing in metadata test!");
-        deleter(ptr);
+        common::take_deleter_and_delete(ptr);
     }
 }

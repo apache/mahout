@@ -17,8 +17,6 @@
 // API workflow tests: Engine initialization and encoding
 
 #[cfg(target_os = "linux")]
-use cudarc::driver::CudaDevice;
-#[cfg(target_os = "linux")]
 use qdp_core::MahoutError;
 use qdp_core::QdpEngine;
 #[cfg(target_os = "linux")]
@@ -52,12 +50,9 @@ fn test_engine_initialization() {
 fn test_amplitude_encoding_workflow() {
     println!("Testing amplitude encoding workflow...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let data = common::create_test_data(1024);
@@ -70,15 +65,8 @@ fn test_amplitude_encoding_workflow() {
 
     // Simulate PyTorch behavior: manually call deleter to free GPU memory
     unsafe {
-        let managed = &mut *dlpack_ptr;
-        assert!(managed.deleter.is_some(), "Deleter must be present");
-
         println!("Calling deleter to free GPU memory");
-        let deleter = managed
-            .deleter
-            .take()
-            .expect("Deleter function pointer is missing!");
-        deleter(dlpack_ptr);
+        common::take_deleter_and_delete(dlpack_ptr);
         println!("PASS: Memory freed successfully");
     }
 }
@@ -88,12 +76,9 @@ fn test_amplitude_encoding_workflow() {
 fn test_amplitude_encoding_async_pipeline() {
     println!("Testing amplitude encoding async pipeline path...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     // Use 200000 elements to trigger async pipeline path (ASYNC_THRESHOLD = 131072)
@@ -106,15 +91,8 @@ fn test_amplitude_encoding_async_pipeline() {
     println!("PASS: Encoding succeeded, DLPack pointer valid");
 
     unsafe {
-        let managed = &mut *dlpack_ptr;
-        assert!(managed.deleter.is_some(), "Deleter must be present");
-
         println!("Calling deleter to free GPU memory");
-        let deleter = managed
-            .deleter
-            .take()
-            .expect("Deleter function pointer is missing!");
-        deleter(dlpack_ptr);
+        common::take_deleter_and_delete(dlpack_ptr);
         println!("PASS: Memory freed successfully");
     }
 }
@@ -124,12 +102,9 @@ fn test_amplitude_encoding_async_pipeline() {
 fn test_angle_encoding_async_pipeline() {
     println!("Testing angle encoding async pipeline path...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let num_qubits = 4;
@@ -143,15 +118,8 @@ fn test_angle_encoding_async_pipeline() {
     println!("PASS: Angle batch encoding succeeded, DLPack pointer valid");
 
     unsafe {
-        let managed = &mut *dlpack_ptr;
-        assert!(managed.deleter.is_some(), "Deleter must be present");
-
         println!("Calling deleter to free GPU memory");
-        let deleter = managed
-            .deleter
-            .take()
-            .expect("Deleter function pointer is missing!");
-        deleter(dlpack_ptr);
+        common::take_deleter_and_delete(dlpack_ptr);
         println!("PASS: Memory freed successfully");
     }
 }
@@ -161,12 +129,9 @@ fn test_angle_encoding_async_pipeline() {
 fn test_angle_async_alignment_error() {
     println!("Testing angle async pipeline alignment error...");
 
-    let device = match CudaDevice::new(0) {
-        Ok(d) => d,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(device) = common::cuda_device() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let misaligned_data = vec![0.0_f64; 10];
@@ -192,12 +157,9 @@ fn test_angle_async_alignment_error() {
 fn test_batch_dlpack_2d_shape() {
     println!("Testing batch DLPack 2D shape...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     // Create batch data: 3 samples, each with 4 elements (2 qubits)
@@ -216,25 +178,12 @@ fn test_batch_dlpack_2d_shape() {
         "amplitude",
     );
     let dlpack_ptr = result.expect("Batch encoding should succeed");
-    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
 
     unsafe {
-        let managed = &*dlpack_ptr;
+        let managed = &mut *dlpack_ptr;
         let tensor = &managed.dl_tensor;
 
-        // Verify 2D shape for batch tensor
-        assert_eq!(tensor.ndim, 2, "Batch tensor should be 2D");
-
-        let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
-        assert_eq!(
-            shape_slice[0], num_samples as i64,
-            "First dimension should be num_samples"
-        );
-        assert_eq!(
-            shape_slice[1],
-            (1 << num_qubits) as i64,
-            "Second dimension should be 2^num_qubits"
-        );
+        common::assert_dlpack_shape_2d(dlpack_ptr, num_samples as i64, (1 << num_qubits) as i64);
 
         let strides_slice = std::slice::from_raw_parts(tensor.strides, tensor.ndim as usize);
         let state_len = 1 << num_qubits;
@@ -249,17 +198,15 @@ fn test_batch_dlpack_2d_shape() {
 
         println!(
             "PASS: Batch DLPack tensor has correct 2D shape: [{}, {}]",
-            shape_slice[0], shape_slice[1]
+            num_samples,
+            1 << num_qubits
         );
         println!(
             "PASS: Strides are correct: [{}, {}]",
             strides_slice[0], strides_slice[1]
         );
 
-        // Free memory
-        if let Some(deleter) = managed.deleter {
-            deleter(dlpack_ptr);
-        }
+        common::take_deleter_and_delete(dlpack_ptr);
     }
 }
 
@@ -268,12 +215,9 @@ fn test_batch_dlpack_2d_shape() {
 fn test_single_encode_dlpack_2d_shape() {
     println!("Testing single encode returns 2D shape...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let data = common::create_test_data(16);
@@ -281,21 +225,12 @@ fn test_single_encode_dlpack_2d_shape() {
     assert!(result.is_ok(), "Encoding should succeed");
 
     let dlpack_ptr = result.unwrap();
-    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
 
     unsafe {
-        let managed = &*dlpack_ptr;
+        let managed = &mut *dlpack_ptr;
         let tensor = &managed.dl_tensor;
 
-        // Verify 2D shape for single encode: [1, 2^num_qubits]
-        assert_eq!(tensor.ndim, 2, "Single encode should be 2D");
-
-        let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
-        assert_eq!(
-            shape_slice[0], 1,
-            "First dimension should be 1 for single encode"
-        );
-        assert_eq!(shape_slice[1], 16, "Second dimension should be [2^4]");
+        common::assert_dlpack_shape_2d(dlpack_ptr, 1, 16);
 
         let strides_slice = std::slice::from_raw_parts(tensor.strides, tensor.ndim as usize);
         assert_eq!(
@@ -307,15 +242,9 @@ fn test_single_encode_dlpack_2d_shape() {
             "Stride for second dimension should be 1"
         );
 
-        println!(
-            "PASS: Single encode returns 2D shape: [{}, {}]",
-            shape_slice[0], shape_slice[1]
-        );
+        println!("PASS: Single encode returns 2D shape: [{}, {}]", 1, 16);
 
-        // Free memory
-        if let Some(deleter) = managed.deleter {
-            deleter(dlpack_ptr);
-        }
+        common::take_deleter_and_delete(dlpack_ptr);
     }
 }
 
@@ -324,12 +253,9 @@ fn test_single_encode_dlpack_2d_shape() {
 fn test_dlpack_device_id() {
     println!("Testing DLPack device_id propagation...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => {
-            println!("SKIP: No GPU available");
-            return;
-        }
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
     };
 
     let data = common::create_test_data(16);
@@ -362,8 +288,6 @@ fn test_dlpack_device_id() {
         );
 
         // Free memory
-        if let Some(deleter) = managed.deleter {
-            deleter(dlpack_ptr);
-        }
+        common::take_deleter_and_delete(dlpack_ptr);
     }
 }

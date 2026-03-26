@@ -17,8 +17,9 @@
 
 import pytest
 
-from ..utils import TESTING_BACKENDS, get_backend_config
 from qumat import QuMat
+
+from ..utils import TESTING_BACKENDS, get_backend_config
 
 
 @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)

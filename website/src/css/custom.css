@@ -43,6 +43,7 @@
 }
 
 /* Import Google Fonts */
+/* TODO: the fonts are not loading on prod site, we need to fix this */
 @import url('https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700&family=Muli:wght@400;600;700&display=swap');
 
 /* GitHub icon in navbar */
@@ -109,6 +110,11 @@
   color: var(--ifm-font-color-base);
 }
 
+/* Remove background color from active dropdown links, probably a bug in Docusaurus */
+.dropdown__link--active:not(:hover) {
+  background-color: unset;
+}
+
 /* Dark mode navbar adjustments */
 [data-theme='dark'] .navbar {
   background-color: #00838f;
@@ -161,7 +167,6 @@
 
 /* Math equations styling */
 .katex-display {
-  overflow-x: auto;
   padding: 1rem 0;
 }
 

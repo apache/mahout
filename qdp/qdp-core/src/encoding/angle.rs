@@ -123,3 +123,85 @@ impl ChunkEncoder for AngleEncoder {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::encoding::STAGE_SIZE_ELEMENTS;
+    // chunk-size overflow checks
+    #[test]
+    #[cfg(target_os = "linux")]
+    fn test_encode_chunk_overflow() {
+        use cudarc::driver::CudaDevice;
+        use std::sync::Arc;
+
+        let device: Arc<CudaDevice> = match CudaDevice::new(0) {
+            Ok(d) => d,
+            Err(_) => return, // no GPU
+        };
+        let engine = match QdpEngine::new(0) {
+            Ok(e) => e,
+            Err(_) => return,
+        };
+        let ctx = match PipelineContext::new(&device, 2) {
+            Ok(c) => c,
+            Err(_) => return,
+        };
+        let host_buf = match PinnedHostBuffer::new(1) {
+            Ok(b) => b,
+            Err(_) => return,
+        };
+
+        let mut state = AngleEncoderState;
+        // usize::MAX * 2 overflows, triggering the checked_mul guard
+        // before host_buffer or ctx are ever accessed
+        let result = AngleEncoder.encode_chunk(
+            &mut state,
+            &engine,
+            &ctx,
+            &host_buf,
+            0u64,
+            usize::MAX, // samples_in_chunk
+            2,          // sample_size: MAX * 2 overflows
+            std::ptr::null_mut(),
+            0,
+            1,
+            0,
+        );
+
+        match result {
+            Err(MahoutError::MemoryAllocation(msg)) => {
+                assert!(msg.contains("overflow"), "msg: {msg}");
+            }
+            _ => panic!("expected MemoryAllocation overflow error, got {:?}", result),
+        }
+    }
+
+    #[test]
+    //reject sample_size == 0
+    fn test_validate_sample_size_zero() {
+        let encoder = AngleEncoder;
+        let result = encoder.validate_sample_size(0);
+        assert!(result.is_err());
+        match result {
+            Err(MahoutError::InvalidInput(msg)) => {
+                assert!(msg.contains("sample_size > 0"), "msg: {msg}");
+            }
+            _ => panic!("expected InvalidInput, got {:?}", result),
+        }
+    }
+
+    #[test]
+    //reject sample_size > STAGE_SIZE_ELEMENTS
+    fn test_validate_sample_size_oversized() {
+        let encoder = AngleEncoder;
+        let result = encoder.validate_sample_size(STAGE_SIZE_ELEMENTS + 1);
+        assert!(result.is_err());
+        match result {
+            Err(MahoutError::InvalidInput(msg)) => {
+                assert!(msg.contains("exceeds"), "msg: {msg}");
+            }
+            _ => panic!("expected InvalidInput, got {:?}", result),
+        }
+    }
+}

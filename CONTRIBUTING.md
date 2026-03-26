@@ -32,6 +32,8 @@ This document describes **repository-wide** setup and workflow. For **subproject
 
 ## Quick Start
 
+For QDP environment and command-level setup (including root `.venv` workflow), see [qdp/DEVELOPMENT.md](qdp/DEVELOPMENT.md).
+
 ### Prerequisites
 
 - Python 3.10 (>=3.10,<3.14)
@@ -138,15 +140,15 @@ Apache Mahout includes several subprojects. Use the root workflow above for issu
 | Subproject | Guide | Description |
 |------------|-------|-------------|
 | **Qumat** | *(this document)* | Core Python library; use root Quick Start and [Testing](#testing). |
-| **QDP** (Quantum Data Plane) | [qdp/CONTRIBUTING.md](qdp/CONTRIBUTING.md) | GPU-accelerated pipeline: Rust/CUDA, DevContainer, build, install, benchmarks, profiling. |
-| **Website** | [website/CONTRIBUTING.md](website/CONTRIBUTING.md) | Docusaurus site: docs source in `/docs`, sync, versioning, deployment. |
+| **QDP** (Quantum Data Plane) | [qdp/DEVELOPMENT.md](qdp/DEVELOPMENT.md) | GPU-accelerated pipeline: Rust/CUDA, DevContainer, build, install, benchmarks, profiling. |
+| **Website** | [website/README.md](website/README.md) | Docusaurus site: docs source in `/docs`, sync, versioning, deployment. |
 
 ---
 
 ## Troubleshooting
 
 - **Pre-commit fails:** Run `pre-commit run --all-files` to see errors. Common fixes: `cargo fmt` (Rust), `cargo clippy` (Rust lint), and ensuring you use the repo venv (`uv run pre-commit` or `make pre-commit`).
-- **Wrong Python or missing package:** Ensure the virtual environment is activated and you ran `uv sync --group dev` from the repo root. For QDP, see [qdp/CONTRIBUTING.md](qdp/CONTRIBUTING.md).
+- **Wrong Python or missing package:** Ensure the virtual environment is activated and you ran `uv sync --group dev` from the repo root. For QDP, see [qdp/DEVELOPMENT.md](qdp/DEVELOPMENT.md).
 
 ---
 
@@ -154,4 +156,6 @@ Apache Mahout includes several subprojects. Use the root workflow above for issu
 
 - [testing/README.md](testing/README.md) — Test structure and commands
 - [.github/PULL_REQUEST_TEMPLATE](.github/PULL_REQUEST_TEMPLATE) — PR description template
+- [docs/community/pr-policy-and-review-guidelines.md](docs/community/pr-policy-and-review-guidelines.md) — PR policy and review guidelines (ASF-aligned)
 - [docs/](docs/) — Documentation source (used by the website)
+- [qdp/DEVELOPMENT.md](qdp/DEVELOPMENT.md) — QDP setup, tests, benchmarks, profiling

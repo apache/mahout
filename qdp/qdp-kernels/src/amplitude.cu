@@ -342,19 +342,16 @@ __global__ void amplitude_encode_batch_kernel_f32(
         const float inv_norm = inv_norms[sample_idx];
 
         float v1, v2;
-        if (elem_offset + 1 < input_len) {
-            if (sample_input_aligned) {
-                const float2 vec_data =
-                    __ldg(reinterpret_cast<const float2*>(sample_input) + elem_pair);
-                v1 = vec_data.x;
-                v2 = vec_data.y;
-            } else {
-                v1 = __ldg(sample_input + elem_offset);
-                v2 = __ldg(sample_input + elem_offset + 1);
-            }
+        if (sample_input_aligned && elem_offset + 1 < input_len) {
+            const float2 vec_data =
+                __ldg(reinterpret_cast<const float2*>(sample_input) + elem_pair);
+            v1 = vec_data.x;
+            v2 = vec_data.y;
         } else if (elem_offset < input_len) {
             v1 = __ldg(sample_input + elem_offset);
-            v2 = 0.0f;
+            v2 = (elem_offset + 1 < input_len)
+                ? __ldg(sample_input + elem_offset + 1)
+                : 0.0f;
         } else {
             v1 = v2 = 0.0f;
         }

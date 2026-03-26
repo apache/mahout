@@ -15,28 +15,29 @@
 # limitations under the License.
 
 from unittest.mock import MagicMock, patch
+
 from braket.circuits import FreeParameter
 
 from qumat.amazon_braket_backend import (
-    initialize_backend,
-    create_empty_circuit,
-    apply_not_gate,
-    apply_hadamard_gate,
     apply_cnot_gate,
-    apply_toffoli_gate,
-    apply_swap_gate,
     apply_cswap_gate,
+    apply_hadamard_gate,
+    apply_not_gate,
     apply_pauli_x_gate,
     apply_pauli_y_gate,
     apply_pauli_z_gate,
-    apply_t_gate,
     apply_rx_gate,
     apply_ry_gate,
     apply_rz_gate,
+    apply_swap_gate,
+    apply_t_gate,
+    apply_toffoli_gate,
     apply_u_gate,
+    calculate_prob_zero,
+    create_empty_circuit,
     execute_circuit,
     get_final_state_vector,
-    calculate_prob_zero,
+    initialize_backend,
 )
 
 # initialize_backend

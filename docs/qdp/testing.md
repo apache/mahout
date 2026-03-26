@@ -1,3 +1,8 @@
+---
+title: QDP Core Test Suite
+sidebar_label: Testing
+---
+
 # QDP Core Test Suite
 
 Unit tests for QDP core library covering input validation, API workflows, and memory safety.
@@ -42,9 +47,20 @@ Unit tests for QDP core library covering input validation, API workflows, and me
 cargo test --package qdp-core
 
 # Run specific test file
-cargo test --package qdp-core --test validation
-cargo test --package qdp-core --test api_workflow
-cargo test --package qdp-core --test memory_safety
+cargo test --package qdp-core --test gpu_validation
+cargo test --package qdp-core --test gpu_api_workflow
+cargo test --package qdp-core --test gpu_memory_safety
+```
+
+## Python tests
+
+The Python test suite (qumat, QDP bindings, loader) runs with `make test_python`.
+
+Tests run in a single process by default to avoid GPU memory pressure (e.g. CUDA out of memory when multiple workers use the device). If you have enough compute and GPU memory, you can speed up the run with parallel workers with `make test_python` in `Makefile`:
+
+```bash
+uv run pytest -n auto --cov --cov-report=term-missing --cov-report=html:htmlcov
+# or specify the number of workers, e.g. -n 4
 ```
 
 ## Requirements

@@ -17,3 +17,4 @@ env_logger = "0.11"
 default = []
 observability = ["qdp-core/observability"]
 pytorch = ["qdp-core/pytorch"]
+remote-io = ["qdp-core/remote-io"]

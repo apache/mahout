@@ -28,6 +28,8 @@ mod platform;
 pub mod preprocessing;
 pub mod reader;
 pub mod readers;
+#[cfg(feature = "remote-io")]
+pub mod remote;
 pub mod tf_proto;
 #[macro_use]
 mod profiling;
@@ -260,6 +262,13 @@ impl QdpEngine {
     /// * `path` - Path to Parquet file with List<Float64> column
     /// * `num_qubits` - Number of qubits
     /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
+    ///
+    /// # Null handling
+    ///
+    /// When reading from Parquet, the streaming encoder always uses
+    /// [`NullHandling::FillZero`] for the underlying `ParquetBlockReader`. This
+    /// replaces any null values with `0.0`, matching the behavior of the batch
+    /// readers and preserving backward compatibility.
     ///
     /// # Returns
     /// DLPack pointer to encoded states [num_samples, 2^num_qubits]
