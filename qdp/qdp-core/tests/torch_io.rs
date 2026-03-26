@@ -71,6 +71,7 @@ fn test_torch_reader_new_rejects_missing_file() {
     }
 }
 
+#[cfg(not(feature = "pytorch"))]
 #[test]
 fn test_torch_reader_default_build_tracks_consumed_state() {
     let path = create_temp_file("pt");
