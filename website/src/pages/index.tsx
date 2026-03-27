@@ -1,4 +1,5 @@
 import type {ReactNode} from 'react';
+import Head from '@docusaurus/Head';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
@@ -6,6 +7,50 @@ import Heading from '@theme/Heading';
 import WaveAnimation from '@site/src/components/WaveAnimation';
 
 import styles from './index.module.css';
+
+const siteUrl = 'https://mahout.apache.org';
+const pageTitle = 'Apache Mahout';
+const pageDescription =
+  'Apache Mahout builds an environment for quickly creating scalable, performant machine learning applications.';
+const logoUrl = `${siteUrl}/img/mahout-favicon.png`;
+const socialImageUrl = `${siteUrl}/img/mascot_with_text.png`;
+
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Apache Mahout',
+  url: siteUrl,
+  logo: {
+    '@type': 'ImageObject',
+    url: logoUrl,
+    width: 512,
+    height: 512,
+  },
+  image: socialImageUrl,
+  sameAs: [
+    'https://github.com/apache/mahout',
+    'https://www.apache.org/',
+  ],
+};
+
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Apache Mahout',
+  url: siteUrl,
+  inLanguage: 'en',
+  publisher: {
+    '@type': 'Organization',
+    name: 'Apache Mahout',
+    url: siteUrl,
+    logo: {
+      '@type': 'ImageObject',
+      url: logoUrl,
+      width: 512,
+      height: 512,
+    },
+  },
+};
 
 function HomepageHeader() {
   return (
@@ -164,6 +209,27 @@ export default function Home(): ReactNode {
     <Layout
       title="Home"
       description="Apache Mahout - Distributed Linear Algebra and Quantum Computing for Machine Learning">
+      <Head>
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={siteUrl} />
+        <meta property="og:image" content={socialImageUrl} />
+        <meta property="og:image:alt" content="Apache Mahout Qumat mascot and logo" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={socialImageUrl} />
+        <meta name="application-name" content={siteConfig.title} />
+        <link rel="icon" href={logoUrl} sizes="512x512" type="image/png" />
+        <link rel="apple-touch-icon" href={logoUrl} />
+        <script type="application/ld+json">
+          {JSON.stringify(organizationJsonLd)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(websiteJsonLd)}
+        </script>
+      </Head>
       <HomepageHeader />
       <main className={styles.mainSection}>
         <div className="container">
