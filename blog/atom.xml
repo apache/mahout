@@ -6,7 +6,7 @@
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://mahout.apache.org/blog"/>
     <subtitle>Apache Mahout Blog</subtitle>
-    <icon>https://mahout.apache.org/img/mahout-favicon.svg</icon>
+    <icon>https://mahout.apache.org/img/mahout-favicon.png</icon>
     <entry>
         <title type="html"><![CDATA[Meeting Minutes]]></title>
         <id>https://mahout.apache.org/blog/2025/10/24/Meeting-Minutes</id>
