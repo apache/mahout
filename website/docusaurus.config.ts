@@ -7,7 +7,7 @@ import rehypeKatex from 'rehype-katex';
 const config: Config = {
   title: 'Apache Mahout',
   tagline: 'Distributed Linear Algebra & Quantum Computing',
-  favicon: 'img/mahout-favicon.svg',
+  favicon: 'img/mahout-favicon.png',
 
   future: {
     v4: true,
@@ -121,7 +121,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/mahout-social-card.svg',
+    image: 'img/mascot_with_text.png',
     colorMode: {
       defaultMode: 'light',
       respectPrefersColorScheme: true,
