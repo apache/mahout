@@ -117,6 +117,65 @@ uv run python benchmark/encoding_benchmarks/qdp_pipeline/mnist_amplitude.py \
   --digits "3,6" --n-samples 100 --trials 3 --iters 500 --early-stop 0
 ```
 
+## SVHN IQP baseline (pure PennyLane)
+
+Pipeline: 2-class SVHN (digit 1 vs 7) → PCA (3072 → n_qubits) → custom IQP circuit (H^n · Diag · H^n) → variational classifier.
+
+```bash
+uv run python benchmark/encoding_benchmarks/pennylane_baseline/svhn_iqp.py
+```
+
+Common flags (only the key ones):
+
+- `--n-qubits`: number of qubits / PCA components (default: 10)
+- `--n-samples`: total samples after binary filter + subsample (default: 500)
+- `--iters`: optimizer steps (default: 500)
+- `--batch-size`: batch size (default: 10)
+- `--layers`: number of variational layers (default: 6)
+- `--lr`: learning rate (default: 0.01)
+- `--optimizer`: `adam` or `nesterov` (default: `adam`)
+- `--trials`: number of restarts; best test accuracy reported (default: 3)
+- `--early-stop`: stop when test accuracy >= this; 0 = off (default: 0.85)
+- `--backend`: `cpu` (default.qubit) or `gpu` (lightning.gpu)
+
+Example (quick test):
+
+```bash
+uv run python benchmark/encoding_benchmarks/pennylane_baseline/svhn_iqp.py \
+  --n-qubits 6 --n-samples 200 --iters 200 --trials 1 --early-stop 0 --backend cpu
+```
+
+## SVHN IQP (QDP pipeline)
+
+Pipeline is identical to the baseline except for encoding:
+PCA-reduced vectors → QDP `QdpEngine.encode(method="iqp")` (one-shot, GPU) → `StatePrep(state_vector)` → same variational classifier.
+
+```bash
+uv run python benchmark/encoding_benchmarks/qdp_pipeline/svhn_iqp.py
+```
+
+The CLI mirrors the baseline, plus:
+
+- **QDP-specific flags**
+  - `--device-id`: CUDA device id (default: 0)
+
+Example (same settings as the baseline example, but with QDP encoding):
+
+```bash
+uv run python benchmark/encoding_benchmarks/qdp_pipeline/svhn_iqp.py \
+  --n-qubits 6 --n-samples 200 --iters 200 --trials 1 --early-stop 0 --backend cpu
+```
+
+## SVHN IQP experiment runner
+
+Run all qubit-scaling, accuracy-parity, and sample-scaling experiments:
+
+```bash
+bash benchmark/encoding_benchmarks/run_svhn_iqp_experiments.sh
+```
+
+Logs are saved to `benchmark/encoding_benchmarks/logs/`. Results and analysis are in `benchmark/encoding_benchmarks/report.md`.
+
 ## Full help
 
 To see the full list of options and defaults, append `--help`:
@@ -124,6 +183,8 @@ To see the full list of options and defaults, append `--help`:
 ```bash
 uv run python benchmark/encoding_benchmarks/pennylane_baseline/iris_amplitude.py --help
 uv run python benchmark/encoding_benchmarks/pennylane_baseline/mnist_amplitude.py --help
+uv run python benchmark/encoding_benchmarks/pennylane_baseline/svhn_iqp.py --help
 uv run python benchmark/encoding_benchmarks/qdp_pipeline/iris_amplitude.py --help
 uv run python benchmark/encoding_benchmarks/qdp_pipeline/mnist_amplitude.py --help
+uv run python benchmark/encoding_benchmarks/qdp_pipeline/svhn_iqp.py --help
 ```
