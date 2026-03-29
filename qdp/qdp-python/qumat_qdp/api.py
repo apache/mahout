@@ -124,9 +124,7 @@ class QdpBenchmark:
     def backend(self, name: str) -> QdpBenchmark:
         """Set benchmark backend: ``'rust'`` or ``'pytorch'``."""
         if name not in ("rust", "pytorch"):
-            raise ValueError(
-                f"backend must be 'rust' or 'pytorch', got {name!r}"
-            )
+            raise ValueError(f"backend must be 'rust' or 'pytorch', got {name!r}")
         self._backend_name = name
         return self
 
