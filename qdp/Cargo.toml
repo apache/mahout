@@ -3,6 +3,7 @@ members = [
     "qdp-core",
     "qdp-kernels",
     "qdp-python",
+    "qdp-runtime",
 ]
 resolver = "2"
 

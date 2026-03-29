@@ -1,0 +1,17 @@
+[package]
+name = "qdp-runtime"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+qdp-core = { path = "../qdp-core" }
+thiserror = { workspace = true }
+nvtx = { version = "1.3", optional = true }
+
+[features]
+default = []
+observability = ["nvtx"]
+local-executor = []
+
+[lib]
+name = "qdp_runtime"
