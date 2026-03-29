@@ -188,7 +188,15 @@ class QdpBenchmark:
 
         from qumat_qdp.torch_ref import encode
 
-        device = f"cuda:{self._device_id}" if torch.cuda.is_available() else "cpu"
+        if torch.cuda.is_available():
+            if self._device_id < 0 or self._device_id >= torch.cuda.device_count():
+                raise ValueError(
+                    f"Invalid CUDA device_id {self._device_id}; "
+                    f"{torch.cuda.device_count()} device(s) available."
+                )
+            device = f"cuda:{self._device_id}"
+        else:
+            device = "cpu"
         # _validate() guarantees these are not None.
         assert self._num_qubits is not None
         assert self._total_batches is not None
@@ -205,9 +213,11 @@ class QdpBenchmark:
         else:
             sample_dim = 1 << num_qubits
 
-        # Generate all batch data upfront.
-        batches = []
-        for b in range(self._total_batches + self._warmup_batches):
+        # Pre-generate a small pool of batch tensors and cycle through them
+        # to keep memory bounded at high qubit counts while still varying data.
+        pool_size = min(8, self._total_batches + self._warmup_batches)
+        pool: list[torch.Tensor] = []
+        for _ in range(pool_size):
             if encoding_method == "basis":
                 data = torch.randint(
                     0, 1 << num_qubits, (batch_size,), device=device
@@ -216,18 +226,18 @@ class QdpBenchmark:
                 data = torch.randn(
                     batch_size, sample_dim, dtype=torch.float64, device=device
                 )
-            batches.append(data)
+            pool.append(data)
 
         # Warmup.
         for b in range(self._warmup_batches):
-            encode(batches[b], num_qubits, encoding_method, device=device)
+            encode(pool[b % pool_size], num_qubits, encoding_method, device=device)
         if device.startswith("cuda"):
             torch.cuda.synchronize()
 
         # Timed run.
         start = time.perf_counter()
-        for b in range(self._warmup_batches, len(batches)):
-            encode(batches[b], num_qubits, encoding_method, device=device)
+        for b in range(self._total_batches):
+            encode(pool[b % pool_size], num_qubits, encoding_method, device=device)
         if device.startswith("cuda"):
             torch.cuda.synchronize()
         duration = time.perf_counter() - start

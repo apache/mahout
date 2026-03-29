@@ -83,7 +83,11 @@ def _validate_loader_args(
 
 
 def _build_sample(seed: int, vector_len: int, encoding_method: str) -> list[float]:
-    """Build a single deterministic sample vector (mirrors benchmark/utils.py:build_sample)."""
+    """Build a single deterministic sample vector for the given encoding method.
+
+    Supports amplitude, angle, basis, and iqp (iqp uses the same mask-and-scale
+    logic as amplitude).
+    """
     import numpy as np
 
     if encoding_method == "basis":
@@ -337,7 +341,15 @@ class QuantumDataLoader:
 
         from qumat_qdp.torch_ref import encode
 
-        device = f"cuda:{self._device_id}" if torch.cuda.is_available() else "cpu"
+        if torch.cuda.is_available():
+            if self._device_id < 0 or self._device_id >= torch.cuda.device_count():
+                raise ValueError(
+                    f"Invalid CUDA device_id {self._device_id}; "
+                    f"{torch.cuda.device_count()} device(s) available."
+                )
+            device = f"cuda:{self._device_id}"
+        else:
+            device = "cpu"
 
         if use_synthetic:
             return self._pytorch_synthetic_iter(torch, encode, device)

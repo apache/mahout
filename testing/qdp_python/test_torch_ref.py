@@ -365,6 +365,7 @@ class TestCrossValidation:
         pytest.importorskip("_qdp")
 
     @pytest.mark.gpu
+    @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
     @pytest.mark.parametrize("encoding", ["amplitude", "angle", "basis", "iqp"])
     def test_encoding_matches_rust(self, encoding):
         import _qdp
