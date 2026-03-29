@@ -606,11 +606,11 @@ def main() -> None:
     X_train_params = features_to_iqp_params(X_train_pca, n_qubits)
     X_test_params = features_to_iqp_params(X_test_pca, n_qubits)
 
-    torch.cuda.synchronize()
+    torch.cuda.synchronize(args.device_id)
     t0 = time.perf_counter()
     encoded_train = encode_qdp(X_train_params, n_qubits, args.device_id)
     encoded_test = encode_qdp(X_test_params, n_qubits, args.device_id)
-    torch.cuda.synchronize()
+    torch.cuda.synchronize(args.device_id)
 
     if args.backend == "gpu":
         # Zero copy: QDP CUDA tensor -> lightning.gpu StatePrep (stays on GPU)

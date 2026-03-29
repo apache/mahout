@@ -148,13 +148,15 @@ uv run python benchmark/encoding_benchmarks/pennylane_baseline/svhn_iqp.py \
 ## SVHN IQP (QDP pipeline)
 
 Pipeline is identical to the baseline except for encoding:
-PCA-reduced vectors → QDP `QdpEngine.encode(method="iqp")` (one-shot, GPU) → `StatePrep(state_vector)` → same variational classifier.
+PCA-reduced vectors → QDP `QdpEngine.encode(encoding_method="iqp")` (one-shot, GPU) → `StatePrep(state_vector)` → same variational classifier.
 
 ```bash
 uv run python benchmark/encoding_benchmarks/qdp_pipeline/svhn_iqp.py
 ```
 
 The CLI mirrors the baseline, plus:
+
+> **Note:** The QDP pipeline always performs the encoding step on a CUDA GPU via QDP. A CUDA-capable device is required even when you select `--backend cpu` for the training backend.
 
 - **QDP-specific flags**
   - `--device-id`: CUDA device id (default: 0)
@@ -166,15 +168,9 @@ uv run python benchmark/encoding_benchmarks/qdp_pipeline/svhn_iqp.py \
   --n-qubits 6 --n-samples 200 --iters 200 --trials 1 --early-stop 0 --backend cpu
 ```
 
-## SVHN IQP experiment runner
+## SVHN IQP experiments
 
-Run all qubit-scaling, accuracy-parity, and sample-scaling experiments:
-
-```bash
-bash benchmark/encoding_benchmarks/run_svhn_iqp_experiments.sh
-```
-
-Logs are saved to `benchmark/encoding_benchmarks/logs/`. Results and analysis are in `benchmark/encoding_benchmarks/report.md`.
+Experiment logs are saved to `benchmark/encoding_benchmarks/logs/`.
 
 ## Full help
 
