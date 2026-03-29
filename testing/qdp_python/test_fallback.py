@@ -15,7 +15,10 @@
 # limitations under the License.
 
 """
-Tests for the fallback mechanism when _qdp is unavailable.
+Tests for backend selection when _qdp is unavailable.
+
+The PyTorch reference backend must be explicitly selected via
+``.backend("pytorch")``; it is NOT used as an automatic fallback.
 """
 
 from __future__ import annotations
@@ -67,6 +70,15 @@ class TestBackendDetection:
         finally:
             force_backend(None)
 
+    def test_auto_detection_skips_pytorch(self):
+        """Without _qdp, auto-detection returns NONE, not PYTORCH."""
+        from qumat_qdp._backend import Backend, get_backend
+
+        # If _qdp is not installed, get_backend() should be NONE.
+        # If _qdp IS installed, it will be RUST_CUDA.  Either way, not PYTORCH.
+        b = get_backend()
+        assert b is not Backend.PYTORCH
+
     def test_get_torch(self):
         from qumat_qdp._backend import get_torch
 
@@ -75,73 +87,77 @@ class TestBackendDetection:
 
 
 # ---------------------------------------------------------------------------
-# Loader fallback (simulate _qdp unavailable)
+# Loader with explicit PyTorch backend
 # ---------------------------------------------------------------------------
 
 
-def _patch_qdp_unavailable(monkeypatch):
-    """Make _get_qdp() return None to simulate missing _qdp extension."""
-    from qumat_qdp import loader
+class TestLoaderPytorchBackend:
+    def test_no_qdp_without_explicit_backend_raises(self, monkeypatch):
+        """Without _qdp and without .backend('pytorch'), iteration raises."""
+        from qumat_qdp import loader as loader_mod
+        from qumat_qdp.loader import QuantumDataLoader
 
-    # Clear lru_cache and replace with a function returning None.
-    monkeypatch.setattr(loader, "_get_qdp", lambda: None)
+        monkeypatch.setattr(loader_mod, "_get_qdp", lambda: None)
+        ld = (
+            QuantumDataLoader(device_id=0)
+            .qubits(2)
+            .encoding("amplitude")
+            .batches(1, size=1)
+            .source_synthetic()
+        )
+        with pytest.raises(RuntimeError, match="Rust extension"):
+            list(ld)
 
-
-class TestLoaderFallback:
-    def test_synthetic_fallback_yields_tensors(self, monkeypatch):
-        _patch_qdp_unavailable(monkeypatch)
+    def test_synthetic_pytorch_yields_tensors(self):
         from qumat_qdp.loader import QuantumDataLoader
 
         loader = (
             QuantumDataLoader(device_id=0)
+            .backend("pytorch")
             .qubits(2)
             .encoding("amplitude")
             .batches(3, size=2)
             .source_synthetic()
         )
-        with pytest.warns(UserWarning, match="PyTorch fallback"):
-            batches = list(loader)
+        batches = list(loader)
         assert len(batches) == 3
         for b in batches:
             assert isinstance(b, torch.Tensor)
             assert b.shape == (2, 4)  # batch_size=2, 2^2=4
             assert b.is_complex()
 
-    def test_synthetic_fallback_angle(self, monkeypatch):
-        _patch_qdp_unavailable(monkeypatch)
+    def test_synthetic_pytorch_angle(self):
         from qumat_qdp.loader import QuantumDataLoader
 
         loader = (
             QuantumDataLoader(device_id=0)
+            .backend("pytorch")
             .qubits(3)
             .encoding("angle")
             .batches(2, size=4)
             .source_synthetic()
         )
-        with pytest.warns(UserWarning, match="PyTorch fallback"):
-            batches = list(loader)
+        batches = list(loader)
         assert len(batches) == 2
         assert batches[0].shape == (4, 8)
 
-    def test_synthetic_fallback_basis(self, monkeypatch):
-        _patch_qdp_unavailable(monkeypatch)
+    def test_synthetic_pytorch_basis(self):
         from qumat_qdp.loader import QuantumDataLoader
 
         loader = (
             QuantumDataLoader(device_id=0)
+            .backend("pytorch")
             .qubits(2)
             .encoding("basis")
             .batches(2, size=3)
             .source_synthetic()
         )
-        with pytest.warns(UserWarning, match="PyTorch fallback"):
-            batches = list(loader)
+        batches = list(loader)
         assert len(batches) == 2
         for b in batches:
             assert b.shape == (3, 4)
 
-    def test_file_npy_fallback(self, monkeypatch, tmp_path):
-        _patch_qdp_unavailable(monkeypatch)
+    def test_file_npy_pytorch(self, tmp_path):
         import numpy as np
         from qumat_qdp.loader import QuantumDataLoader
 
@@ -152,51 +168,48 @@ class TestLoaderFallback:
 
         loader = (
             QuantumDataLoader(device_id=0)
+            .backend("pytorch")
             .qubits(2)
             .encoding("amplitude")
             .batches(5, size=2)
             .source_file(npy_path)
         )
-        with pytest.warns(UserWarning, match="PyTorch fallback"):
-            batches = list(loader)
+        batches = list(loader)
         assert len(batches) == 5
         for b in batches:
             assert isinstance(b, torch.Tensor)
             assert b.shape == (2, 4)
 
-    def test_file_parquet_raises(self, monkeypatch):
-        _patch_qdp_unavailable(monkeypatch)
+    def test_file_parquet_raises(self):
         from qumat_qdp.loader import QuantumDataLoader
 
         loader = (
             QuantumDataLoader(device_id=0)
+            .backend("pytorch")
             .qubits(2)
             .encoding("amplitude")
             .batches(1, size=1)
             .source_file("data.parquet")
         )
-        with pytest.warns(UserWarning, match="PyTorch fallback"):
-            with pytest.raises(RuntimeError, match="only supports"):
-                list(loader)
+        with pytest.raises(RuntimeError, match="only supports"):
+            list(loader)
 
-    def test_synthetic_fallback_iqp(self, monkeypatch):
-        _patch_qdp_unavailable(monkeypatch)
+    def test_synthetic_pytorch_iqp(self):
         from qumat_qdp.loader import QuantumDataLoader
 
         loader = (
             QuantumDataLoader(device_id=0)
+            .backend("pytorch")
             .qubits(3)
             .encoding("iqp")
             .batches(2, size=4)
             .source_synthetic()
         )
-        with pytest.warns(UserWarning, match="PyTorch fallback"):
-            batches = list(loader)
+        batches = list(loader)
         assert len(batches) == 2
         assert batches[0].shape == (4, 8)
 
-    def test_file_pt_fallback(self, monkeypatch, tmp_path):
-        _patch_qdp_unavailable(monkeypatch)
+    def test_file_pt_pytorch(self, tmp_path):
         from qumat_qdp.loader import QuantumDataLoader
 
         data = torch.randn(10, 4, dtype=torch.float64)
@@ -205,32 +218,37 @@ class TestLoaderFallback:
 
         loader = (
             QuantumDataLoader(device_id=0)
+            .backend("pytorch")
             .qubits(2)
             .encoding("amplitude")
             .batches(5, size=2)
             .source_file(pt_path)
         )
-        with pytest.warns(UserWarning, match="PyTorch fallback"):
-            batches = list(loader)
+        batches = list(loader)
         assert len(batches) == 5
         for b in batches:
             assert isinstance(b, torch.Tensor)
             assert b.shape == (2, 4)
 
-    def test_streaming_raises(self, monkeypatch):
-        _patch_qdp_unavailable(monkeypatch)
+    def test_streaming_raises(self):
         from qumat_qdp.loader import QuantumDataLoader
 
         loader = (
             QuantumDataLoader(device_id=0)
+            .backend("pytorch")
             .qubits(2)
             .encoding("amplitude")
             .batches(1, size=1)
             .source_file("data.parquet", streaming=True)
         )
-        with pytest.warns(UserWarning, match="PyTorch fallback"):
-            with pytest.raises(RuntimeError, match="Streaming"):
-                list(loader)
+        with pytest.raises(RuntimeError, match="Streaming"):
+            list(loader)
+
+    def test_invalid_backend_raises(self):
+        from qumat_qdp.loader import QuantumDataLoader
+
+        with pytest.raises(ValueError, match="'rust' or 'pytorch'"):
+            QuantumDataLoader(device_id=0).backend("auto")
 
 
 # ---------------------------------------------------------------------------
@@ -267,8 +285,14 @@ class TestBenchmarkFallback:
     def test_invalid_backend_raises(self):
         from qumat_qdp.api import QdpBenchmark
 
-        with pytest.raises(ValueError, match="'auto', 'rust', or 'pytorch'"):
+        with pytest.raises(ValueError, match="'rust' or 'pytorch'"):
             QdpBenchmark().backend("invalid")
+
+    def test_auto_backend_raises(self):
+        from qumat_qdp.api import QdpBenchmark
+
+        with pytest.raises(ValueError, match="'rust' or 'pytorch'"):
+            QdpBenchmark().backend("auto")
 
     def test_pytorch_throughput(self):
         from qumat_qdp.api import QdpBenchmark

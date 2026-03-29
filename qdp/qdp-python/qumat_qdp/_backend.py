@@ -17,10 +17,14 @@
 """
 Backend detection and selection for QDP.
 
-Priority order:
+Available backends:
 1. _qdp (Rust+CUDA) -- native extension, highest performance
-2. torch (PyTorch) -- fallback, optional dependency
-3. None -- neither available
+2. torch (PyTorch) -- reference implementation, must be explicitly selected
+
+Auto-detection only activates the Rust backend.  To use the PyTorch
+reference backend, call ``force_backend(Backend.PYTORCH)`` or use
+the ``.backend("pytorch")`` builder method on ``QdpBenchmark`` /
+``QuantumDataLoader``.
 """
 
 from __future__ import annotations
@@ -65,16 +69,15 @@ def get_torch() -> ModuleType | None:
 
 
 def get_backend() -> Backend:
-    """Return the highest-priority available backend.
+    """Return the active backend.
 
-    Respects :func:`force_backend` overrides.
+    Only the Rust backend is auto-detected.  The PyTorch reference
+    backend must be selected explicitly via :func:`force_backend`.
     """
     if _forced_backend is not None:
         return _forced_backend
     if get_qdp() is not None:
         return Backend.RUST_CUDA
-    if get_torch() is not None:
-        return Backend.PYTORCH
     return Backend.NONE
 
 
@@ -94,6 +97,7 @@ def require_backend() -> Backend:
     if b is Backend.NONE:
         raise RuntimeError(
             "No QDP encoding backend available. "
-            "Install PyTorch (pip install torch) or build the Rust extension (maturin develop)."
+            "Build the Rust extension (maturin develop) or explicitly select the "
+            "PyTorch reference backend with force_backend(Backend.PYTORCH)."
         )
     return b

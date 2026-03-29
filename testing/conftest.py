@@ -58,7 +58,7 @@ def pytest_collection_modifyitems(config, items):
         "Build with: cd qdp/qdp-python && maturin develop"
     )
 
-    # Tests that work without _qdp (PyTorch fallback / reference tests).
+    # Tests that work without _qdp (PyTorch reference backend tests).
     _NO_QDP_OK = {"test_torch_ref.py", "test_fallback.py"}
 
     for item in items:

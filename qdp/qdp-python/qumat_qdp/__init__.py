@@ -30,7 +30,7 @@ Usage:
 from __future__ import annotations
 
 # Backend detection: gracefully degrade when _qdp (Rust extension) is unavailable.
-from qumat_qdp._backend import Backend, get_backend, get_qdp
+from qumat_qdp._backend import Backend, force_backend, get_backend, get_qdp
 
 _qdp_mod = get_qdp()
 if _qdp_mod is not None:
@@ -60,5 +60,6 @@ __all__ = [
     "QuantumDataLoader",
     "QuantumTensor",
     "ThroughputResult",
+    "force_backend",
     "run_throughput_pipeline_py",
 ]

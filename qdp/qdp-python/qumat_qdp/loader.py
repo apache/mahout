@@ -30,7 +30,6 @@ Usage:
 from __future__ import annotations
 
 import math
-import warnings
 from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
@@ -144,6 +143,7 @@ class QuantumDataLoader:
         self._synthetic_requested = False  # set True only by source_synthetic()
         self._file_requested = False
         self._null_handling: str | None = None
+        self._backend_name: str = "rust"
 
     def qubits(self, n: int) -> QuantumDataLoader:
         """Set number of qubits. Returns self for chaining."""
@@ -233,6 +233,17 @@ class QuantumDataLoader:
         self._null_handling = policy
         return self
 
+    def backend(self, name: str) -> QuantumDataLoader:
+        """Set encoding backend: ``'rust'`` or ``'pytorch'``.
+
+        The PyTorch reference backend is intended for testing and must be
+        explicitly selected.  Returns self for chaining.
+        """
+        if name not in ("rust", "pytorch"):
+            raise ValueError(f"backend must be 'rust' or 'pytorch', got {name!r}")
+        self._backend_name = name
+        return self
+
     def _create_iterator(self) -> Iterator[object]:
         """Build engine and return a loader iterator (Rust-backed or PyTorch fallback)."""
         if self._synthetic_requested and self._file_requested:
@@ -253,12 +264,18 @@ class QuantumDataLoader:
                 encoding_method=self._encoding_method,
                 seed=self._seed,
             )
+        if self._backend_name == "pytorch":
+            return self._create_pytorch_iterator(use_synthetic)
+        # Rust backend (default).
         qdp = _get_qdp()
         QdpEngine = getattr(qdp, "QdpEngine", None) if qdp else None
-        if QdpEngine is not None:
-            return self._create_rust_iterator(QdpEngine, use_synthetic)
-        # Rust extension unavailable – fall back to PyTorch.
-        return self._create_pytorch_iterator(use_synthetic)
+        if QdpEngine is None:
+            raise RuntimeError(
+                "Rust extension (_qdp) is not available. "
+                "Build with: maturin develop, or explicitly select the PyTorch "
+                "reference backend with .backend('pytorch')."
+            )
+        return self._create_rust_iterator(QdpEngine, use_synthetic)
 
     def _create_rust_iterator(self, QdpEngine, use_synthetic: bool) -> Iterator[object]:
         """Create the Rust-backed loader iterator (original path)."""
@@ -303,7 +320,7 @@ class QuantumDataLoader:
         )
 
     def _create_pytorch_iterator(self, use_synthetic: bool) -> Iterator[object]:
-        """Fallback iterator using pure-PyTorch encoding when _qdp is unavailable.
+        """PyTorch reference iterator (explicitly selected via ``.backend('pytorch')``).
 
         Yields ``torch.Tensor`` (not ``QuantumTensor``).
 
@@ -314,17 +331,11 @@ class QuantumDataLoader:
             import torch
         except ImportError:
             raise RuntimeError(
-                "Neither _qdp (Rust extension) nor torch (PyTorch) is available. "
-                "Install PyTorch with: pip install torch, or build _qdp with: maturin develop"
+                "PyTorch backend selected but torch is not installed. "
+                "Install PyTorch with: pip install torch"
             ) from None
 
         from qumat_qdp.torch_ref import encode
-
-        warnings.warn(
-            "Using PyTorch fallback backend. Iteration yields torch.Tensor "
-            "instead of QuantumTensor (no torch.from_dlpack() needed).",
-            stacklevel=3,
-        )
 
         device = f"cuda:{self._device_id}" if torch.cuda.is_available() else "cpu"
 
@@ -417,8 +428,8 @@ class QuantumDataLoader:
     def __iter__(self) -> Iterator[object]:
         """Return iterator that yields one encoded batch per step.
 
-        When the ``_qdp`` Rust extension is available, yields ``QuantumTensor``
-        (use ``torch.from_dlpack(qt)``).  When falling back to PyTorch, yields
-        ``torch.Tensor`` directly.
+        With the default ``"rust"`` backend, yields ``QuantumTensor``
+        (use ``torch.from_dlpack(qt)``).  With ``.backend("pytorch")``,
+        yields ``torch.Tensor`` directly.
         """
         return self._create_iterator()

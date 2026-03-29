@@ -20,11 +20,11 @@ Benchmark API: supports Rust-optimized pipeline and PyTorch reference backend.
 Usage:
     from qumat_qdp import QdpBenchmark, ThroughputResult, LatencyResult
 
+    # Rust backend (default):
     result = (QdpBenchmark(device_id=0).qubits(16).encoding("amplitude")
               .batches(100, size=64).warmup(2).run_throughput())
-    # result.duration_sec, result.vectors_per_sec
 
-    # PyTorch reference benchmark:
+    # PyTorch reference (must be explicitly selected):
     result = (QdpBenchmark(device_id=0).backend("pytorch").qubits(16)
               .encoding("amplitude").batches(100, size=64).run_throughput())
 """
@@ -82,24 +82,13 @@ def _get_run_throughput_pipeline_py():
     return fn
 
 
-def _rust_available() -> bool:
-    """Check if the Rust pipeline is available without raising."""
-    from qumat_qdp._backend import get_qdp
-
-    qdp = get_qdp()
-    return (
-        qdp is not None and getattr(qdp, "run_throughput_pipeline_py", None) is not None
-    )
-
-
 class QdpBenchmark:
     """
     Builder for throughput/latency benchmarks.
 
     Supports two backends:
-    - ``"rust"``: Rust-optimized pipeline (no Python for-loop, GIL released).
-    - ``"pytorch"``: Pure PyTorch reference implementation.
-    - ``"auto"`` (default): use Rust if available, else PyTorch.
+    - ``"rust"`` (default): Rust-optimized pipeline (no Python for-loop, GIL released).
+    - ``"pytorch"``: Pure PyTorch reference implementation (must be explicitly selected).
     """
 
     def __init__(self, device_id: int = 0) -> None:
@@ -109,7 +98,7 @@ class QdpBenchmark:
         self._total_batches: int | None = None
         self._batch_size: int = 64
         self._warmup_batches: int = 0
-        self._backend_name: str = "auto"
+        self._backend_name: str = "rust"
 
     def qubits(self, n: int) -> QdpBenchmark:
         self._num_qubits = n
@@ -133,19 +122,13 @@ class QdpBenchmark:
         return self
 
     def backend(self, name: str) -> QdpBenchmark:
-        """Set benchmark backend: ``'auto'``, ``'rust'``, or ``'pytorch'``."""
-        if name not in ("auto", "rust", "pytorch"):
+        """Set benchmark backend: ``'rust'`` or ``'pytorch'``."""
+        if name not in ("rust", "pytorch"):
             raise ValueError(
-                f"backend must be 'auto', 'rust', or 'pytorch', got {name!r}"
+                f"backend must be 'rust' or 'pytorch', got {name!r}"
             )
         self._backend_name = name
         return self
-
-    def _resolve_backend(self) -> str:
-        """Return the effective backend name."""
-        if self._backend_name == "auto":
-            return "rust" if _rust_available() else "pytorch"
-        return self._backend_name
 
     def _validate(self) -> None:
         if self._num_qubits is None or self._total_batches is None:
@@ -156,14 +139,14 @@ class QdpBenchmark:
     def run_throughput(self) -> ThroughputResult:
         """Run throughput benchmark using the selected backend."""
         self._validate()
-        if self._resolve_backend() == "pytorch":
+        if self._backend_name == "pytorch":
             return self._run_throughput_pytorch()
         return self._run_throughput_rust()
 
     def run_latency(self) -> LatencyResult:
         """Run latency benchmark using the selected backend."""
         self._validate()
-        if self._resolve_backend() == "pytorch":
+        if self._backend_name == "pytorch":
             return self._run_latency_pytorch()
         return self._run_latency_rust()
 
