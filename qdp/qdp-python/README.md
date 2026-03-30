@@ -35,6 +35,7 @@ print(tensor)  # Complex tensor on CUDA
 | `angle` | Map values to rotation angles (one per qubit) |
 | `basis` | Encode integer as computational basis state |
 | `iqp` | IQP-style encoding with entanglement |
+| `iqp-z` | IQP-Z encoding with single-qubit phase terms only |
 
 ## Input Sources
 

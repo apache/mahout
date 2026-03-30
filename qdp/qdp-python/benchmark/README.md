@@ -8,6 +8,8 @@ scripts:
 - `benchmark_throughput.py`: DataLoader-style throughput benchmark
   that measures vectors/sec across Mahout, PennyLane, and Qiskit.
 - `benchmark_latency.py`: Data-to-State latency benchmark (CPU RAM -> GPU VRAM).
+- `benchmark_iqp_torch.py`: IQP kernel benchmark against eager and
+  `torch.compile` torch references.
 
 ## Quick Start
 
@@ -32,6 +34,7 @@ To run individual benchmarks after setup:
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_e2e.py
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_latency.py
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_throughput.py
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_iqp_torch.py
 ```
 
 This keeps all benchmark dependencies in the unified repo root venv (`mahout/.venv`).
@@ -117,6 +120,24 @@ Notes:
   Options: `mahout`, `pennylane`, `qiskit`.
 - `--encoding-method` selects the encoding method: `amplitude` (default) or `basis`.
 - Throughput is reported in vectors/sec (higher is better).
+
+## IQP Torch Benchmark
+
+Compare the IQP CUDA kernel against a pure torch reference and `torch.compile`:
+
+```bash
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_iqp_torch.py \
+  --qubits 6 --batches 100 --batch-size 32 --prefetch 16 --encoding-method iqp
+```
+
+Notes:
+
+- `--encoding-method` accepts `iqp` and `iqp-z`.
+- The script times three paths when possible: QDP CUDA, eager torch reference,
+  and `torch.compile` torch reference.
+- The benchmark uses CUDA-resident inputs to focus on compute-kernel time.
+- The torch reference implementation lives in `benchmark/iqp_reference.py`
+  next to this benchmark so it is not confused with the production CUDA encoder.
 
 ## Dependency Notes
 

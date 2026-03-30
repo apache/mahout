@@ -307,7 +307,6 @@ __global__ void fwt_butterfly_batch_kernel(
     cuDoubleComplex* __restrict__ state_batch,
     size_t num_samples,
     size_t state_len,
-    unsigned int num_qubits,
     unsigned int stage
 ) {
     const size_t pairs_per_sample = state_len >> 1;
@@ -321,23 +320,16 @@ __global__ void fwt_butterfly_batch_kernel(
     for (size_t global_pair_idx = blockIdx.x * blockDim.x + threadIdx.x;
          global_pair_idx < total_pairs;
          global_pair_idx += grid_stride) {
-
-        // Determine which sample and which pair within that sample
         const size_t sample_idx = global_pair_idx / pairs_per_sample;
         const size_t pair_idx = global_pair_idx % pairs_per_sample;
-
-        // Compute indices within this sample's state
         const size_t block_idx = pair_idx / stride;
         const size_t pair_offset = pair_idx % stride;
         const size_t local_i = block_idx * block_size + pair_offset;
         const size_t local_j = local_i + stride;
-
-        // Global indices
         const size_t base = sample_idx * state_len;
         const size_t i = base + local_i;
         const size_t j = base + local_j;
 
-        // Load values
         cuDoubleComplex a = state_batch[i];
         cuDoubleComplex b = state_batch[j];
 
@@ -499,12 +491,13 @@ int launch_iqp_encode_batch(
     cuDoubleComplex* state_complex_d = static_cast<cuDoubleComplex*>(state_batch_d);
     const int blockSize = DEFAULT_BLOCK_SIZE;
     const size_t total_elements = num_samples * state_len;
-    const size_t blocks_needed = (total_elements + blockSize - 1) / blockSize;
-    const size_t gridSize = (blocks_needed < MAX_GRID_BLOCKS) ? blocks_needed : MAX_GRID_BLOCKS;
+    const size_t element_blocks_needed = (total_elements + blockSize - 1) / blockSize;
+    const size_t element_grid_size =
+        (element_blocks_needed < MAX_GRID_BLOCKS) ? element_blocks_needed : MAX_GRID_BLOCKS;
 
     // Use naive kernel for small n (FWT overhead not worth it)
     if (num_qubits < FWT_MIN_QUBITS) {
-        iqp_encode_batch_kernel_naive<<<gridSize, blockSize, 0, stream>>>(
+        iqp_encode_batch_kernel_naive<<<element_grid_size, blockSize, 0, stream>>>(
             data_batch_d,
             state_complex_d,
             num_samples,
@@ -519,7 +512,7 @@ int launch_iqp_encode_batch(
     // FWT-based implementation for larger n
 
     // Step 1: Compute phase array f[x] = exp(i*theta(x)) for all samples
-    iqp_phase_batch_kernel<<<gridSize, blockSize, 0, stream>>>(
+    iqp_phase_batch_kernel<<<element_grid_size, blockSize, 0, stream>>>(
         data_batch_d,
         state_complex_d,
         num_samples,
@@ -534,21 +527,21 @@ int launch_iqp_encode_batch(
     // (shared memory would require processing samples one at a time)
     const size_t total_pairs = num_samples * (state_len >> 1);
     const size_t fwt_blocks_needed = (total_pairs + blockSize - 1) / blockSize;
-    const size_t fwt_grid_size = (fwt_blocks_needed < MAX_GRID_BLOCKS) ? fwt_blocks_needed : MAX_GRID_BLOCKS;
+    const size_t fwt_grid_size =
+        (fwt_blocks_needed < MAX_GRID_BLOCKS) ? fwt_blocks_needed : MAX_GRID_BLOCKS;
 
     for (unsigned int stage = 0; stage < num_qubits; ++stage) {
         fwt_butterfly_batch_kernel<<<fwt_grid_size, blockSize, 0, stream>>>(
             state_complex_d,
             num_samples,
             state_len,
-            num_qubits,
             stage
         );
     }
 
     // Step 3: Normalize by 1/2^n
     double norm_factor = 1.0 / (double)state_len;
-    normalize_batch_kernel<<<gridSize, blockSize, 0, stream>>>(
+    normalize_batch_kernel<<<element_grid_size, blockSize, 0, stream>>>(
         state_complex_d,
         total_elements,
         norm_factor

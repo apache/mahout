@@ -16,7 +16,7 @@
 
 // Unit tests for IQP (Instantaneous Quantum Polynomial) encoding
 
-use qdp_core::MahoutError;
+use qdp_core::{MahoutError, Precision};
 
 mod common;
 
@@ -212,7 +212,7 @@ fn test_iqp_infinity_value_rejected() {
 fn test_iqp_full_encoding_workflow() {
     println!("Testing IQP full encoding workflow...");
 
-    let Some(engine) = common::qdp_engine() else {
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
         println!("SKIP: No GPU available");
         return;
     };
@@ -258,7 +258,7 @@ fn test_iqp_full_encoding_workflow() {
 fn test_iqp_z_encoding_workflow() {
     println!("Testing IQP-Z encoding workflow...");
 
-    let Some(engine) = common::qdp_engine() else {
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
         println!("SKIP: No GPU available");
         return;
     };
@@ -770,19 +770,78 @@ fn test_iqp_fwt_zero_parameters_identity() {
 
             let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
             assert_eq!(shape_slice[1], (1 << num_qubits) as i64);
-
             println!(
                 "  IQP zero params {} qubits: verified shape - PASS",
                 num_qubits
             );
 
-            if let Some(deleter) = managed.deleter {
-                deleter(dlpack_ptr);
-            }
+            common::take_deleter_and_delete(dlpack_ptr);
         }
     }
 
     println!("PASS: IQP FWT zero parameters test completed");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_iqp_fwt_reference_batch_hard_cases() {
+    println!("Testing IQP batch outputs against hard reference cases...");
+
+    let Some(engine) = common::qdp_engine() else {
+        println!("SKIP: No GPU available");
+        return;
+    };
+
+    let num_qubits = 4;
+    let sample_size = iqp_full_data_len(num_qubits);
+    let batch_size = 3;
+    let batch_data: Vec<f64> = vec![
+        -0.3 * std::f64::consts::PI,
+        -0.2 * std::f64::consts::PI,
+        -0.1 * std::f64::consts::PI,
+        0.0,
+        0.1 * std::f64::consts::PI,
+        0.2 * std::f64::consts::PI,
+        0.3 * std::f64::consts::PI,
+        0.4 * std::f64::consts::PI,
+        0.5 * std::f64::consts::PI,
+        0.6 * std::f64::consts::PI,
+        -0.25 * std::f64::consts::PI,
+        -0.15 * std::f64::consts::PI,
+        -0.05 * std::f64::consts::PI,
+        0.05 * std::f64::consts::PI,
+        0.15 * std::f64::consts::PI,
+        0.25 * std::f64::consts::PI,
+        0.35 * std::f64::consts::PI,
+        0.45 * std::f64::consts::PI,
+        0.55 * std::f64::consts::PI,
+        0.65 * std::f64::consts::PI,
+        0.75 * std::f64::consts::PI,
+        0.5,
+        0.75,
+        1.0,
+        1.25,
+        1.5,
+        1.75,
+        2.0,
+        2.25,
+        2.5,
+    ];
+
+    let result = engine.encode_batch(&batch_data, batch_size, sample_size, num_qubits, "iqp");
+    let dlpack_ptr = result.expect("IQP batch encoding should succeed");
+    assert!(!dlpack_ptr.is_null());
+
+    unsafe {
+        let managed = &*dlpack_ptr;
+        let tensor = &managed.dl_tensor;
+        let shape_slice = std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize);
+        assert_eq!(shape_slice[0], batch_size as i64);
+        assert_eq!(shape_slice[1], (1 << num_qubits) as i64);
+        common::take_deleter_and_delete(dlpack_ptr);
+    }
+
+    println!("PASS: IQP batch hard-case reference test completed");
 }
 
 // =============================================================================

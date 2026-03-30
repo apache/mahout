@@ -50,6 +50,19 @@ def build_sample(
         mask = np.uint64(vector_len - 1)
         idx = np.uint64(seed) & mask
         return np.array([idx], dtype=np.float64)
+    if encoding_method in ("iqp", "iqp-z"):
+        # IQP encodings consume raw phase parameters.
+        if vector_len == 0:
+            return np.array([], dtype=np.float64)
+        scale = np.pi / max(vector_len, 1)
+        idx = np.arange(vector_len, dtype=np.uint64)
+        mixed = (idx + np.uint64(seed)) % np.uint64(max(vector_len, 1))
+        values = mixed.astype(np.float64) * scale
+        if encoding_method == "iqp":
+            # Spread the phases over a symmetric interval to exercise both
+            # constructive and destructive interference patterns.
+            return values - (0.5 * np.pi)
+        return values
     if encoding_method == "angle":
         # Angle encoding: one angle per qubit, scaled to [0, 2*pi)
         if vector_len == 0:
@@ -90,6 +103,11 @@ def generate_batch_data(
     if encoding_method == "basis":
         # Basis encoding: single index per sample
         return np.random.randint(0, dim, size=(n_samples, 1)).astype(np.float64)
+    if encoding_method in ("iqp", "iqp-z"):
+        # IQP inputs are phase parameters; keep them bounded and deterministic.
+        low = -np.pi if encoding_method == "iqp" else 0.0
+        high = np.pi
+        return np.random.uniform(low, high, size=(n_samples, dim)).astype(np.float64)
     if encoding_method == "angle":
         # Angle encoding: per-qubit angles in [0, 2*pi)
         return (np.random.rand(n_samples, dim) * (2.0 * np.pi)).astype(np.float64)
@@ -109,10 +127,10 @@ def normalize_batch(
         encoding_method: "amplitude", "angle", or "basis".
 
     Returns:
-        Normalized batch. For basis/angle encoding, returns the input unchanged.
+        Normalized batch. For basis/angle/IQP encodings, returns the input unchanged.
     """
-    if encoding_method in ("basis", "angle"):
-        # Basis/angle encodings don't need normalization
+    if encoding_method in ("basis", "angle", "iqp", "iqp-z"):
+        # Basis/angle/IQP encodings don't need normalization
         return batch
     # Amplitude encoding: normalize vectors
     norms = np.linalg.norm(batch, axis=1, keepdims=True)
@@ -133,8 +151,8 @@ def normalize_batch_torch(
     Returns:
         Normalized batch. For basis/angle encoding, returns the input unchanged.
     """
-    if encoding_method in ("basis", "angle"):
-        # Basis/angle encodings don't need normalization
+    if encoding_method in ("basis", "angle", "iqp", "iqp-z"):
+        # Basis/angle/IQP encodings don't need normalization
         return batch
     # Amplitude encoding: normalize vectors
     norms = torch.norm(batch, dim=1, keepdim=True)

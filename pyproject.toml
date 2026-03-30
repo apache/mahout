@@ -96,11 +96,14 @@ exclude = [
 # _qdp: compiled Rust extension (no type info for members)
 # api: benchmark module loaded via sys.path in tests
 # qumat_qdp: optional QDP Python package (editable install from qdp/qdp-python)
+# benchmark: benchmark helpers loaded via sys.path in tests and scripts
 allowed-unresolved-imports = [
     "_qdp",
     "_qdp.*",
     "api",
     "api.*",
+    "benchmark",
+    "benchmark.*",
     "qumat_qdp",
     "qumat_qdp.*",
 ]
