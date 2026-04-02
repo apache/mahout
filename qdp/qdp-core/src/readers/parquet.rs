@@ -580,3 +580,431 @@ impl StreamingDataReader for ParquetStreamingReader {
         self.total_rows
     }
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use arrow::array::{
+        ArrayRef, FixedSizeListBuilder, Float64Builder, Int32Array, ListBuilder, RecordBatch,
+    };
+    use arrow::datatypes::{DataType, Field, Schema};
+    use parquet::arrow::ArrowWriter;
+    use std::fs;
+    use std::sync::Arc;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    static TEST_FILE_COUNTER: AtomicUsize = AtomicUsize::new(0);
+
+    struct TempTestFile {
+        path: std::path::PathBuf,
+    }
+
+    impl TempTestFile {
+        fn new() -> Self {
+            let count = TEST_FILE_COUNTER.fetch_add(1, Ordering::SeqCst);
+            let path = std::env::temp_dir().join(format!(
+                "mahout_test_parquet_{}_{}.parquet",
+                std::process::id(),
+                count
+            ));
+            Self { path }
+        }
+
+        fn path(&self) -> &std::path::Path {
+            &self.path
+        }
+    }
+
+    impl Drop for TempTestFile {
+        fn drop(&mut self) {
+            let _ = fs::remove_file(&self.path);
+        }
+    }
+
+    fn write_test_parquet(schema: Arc<Schema>, arrays: Vec<ArrayRef>) -> TempTestFile {
+        let file = TempTestFile::new();
+        let batch = RecordBatch::try_new(schema.clone(), arrays).unwrap();
+        let os_file = fs::File::create(file.path()).unwrap();
+        let mut writer = ArrowWriter::try_new(os_file, schema, None).unwrap();
+        writer.write(&batch).unwrap();
+        writer.close().unwrap();
+        file
+    }
+
+    #[test]
+    fn test_parquet_reader_missing_file() {
+        let path = std::env::temp_dir().join(format!("missing_{}.parquet", std::process::id()));
+        let result = ParquetReader::new(&path, None, NullHandling::FillZero);
+        assert!(matches!(result, Err(MahoutError::Io(_))));
+    }
+
+    #[test]
+    fn test_parquet_reader_bad_schema() {
+        let schema = Arc::new(Schema::new(vec![Field::new("bad", DataType::Int32, false)]));
+        let array = Arc::new(Int32Array::from(vec![1, 2, 3])) as ArrayRef;
+        let file = write_test_parquet(schema, vec![array]);
+
+        let result = ParquetReader::new(file.path(), None, NullHandling::FillZero);
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("Expected List<Float64> or FixedSizeList<Float64> column"));
+    }
+
+    #[test]
+    fn test_parquet_reader_too_many_columns() {
+        let schema = Arc::new(Schema::new(vec![
+            Field::new("col1", DataType::Int32, false),
+            Field::new("col2", DataType::Int32, false),
+        ]));
+        let arr1 = Arc::new(Int32Array::from(vec![1, 2, 3])) as ArrayRef;
+        let arr2 = Arc::new(Int32Array::from(vec![1, 2, 3])) as ArrayRef;
+        let file = write_test_parquet(schema, vec![arr1, arr2]);
+
+        let result = ParquetReader::new(file.path(), None, NullHandling::FillZero);
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("Expected exactly one column"));
+    }
+
+    #[test]
+    fn test_parquet_reader_bad_list_type() {
+        let item_field = Arc::new(Field::new("item", DataType::Int32, true));
+        let list_field = Field::new("list_col", DataType::List(item_field.clone()), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = arrow::array::ListBuilder::new(arrow::array::Int32Builder::new());
+        builder.values().append_value(1);
+        builder.append(true);
+        let array = Arc::new(builder.finish()) as ArrayRef;
+
+        let file = write_test_parquet(schema, vec![array]);
+
+        let result = ParquetReader::new(file.path(), None, NullHandling::FillZero);
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("Expected List<Float64> column"));
+    }
+
+    #[test]
+    fn test_parquet_reader_list_f64() {
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::List(item_field.clone()), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = ListBuilder::new(Float64Builder::new());
+        builder.values().append_slice(&[1.0, 2.0]);
+        builder.append(true);
+        builder.values().append_slice(&[3.0, 4.0]);
+        builder.append(true);
+        let array = Arc::new(builder.finish()) as ArrayRef;
+
+        let file = write_test_parquet(schema, vec![array]);
+
+        let mut reader = ParquetReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        let (data, num_samples, sample_size) = reader.read_batch().unwrap();
+        assert_eq!(data, vec![1.0, 2.0, 3.0, 4.0]);
+        assert_eq!(num_samples, 2);
+        assert_eq!(sample_size, 2);
+        assert_eq!(reader.get_sample_size(), Some(2));
+        assert_eq!(reader.get_num_samples(), Some(2));
+    }
+
+    #[test]
+    fn test_parquet_reader_fixed_size_list_f64() {
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::FixedSizeList(item_field.clone(), 2), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = FixedSizeListBuilder::new(Float64Builder::new(), 2);
+        builder.values().append_slice(&[5.0, 6.0]);
+        builder.append(true);
+        builder.values().append_slice(&[7.0, 8.0]);
+        builder.append(true);
+        let array = Arc::new(builder.finish()) as ArrayRef;
+
+        let file = write_test_parquet(schema, vec![array]);
+
+        let mut reader = ParquetReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        let (data, num_samples, sample_size) = reader.read_batch().unwrap();
+        assert_eq!(data, vec![5.0, 6.0, 7.0, 8.0]);
+        assert_eq!(num_samples, 2);
+        assert_eq!(sample_size, 2);
+    }
+
+    #[test]
+    fn test_parquet_reader_inconsistent_sample_sizes() {
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::List(item_field.clone()), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = ListBuilder::new(Float64Builder::new());
+        builder.values().append_slice(&[1.0, 2.0]);
+        builder.append(true);
+        builder.values().append_slice(&[3.0, 4.0, 5.0]); // Inconsistent!
+        builder.append(true);
+        let array = Arc::new(builder.finish()) as ArrayRef;
+
+        let file = write_test_parquet(schema, vec![array]);
+
+        let mut reader = ParquetReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        let result = reader.read_batch();
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("Inconsistent sample sizes: expected 2, got 3"));
+    }
+
+    #[test]
+    fn test_parquet_streaming_reader_scalar_f64() {
+        let schema = Arc::new(Schema::new(vec![Field::new(
+            "data",
+            DataType::Float64,
+            false,
+        )]));
+        let mut builder = Float64Builder::new();
+        builder.append_slice(&[10.0, 20.0, 30.0]);
+        let array = Arc::new(builder.finish()) as ArrayRef;
+        let file = write_test_parquet(schema, vec![array]);
+
+        let mut streaming_reader =
+            ParquetStreamingReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        assert_eq!(streaming_reader.total_rows(), 3);
+        let mut buffer = vec![0.0; 2];
+        let written1 = streaming_reader.read_chunk(&mut buffer).unwrap();
+        assert_eq!(written1, 2);
+        assert_eq!(buffer, vec![10.0, 20.0]);
+
+        let mut buffer2 = vec![0.0; 2];
+        let written2 = streaming_reader.read_chunk(&mut buffer2).unwrap();
+        assert_eq!(written2, 1);
+        assert_eq!(buffer2[..1], vec![30.0]);
+
+        let written3 = streaming_reader.read_chunk(&mut buffer2).unwrap();
+        assert_eq!(written3, 0);
+    }
+
+    #[test]
+    fn test_parquet_streaming_reader_list_f64_chunked() {
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::List(item_field.clone()), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = ListBuilder::new(Float64Builder::new());
+        builder.values().append_slice(&[1.0, 2.0]);
+        builder.append(true);
+        builder.values().append_slice(&[3.0, 4.0]);
+        builder.append(true);
+        builder.values().append_slice(&[5.0, 6.0]);
+        builder.append(true);
+        let array = Arc::new(builder.finish()) as ArrayRef;
+
+        let file = write_test_parquet(schema, vec![array]);
+
+        let mut reader =
+            ParquetStreamingReader::new(file.path(), Some(1), NullHandling::FillZero).unwrap();
+        let (data, num_samples, sample_size) = reader.read_batch().unwrap();
+        assert_eq!(data, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+        assert_eq!(num_samples, 3);
+        assert_eq!(sample_size, 2);
+    }
+
+    #[test]
+    fn test_parquet_reader_empty_data() {
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::List(item_field.clone()), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = ListBuilder::new(Float64Builder::new());
+        let array = Arc::new(builder.finish()) as ArrayRef;
+        let file = write_test_parquet(schema, vec![array]);
+
+        let mut reader = ParquetReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        let result = reader.read_batch();
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("no data") || err_msg.contains("no columns"));
+    }
+
+    #[test]
+    fn test_parquet_streaming_reader_empty_data() {
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::List(item_field.clone()), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = ListBuilder::new(Float64Builder::new());
+        let array = Arc::new(builder.finish()) as ArrayRef;
+        let file = write_test_parquet(schema, vec![array]);
+
+        let mut reader =
+            ParquetStreamingReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        let result = reader.read_batch();
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("no data") || err_msg.contains("No data"));
+    }
+
+    // --- NullHandling tests ---
+
+    fn write_list_parquet_with_nulls() -> TempTestFile {
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::List(item_field.clone()), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = ListBuilder::new(Float64Builder::new());
+        builder.values().append_value(1.0);
+        builder.values().append_null();
+        builder.append(true);
+        builder.values().append_value(3.0);
+        builder.values().append_value(4.0);
+        builder.append(true);
+        let array = Arc::new(builder.finish()) as ArrayRef;
+
+        write_test_parquet(schema, vec![array])
+    }
+
+    fn write_fixed_size_list_parquet_with_nulls() -> TempTestFile {
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::FixedSizeList(item_field.clone(), 2), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = FixedSizeListBuilder::new(Float64Builder::new(), 2);
+        builder.values().append_value(1.0);
+        builder.values().append_null();
+        builder.append(true);
+        builder.values().append_value(3.0);
+        builder.values().append_value(4.0);
+        builder.append(true);
+        let array = Arc::new(builder.finish()) as ArrayRef;
+
+        write_test_parquet(schema, vec![array])
+    }
+
+    #[test]
+    fn test_parquet_reader_list_f64_null_fill_zero() {
+        let file = write_list_parquet_with_nulls();
+        let mut reader = ParquetReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        let (data, num_samples, sample_size) = reader.read_batch().unwrap();
+        assert_eq!(data, vec![1.0, 0.0, 3.0, 4.0]);
+        assert_eq!(num_samples, 2);
+        assert_eq!(sample_size, 2);
+    }
+
+    #[test]
+    fn test_parquet_reader_list_f64_null_reject() {
+        let file = write_list_parquet_with_nulls();
+        let mut reader = ParquetReader::new(file.path(), None, NullHandling::Reject).unwrap();
+        let result = reader.read_batch();
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("Null value"));
+    }
+
+    #[test]
+    fn test_parquet_reader_fixed_size_list_null_fill_zero() {
+        let file = write_fixed_size_list_parquet_with_nulls();
+        let mut reader = ParquetReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        let (data, num_samples, sample_size) = reader.read_batch().unwrap();
+        assert_eq!(data, vec![1.0, 0.0, 3.0, 4.0]);
+        assert_eq!(num_samples, 2);
+        assert_eq!(sample_size, 2);
+    }
+
+    #[test]
+    fn test_parquet_reader_fixed_size_list_null_reject() {
+        let file = write_fixed_size_list_parquet_with_nulls();
+        let mut reader = ParquetReader::new(file.path(), None, NullHandling::Reject).unwrap();
+        let result = reader.read_batch();
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("Null value"));
+    }
+
+    // --- ParquetStreamingReader error-path tests ---
+
+    #[test]
+    fn test_parquet_streaming_reader_missing_file() {
+        let file = TempTestFile::new();
+        let path = file.path().to_path_buf();
+        drop(file);
+        let result = ParquetStreamingReader::new(&path, None, NullHandling::FillZero);
+        assert!(matches!(result, Err(MahoutError::Io(_))));
+    }
+
+    #[test]
+    fn test_parquet_streaming_reader_bad_schema() {
+        let schema = Arc::new(Schema::new(vec![Field::new("bad", DataType::Int32, false)]));
+        let array = Arc::new(Int32Array::from(vec![1, 2, 3])) as ArrayRef;
+        let file = write_test_parquet(schema, vec![array]);
+
+        let result = ParquetStreamingReader::new(file.path(), None, NullHandling::FillZero);
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("Expected"));
+    }
+
+    #[test]
+    fn test_parquet_streaming_reader_too_many_columns() {
+        let schema = Arc::new(Schema::new(vec![
+            Field::new("col1", DataType::Int32, false),
+            Field::new("col2", DataType::Int32, false),
+        ]));
+        let arr1 = Arc::new(Int32Array::from(vec![1, 2, 3])) as ArrayRef;
+        let arr2 = Arc::new(Int32Array::from(vec![1, 2, 3])) as ArrayRef;
+        let file = write_test_parquet(schema, vec![arr1, arr2]);
+
+        let result = ParquetStreamingReader::new(file.path(), None, NullHandling::FillZero);
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("Expected exactly one column"));
+    }
+
+    #[test]
+    fn test_parquet_streaming_reader_bad_list_type() {
+        let item_field = Arc::new(Field::new("item", DataType::Int32, true));
+        let list_field = Field::new("list_col", DataType::List(item_field.clone()), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = arrow::array::ListBuilder::new(arrow::array::Int32Builder::new());
+        builder.values().append_value(1);
+        builder.append(true);
+        let array = Arc::new(builder.finish()) as ArrayRef;
+
+        let file = write_test_parquet(schema, vec![array]);
+
+        let result = ParquetStreamingReader::new(file.path(), None, NullHandling::FillZero);
+        assert!(result.is_err());
+        let err_msg = match result {
+            Err(e) => e.to_string(),
+            Ok(_) => panic!(),
+        };
+        assert!(err_msg.contains("Expected List<Float64>"));
+    }
+}
