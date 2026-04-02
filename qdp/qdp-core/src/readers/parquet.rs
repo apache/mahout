@@ -632,9 +632,7 @@ mod tests {
 
     #[test]
     fn test_parquet_reader_missing_file() {
-        let file = TempTestFile::new();
-        let path = file.path().to_path_buf();
-        drop(file); // ensure file does not exist
+        let path = std::env::temp_dir().join(format!("missing_{}.parquet", std::process::id()));
         let result = ParquetReader::new(&path, None, NullHandling::FillZero);
         assert!(matches!(result, Err(MahoutError::Io(_))));
     }
