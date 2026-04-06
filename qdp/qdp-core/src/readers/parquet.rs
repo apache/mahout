@@ -540,13 +540,11 @@ impl StreamingDataReader for ParquetStreamingReader {
                     if self.sample_size.is_none() {
                         self.sample_size = Some(current_sample_size);
                         limit = calc_limit(current_sample_size);
-                    } else if let Some(expected_size) = self.sample_size {
-                        if current_sample_size != expected_size {
-                            return Err(MahoutError::InvalidInput(format!(
-                                "Inconsistent sample sizes: expected {}, got {}",
-                                expected_size, current_sample_size
-                            )));
-                        }
+                    } else if current_sample_size != self.sample_size.unwrap() {
+                        return Err(MahoutError::InvalidInput(format!(
+                            "Inconsistent sample sizes: expected {}, got {}",
+                            self.sample_size.unwrap(), current_sample_size
+                        )));
                     }
 
                     let available = batch_values.len();
