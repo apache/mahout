@@ -86,14 +86,6 @@ const config: Config = {
     ],
   ],
 
-  // KaTeX stylesheet for math rendering
-  stylesheets: [
-    {
-      href: '/css/katex.min.css',
-      type: 'text/css',
-    },
-  ],
-
   plugins: [
     [
       '@docusaurus/plugin-client-redirects',

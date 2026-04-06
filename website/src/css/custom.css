@@ -5,6 +5,15 @@
  * Primary brand color: #00bcd4 (Mahout Cyan)
  */
 
+@import '@fontsource/maven-pro/400.css';
+@import '@fontsource/maven-pro/500.css';
+@import '@fontsource/maven-pro/600.css';
+@import '@fontsource/maven-pro/700.css';
+@import '@fontsource/mulish/400.css';
+@import '@fontsource/mulish/600.css';
+@import '@fontsource/mulish/700.css';
+@import 'katex/dist/katex.min.css';
+
 /* Light mode color palette */
 :root {
   /* Mahout primary cyan color */
@@ -21,7 +30,7 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 188, 212, 0.1);
 
   /* Typography */
-  --ifm-font-family-base: 'Muli', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+  --ifm-font-family-base: 'Mulish', -apple-system, BlinkMacSystemFont, 'Segoe UI',
     Roboto, 'Helvetica Neue', Arial, sans-serif;
   --ifm-heading-font-family: 'Maven Pro', var(--ifm-font-family-base);
 
@@ -41,10 +50,6 @@
   --ifm-color-primary-lightest: #a0e7f2;
   --docusaurus-highlighted-code-line-bg: rgba(77, 208, 225, 0.2);
 }
-
-/* Import Google Fonts */
-/* TODO: the fonts are not loading on prod site, we need to fix this */
-@import url('https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700&family=Muli:wght@400;600;700&display=swap');
 
 /* GitHub icon in navbar */
 .header-github-link::before {
