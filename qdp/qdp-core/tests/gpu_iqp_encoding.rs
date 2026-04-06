@@ -811,15 +811,15 @@ fn test_iqp_encoder_via_factory() {
 
     // Clean up
     unsafe {
-        if let Ok(ptr) = result1
-            && let Some(d) = (*ptr).deleter
-        {
-            d(ptr);
+        if let Ok(ptr) = result1 {
+            if let Some(d) = (*ptr).deleter {
+                d(ptr);
+            }
         }
-        if let Ok(ptr) = result2
-            && let Some(d) = (*ptr).deleter
-        {
-            d(ptr);
+        if let Ok(ptr) = result2 {
+            if let Some(d) = (*ptr).deleter {
+                d(ptr);
+            }
         }
     }
 
@@ -843,10 +843,10 @@ fn test_iqp_z_encoder_via_factory() {
     assert!(result.is_ok(), "'iqp-z' should work");
 
     unsafe {
-        if let Ok(ptr) = result
-            && let Some(d) = (*ptr).deleter
-        {
-            d(ptr);
+        if let Ok(ptr) = result {
+            if let Some(d) = (*ptr).deleter {
+                d(ptr);
+            }
         }
     }
 

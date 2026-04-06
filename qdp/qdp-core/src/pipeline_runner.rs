@@ -39,6 +39,7 @@ pub struct PipelineConfig {
     pub seed: Option<u64>,
     pub warmup_batches: usize,
     pub null_handling: NullHandling,
+    pub float32_pipeline: bool,
 }
 
 impl Default for PipelineConfig {
@@ -52,6 +53,7 @@ impl Default for PipelineConfig {
             seed: None,
             warmup_batches: 0,
             null_handling: NullHandling::FillZero,
+            float32_pipeline: false,
         }
     }
 }
@@ -64,8 +66,14 @@ pub struct PipelineRunResult {
     pub latency_ms_per_vector: f64,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub enum BatchData {
+    F32(Vec<f32>),
+    F64(Vec<f64>),
+}
+
 pub struct PrefetchedBatch {
-    pub data: Vec<f64>,
+    pub data: BatchData,
     pub batch_n: usize,
     pub sample_size: usize,
     pub num_qubits: usize,
@@ -103,7 +111,11 @@ impl BatchProducer for SyntheticProducer {
             return Ok(None);
         }
         fill_batch_inplace(&self.config, self.batch_index, self.vector_len, &mut self.batch_buf);
-        let data = self.batch_buf.clone();
+        let data = if self.config.float32_pipeline {
+            BatchData::F32(self.batch_buf.iter().map(|&v| v as f32).collect())
+        } else {
+            BatchData::F64(self.batch_buf.clone())
+        };
         self.batch_index += 1;
         Ok(Some(PrefetchedBatch {
             data,
@@ -141,8 +153,10 @@ impl BatchProducer for InMemoryProducer {
         self.batches_yielded += 1;
         let slice = self.data[start..end].to_vec();
         
+        let data = BatchData::F64(slice);
+        
         Ok(Some(PrefetchedBatch {
-            data: slice,
+            data,
             batch_n,
             sample_size: self.sample_size,
             num_qubits: self.num_qubits,
@@ -194,8 +208,10 @@ impl BatchProducer for StreamingProducer {
             self.buffer_cursor = 0;
         }
         
+        let data = BatchData::F64(slice);
+        
         Ok(Some(PrefetchedBatch {
-            data: slice,
+            data,
             batch_n,
             sample_size: self.sample_size,
             num_qubits: self.num_qubits,
@@ -424,13 +440,22 @@ impl PipelineIterator {
             Ok(Err(e)) => return Err(e),
             Err(_) => return Ok(None),
         };
-        let ptr = self.engine.encode_batch(
-            &batch.data,
-            batch.batch_n,
-            batch.sample_size,
-            batch.num_qubits,
-            &self.config.encoding_method,
-        )?;
+        let ptr = match batch.data {
+            BatchData::F64(ref buf) => self.engine.encode_batch(
+                buf,
+                batch.batch_n,
+                batch.sample_size,
+                batch.num_qubits,
+                &self.config.encoding_method,
+            )?,
+            BatchData::F32(ref buf) => self.engine.encode_batch_f32(
+                buf,
+                batch.batch_n,
+                batch.sample_size,
+                batch.num_qubits,
+                &self.config.encoding_method,
+            )?,
+        };
         Ok(Some(ptr))
     }
 }
@@ -552,13 +577,22 @@ pub fn run_throughput_pipeline(config: &PipelineConfig) -> Result<PipelineRunRes
     // Iteration loop
     let mut total_batches = 0;
     while let Ok(Ok(batch)) = rx.recv() {
-        let ptr = engine.encode_batch(
-            &batch.data,
-            batch.batch_n,
-            batch.sample_size,
-            batch.num_qubits,
-            &config.encoding_method,
-        )?;
+        let ptr = match batch.data {
+            BatchData::F64(ref buf) => engine.encode_batch(
+                buf,
+                batch.batch_n,
+                batch.sample_size,
+                batch.num_qubits,
+                &config.encoding_method,
+            )?,
+            BatchData::F32(ref buf) => engine.encode_batch_f32(
+                buf,
+                batch.batch_n,
+                batch.sample_size,
+                batch.num_qubits,
+                &config.encoding_method,
+            )?,
+        };
         unsafe { release_dlpack(ptr) };
         total_batches += 1;
     }
@@ -824,7 +858,7 @@ mod tests {
         let batch_from_producer = producer.produce().unwrap().unwrap();
         let expected_data = generate_batch(&config, 0, vector_len);
         
-        assert_eq!(batch_from_producer.data, expected_data);
+        assert_eq!(batch_from_producer.data, BatchData::F64(expected_data));
     }
 
     #[test]

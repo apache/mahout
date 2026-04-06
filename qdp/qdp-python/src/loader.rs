@@ -92,6 +92,7 @@ mod loader_impl {
         total_batches: usize,
         seed: Option<u64>,
         null_handling: NullHandling,
+        float32_pipeline: bool,
     ) -> PipelineConfig {
         PipelineConfig {
             device_id: 0,
@@ -102,6 +103,7 @@ mod loader_impl {
             seed,
             warmup_batches: 0,
             null_handling,
+            float32_pipeline,
         }
     }
 

@@ -208,7 +208,7 @@ impl TensorFlowReader {
                 "Big-endian platforms are not supported for TensorFlow tensor_content".into(),
             ));
         }
-        if !bytes.len().is_multiple_of(8) {
+        if bytes.len() % 8 != 0 {
             return Err(MahoutError::InvalidInput(format!(
                 "tensor_content length {} is not a multiple of 8",
                 bytes.len()

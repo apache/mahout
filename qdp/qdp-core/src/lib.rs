@@ -222,6 +222,31 @@ impl QdpEngine {
         Ok(dlpack_ptr)
     }
 
+    /// Encode multiple samples in a single fused kernel (most efficient) using f32 host input.
+    pub fn encode_batch_f32(
+        &self,
+        batch_data: &[f32],
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> Result<*mut DLManagedTensor> {
+        crate::profile_scope!("Mahout::EncodeBatchF32");
+
+        let encoder = get_encoder(encoding_method)?;
+        let state_vector = encoder.encode_batch_f32(
+            &self.device,
+            batch_data,
+            num_samples,
+            sample_size,
+            num_qubits,
+        )?;
+
+        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
+        let dlpack_ptr = state_vector.to_dlpack();
+        Ok(dlpack_ptr)
+    }
+
     /// Run dual-stream pipeline for encoding (H2D + kernel overlap). Exposes gpu::pipeline::run_dual_stream_pipeline.
     /// Currently supports amplitude encoding (1D host_data). Does not return a tensor;
     /// use for throughput measurement or when the encoded state is not needed.

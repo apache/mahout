@@ -51,7 +51,9 @@ class LatencyResult:
 
 
 # Cached reference to Rust pipeline (avoids repeated import).
-_run_throughput_pipeline_py: object | None = None
+from typing import Any, Optional
+
+_run_throughput_pipeline_py: Any = None
 
 
 def _get_run_throughput_pipeline_py():
@@ -127,6 +129,7 @@ class QdpBenchmark:
             encoding_method=self._encoding_method,
             warmup_batches=self._warmup_batches,
             seed=None,
+            float32_pipeline=True,
         )
         return ThroughputResult(
             duration_sec=duration_sec, vectors_per_sec=vectors_per_sec
@@ -148,6 +151,7 @@ class QdpBenchmark:
             encoding_method=self._encoding_method,
             warmup_batches=self._warmup_batches,
             seed=None,
+            float32_pipeline=True,
         )
         return LatencyResult(
             duration_sec=duration_sec,

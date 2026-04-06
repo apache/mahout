@@ -134,6 +134,41 @@ pub trait QuantumEncoder: Send + Sync {
             self.name()
         )))
     }
+
+    /// Encode multiple samples in a single GPU allocation and kernel launch using f32 inputs.
+    fn encode_batch_f32(
+        &self,
+        _device: &Arc<CudaDevice>,
+        _batch_data: &[f32],
+        _num_samples: usize,
+        _sample_size: usize,
+        _num_qubits: usize,
+    ) -> Result<GpuStateVector> {
+        Err(MahoutError::NotImplemented(format!(
+            "encode_batch_f32 not implemented for {}",
+            self.name()
+        )))
+    }
+
+    /// Encode batch from existing GPU pointer (zero-copy) for f32 inputs.
+    ///
+    /// # Safety
+    /// Caller must ensure `input_batch_d` points to valid GPU memory (f32).
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_batch_from_gpu_ptr_f32(
+        &self,
+        _device: &Arc<CudaDevice>,
+        _input_batch_d: *const c_void,
+        _num_samples: usize,
+        _sample_size: usize,
+        _num_qubits: usize,
+        _stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        Err(MahoutError::NotImplemented(format!(
+            "encode_batch_from_gpu_ptr_f32 not supported for {}",
+            self.name()
+        )))
+    }
 }
 
 // Encoding implementations
