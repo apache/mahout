@@ -51,6 +51,8 @@ pub struct PipelineContext {
     events_copy_done: Vec<*mut c_void>,
 }
 
+
+
 #[cfg(target_os = "linux")]
 fn validate_event_slot(events: &[*mut c_void], slot: usize) -> Result<()> {
     if slot >= events.len() {
@@ -274,6 +276,7 @@ where
 /// `align_elements` must evenly divide the host data length and ensures chunks do not
 /// split logical records (e.g., per-sample data in batch encoding).
 #[cfg(target_os = "linux")]
+#[allow(clippy::manual_is_multiple_of)]
 pub fn run_dual_stream_pipeline_aligned<F>(
     device: &Arc<CudaDevice>,
     host_data: &[f64],
@@ -381,6 +384,7 @@ where
         ensure_device_memory_available(chunk_bytes, "pipeline chunk buffer allocation", None)?;
 
         // Allocate temporary device buffer for this chunk
+        #[allow(clippy::collapsible_if, clippy::manual_is_multiple_of)]
         let input_chunk_dev = unsafe { device.alloc::<f64>(chunk.len()) }.map_err(|e| {
             map_allocation_error(chunk_bytes, "pipeline chunk buffer allocation", None, e)
         })?;
@@ -403,6 +407,7 @@ where
 
             // Record copy start if overlap tracking enabled
             // Note: Overlap tracking is optional observability - failures should not stop the pipeline
+            #[allow(clippy::collapsible_if)]
             if let Some(ref tracker) = overlap_tracker {
                 if let Err(e) = tracker.record_copy_start(&ctx.stream_copy, event_slot) {
                     log::warn!(
@@ -422,6 +427,7 @@ where
 
                 // Record copy end if overlap tracking enabled
                 // Note: Overlap tracking is optional observability - failures should not stop the pipeline
+                #[allow(clippy::collapsible_if)]
                 if let Some(ref tracker) = overlap_tracker {
                     if let Err(e) = tracker.record_copy_end(&ctx.stream_copy, event_slot) {
                         log::warn!(
@@ -456,6 +462,7 @@ where
 
             // Record compute start if overlap tracking enabled
             // Note: Overlap tracking is optional observability - failures should not stop the pipeline
+            #[allow(clippy::collapsible_if)]
             if let Some(ref tracker) = overlap_tracker {
                 if let Err(e) = tracker.record_compute_start(&ctx.stream_compute, event_slot) {
                     log::warn!(
@@ -470,6 +477,7 @@ where
 
             // Record compute end if overlap tracking enabled
             // Note: Overlap tracking is optional observability - failures should not stop the pipeline
+            #[allow(clippy::collapsible_if)]
             if let Some(ref tracker) = overlap_tracker {
                 if let Err(e) = tracker.record_compute_end(&ctx.stream_compute, event_slot) {
                     log::warn!(
@@ -489,6 +497,7 @@ where
         // Note: log_overlap now handles both success and failure cases internally,
         // logging at appropriate levels (INFO for visibility, DEBUG for details).
         #[allow(clippy::manual_is_multiple_of)]
+        #[allow(clippy::collapsible_if)]
         if let Some(ref tracker) = overlap_tracker {
             if chunk_idx % 10 == 0 || chunk_idx == 0 {
                 // Only log every Nth chunk to avoid excessive logging

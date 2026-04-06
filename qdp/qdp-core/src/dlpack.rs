@@ -252,6 +252,7 @@ impl GpuStateVector {
     /// # Safety
     /// Freed by DLPack deleter when PyTorch releases tensor.
     /// Do not free manually.
+    #[allow(clippy::manual_is_multiple_of)]
     pub fn to_dlpack(&self) -> *mut DLManagedTensor {
         // Always return 2D tensor: Batch [num_samples, state_len], Single [1, state_len]
         let (shape, strides) = if let Some(num_samples) = self.num_samples {

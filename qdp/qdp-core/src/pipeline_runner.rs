@@ -505,6 +505,7 @@ fn fill_sample(seed: u64, out: &mut [f64], encoding_method: &str, num_qubits: us
 }
 
 /// Generate one batch (batch_size * vector_len elements, or batch_size * 1 for basis).
+#[cfg(test)]
 fn generate_batch(config: &PipelineConfig, batch_idx: usize, vector_len: usize) -> Vec<f64> {
     let mut batch = vec![0.0f64; config.batch_size * vector_len];
     fill_batch_inplace(config, batch_idx, vector_len, &mut batch);
