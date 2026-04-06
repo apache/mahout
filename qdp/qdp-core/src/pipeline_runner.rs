@@ -145,16 +145,16 @@ impl BatchProducer for InMemoryProducer {
         if remaining == 0 {
             return Ok(None);
         }
-        
+
         let batch_n = remaining.min(self.batch_size);
         let start = self.cursor;
         let end = start + batch_n * self.sample_size;
         self.cursor = end;
         self.batches_yielded += 1;
         let slice = self.data[start..end].to_vec();
-        
+
         let data = BatchData::F64(slice);
-        
+
         Ok(Some(PrefetchedBatch {
             data,
             batch_n,
@@ -191,25 +191,25 @@ impl BatchProducer for StreamingProducer {
         }
         let available = self.buffer.len() - self.buffer_cursor;
         let available_samples = available / self.sample_size;
-        
+
         if available_samples == 0 {
             return Ok(None);
         }
-        
+
         let batch_n = available_samples.min(self.batch_size);
         let start = self.buffer_cursor;
         let end = start + batch_n * self.sample_size;
         self.buffer_cursor = end;
         self.batches_yielded += 1;
         let slice = self.buffer[start..end].to_vec();
-        
+
         if self.buffer_cursor >= self.buffer.len() / BUFFER_COMPACT_DENOM {
             self.buffer.drain(..self.buffer_cursor);
             self.buffer_cursor = 0;
         }
-        
+
         let data = BatchData::F64(slice);
-        
+
         Ok(Some(PrefetchedBatch {
             data,
             batch_n,
@@ -571,7 +571,7 @@ pub fn run_throughput_pipeline(config: &PipelineConfig) -> Result<PipelineRunRes
     engine.synchronize()?;
 
     let start = Instant::now();
-    
+
     let producer = SyntheticProducer::new(config.clone(), vector_len);
     let (rx, producer_handle) = spawn_producer(producer);
 
@@ -836,7 +836,7 @@ mod tests {
         };
         let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
         let mut producer = SyntheticProducer::new(config, vector_len);
-        
+
         let mut count = 0;
         while let Ok(Some(_)) = producer.produce() {
             count += 1;
@@ -855,10 +855,10 @@ mod tests {
         };
         let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
         let mut producer = SyntheticProducer::new(config.clone(), vector_len);
-        
+
         let batch_from_producer = producer.produce().unwrap().unwrap();
         let expected_data = generate_batch(&config, 0, vector_len);
-        
+
         assert_eq!(batch_from_producer.data, BatchData::F64(expected_data));
     }
 
@@ -872,7 +872,7 @@ mod tests {
         };
         let sample_size = 4; // 2^2
         let data = vec![0.0f64; 16]; // 16 elements = 4 samples
-        
+
         let mut producer = InMemoryProducer {
             data,
             cursor: 0,
@@ -882,11 +882,11 @@ mod tests {
             batches_yielded: 0,
             batch_limit: 10,
         };
-        
+
         // 4 samples total, batch size 5 -> should return 1 batch with 4 samples
         let batch1 = producer.produce().unwrap().unwrap();
         assert_eq!(batch1.batch_n, 4);
-        
+
         let batch2 = producer.produce().unwrap();
         assert!(batch2.is_none());
     }
@@ -899,14 +899,14 @@ mod tests {
         };
         let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
         let producer = SyntheticProducer::new(config, vector_len);
-        
+
         let (rx, handle) = spawn_producer(producer);
-        
+
         // We expect 3 batches
         assert!(rx.recv().unwrap().is_ok());
         assert!(rx.recv().unwrap().is_ok());
         assert!(rx.recv().unwrap().is_ok());
-        
+
         // Iterator should be exhausted, channel should be closed down successfully
         assert!(rx.recv().is_err());
         handle.join().unwrap();
@@ -920,15 +920,15 @@ mod tests {
         };
         let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
         let producer = SyntheticProducer::new(config, vector_len);
-        
+
         let (rx, handle) = spawn_producer(producer);
-        
+
         // Let it start
         assert!(rx.recv().unwrap().is_ok());
-        
+
         // Drop rx, closing the channel
         drop(rx);
-        
+
         // Thread should cleanly exit instead of panicking
         handle.join().unwrap();
     }
