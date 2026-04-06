@@ -45,6 +45,7 @@ pub fn create_test_data_f32(size: usize) -> Vec<f32> {
 /// Writes a FixedSizeList<Float64, sample_size> Parquet file for streaming encoder tests.
 /// Each `sample_size` consecutive values in `data` form one row.
 #[allow(dead_code)]
+#[allow(clippy::manual_is_multiple_of)]
 pub fn write_fixed_size_list_parquet(path: &str, data: &[f64], sample_size: usize) {
     assert!(sample_size > 0, "sample_size must be > 0");
     assert!(

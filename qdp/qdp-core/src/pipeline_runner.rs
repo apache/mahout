@@ -110,7 +110,12 @@ impl BatchProducer for SyntheticProducer {
         if self.batch_index >= self.total_batches {
             return Ok(None);
         }
-        fill_batch_inplace(&self.config, self.batch_index, self.vector_len, &mut self.batch_buf);
+        fill_batch_inplace(
+            &self.config,
+            self.batch_index,
+            self.vector_len,
+            &mut self.batch_buf,
+        );
         let data = if self.config.float32_pipeline {
             BatchData::F32(self.batch_buf.iter().map(|&v| v as f32).collect())
         } else {
@@ -187,7 +192,8 @@ impl BatchProducer for StreamingProducer {
             if written == 0 {
                 break;
             }
-            self.buffer.extend_from_slice(&self.read_chunk_scratch[..written]);
+            self.buffer
+                .extend_from_slice(&self.read_chunk_scratch[..written]);
         }
         let available = self.buffer.len() - self.buffer_cursor;
         let available_samples = available / self.sample_size;

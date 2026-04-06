@@ -473,7 +473,9 @@ impl QuantumEncoder for AmplitudeEncoder {
         // We will just do a basic length check if f32 validation is missing.
         let state_len = 1 << num_qubits;
         if batch_data.len() != num_samples * sample_size {
-            return Err(MahoutError::InvalidInput("batch_data length mismatch".into()));
+            return Err(MahoutError::InvalidInput(
+                "batch_data length mismatch".into(),
+            ));
         }
 
         let batch_state_vector = {

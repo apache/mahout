@@ -811,11 +811,13 @@ fn test_iqp_encoder_via_factory() {
 
     // Clean up
     unsafe {
+        #[allow(clippy::collapsible_if)]
         if let Ok(ptr) = result1 {
             if let Some(d) = (*ptr).deleter {
                 d(ptr);
             }
         }
+        #[allow(clippy::collapsible_if)]
         if let Ok(ptr) = result2 {
             if let Some(d) = (*ptr).deleter {
                 d(ptr);
@@ -843,6 +845,7 @@ fn test_iqp_z_encoder_via_factory() {
     assert!(result.is_ok(), "'iqp-z' should work");
 
     unsafe {
+        #[allow(clippy::collapsible_if)]
         if let Ok(ptr) = result {
             if let Some(d) = (*ptr).deleter {
                 d(ptr);

@@ -51,8 +51,6 @@ pub struct PipelineContext {
     events_copy_done: Vec<*mut c_void>,
 }
 
-
-
 #[cfg(target_os = "linux")]
 fn validate_event_slot(events: &[*mut c_void], slot: usize) -> Result<()> {
     if slot >= events.len() {
@@ -502,20 +500,20 @@ where
             if chunk_idx % 10 == 0 || chunk_idx == 0 {
                 // Only log every Nth chunk to avoid excessive logging
                 // Note: log_overlap waits for events to complete, which may take time
-            // If events fail (e.g., invalid resource handle), log_overlap will log
-            // at INFO level so it's visible in both debug and info modes
-            if let Err(e) = tracker.log_overlap(chunk_idx) {
-                // log_overlap already logged the error at INFO level
-                // We only need to log additional details at DEBUG level if needed
-                if log::log_enabled!(log::Level::Debug) {
-                    log::debug!(
-                        "Overlap tracking failed for chunk {}: {}. Pipeline continues normally.",
-                        chunk_idx,
-                        e
-                    );
+                // If events fail (e.g., invalid resource handle), log_overlap will log
+                // at INFO level so it's visible in both debug and info modes
+                if let Err(e) = tracker.log_overlap(chunk_idx) {
+                    // log_overlap already logged the error at INFO level
+                    // We only need to log additional details at DEBUG level if needed
+                    if log::log_enabled!(log::Level::Debug) {
+                        log::debug!(
+                            "Overlap tracking failed for chunk {}: {}. Pipeline continues normally.",
+                            chunk_idx,
+                            e
+                        );
+                    }
+                    // Don't fail the pipeline - overlap tracking is optional observability
                 }
-                // Don't fail the pipeline - overlap tracking is optional observability
-            }
             }
         }
 

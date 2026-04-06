@@ -84,6 +84,7 @@ mod loader_impl {
     }
 
     /// Build PipelineConfig from Python args. device_id is 0 (engine does not expose it); iterator uses engine clone with correct device.
+    #[allow(clippy::too_many_arguments)]
     pub fn config_from_args(
         _engine: &CoreEngine,
         batch_size: usize,
