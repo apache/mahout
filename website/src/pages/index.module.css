@@ -8,7 +8,7 @@
   position: relative;
   height: 500px;
   overflow: hidden;
-  background: url('https://www.transparenttextures.com/patterns/cubes.png'),
+  background: url('/img/cubes.png'),
     linear-gradient(45deg, #00bcd4 0%, #00838f 100%);
   background-color: #00bcd4;
   background-repeat: repeat;
