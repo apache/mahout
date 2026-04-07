@@ -155,18 +155,19 @@ def angle_encode(
     cos_vals = torch.cos(data)
     sin_vals = torch.sin(data)
 
-    # Bit-pattern matrix: (state_dim, num_qubits)
-    # bits[i, k] = (i >> k) & 1
+    # Bit-pattern mask: (state_dim, num_qubits), bits[i, k] = bool((i >> k) & 1)
     indices = torch.arange(state_dim, device=data.device, dtype=torch.long)
     bits = (
         (indices.unsqueeze(1) >> torch.arange(num_qubits, device=data.device)) & 1
-    ).to(data.dtype)
+    ).bool()
 
     # For each state index: amplitude = prod_k (sin if bit else cos)
     # Shape: (batch, state_dim, num_qubits) via broadcasting
-    trig = bits.unsqueeze(0) * sin_vals.unsqueeze(1) + (
-        1 - bits.unsqueeze(0)
-    ) * cos_vals.unsqueeze(1)
+    trig = torch.where(
+        bits.unsqueeze(0),
+        sin_vals.unsqueeze(1),
+        cos_vals.unsqueeze(1),
+    )
 
     # Product over qubits → (batch, state_dim)
     amplitudes = trig.prod(dim=2)
