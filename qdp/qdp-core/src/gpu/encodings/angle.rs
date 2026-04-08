@@ -402,6 +402,15 @@ impl QuantumEncoder for AngleEncoder {
 
 impl AngleEncoder {
     #[cfg(target_os = "linux")]
+    /// Encodes `input_len` angle values from a device-resident `f32` buffer into a GPU state
+    /// vector, using the provided CUDA stream for all launched work.
+    ///
+    /// # Safety
+    /// The caller must ensure that `input_d` points to at least `input_len` contiguous `f32`
+    /// values in GPU-accessible memory and remains valid for the duration of this call.
+    /// The caller must also ensure that `stream` is either null or a valid CUDA stream handle
+    /// associated with `device`, and that no concurrent use of these raw pointers violates Rust's
+    /// aliasing or lifetime rules.
     pub unsafe fn encode_from_gpu_ptr_f32_with_stream(
         device: &Arc<CudaDevice>,
         input_d: *const f32,
