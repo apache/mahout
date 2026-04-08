@@ -1,0 +1,33 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH="/root/.cargo/bin:/root/.local/bin:${PATH}"
+ENV UV_LINK_MODE=copy
+
+WORKDIR /workspace/mahout
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    ca-certificates \
+    clang \
+    curl \
+    git \
+    pkg-config \
+    python3 \
+    python3-dev \
+    python3-pip \
+    python3-venv \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+COPY . /workspace/mahout
+
+RUN uv sync --group dev
+RUN unset CONDA_PREFIX && uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml
+
+COPY dev/qdp-amd-smoke.sh /usr/local/bin/qdp-amd-smoke
+RUN chmod +x /usr/local/bin/qdp-amd-smoke
+
+CMD ["/usr/local/bin/qdp-amd-smoke"]
