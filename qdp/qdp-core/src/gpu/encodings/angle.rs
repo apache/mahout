@@ -402,6 +402,65 @@ impl QuantumEncoder for AngleEncoder {
 
 impl AngleEncoder {
     #[cfg(target_os = "linux")]
+    pub unsafe fn encode_from_gpu_ptr_f32_with_stream(
+        device: &Arc<CudaDevice>,
+        input_d: *const f32,
+        input_len: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        if input_len == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Input data cannot be empty".into(),
+            ));
+        }
+        if input_len != num_qubits {
+            return Err(MahoutError::InvalidInput(format!(
+                "Angle encoding expects {} values (one per qubit), got {}",
+                num_qubits, input_len
+            )));
+        }
+
+        let state_len = 1 << num_qubits;
+        let state_vector = {
+            crate::profile_scope!("GPU::Alloc");
+            GpuStateVector::new(device, num_qubits, Precision::Float32)?
+        };
+        let state_ptr = state_vector.ptr_f32().ok_or_else(|| {
+            MahoutError::InvalidInput(
+                "State vector precision mismatch (expected float32 buffer)".to_string(),
+            )
+        })?;
+
+        {
+            crate::profile_scope!("GPU::KernelLaunch");
+            let ret = unsafe {
+                qdp_kernels::launch_angle_encode_f32(
+                    input_d,
+                    state_ptr as *mut c_void,
+                    state_len,
+                    num_qubits as u32,
+                    stream,
+                )
+            };
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Angle encoding kernel (f32) failed with CUDA error code: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
+                )));
+            }
+        }
+
+        {
+            crate::profile_scope!("GPU::Synchronize");
+            crate::gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
+        }
+
+        Ok(state_vector)
+    }
+
+    #[cfg(target_os = "linux")]
     fn encode_batch_async_pipeline(
         device: &Arc<CudaDevice>,
         batch_data: &[f64],
