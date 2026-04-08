@@ -7,6 +7,7 @@ ENV UV_LINK_MODE=copy
 WORKDIR /workspace/mahout
 
 RUN apt-get update && apt-get install -y \
+    bash \
     build-essential \
     ca-certificates \
     clang \
@@ -27,7 +28,4 @@ COPY . /workspace/mahout
 RUN uv sync --group dev
 RUN unset CONDA_PREFIX && uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml
 
-COPY dev/qdp-amd-smoke.sh /usr/local/bin/qdp-amd-smoke
-RUN chmod +x /usr/local/bin/qdp-amd-smoke
-
-CMD ["/usr/local/bin/qdp-amd-smoke"]
+CMD ["/bin/bash"]
