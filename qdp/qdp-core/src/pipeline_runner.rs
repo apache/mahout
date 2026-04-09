@@ -274,14 +274,16 @@ impl BatchProducer for StreamingProducer {
     }
 }
 
-fn spawn_producer(
-    mut producer: impl BatchProducer,
-    prefetch_depth: usize,
-) -> Result<(
+type ProducerHandles = (
     std::sync::mpsc::Receiver<Result<PrefetchedBatch>>,
     std::sync::mpsc::Sender<BatchData>,
     std::thread::JoinHandle<()>,
-)> {
+);
+
+fn spawn_producer(
+    mut producer: impl BatchProducer,
+    prefetch_depth: usize,
+) -> Result<ProducerHandles> {
     // If prefetch_depth is 0, default to a minimum of 1 to ensure channel can hold at least 1 item
     let depth = prefetch_depth.max(1);
     let (tx, rx) = std::sync::mpsc::sync_channel(depth);
