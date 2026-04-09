@@ -469,13 +469,27 @@ impl QuantumEncoder for AmplitudeEncoder {
     ) -> Result<GpuStateVector> {
         crate::profile_scope!("AmplitudeEncoder::encode_batch_f32");
 
-        // Validate inputs. Wait, Preprocessor::validate_batch currently takes f64...
-        // We will just do a basic length check if f32 validation is missing.
         let state_len = 1 << num_qubits;
-        if batch_data.len() != num_samples * sample_size {
+
+        if sample_size == 0 {
             return Err(MahoutError::InvalidInput(
-                "batch_data length mismatch".into(),
+                "sample_size cannot be zero".into(),
             ));
+        }
+        if sample_size > state_len {
+            return Err(MahoutError::InvalidInput(format!(
+                "sample_size {} exceeds state vector length {} (2^{} qubits)",
+                sample_size, state_len, num_qubits
+            )));
+        }
+        if batch_data.len() != num_samples * sample_size {
+            return Err(MahoutError::InvalidInput(format!(
+                "batch_data length mismatch (expected {} * {} = {}, got {})",
+                num_samples,
+                sample_size,
+                num_samples * sample_size,
+                batch_data.len()
+            )));
         }
 
         let batch_state_vector = {

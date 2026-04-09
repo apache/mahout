@@ -31,6 +31,7 @@ Usage:
 
 from __future__ import annotations
 
+from typing import Any
 from dataclasses import dataclass
 
 
@@ -51,8 +52,6 @@ class LatencyResult:
 
 
 # Cached reference to Rust pipeline (avoids repeated import).
-from typing import Any
-
 _run_throughput_pipeline_py: Any = None
 
 

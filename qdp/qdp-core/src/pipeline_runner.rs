@@ -277,11 +277,11 @@ impl BatchProducer for StreamingProducer {
 fn spawn_producer(
     mut producer: impl BatchProducer,
     prefetch_depth: usize,
-) -> (
+) -> Result<(
     std::sync::mpsc::Receiver<Result<PrefetchedBatch>>,
     std::sync::mpsc::Sender<BatchData>,
     std::thread::JoinHandle<()>,
-) {
+)> {
     // If prefetch_depth is 0, default to a minimum of 1 to ensure channel can hold at least 1 item
     let depth = prefetch_depth.max(1);
     let (tx, rx) = std::sync::mpsc::sync_channel(depth);
@@ -305,8 +305,8 @@ fn spawn_producer(
                 }
             }
         })
-        .expect("Failed to spawn prefetch thread");
-    (rx, recycle_tx, handle)
+        .map_err(|e| MahoutError::Io(format!("Failed to spawn prefetch thread: {}", e)))?;
+    Ok((rx, recycle_tx, handle))
 }
 
 /// Default Parquet row group size for streaming reader (tunable).
@@ -354,11 +354,11 @@ fn read_file_by_extension(
 /// Stateful iterator that yields one batch DLPack at a time for Python `for` loop consumption.
 /// Reads prefetched batches via a bounded channel.
 pub struct PipelineIterator {
-    pub engine: QdpEngine,
-    pub config: PipelineConfig,
-    pub rx: std::sync::Mutex<std::sync::mpsc::Receiver<Result<PrefetchedBatch>>>,
-    pub recycle_tx: std::sync::Mutex<std::sync::mpsc::Sender<BatchData>>,
-    pub _producer_handle: std::sync::Mutex<std::thread::JoinHandle<()>>,
+    engine: QdpEngine,
+    config: PipelineConfig,
+    rx: std::sync::Mutex<std::sync::mpsc::Receiver<Result<PrefetchedBatch>>>,
+    recycle_tx: std::sync::Mutex<std::sync::mpsc::Sender<BatchData>>,
+    _producer_handle: std::sync::Mutex<std::thread::JoinHandle<()>>,
 }
 
 impl PipelineIterator {
@@ -367,7 +367,7 @@ impl PipelineIterator {
         let vector_len = vector_len(config.num_qubits, &config.encoding_method);
         let producer = SyntheticProducer::new(config.clone(), vector_len);
         let prefetch_depth = config.prefetch_depth;
-        let (rx, recycle_tx, _producer_handle) = spawn_producer(producer, prefetch_depth);
+        let (rx, recycle_tx, _producer_handle) = spawn_producer(producer, prefetch_depth)?;
         Ok(Self {
             engine,
             config,
@@ -419,7 +419,7 @@ impl PipelineIterator {
             batch_limit,
         };
         let prefetch_depth = config.prefetch_depth;
-        let (rx, recycle_tx, _producer_handle) = spawn_producer(producer, prefetch_depth);
+        let (rx, recycle_tx, _producer_handle) = spawn_producer(producer, prefetch_depth)?;
         Ok(Self {
             engine,
             config,
@@ -491,7 +491,7 @@ impl PipelineIterator {
             batch_limit,
         };
         let prefetch_depth = config.prefetch_depth;
-        let (rx, recycle_tx, _producer_handle) = spawn_producer(producer, prefetch_depth);
+        let (rx, recycle_tx, _producer_handle) = spawn_producer(producer, prefetch_depth)?;
         Ok(Self {
             engine,
             config,
@@ -717,11 +717,12 @@ pub fn run_throughput_pipeline(config: &PipelineConfig) -> Result<PipelineRunRes
 
     let producer = SyntheticProducer::new(config.clone(), vector_len);
     let prefetch_depth = config.prefetch_depth;
-    let (rx, recycle_tx, producer_handle) = spawn_producer(producer, prefetch_depth);
+    let (rx, recycle_tx, producer_handle) = spawn_producer(producer, prefetch_depth)?;
 
     // Iteration loop
     let mut total_batches = 0;
-    while let Ok(Ok(batch)) = rx.recv() {
+    while let Ok(result) = rx.recv() {
+        let batch = result?;
         let ptr = match &batch.data {
             BatchData::F64(buf) => engine.encode_batch(
                 buf,
@@ -750,6 +751,11 @@ pub fn run_throughput_pipeline(config: &PipelineConfig) -> Result<PipelineRunRes
 
     let duration_sec = start.elapsed().as_secs_f64().max(1e-9);
     let total_vectors = total_batches * config.batch_size;
+    if total_vectors == 0 {
+        return Err(MahoutError::InvalidInput(
+            "No vectors processed in pipeline".into(),
+        ));
+    }
     let vectors_per_sec = total_vectors as f64 / duration_sec;
     let latency_ms_per_vector = (duration_sec / total_vectors as f64) * 1000.0;
 
@@ -1045,7 +1051,7 @@ mod tests {
         let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
         let producer = SyntheticProducer::new(config, vector_len);
 
-        let (rx, _recycle_tx, handle) = spawn_producer(producer, 16);
+        let (rx, _recycle_tx, handle) = spawn_producer(producer, 16).unwrap();
 
         // We expect 3 batches
         assert!(rx.recv().unwrap().is_ok());
@@ -1067,7 +1073,7 @@ mod tests {
         let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
         let producer = SyntheticProducer::new(config, vector_len);
 
-        let (rx, _recycle_tx, handle) = spawn_producer(producer, 16);
+        let (rx, _recycle_tx, handle) = spawn_producer(producer, 16).unwrap();
 
         // Let it start
         assert!(rx.recv().unwrap().is_ok());
