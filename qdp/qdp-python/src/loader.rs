@@ -105,6 +105,7 @@ mod loader_impl {
             warmup_batches: 0,
             null_handling,
             float32_pipeline,
+            prefetch_depth: 16,
         }
     }
 

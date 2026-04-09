@@ -54,6 +54,7 @@ fn run_throughput_pipeline_py(
         warmup_batches,
         null_handling: qdp_core::NullHandling::default(),
         float32_pipeline,
+        prefetch_depth: 16,
     };
     let result = py
         .detach(|| qdp_core::run_throughput_pipeline(&config))
