@@ -274,8 +274,6 @@ impl BatchProducer for StreamingProducer {
     }
 }
 
-
-
 fn spawn_producer(
     mut producer: impl BatchProducer,
     prefetch_depth: usize,
@@ -1103,7 +1101,10 @@ mod tests {
 
         // Verify data is non-zero (was actually filled)
         if let BatchData::F32(ref buf) = batch.data {
-            assert!(!buf.iter().all(|&v| v == 0.0), "batch data should be non-zero");
+            assert!(
+                !buf.iter().all(|&v| v == 0.0),
+                "batch data should be non-zero"
+            );
         }
     }
 
