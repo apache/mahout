@@ -1401,13 +1401,17 @@ def test_iqp_batch_matches_single_encode():
             dtype=torch.float64,
         )
 
-        batch_state = torch.from_dlpack(engine.encode(batch, num_qubits, encoding_method))
+        batch_state = torch.from_dlpack(
+            engine.encode(batch, num_qubits, encoding_method)
+        )
 
         for sample_idx in range(batch_size):
             single_state = torch.from_dlpack(
                 engine.encode(batch[sample_idx].tolist(), num_qubits, encoding_method)
             )
-            assert torch.allclose(batch_state[sample_idx], single_state[0], atol=1e-10), (
+            assert torch.allclose(
+                batch_state[sample_idx], single_state[0], atol=1e-10
+            ), (
                 f"{encoding_method} batch sample {sample_idx} diverges from single encode"
             )
 
@@ -1436,7 +1440,9 @@ def test_iqp_grid_stride_large_state_zero_params():
     assert state.shape == (1, 1 << num_qubits)
     assert torch.isclose(norm, torch.tensor(1.0, device="cuda:0"), atol=1e-6)
     assert torch.isclose(
-        state[0, 0], torch.tensor(1.0 + 0.0j, dtype=state.dtype, device="cuda:0"), atol=1e-6
+        state[0, 0],
+        torch.tensor(1.0 + 0.0j, dtype=state.dtype, device="cuda:0"),
+        atol=1e-6,
     )
     assert torch.max(magnitudes[1:]) < 1e-6
 
