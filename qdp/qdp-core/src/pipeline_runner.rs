@@ -19,7 +19,6 @@
 
 use std::f64::consts::PI;
 use std::path::Path;
-use std::sync::Mutex;
 use std::time::Instant;
 
 use crate::QdpEngine;
@@ -40,6 +39,22 @@ pub struct PipelineConfig {
     pub seed: Option<u64>,
     pub warmup_batches: usize,
     pub null_handling: NullHandling,
+    pub float32_pipeline: bool,
+    pub prefetch_depth: usize,
+}
+
+impl PipelineConfig {
+    /// Normalizes the configuration, such as falling back to f64 if f32 is requested
+    /// but the encoding doesn't support it.
+    pub fn normalize(&mut self) {
+        if self.float32_pipeline && !encoding_supports_f32(&self.encoding_method) {
+            log::info!(
+                "float32_pipeline requested but encoding '{}' does not support f32; falling back to f64",
+                self.encoding_method
+            );
+            self.float32_pipeline = false;
+        }
+    }
 }
 
 impl Default for PipelineConfig {
@@ -53,6 +68,8 @@ impl Default for PipelineConfig {
             seed: None,
             warmup_batches: 0,
             null_handling: NullHandling::FillZero,
+            float32_pipeline: false,
+            prefetch_depth: 16,
         }
     }
 }
@@ -65,80 +82,233 @@ pub struct PipelineRunResult {
     pub latency_ms_per_vector: f64,
 }
 
-/// Data source for the pipeline iterator (Phase 1: Synthetic; Phase 2a: InMemory; Phase 2b: Streaming).
-pub enum DataSource {
-    Synthetic {
-        seed: u64,
-        batch_index: usize,
-        total_batches: usize,
-    },
-    /// Phase 2a: full file loaded once; iterator slices by batch_size.
-    InMemory {
-        data: Vec<f64>,
-        cursor: usize,
-        num_samples: usize,
-        sample_size: usize,
-        batches_yielded: usize,
-        batch_limit: usize,
-    },
-    /// Phase 2b: stream from Parquet in chunks; iterator refills buffer and encodes by batch.
-    /// Reader is in Mutex so PipelineIterator remains Sync (required by PyO3 pyclass).
-    Streaming {
-        reader: Mutex<ParquetStreamingReader>,
-        buffer: Vec<f64>,
-        buffer_cursor: usize,
-        read_chunk_scratch: Vec<f64>,
-        sample_size: usize,
-        batch_limit: usize,
-        batches_yielded: usize,
-    },
+#[derive(Clone, Debug, PartialEq)]
+pub enum BatchData {
+    F32(Vec<f32>),
+    F64(Vec<f64>),
 }
 
-impl std::fmt::Debug for DataSource {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            DataSource::Synthetic {
-                seed,
-                batch_index,
-                total_batches,
-            } => f
-                .debug_struct("Synthetic")
-                .field("seed", seed)
-                .field("batch_index", batch_index)
-                .field("total_batches", total_batches)
-                .finish(),
-            DataSource::InMemory {
-                cursor,
-                num_samples,
-                sample_size,
-                batches_yielded,
-                batch_limit,
-                ..
-            } => f
-                .debug_struct("InMemory")
-                .field("cursor", cursor)
-                .field("num_samples", num_samples)
-                .field("sample_size", sample_size)
-                .field("batches_yielded", batches_yielded)
-                .field("batch_limit", batch_limit)
-                .finish(),
-            DataSource::Streaming {
-                buffer,
-                buffer_cursor,
-                sample_size,
-                batch_limit,
-                batches_yielded,
-                ..
-            } => f
-                .debug_struct("Streaming")
-                .field("buffer_len", &buffer.len())
-                .field("buffer_cursor", buffer_cursor)
-                .field("sample_size", sample_size)
-                .field("batch_limit", batch_limit)
-                .field("batches_yielded", batches_yielded)
-                .finish(),
+pub struct PrefetchedBatch {
+    pub data: BatchData,
+    pub batch_n: usize,
+    pub sample_size: usize,
+    pub num_qubits: usize,
+}
+
+pub trait BatchProducer: Send + 'static {
+    fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>>;
+}
+
+/// Returns true if the given encoding method has a native f32 GPU kernel.
+/// Used to auto-gate `float32_pipeline` so unsupported encodings fall back to f64.
+fn encoding_supports_f32(encoding_method: &str) -> bool {
+    matches!(encoding_method.to_lowercase().as_str(), "amplitude")
+}
+
+pub struct SyntheticProducer {
+    pub config: PipelineConfig,
+    pub vector_len: usize,
+    pub batch_index: usize,
+    pub total_batches: usize,
+}
+
+impl SyntheticProducer {
+    pub fn new(config: PipelineConfig, vector_len: usize) -> Self {
+        let total_batches = config.total_batches;
+        Self {
+            config,
+            vector_len,
+            batch_index: 0,
+            total_batches,
         }
     }
+}
+
+impl BatchProducer for SyntheticProducer {
+    fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>> {
+        if self.batch_index >= self.total_batches {
+            return Ok(None);
+        }
+
+        let mut data = match recycled {
+            Some(BatchData::F32(mut buf)) if self.config.float32_pipeline => {
+                buf.resize(self.config.batch_size * self.vector_len, 0.0);
+                BatchData::F32(buf)
+            }
+            Some(BatchData::F64(mut buf)) if !self.config.float32_pipeline => {
+                buf.resize(self.config.batch_size * self.vector_len, 0.0);
+                BatchData::F64(buf)
+            }
+            _ => {
+                if self.config.float32_pipeline {
+                    BatchData::F32(vec![0.0f32; self.config.batch_size * self.vector_len])
+                } else {
+                    BatchData::F64(vec![0.0f64; self.config.batch_size * self.vector_len])
+                }
+            }
+        };
+
+        match &mut data {
+            BatchData::F32(buf) => {
+                fill_batch_inplace_f32(&self.config, self.batch_index, self.vector_len, buf)
+            }
+            BatchData::F64(buf) => {
+                fill_batch_inplace(&self.config, self.batch_index, self.vector_len, buf)
+            }
+        }
+
+        self.batch_index += 1;
+        Ok(Some(PrefetchedBatch {
+            data,
+            batch_n: self.config.batch_size,
+            sample_size: self.vector_len,
+            num_qubits: self.config.num_qubits as usize,
+        }))
+    }
+}
+
+pub struct InMemoryProducer {
+    pub data: Vec<f64>,
+    pub cursor: usize,
+    pub sample_size: usize,
+    pub batch_size: usize,
+    pub num_qubits: usize,
+    pub batches_yielded: usize,
+    pub batch_limit: usize,
+}
+
+impl BatchProducer for InMemoryProducer {
+    fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>> {
+        if self.batches_yielded >= self.batch_limit {
+            return Ok(None);
+        }
+        let remaining = (self.data.len() - self.cursor) / self.sample_size;
+        if remaining == 0 {
+            return Ok(None);
+        }
+
+        let batch_n = remaining.min(self.batch_size);
+        let start = self.cursor;
+        let end = start + batch_n * self.sample_size;
+        self.cursor = end;
+        self.batches_yielded += 1;
+        let slice = &self.data[start..end];
+
+        let data = match recycled {
+            Some(BatchData::F64(mut buf)) => {
+                buf.clear();
+                buf.extend_from_slice(slice);
+                BatchData::F64(buf)
+            }
+            _ => BatchData::F64(slice.to_vec()),
+        };
+
+        Ok(Some(PrefetchedBatch {
+            data,
+            batch_n,
+            sample_size: self.sample_size,
+            num_qubits: self.num_qubits,
+        }))
+    }
+}
+
+pub struct StreamingProducer {
+    pub reader: ParquetStreamingReader,
+    pub buffer: Vec<f64>,
+    pub buffer_cursor: usize,
+    pub read_chunk_scratch: Vec<f64>,
+    pub sample_size: usize,
+    pub batch_size: usize,
+    pub num_qubits: usize,
+    pub batches_yielded: usize,
+    pub batch_limit: usize,
+}
+
+impl BatchProducer for StreamingProducer {
+    fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>> {
+        if self.batches_yielded >= self.batch_limit {
+            return Ok(None);
+        }
+        let required = self.batch_size * self.sample_size;
+        while (self.buffer.len() - self.buffer_cursor) < required {
+            let written = self.reader.read_chunk(&mut self.read_chunk_scratch)?;
+            if written == 0 {
+                break;
+            }
+            self.buffer
+                .extend_from_slice(&self.read_chunk_scratch[..written]);
+        }
+        let available = self.buffer.len() - self.buffer_cursor;
+        let available_samples = available / self.sample_size;
+
+        if available_samples == 0 {
+            return Ok(None);
+        }
+
+        let batch_n = available_samples.min(self.batch_size);
+        let start = self.buffer_cursor;
+        let end = start + batch_n * self.sample_size;
+        self.buffer_cursor = end;
+        self.batches_yielded += 1;
+
+        let data = match recycled {
+            Some(BatchData::F64(mut buf)) => {
+                buf.clear();
+                buf.extend_from_slice(&self.buffer[start..end]);
+                BatchData::F64(buf)
+            }
+            _ => BatchData::F64(self.buffer[start..end].to_vec()),
+        };
+
+        if self.buffer_cursor >= self.buffer.len() / BUFFER_COMPACT_DENOM {
+            self.buffer.drain(..self.buffer_cursor);
+            self.buffer_cursor = 0;
+        }
+
+        Ok(Some(PrefetchedBatch {
+            data,
+            batch_n,
+            sample_size: self.sample_size,
+            num_qubits: self.num_qubits,
+        }))
+    }
+}
+
+type ProducerHandles = (
+    std::sync::mpsc::Receiver<Result<PrefetchedBatch>>,
+    std::sync::mpsc::Sender<BatchData>,
+    std::thread::JoinHandle<()>,
+);
+
+fn spawn_producer(
+    mut producer: impl BatchProducer,
+    prefetch_depth: usize,
+) -> Result<ProducerHandles> {
+    // If prefetch_depth is 0, default to a minimum of 1 to ensure channel can hold at least 1 item
+    let depth = prefetch_depth.max(1);
+    let (tx, rx) = std::sync::mpsc::sync_channel(depth);
+    let (recycle_tx, recycle_rx) = std::sync::mpsc::channel::<BatchData>();
+    let handle = std::thread::Builder::new()
+        .name("qdp-prefetch".into())
+        .spawn(move || {
+            loop {
+                let recycled = recycle_rx.try_recv().ok();
+                match producer.produce(recycled) {
+                    Ok(Some(batch)) => {
+                        if tx.send(Ok(batch)).is_err() {
+                            break;
+                        }
+                    }
+                    Ok(None) => break,
+                    Err(e) => {
+                        let _ = tx.send(Err(e));
+                        break;
+                    }
+                }
+            }
+        })
+        .map_err(|e| MahoutError::Io(format!("Failed to spawn prefetch thread: {}", e)))?;
+    Ok((rx, recycle_tx, handle))
 }
 
 /// Default Parquet row group size for streaming reader (tunable).
@@ -184,31 +354,28 @@ fn read_file_by_extension(
 }
 
 /// Stateful iterator that yields one batch DLPack at a time for Python `for` loop consumption.
-/// Holds a clone of QdpEngine, PipelineConfig, and source state; reuses generate_batch and encode_batch.
+/// Reads prefetched batches via a bounded channel.
 pub struct PipelineIterator {
     engine: QdpEngine,
     config: PipelineConfig,
-    source: DataSource,
-    vector_len: usize,
+    rx: std::sync::Mutex<std::sync::mpsc::Receiver<Result<PrefetchedBatch>>>,
+    recycle_tx: std::sync::Mutex<std::sync::mpsc::Sender<BatchData>>,
+    _producer_handle: std::sync::Mutex<std::thread::JoinHandle<()>>,
 }
 
-/// (batch_data, batch_n, sample_size, num_qubits) from one source pull.
-type BatchFromSource = (Vec<f64>, usize, usize, usize);
-
 impl PipelineIterator {
-    /// Create a new synthetic-data pipeline iterator.
-    pub fn new_synthetic(engine: QdpEngine, config: PipelineConfig) -> Result<Self> {
+    pub fn new_synthetic(engine: QdpEngine, mut config: PipelineConfig) -> Result<Self> {
+        config.normalize();
         let vector_len = vector_len(config.num_qubits, &config.encoding_method);
-        let source = DataSource::Synthetic {
-            seed: config.seed.unwrap_or(0),
-            batch_index: 0,
-            total_batches: config.total_batches,
-        };
+        let producer = SyntheticProducer::new(config.clone(), vector_len);
+        let prefetch_depth = config.prefetch_depth;
+        let (rx, recycle_tx, _producer_handle) = spawn_producer(producer, prefetch_depth)?;
         Ok(Self {
             engine,
             config,
-            source,
-            vector_len,
+            rx: std::sync::Mutex::new(rx),
+            recycle_tx: std::sync::Mutex::new(recycle_tx),
+            _producer_handle: std::sync::Mutex::new(_producer_handle),
         })
     }
 
@@ -220,9 +387,10 @@ impl PipelineIterator {
     pub fn new_from_file<P: AsRef<Path>>(
         engine: QdpEngine,
         path: P,
-        config: PipelineConfig,
+        mut config: PipelineConfig,
         batch_limit: usize,
     ) -> Result<Self> {
+        config.normalize();
         let path = path.as_ref();
         let (data, num_samples, sample_size) = read_file_by_extension(path, config.null_handling)?;
         let vector_len = vector_len(config.num_qubits, &config.encoding_method);
@@ -243,19 +411,23 @@ impl PipelineIterator {
             )));
         }
 
-        let source = DataSource::InMemory {
+        let producer = InMemoryProducer {
             data,
             cursor: 0,
-            num_samples,
             sample_size,
+            batch_size: config.batch_size,
+            num_qubits: config.num_qubits as usize,
             batches_yielded: 0,
             batch_limit,
         };
+        let prefetch_depth = config.prefetch_depth;
+        let (rx, recycle_tx, _producer_handle) = spawn_producer(producer, prefetch_depth)?;
         Ok(Self {
             engine,
             config,
-            source,
-            vector_len,
+            rx: std::sync::Mutex::new(rx),
+            recycle_tx: std::sync::Mutex::new(recycle_tx),
+            _producer_handle: std::sync::Mutex::new(_producer_handle),
         })
     }
 
@@ -265,9 +437,10 @@ impl PipelineIterator {
     pub fn new_from_file_streaming<P: AsRef<Path>>(
         engine: QdpEngine,
         path: P,
-        config: PipelineConfig,
+        mut config: PipelineConfig,
         batch_limit: usize,
     ) -> Result<Self> {
+        config.normalize();
         let path = path.as_ref();
         if path_extension_lower(path).as_deref() != Some("parquet") {
             return Err(MahoutError::InvalidInput(format!(
@@ -308,138 +481,52 @@ impl PipelineIterator {
         buffer.truncate(written);
         let read_chunk_scratch = vec![0.0; INITIAL_CHUNK_CAP];
 
-        let source = DataSource::Streaming {
-            reader: Mutex::new(reader),
+        let producer = StreamingProducer {
+            reader,
             buffer,
             buffer_cursor: 0,
             read_chunk_scratch,
             sample_size,
-            batch_limit,
+            batch_size: config.batch_size,
+            num_qubits: config.num_qubits as usize,
             batches_yielded: 0,
+            batch_limit,
         };
+        let prefetch_depth = config.prefetch_depth;
+        let (rx, recycle_tx, _producer_handle) = spawn_producer(producer, prefetch_depth)?;
         Ok(Self {
             engine,
             config,
-            source,
-            vector_len,
-        })
-    }
-
-    /// Yields the next batch data from the current source; `None` when exhausted.
-    /// Returns (batch_data, batch_n, sample_size, num_qubits).
-    fn take_batch_from_source(&mut self) -> Result<Option<BatchFromSource>> {
-        Ok(match &mut self.source {
-            DataSource::Synthetic {
-                batch_index,
-                total_batches,
-                ..
-            } => {
-                if *batch_index >= *total_batches {
-                    None
-                } else {
-                    let data = generate_batch(&self.config, *batch_index, self.vector_len);
-                    *batch_index += 1;
-                    Some((
-                        data,
-                        self.config.batch_size,
-                        self.vector_len,
-                        self.config.num_qubits as usize,
-                    ))
-                }
-            }
-            DataSource::InMemory {
-                data,
-                cursor,
-                sample_size,
-                batches_yielded,
-                batch_limit,
-                ..
-            } => {
-                if *batches_yielded >= *batch_limit {
-                    None
-                } else {
-                    let remaining = (data.len() - *cursor) / *sample_size;
-                    if remaining == 0 {
-                        None
-                    } else {
-                        let batch_n = remaining.min(self.config.batch_size);
-                        let start = *cursor;
-                        let end = start + batch_n * *sample_size;
-                        *cursor = end;
-                        *batches_yielded += 1;
-                        let slice = data[start..end].to_vec();
-                        Some((
-                            slice,
-                            batch_n,
-                            *sample_size,
-                            self.config.num_qubits as usize,
-                        ))
-                    }
-                }
-            }
-            DataSource::Streaming {
-                reader,
-                buffer,
-                buffer_cursor,
-                read_chunk_scratch,
-                sample_size,
-                batch_limit,
-                batches_yielded,
-            } => {
-                if *batches_yielded >= *batch_limit {
-                    None
-                } else {
-                    let required = self.config.batch_size * *sample_size;
-                    while (buffer.len() - *buffer_cursor) < required {
-                        let r = reader.get_mut().map_err(|e| {
-                            MahoutError::Io(format!("Streaming reader mutex poisoned: {}", e))
-                        })?;
-                        let written = r.read_chunk(read_chunk_scratch)?;
-                        if written == 0 {
-                            break;
-                        }
-                        buffer.extend_from_slice(&read_chunk_scratch[..written]);
-                    }
-                    let available = buffer.len() - *buffer_cursor;
-                    let available_samples = available / *sample_size;
-                    if available_samples == 0 {
-                        None
-                    } else {
-                        let batch_n = available_samples.min(self.config.batch_size);
-                        let start = *buffer_cursor;
-                        let end = start + batch_n * *sample_size;
-                        *buffer_cursor = end;
-                        *batches_yielded += 1;
-                        let slice = buffer[start..end].to_vec();
-                        if *buffer_cursor >= buffer.len() / BUFFER_COMPACT_DENOM {
-                            buffer.drain(..*buffer_cursor);
-                            *buffer_cursor = 0;
-                        }
-                        Some((
-                            slice,
-                            batch_n,
-                            *sample_size,
-                            self.config.num_qubits as usize,
-                        ))
-                    }
-                }
-            }
+            rx: std::sync::Mutex::new(rx),
+            recycle_tx: std::sync::Mutex::new(recycle_tx),
+            _producer_handle: std::sync::Mutex::new(_producer_handle),
         })
     }
 
     /// Returns the next batch as a DLPack pointer; `Ok(None)` when exhausted.
     pub fn next_batch(&mut self) -> Result<Option<*mut DLManagedTensor>> {
-        let Some((batch_data, batch_n, sample_size, num_qubits)) = self.take_batch_from_source()?
-        else {
-            return Ok(None);
+        let batch = match self.rx.lock().unwrap().recv() {
+            Ok(Ok(b)) => b,
+            Ok(Err(e)) => return Err(e),
+            Err(_) => return Ok(None),
         };
-        let ptr = self.engine.encode_batch(
-            &batch_data,
-            batch_n,
-            sample_size,
-            num_qubits,
-            &self.config.encoding_method,
-        )?;
+        let ptr = match &batch.data {
+            BatchData::F64(buf) => self.engine.encode_batch(
+                buf,
+                batch.batch_n,
+                batch.sample_size,
+                batch.num_qubits,
+                &self.config.encoding_method,
+            )?,
+            BatchData::F32(buf) => self.engine.encode_batch_f32(
+                buf,
+                batch.batch_n,
+                batch.sample_size,
+                batch.num_qubits,
+                &self.config.encoding_method,
+            )?,
+        };
+        let _ = self.recycle_tx.lock().unwrap().send(batch.data);
         Ok(Some(ptr))
     }
 }
@@ -489,6 +576,7 @@ fn fill_sample(seed: u64, out: &mut [f64], encoding_method: &str, num_qubits: us
 }
 
 /// Generate one batch (batch_size * vector_len elements, or batch_size * 1 for basis).
+#[cfg(test)]
 fn generate_batch(config: &PipelineConfig, batch_idx: usize, vector_len: usize) -> Vec<f64> {
     let mut batch = vec![0.0f64; config.batch_size * vector_len];
     fill_batch_inplace(config, batch_idx, vector_len, &mut batch);
@@ -518,6 +606,66 @@ fn fill_batch_inplace(
     }
 }
 
+/// Deterministic sample generation for f32.
+fn fill_sample_f32(
+    seed: u64,
+    out: &mut [f32],
+    encoding_method: &str,
+    num_qubits: usize,
+) -> Result<()> {
+    let len = out.len();
+    if len == 0 {
+        return Ok(());
+    }
+    match encoding_method.to_lowercase().as_str() {
+        "basis" => {
+            let state_space_size = 1 << num_qubits;
+            let mask = (state_space_size - 1) as u64;
+            let idx = seed & mask;
+            out[0] = idx as f32;
+        }
+        "angle" => {
+            let scale = (2.0 * std::f32::consts::PI) / len as f32;
+            for (i, v) in out.iter_mut().enumerate() {
+                let mixed = (i as u64 + seed) % (len as u64);
+                *v = mixed as f32 * scale;
+            }
+        }
+        _ => {
+            // amplitude
+            let mask = (len - 1) as u64;
+            let scale = 1.0 / len as f32;
+            for (i, v) in out.iter_mut().enumerate() {
+                let mixed = (i as u64 + seed) & mask;
+                *v = mixed as f32 * scale;
+            }
+        }
+    }
+    Ok(())
+}
+
+fn fill_batch_inplace_f32(
+    config: &PipelineConfig,
+    batch_idx: usize,
+    vector_len: usize,
+    batch_buf: &mut [f32],
+) {
+    debug_assert_eq!(batch_buf.len(), config.batch_size * vector_len);
+    let seed_base = config
+        .seed
+        .unwrap_or(0)
+        .wrapping_add((batch_idx * config.batch_size) as u64);
+    for i in 0..config.batch_size {
+        let offset = i * vector_len;
+        let _ = fill_sample_f32(
+            seed_base + i as u64,
+            &mut batch_buf[offset..offset + vector_len],
+            &config.encoding_method,
+            config.num_qubits as usize,
+        );
+    }
+}
+
 /// Release DLPack tensor (call deleter so GPU memory is freed).
 unsafe fn release_dlpack(ptr: *mut DLManagedTensor) {
     if ptr.is_null() {
@@ -531,47 +679,85 @@ unsafe fn release_dlpack(ptr: *mut DLManagedTensor) {
 
 /// Run throughput pipeline: warmup, then timed encode_batch loop; returns stats.
 pub fn run_throughput_pipeline(config: &PipelineConfig) -> Result<PipelineRunResult> {
+    let mut config = config.clone();
+    config.normalize();
+
     let engine = QdpEngine::new(config.device_id)?;
     let vector_len = vector_len(config.num_qubits, &config.encoding_method);
     let num_qubits = config.num_qubits as usize;
 
-    // Reuse a single CPU batch buffer to avoid per-iteration allocations in throughput benchmarks.
-    let mut batch_buf = vec![0.0f64; config.batch_size * vector_len];
-
     // Warmup
-    for b in 0..config.warmup_batches {
-        fill_batch_inplace(config, b, vector_len, &mut batch_buf);
-        let ptr = engine.encode_batch(
-            &batch_buf,
-            config.batch_size,
-            vector_len,
-            num_qubits,
-            &config.encoding_method,
-        )?;
-        unsafe { release_dlpack(ptr) };
+    if config.float32_pipeline {
+        let mut batch_buf = vec![0.0f32; config.batch_size * vector_len];
+        for b in 0..config.warmup_batches {
+            fill_batch_inplace_f32(&config, b, vector_len, &mut batch_buf);
+            let ptr = engine.encode_batch_f32(
+                &batch_buf,
+                config.batch_size,
+                vector_len,
+                num_qubits,
+                &config.encoding_method,
+            )?;
+            unsafe { release_dlpack(ptr) };
+        }
+    } else {
+        let mut batch_buf = vec![0.0f64; config.batch_size * vector_len];
+        for b in 0..config.warmup_batches {
+            fill_batch_inplace(&config, b, vector_len, &mut batch_buf);
+            let ptr = engine.encode_batch(
+                &batch_buf,
+                config.batch_size,
+                vector_len,
+                num_qubits,
+                &config.encoding_method,
+            )?;
+            unsafe { release_dlpack(ptr) };
+        }
     }
-
-    #[cfg(target_os = "linux")]
-    engine.synchronize()?;
 
     let start = Instant::now();
-    for b in 0..config.total_batches {
-        fill_batch_inplace(config, b, vector_len, &mut batch_buf);
-        let ptr = engine.encode_batch(
-            &batch_buf,
-            config.batch_size,
-            vector_len,
-            num_qubits,
-            &config.encoding_method,
-        )?;
+
+    let producer = SyntheticProducer::new(config.clone(), vector_len);
+    let prefetch_depth = config.prefetch_depth;
+    let (rx, recycle_tx, producer_handle) = spawn_producer(producer, prefetch_depth)?;
+
+    // Iteration loop
+    let mut total_batches = 0;
+    while let Ok(result) = rx.recv() {
+        let batch = result?;
+        let ptr = match &batch.data {
+            BatchData::F64(buf) => engine.encode_batch(
+                buf,
+                batch.batch_n,
+                batch.sample_size,
+                batch.num_qubits,
+                &config.encoding_method,
+            )?,
+            BatchData::F32(buf) => engine.encode_batch_f32(
+                buf,
+                batch.batch_n,
+                batch.sample_size,
+                batch.num_qubits,
+                &config.encoding_method,
+            )?,
+        };
         unsafe { release_dlpack(ptr) };
+        total_batches += 1;
+        let _ = recycle_tx.send(batch.data);
     }
+
+    let _ = producer_handle.join();
 
     #[cfg(target_os = "linux")]
     engine.synchronize()?;
 
     let duration_sec = start.elapsed().as_secs_f64().max(1e-9);
-    let total_vectors = config.total_batches * config.batch_size;
+    let total_vectors = total_batches * config.batch_size;
+    if total_vectors == 0 {
+        return Err(MahoutError::InvalidInput(
+            "No vectors processed in pipeline".into(),
+        ));
+    }
     let vectors_per_sec = total_vectors as f64 / duration_sec;
     let latency_ms_per_vector = (duration_sec / total_vectors as f64) * 1000.0;
 
@@ -791,5 +977,194 @@ mod tests {
                 value
             );
         }
+    }
+    #[test]
+    fn test_synthetic_producer_batch_count() {
+        let config = PipelineConfig {
+            total_batches: 5,
+            num_qubits: 3,
+            batch_size: 4,
+            encoding_method: "amplitude".to_string(),
+            ..Default::default()
+        };
+        let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
+        let mut producer = SyntheticProducer::new(config, vector_len);
+
+        let mut count = 0;
+        while let Ok(Some(_)) = producer.produce(None) {
+            count += 1;
+        }
+        assert_eq!(count, 5);
+    }
+
+    #[test]
+    fn test_synthetic_producer_data_consistency() {
+        let config = PipelineConfig {
+            total_batches: 1,
+            num_qubits: 3,
+            batch_size: 4,
+            encoding_method: "amplitude".to_string(),
+            ..Default::default()
+        };
+        let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
+        let mut producer = SyntheticProducer::new(config.clone(), vector_len);
+
+        let batch_from_producer = producer.produce(None).unwrap().unwrap();
+        let expected_data = generate_batch(&config, 0, vector_len);
+
+        assert_eq!(batch_from_producer.data, BatchData::F64(expected_data));
+    }
+
+    #[test]
+    fn test_inmemory_producer_partial_last_batch() {
+        let config = PipelineConfig {
+            batch_size: 5,
+            num_qubits: 2,
+            encoding_method: "amplitude".to_string(),
+            ..Default::default()
+        };
+        let sample_size = 4; // 2^2
+        let data = vec![0.0f64; 16]; // 16 elements = 4 samples
+
+        let mut producer = InMemoryProducer {
+            data,
+            cursor: 0,
+            sample_size,
+            batch_size: config.batch_size,
+            num_qubits: config.num_qubits as usize,
+            batches_yielded: 0,
+            batch_limit: 10,
+        };
+
+        let batch1 = producer.produce(None).unwrap().unwrap();
+        assert_eq!(batch1.batch_n, 4);
+
+        let batch2 = producer.produce(None).unwrap();
+        assert!(batch2.is_none());
+    }
+
+    #[test]
+    fn test_spawn_producer_channel_exhaustion() {
+        let config = PipelineConfig {
+            total_batches: 3,
+            prefetch_depth: 16,
+            ..Default::default()
+        };
+        let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
+        let producer = SyntheticProducer::new(config, vector_len);
+
+        let (rx, _recycle_tx, handle) = spawn_producer(producer, 16).unwrap();
+
+        // We expect 3 batches
+        assert!(rx.recv().unwrap().is_ok());
+        assert!(rx.recv().unwrap().is_ok());
+        assert!(rx.recv().unwrap().is_ok());
+
+        // Iterator should be exhausted, channel should be closed down successfully
+        assert!(rx.recv().is_err());
+        handle.join().unwrap();
+    }
+
+    #[test]
+    fn test_spawn_producer_early_consumer_drop() {
+        let config = PipelineConfig {
+            total_batches: 1000, // Very large so producer definitely tries to send multiple
+            prefetch_depth: 16,
+            ..Default::default()
+        };
+        let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
+        let producer = SyntheticProducer::new(config, vector_len);
+
+        let (rx, _recycle_tx, handle) = spawn_producer(producer, 16).unwrap();
+
+        // Let it start
+        assert!(rx.recv().unwrap().is_ok());
+
+        // Drop rx, closing the channel
+        drop(rx);
+
+        // Thread should cleanly exit instead of panicking
+        handle.join().unwrap();
+    }
+
+    #[test]
+    fn test_synthetic_producer_f32_amplitude() {
+        let mut config = PipelineConfig {
+            total_batches: 2,
+            num_qubits: 3,
+            batch_size: 4,
+            encoding_method: "amplitude".to_string(),
+            float32_pipeline: true,
+            ..Default::default()
+        };
+        config.normalize();
+        let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
+        let mut producer = SyntheticProducer::new(config, vector_len);
+
+        let batch = producer.produce(None).unwrap().unwrap();
+        assert!(
+            matches!(batch.data, BatchData::F32(_)),
+            "amplitude with float32_pipeline=true should produce F32 data"
+        );
+
+        // Verify data is non-zero (was actually filled)
+        if let BatchData::F32(ref buf) = batch.data {
+            assert!(
+                !buf.iter().all(|&v| v == 0.0),
+                "batch data should be non-zero"
+            );
+        }
+    }
+
+    #[test]
+    fn test_synthetic_producer_f32_fallback_for_angle() {
+        let mut config = PipelineConfig {
+            total_batches: 1,
+            num_qubits: 3,
+            batch_size: 4,
+            encoding_method: "angle".to_string(),
+            float32_pipeline: true, // requested f32, but angle doesn't support it
+            ..Default::default()
+        };
+        config.normalize();
+        let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
+        let mut producer = SyntheticProducer::new(config, vector_len);
+
+        let batch = producer.produce(None).unwrap().unwrap();
+        assert!(
+            matches!(batch.data, BatchData::F64(_)),
+            "angle with float32_pipeline=true should fall back to F64 data"
+        );
+    }
+
+    #[test]
+    fn test_synthetic_producer_f32_fallback_for_basis() {
+        let mut config = PipelineConfig {
+            total_batches: 1,
+            num_qubits: 3,
+            batch_size: 4,
+            encoding_method: "basis".to_string(),
+            float32_pipeline: true,
+            ..Default::default()
+        };
+        config.normalize();
+        let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
+        let mut producer = SyntheticProducer::new(config, vector_len);
+
+        let batch = producer.produce(None).unwrap().unwrap();
+        assert!(
+            matches!(batch.data, BatchData::F64(_)),
+            "basis with float32_pipeline=true should fall back to F64 data"
+        );
+    }
+
+    #[test]
+    fn test_encoding_supports_f32() {
+        assert!(super::encoding_supports_f32("amplitude"));
+        assert!(super::encoding_supports_f32("Amplitude"));
+        assert!(super::encoding_supports_f32("AMPLITUDE"));
+        assert!(!super::encoding_supports_f32("angle"));
+        assert!(!super::encoding_supports_f32("basis"));
+        assert!(!super::encoding_supports_f32("iqp"));
     }
 }

@@ -44,7 +44,7 @@ mod pipeline_runner;
 
 #[cfg(target_os = "linux")]
 pub use pipeline_runner::{
-    DataSource, PipelineConfig, PipelineIterator, PipelineRunResult, run_latency_pipeline,
+    PipelineConfig, PipelineIterator, PipelineRunResult, run_latency_pipeline,
     run_throughput_pipeline,
 };
 
@@ -210,6 +210,31 @@ impl QdpEngine {
 
         let encoder = get_encoder(encoding_method)?;
         let state_vector = encoder.encode_batch(
+            &self.device,
+            batch_data,
+            num_samples,
+            sample_size,
+            num_qubits,
+        )?;
+
+        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
+        let dlpack_ptr = state_vector.to_dlpack();
+        Ok(dlpack_ptr)
+    }
+
+    /// Encode multiple samples in a single fused kernel (most efficient) using f32 host input.
+    pub fn encode_batch_f32(
+        &self,
+        batch_data: &[f32],
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> Result<*mut DLManagedTensor> {
+        crate::profile_scope!("Mahout::EncodeBatchF32");
+
+        let encoder = get_encoder(encoding_method)?;
+        let state_vector = encoder.encode_batch_f32(
             &self.device,
             batch_data,
             num_samples,

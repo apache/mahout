@@ -633,6 +633,7 @@ impl QdpEngine {
             total_batches,
             seed,
             nh,
+            true,
         );
         let iter = qdp_core::PipelineIterator::new_synthetic(self.engine.clone(), config).map_err(
             |e| PyRuntimeError::new_err(format!("create_synthetic_loader failed: {}", e)),
@@ -665,6 +666,7 @@ impl QdpEngine {
             0,
             None,
             nh,
+            true, // float32_pipeline
         );
         let engine = self.engine.clone();
         // Resolve remote URLs before detaching from GIL. The _resolved guard keeps the
@@ -713,6 +715,7 @@ impl QdpEngine {
             0,
             None,
             nh,
+            true, // float32_pipeline
         );
         let engine = self.engine.clone();
         // Resolve remote URLs before detaching from GIL. The _resolved guard keeps the

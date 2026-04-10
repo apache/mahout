@@ -202,13 +202,14 @@ impl TensorFlowReader {
     /// 2. Length check (must be multiple of 8)
     /// 3. Alignment check (f64 needs 8-byte alignment, Vec handles this automatically)
     /// 4. Overflow check (ensures no overflow)
+    #[allow(clippy::manual_is_multiple_of)]
     fn bytes_to_f64_vec(bytes: &Bytes) -> Result<Vec<f64>> {
         if !cfg!(target_endian = "little") {
             return Err(MahoutError::NotImplemented(
                 "Big-endian platforms are not supported for TensorFlow tensor_content".into(),
             ));
         }
-        if !bytes.len().is_multiple_of(8) {
+        if bytes.len() % 8 != 0 {
             return Err(MahoutError::InvalidInput(format!(
                 "tensor_content length {} is not a multiple of 8",
                 bytes.len()

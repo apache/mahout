@@ -84,6 +84,7 @@ mod loader_impl {
     }
 
     /// Build PipelineConfig from Python args. device_id is 0 (engine does not expose it); iterator uses engine clone with correct device.
+    #[allow(clippy::too_many_arguments)]
     pub fn config_from_args(
         _engine: &CoreEngine,
         batch_size: usize,
@@ -92,6 +93,7 @@ mod loader_impl {
         total_batches: usize,
         seed: Option<u64>,
         null_handling: NullHandling,
+        float32_pipeline: bool,
     ) -> PipelineConfig {
         PipelineConfig {
             device_id: 0,
@@ -102,6 +104,8 @@ mod loader_impl {
             seed,
             warmup_batches: 0,
             null_handling,
+            float32_pipeline,
+            prefetch_depth: 16,
         }
     }
 
