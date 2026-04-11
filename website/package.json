@@ -15,8 +15,7 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "typecheck": "tsc",
-    "version": "docusaurus docs:version",
-    "migrate-blog": "node scripts/migrate-posts.js"
+    "version": "docusaurus docs:version"
   },
   "dependencies": {
     "@docusaurus/core": "3.9.2",
