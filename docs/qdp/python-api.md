@@ -163,11 +163,11 @@ tensor = torch.from_dlpack(qt)
 
 | Method | Description |
 |--------|-------------|
-| `qubits(n)` | Set number of qubits. |
-| `encoding(method)` | Set encoding method. |
-| `batches(total, size=64)` | Set total batches and batch size. |
-| `prefetch(n)` | No-op for API compatibility. |
-| `warmup(n)` | Set warmup batches. |
+| `qubits(n)` | Number of qubits. |
+| `encoding(method)` | `"amplitude"` \| `"angle"` \| `"basis"` \| `"iqp"` \| `"iqp-z"`. |
+| `batches(total, size=64)` | Total batches and batch size. |
+| `prefetch(n)` | No-op (API compatibility). |
+| `warmup(n)` | Warmup batch count. |
 | `backend(name)` | Select `"rust"` or `"pytorch"`. |
 
 Backend notes:
@@ -229,12 +229,12 @@ Result types:
 
 | Method | Description |
 |--------|-------------|
-| `qubits(n)` | Set number of qubits. |
-| `encoding(method)` | Set encoding method. |
-| `batches(total, size=64)` | Set total batches and batch size. |
-| `source_synthetic(total_batches=None)` | Use synthetic data. |
+| `qubits(n)` | Number of qubits. |
+| `encoding(method)` | `"amplitude"` \| `"angle"` \| `"basis"` \| `"iqp"` \| `"iqp-z"`. |
+| `batches(total, size=64)` | Total batches and batch size. |
+| `source_synthetic(total_batches=None)` | Synthetic data (default); optional override for total batches. |
 | `source_file(path, streaming=False)` | Use a file-backed source. |
-| `seed(s)` | Set reproducible synthetic-data seed. |
+| `seed(s)` | RNG seed for reproducibility. |
 | `null_handling(policy)` | Set `"fill_zero"` or `"reject"`. |
 | `backend(name)` | Select `"rust"` or `"pytorch"`. |
 

@@ -87,7 +87,7 @@ Notes:
 
 - `--frameworks` is a comma-separated list or `all`.
   Options: `mahout`, `pennylane`, `qiskit-init`, `qiskit-statevector`.
-- `--encoding-method` selects the encoding method: `amplitude` (default) or `basis`.
+- `--encoding-method` selects the encoding method: `amplitude` (default), `angle`, `basis`, `iqp`, or `iqp-z`.
 - The latency test reports average milliseconds per vector.
 - Flags:
   - `--qubits`: controls vector length (`2^qubits`).
@@ -115,7 +115,7 @@ Notes:
 
 - `--frameworks` is a comma-separated list or `all`.
   Options: `mahout`, `pennylane`, `qiskit`.
-- `--encoding-method` selects the encoding method: `amplitude` (default) or `basis`.
+- `--encoding-method` selects the encoding method: `amplitude` (default), `angle`, `basis`, `iqp`, or `iqp-z`.
 - Throughput is reported in vectors/sec (higher is better).
 
 ## Dependency Notes
