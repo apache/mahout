@@ -537,11 +537,13 @@ pub fn vector_len(num_qubits: u32, encoding_method: &str) -> usize {
     match encoding_method.to_lowercase().as_str() {
         "angle" => n,
         "basis" => 1,
+        "iqp-z" => n,
+        "iqp" => n + n.saturating_mul(n.saturating_sub(1)) / 2,
         _ => 1 << n, // amplitude
     }
 }
 
-/// Deterministic sample generation matching Python utils.build_sample (amplitude/angle/basis).
+/// Deterministic sample generation matching Python benchmark helpers.
 fn fill_sample(seed: u64, out: &mut [f64], encoding_method: &str, num_qubits: usize) -> Result<()> {
     let len = out.len();
     if len == 0 {
@@ -556,6 +558,13 @@ fn fill_sample(seed: u64, out: &mut [f64], encoding_method: &str, num_qubits: us
             out[0] = idx as f64;
         }
         "angle" => {
+            let scale = (2.0 * PI) / len as f64;
+            for (i, v) in out.iter_mut().enumerate() {
+                let mixed = (i as u64 + seed) % (len as u64);
+                *v = mixed as f64 * scale;
+            }
+        }
+        "iqp-z" | "iqp" => {
             let scale = (2.0 * PI) / len as f64;
             for (i, v) in out.iter_mut().enumerate() {
                 let mixed = (i as u64 + seed) % (len as u64);
@@ -625,6 +634,13 @@ fn fill_sample_f32(
             out[0] = idx as f32;
         }
         "angle" => {
+            let scale = (2.0 * std::f32::consts::PI) / len as f32;
+            for (i, v) in out.iter_mut().enumerate() {
+                let mixed = (i as u64 + seed) % (len as u64);
+                *v = mixed as f32 * scale;
+            }
+        }
+        "iqp-z" | "iqp" => {
             let scale = (2.0 * std::f32::consts::PI) / len as f32;
             for (i, v) in out.iter_mut().enumerate() {
                 let mixed = (i as u64 + seed) % (len as u64);
@@ -830,6 +846,16 @@ mod tests {
     }
 
     #[test]
+    fn generate_batch_matches_fill_batch_inplace_iqp_z() {
+        assert_generate_and_inplace_match("iqp-z");
+    }
+
+    #[test]
+    fn generate_batch_matches_fill_batch_inplace_iqp() {
+        assert_generate_and_inplace_match("iqp");
+    }
+
+    #[test]
     fn adjacent_batches_differ_amplitude() {
         assert_adjacent_batches_differ("amplitude");
     }
@@ -842,6 +868,16 @@ mod tests {
     #[test]
     fn adjacent_batches_differ_basis() {
         assert_adjacent_batches_differ("basis");
+    }
+
+    #[test]
+    fn adjacent_batches_differ_iqp_z() {
+        assert_adjacent_batches_differ("iqp-z");
+    }
+
+    #[test]
+    fn adjacent_batches_differ_iqp() {
+        assert_adjacent_batches_differ("iqp");
     }
 
     #[test]
@@ -1165,6 +1201,35 @@ mod tests {
         assert!(super::encoding_supports_f32("AMPLITUDE"));
         assert!(!super::encoding_supports_f32("angle"));
         assert!(!super::encoding_supports_f32("basis"));
+        assert!(!super::encoding_supports_f32("iqp-z"));
         assert!(!super::encoding_supports_f32("iqp"));
+    }
+
+    #[test]
+    fn test_vector_len_for_iqp_variants() {
+        assert_eq!(super::vector_len(4, "iqp-z"), 4);
+        assert_eq!(super::vector_len(4, "iqp"), 10);
+    }
+
+    #[test]
+    fn test_iqp_samples_in_angle_range() {
+        let config = PipelineConfig {
+            num_qubits: 4,
+            batch_size: 3,
+            encoding_method: "iqp".to_string(),
+            seed: Some(7),
+            ..Default::default()
+        };
+
+        let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
+        let batch = generate_batch(&config, 0, vector_len);
+        let upper = 2.0 * PI;
+        for &value in &batch {
+            assert!(
+                (0.0..upper).contains(&value),
+                "iqp value should be in [0, 2pi), got {}",
+                value
+            );
+        }
     }
 }

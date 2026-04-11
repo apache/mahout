@@ -68,6 +68,8 @@ def _sample_dim(encoding_method: str, num_qubits: int) -> int:
         return 1
     if encoding_method == "angle":
         return num_qubits
+    if encoding_method == "iqp-z":
+        return num_qubits
     if encoding_method == "iqp":
         return num_qubits + num_qubits * (num_qubits - 1) // 2
     return 1 << num_qubits
@@ -270,7 +272,7 @@ def main() -> None:
     parser.add_argument(
         "--encoding-method",
         default="amplitude",
-        choices=["amplitude", "angle", "basis", "iqp"],
+        choices=["amplitude", "angle", "basis", "iqp", "iqp-z"],
     )
     parser.add_argument("--warmup", type=int, default=5)
     parser.add_argument("--trials", type=int, default=3)

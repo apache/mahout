@@ -85,8 +85,7 @@ def _validate_loader_args(
 def _build_sample(seed: int, vector_len: int, encoding_method: str) -> list[float]:
     """Build a single deterministic sample vector for the given encoding method.
 
-    Supports amplitude, angle, basis, and iqp (iqp uses the same mask-and-scale
-    logic as amplitude).
+    Supports amplitude, angle, basis, iqp, and iqp-z.
     """
     import numpy as np
 
@@ -94,19 +93,30 @@ def _build_sample(seed: int, vector_len: int, encoding_method: str) -> list[floa
         mask = np.uint64(vector_len - 1)
         idx = np.uint64(seed) & mask
         return [float(idx)]
-    if encoding_method == "angle":
+    if encoding_method in ("angle", "iqp", "iqp-z"):
         if vector_len == 0:
             return []
         scale = (2.0 * math.pi) / vector_len
         idx = np.arange(vector_len, dtype=np.uint64)
         mixed = (idx + np.uint64(seed)) % np.uint64(vector_len)
         return (mixed.astype(np.float64) * scale).tolist()
-    # amplitude / iqp
+    # amplitude
     mask = np.uint64(vector_len - 1)
     scale = 1.0 / vector_len
     idx = np.arange(vector_len, dtype=np.uint64)
     mixed = (idx + np.uint64(seed)) & mask
     return (mixed.astype(np.float64) * scale).tolist()
+
+
+def _sample_dim(num_qubits: int, encoding_method: str) -> int:
+    """Return the synthetic sample dimension for the selected encoding."""
+    if encoding_method == "basis":
+        return 1
+    if encoding_method in ("angle", "iqp-z"):
+        return num_qubits
+    if encoding_method == "iqp":
+        return num_qubits + num_qubits * (num_qubits - 1) // 2
+    return 1 << num_qubits
 
 
 class QuantumDataLoader:
@@ -365,15 +375,7 @@ class QuantumDataLoader:
         encoding_method = self._encoding_method
         batch_size = self._batch_size
         seed = self._seed if self._seed is not None else 0
-
-        if encoding_method == "basis":
-            sample_size = 1
-        elif encoding_method == "angle":
-            sample_size = num_qubits
-        elif encoding_method == "iqp":
-            sample_size = num_qubits + num_qubits * (num_qubits - 1) // 2
-        else:
-            sample_size = 1 << num_qubits
+        sample_size = _sample_dim(num_qubits, encoding_method)
 
         for batch_idx in range(self._total_batches):
             base = batch_idx * batch_size

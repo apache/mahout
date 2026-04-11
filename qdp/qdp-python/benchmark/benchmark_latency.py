@@ -113,6 +113,16 @@ def run_mahout(
     return result.duration_sec, result.latency_ms_per_vector
 
 
+def _sample_dim(num_qubits: int, encoding_method: str) -> int:
+    if encoding_method == "basis":
+        return 1
+    if encoding_method in {"angle", "iqp-z"}:
+        return num_qubits
+    if encoding_method == "iqp":
+        return num_qubits + num_qubits * (num_qubits - 1) // 2
+    return 1 << num_qubits
+
+
 def run_pennylane(num_qubits: int, total_batches: int, batch_size: int, prefetch: int):
     if not HAS_PENNYLANE:
         print("[PennyLane] Not installed, skipping.")
@@ -236,8 +246,8 @@ def main() -> None:
         "--encoding-method",
         type=str,
         default="amplitude",
-        choices=["amplitude", "angle", "basis"],
-        help="Encoding method to use for Mahout (amplitude, angle, or basis).",
+        choices=["amplitude", "angle", "basis", "iqp", "iqp-z"],
+        help="Encoding method to use for Mahout (amplitude, angle, basis, iqp, or iqp-z).",
     )
     args = parser.parse_args()
 
@@ -249,8 +259,19 @@ def main() -> None:
     except ValueError as exc:
         parser.error(str(exc))
 
+    # TODO: fix this with #1252 in the future.
+    if args.encoding_method in {"iqp", "iqp-z"}:
+        unsupported = [name for name in frameworks if name != "mahout"]
+        if unsupported:
+            print(
+                "Warning: IQP benchmarks in this script currently support only "
+                "framework 'mahout'; skipping unsupported frameworks: "
+                f"{', '.join(unsupported)}."
+            )
+            frameworks = ["mahout"]
+
     total_vectors = args.batches * args.batch_size
-    vector_len = 1 << args.qubits
+    vector_len = _sample_dim(args.qubits, args.encoding_method)
 
     print(f"Generating {total_vectors} samples of {args.qubits} qubits...")
     print(f"  Batch size   : {args.batch_size}")
