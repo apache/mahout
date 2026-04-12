@@ -16,6 +16,7 @@
 
 // Input validation and error handling tests
 
+use qdp_core::gpu::encodings::MAX_QUBITS;
 use qdp_core::MahoutError;
 
 mod common;
@@ -105,7 +106,7 @@ fn test_input_validation_zero_qubits() {
 #[test]
 #[cfg(target_os = "linux")]
 fn test_input_validation_max_qubits() {
-    println!("Testing maximum qubit limit (30)...");
+    println!("Testing maximum qubit limit ({MAX_QUBITS})...");
 
     let Some(engine) = common::qdp_engine() else {
         return;
@@ -113,14 +114,14 @@ fn test_input_validation_max_qubits() {
 
     let data = common::create_test_data(100);
 
-    let result = engine.encode(&data, 35, "amplitude");
+    let result = engine.encode(&data, MAX_QUBITS + 5, "amplitude");
     assert!(result.is_err(), "Should reject excessive qubits");
 
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
             assert!(
-                msg.contains("exceeds") && msg.contains("30"),
-                "Error should mention 30 qubit limit"
+                msg.contains("exceeds") && msg.contains(&MAX_QUBITS.to_string()),
+                "Error should mention configured qubit limit"
             );
             println!("PASS: Correctly rejected excessive qubits: {}", msg);
         }

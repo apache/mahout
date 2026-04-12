@@ -16,6 +16,7 @@
 
 // Unit tests for IQP (Instantaneous Quantum Polynomial) encoding
 
+use qdp_core::gpu::encodings::MAX_QUBITS;
 use qdp_core::MahoutError;
 
 mod common;
@@ -62,19 +63,23 @@ fn test_iqp_zero_qubits_rejected() {
 #[test]
 #[cfg(target_os = "linux")]
 fn test_iqp_max_qubits_exceeded() {
-    println!("Testing IQP max qubits (>30) rejection...");
+    println!("Testing IQP max qubits (>{MAX_QUBITS}) rejection...");
 
     let Some(engine) = common::qdp_engine() else {
         return;
     };
 
-    let data = vec![0.5; iqp_full_data_len(31)];
-    let result = engine.encode(&data, 31, "iqp");
-    assert!(result.is_err(), "Should reject qubits > 30");
+    let requested_qubits = MAX_QUBITS + 1;
+    let data = vec![0.5; iqp_full_data_len(requested_qubits)];
+    let result = engine.encode(&data, requested_qubits, "iqp");
+    assert!(result.is_err(), "Should reject qubits above MAX_QUBITS");
 
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
-            assert!(msg.contains("30"), "Error should mention 30 qubit limit");
+            assert!(
+                msg.contains(&MAX_QUBITS.to_string()),
+                "Error should mention configured qubit limit"
+            );
             println!("PASS: Correctly rejected excessive qubits: {}", msg);
         }
         _ => panic!("Expected InvalidInput error for max qubits"),

@@ -16,6 +16,7 @@
 
 use approx::assert_relative_eq;
 use qdp_core::MahoutError;
+use qdp_core::gpu::encodings::MAX_QUBITS;
 use qdp_core::preprocessing::Preprocessor;
 
 #[test]
@@ -37,7 +38,7 @@ fn test_validate_input_zero_qubits() {
 #[test]
 fn test_validate_input_too_many_qubits() {
     let data = vec![1.0];
-    let result = Preprocessor::validate_input(&data, 31);
+    let result = Preprocessor::validate_input(&data, MAX_QUBITS + 1);
     assert!(
         matches!(result, Err(MahoutError::InvalidInput(msg)) if msg.contains("exceeds practical limit"))
     );
@@ -70,7 +71,7 @@ fn test_validate_input_allows_partial_state() {
 #[test]
 fn test_validate_input_max_qubits_boundary() {
     let data = vec![1.0];
-    assert!(Preprocessor::validate_input(&data, 30).is_ok());
+    assert!(Preprocessor::validate_input(&data, MAX_QUBITS).is_ok());
 }
 
 #[test]

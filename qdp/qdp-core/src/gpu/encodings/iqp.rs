@@ -16,7 +16,7 @@
 
 // IQP (Instantaneous Quantum Polynomial) encoding: entangled quantum states via diagonal phases.
 
-use super::QuantumEncoder;
+use super::{QuantumEncoder, validate_qubit_count};
 #[cfg(target_os = "linux")]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
@@ -149,12 +149,7 @@ impl QuantumEncoder for IqpEncoder {
     ) -> Result<GpuStateVector> {
         crate::profile_scope!("IqpEncoder::encode_batch");
 
-        if num_qubits == 0 || num_qubits > 30 {
-            return Err(MahoutError::InvalidInput(format!(
-                "Number of qubits {} must be between 1 and 30",
-                num_qubits
-            )));
-        }
+        validate_qubit_count(num_qubits)?;
 
         let expected_len = self.expected_data_len(num_qubits);
         if sample_size != expected_len {
@@ -251,12 +246,7 @@ impl QuantumEncoder for IqpEncoder {
         num_qubits: usize,
         stream: *mut c_void,
     ) -> Result<GpuStateVector> {
-        if num_qubits == 0 || num_qubits > 30 {
-            return Err(MahoutError::InvalidInput(format!(
-                "Number of qubits {} must be between 1 and 30",
-                num_qubits
-            )));
-        }
+        validate_qubit_count(num_qubits)?;
 
         let expected_len = self.expected_data_len(num_qubits);
         if input_len != expected_len {
@@ -321,12 +311,7 @@ impl QuantumEncoder for IqpEncoder {
         num_qubits: usize,
         stream: *mut c_void,
     ) -> Result<GpuStateVector> {
-        if num_qubits == 0 || num_qubits > 30 {
-            return Err(MahoutError::InvalidInput(format!(
-                "Number of qubits {} must be between 1 and 30",
-                num_qubits
-            )));
-        }
+        validate_qubit_count(num_qubits)?;
 
         let expected_len = self.expected_data_len(num_qubits);
         if sample_size != expected_len {
@@ -384,17 +369,7 @@ impl QuantumEncoder for IqpEncoder {
     }
 
     fn validate_input(&self, data: &[f64], num_qubits: usize) -> Result<()> {
-        if num_qubits == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Number of qubits must be at least 1".to_string(),
-            ));
-        }
-        if num_qubits > 30 {
-            return Err(MahoutError::InvalidInput(format!(
-                "Number of qubits {} exceeds practical limit of 30",
-                num_qubits
-            )));
-        }
+        validate_qubit_count(num_qubits)?;
 
         let expected_len = self.expected_data_len(num_qubits);
         if data.len() != expected_len {
