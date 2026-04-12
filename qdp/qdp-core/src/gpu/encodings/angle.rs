@@ -232,6 +232,7 @@ impl QuantumEncoder for AngleEncoder {
                 num_qubits, input_len
             )));
         }
+        validate_qubit_count(num_qubits)?;
         let state_len = 1 << num_qubits;
         let angles_d = input_d as *const f64;
         let state_vector = {
@@ -290,6 +291,7 @@ impl QuantumEncoder for AngleEncoder {
                 num_qubits, sample_size
             )));
         }
+        validate_qubit_count(num_qubits)?;
         let state_len = 1 << num_qubits;
         let input_batch_d = input_batch_d as *const f64;
         let angle_validation_buffer = {
@@ -401,7 +403,6 @@ impl QuantumEncoder for AngleEncoder {
 }
 
 impl AngleEncoder {
-    #[cfg(target_os = "linux")]
     /// Encodes `input_len` angle values from a device-resident `f32` buffer into a GPU state
     /// vector, using the provided CUDA stream for all launched work.
     ///
@@ -411,6 +412,7 @@ impl AngleEncoder {
     /// The caller must also ensure that `stream` is either null or a valid CUDA stream handle
     /// associated with `device`, and that no concurrent use of these raw pointers violates Rust's
     /// aliasing or lifetime rules.
+    #[cfg(target_os = "linux")]
     pub unsafe fn encode_from_gpu_ptr_f32_with_stream(
         device: &Arc<CudaDevice>,
         input_d: *const f32,
@@ -430,6 +432,7 @@ impl AngleEncoder {
             )));
         }
 
+        validate_qubit_count(num_qubits)?;
         let state_len = 1 << num_qubits;
         let state_vector = {
             crate::profile_scope!("GPU::Alloc");
