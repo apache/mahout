@@ -16,6 +16,8 @@
 
 """Simple tests for PyO3 bindings."""
 
+import math
+
 import pytest
 import torch
 
@@ -28,6 +30,58 @@ def _has_multi_gpu():
         return torch.cuda.is_available() and torch.cuda.device_count() >= 2
     except ImportError:
         return False
+
+
+def _iqp_data_len(num_qubits: int, enable_zz: bool) -> int:
+    """Return the expected IQP parameter count for a given qubit count."""
+    if enable_zz:
+        return num_qubits + num_qubits * (num_qubits - 1) // 2
+    return num_qubits
+
+
+def _build_iqp_params(num_qubits: int, enable_zz: bool, offset: float = 0.0):
+    """Build deterministic IQP parameters for tests."""
+    data_len = _iqp_data_len(num_qubits, enable_zz)
+    return [0.03125 * (i + 1) + offset for i in range(data_len)]
+
+
+def _compute_iqp_phase(data, x: int, num_qubits: int, enable_zz: bool) -> float:
+    """Reference CPU phase computation matching the CUDA kernel."""
+    phase = 0.0
+
+    for i in range(num_qubits):
+        if (x >> i) & 1:
+            phase += data[i]
+
+    if enable_zz:
+        pair_idx = num_qubits
+        for i in range(num_qubits):
+            for j in range(i + 1, num_qubits):
+                if ((x >> i) & 1) and ((x >> j) & 1):
+                    phase += data[pair_idx]
+                pair_idx += 1
+
+    return phase
+
+
+def _cpu_iqp_state(data, num_qubits: int, enable_zz: bool) -> torch.Tensor:
+    """Compute a small IQP reference state on CPU using the naive definition."""
+    state_len = 1 << num_qubits
+    amplitudes = []
+
+    for z in range(state_len):
+        real_sum = 0.0
+        imag_sum = 0.0
+
+        for x in range(state_len):
+            phase = _compute_iqp_phase(data, x, num_qubits, enable_zz)
+            sign = 1.0 if ((x & z).bit_count() & 1) == 0 else -1.0
+            real_sum += sign * math.cos(phase)
+            imag_sum += sign * math.sin(phase)
+
+        amplitudes.append(complex(real_sum / state_len, imag_sum / state_len))
+
+    return torch.tensor([amplitudes], dtype=torch.complex128, device="cuda:0")
 
 
 @requires_qdp
@@ -1299,6 +1353,98 @@ def test_iqp_fwt_shared_vs_global_memory_threshold():
         assert torch.isclose(norm, torch.tensor(1.0, device="cuda:0"), atol=1e-6), (
             f"IQP {num_qubits} qubits not normalized at threshold: got {norm.item()}"
         )
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_iqp_fwt_matches_naive_reference():
+    """Test FWT/fused IQP kernels against a small CPU reference."""
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    for encoding_method, enable_zz in [("iqp-z", False), ("iqp", True)]:
+        for num_qubits in [4, 5]:
+            data = _build_iqp_params(num_qubits, enable_zz)
+            expected = _cpu_iqp_state(data, num_qubits, enable_zz)
+            actual = torch.from_dlpack(engine.encode(data, num_qubits, encoding_method))
+
+            assert torch.allclose(actual, expected, atol=1e-10, rtol=1e-10), (
+                f"{encoding_method} {num_qubits} qubits does not match naive reference"
+            )
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_iqp_batch_matches_single_encode():
+    """Test that batch IQP encoding matches per-sample single encode results."""
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    for encoding_method, enable_zz in [("iqp-z", False), ("iqp", True)]:
+        num_qubits = 6
+        batch_size = 4
+        batch = torch.tensor(
+            [
+                _build_iqp_params(num_qubits, enable_zz, offset=0.01 * sample_idx)
+                for sample_idx in range(batch_size)
+            ],
+            dtype=torch.float64,
+        )
+
+        batch_state = torch.from_dlpack(
+            engine.encode(batch, num_qubits, encoding_method)
+        )
+
+        for sample_idx in range(batch_size):
+            single_state = torch.from_dlpack(
+                engine.encode(batch[sample_idx].tolist(), num_qubits, encoding_method)
+            )
+            assert torch.allclose(
+                batch_state[sample_idx], single_state[0], atol=1e-10
+            ), (
+                f"{encoding_method} batch sample {sample_idx} diverges from single encode"
+            )
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_iqp_grid_stride_large_state_zero_params():
+    """Test a large IQP-Z state that requires the capped grid-size path."""
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+
+    # For DEFAULT_BLOCK_SIZE=256 and MAX_GRID_BLOCKS=2048, 20 qubits requires
+    # 4096 blocks without the grid cap, so this exercises the grid-stride path.
+    num_qubits = 20
+    data = [0.0] * num_qubits
+
+    state = torch.from_dlpack(engine.encode(data, num_qubits, "iqp-z"))
+    magnitudes = torch.abs(state[0])
+    norm = torch.sum(magnitudes**2)
+
+    assert state.shape == (1, 1 << num_qubits)
+    assert torch.isclose(norm, torch.tensor(1.0, device="cuda:0"), atol=1e-6)
+    assert torch.isclose(
+        state[0, 0],
+        torch.tensor(1.0 + 0.0j, dtype=state.dtype, device="cuda:0"),
+        atol=1e-6,
+    )
+    assert torch.max(magnitudes[1:]) < 1e-6
 
 
 @requires_qdp
