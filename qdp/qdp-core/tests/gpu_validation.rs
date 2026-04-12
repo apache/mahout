@@ -16,8 +16,8 @@
 
 // Input validation and error handling tests
 
-use qdp_core::gpu::encodings::MAX_QUBITS;
 use qdp_core::MahoutError;
+use qdp_core::gpu::encodings::MAX_QUBITS;
 
 mod common;
 
