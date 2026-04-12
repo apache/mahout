@@ -7,7 +7,7 @@ Unit tests for QDP core library covering input validation, API workflows, and me
 ### `validation.rs` - Input Validation
 
 - Invalid encoder strategy rejection
-- Qubit size validation (mismatch, zero, max limit 30)
+- Qubit size validation (mismatch, zero, configured max limit)
 - Empty and zero-norm data rejection
 - Error type formatting
 - Non-Linux platform graceful failure
