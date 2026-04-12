@@ -1041,6 +1041,68 @@ fn test_encode_angle_from_gpu_ptr_f32_qubit_mismatch() {
 }
 
 #[test]
+fn test_encode_angle_from_gpu_ptr_f32_too_many_qubits() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let input = vec![0.0_f32; 31];
+    let (_device, input_d) = match common::copy_f32_to_device(&input) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let ptr = *input_d.device_ptr() as *const f32;
+    let result = unsafe { engine.encode_angle_from_gpu_ptr_f32(ptr, input_d.len(), 31) };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => {
+            assert!(msg.contains("exceeds practical limit"), "got: {msg}");
+        }
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_angle_from_gpu_ptr_f32_with_stream_too_many_qubits() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (device, input_d) = match common::copy_f32_to_device(&[0.0_f32; 31]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let stream = device.fork_default_stream().expect("fork_default_stream");
+    let result = unsafe {
+        engine.encode_angle_from_gpu_ptr_f32_with_stream(
+            *input_d.device_ptr() as *const f32,
+            input_d.len(),
+            31,
+            stream.stream as *mut c_void,
+        )
+    };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => {
+            assert!(msg.contains("exceeds practical limit"), "got: {msg}");
+        }
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
 fn test_encode_batch_from_gpu_ptr_f32_success() {
     let engine = match engine_f32() {
         Some(e) => e,
