@@ -60,6 +60,10 @@ github:
       required_linear_history: true
       required_signatures: false
 
+  collaborators:
+    - viiccwen
+    - vvvdwbvvv
+
 notifications:
   commits: commits@mahout.apache.org
   issues: issues@mahout.apache.org
