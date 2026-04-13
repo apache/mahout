@@ -1293,3 +1293,204 @@ fn test_encode_batch_from_gpu_ptr_f32_odd_sample_size_success() {
         )
     };
 }
+
+#[test]
+fn test_encode_angle_batch_from_gpu_ptr_f32_success() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let num_samples = 2;
+    let num_qubits = 3;
+    let (_device, input_d) = match common::copy_f32_to_device(&[
+        0.0,
+        std::f32::consts::FRAC_PI_2,
+        std::f32::consts::FRAC_PI_4,
+        0.2,
+        0.4,
+        0.6,
+    ]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_angle_batch_from_gpu_ptr_f32(
+                *input_d.device_ptr() as *const f32,
+                num_samples,
+                num_qubits,
+                num_qubits,
+            )
+            .expect("encode_angle_batch_from_gpu_ptr_f32")
+    };
+    unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, num_samples as i64, 8) };
+}
+
+#[test]
+fn test_encode_angle_batch_from_gpu_ptr_f32_with_stream_success() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (device, input_d) = match common::copy_f32_to_device(&[
+        0.0_f32,
+        std::f32::consts::FRAC_PI_2,
+        std::f32::consts::FRAC_PI_4,
+        0.2_f32,
+        0.4_f32,
+        0.6_f32,
+    ]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let stream = device.fork_default_stream().expect("fork_default_stream");
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_angle_batch_from_gpu_ptr_f32_with_stream(
+                *input_d.device_ptr() as *const f32,
+                2,
+                3,
+                3,
+                stream.stream as *mut c_void,
+            )
+            .expect("encode_angle_batch_from_gpu_ptr_f32_with_stream")
+    };
+    unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 2, 8) };
+}
+
+#[test]
+fn test_encode_angle_batch_from_gpu_ptr_f32_null_pointer() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let result = unsafe { engine.encode_angle_batch_from_gpu_ptr_f32(std::ptr::null(), 2, 2, 2) };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => assert!(msg.contains("null")),
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_angle_batch_from_gpu_ptr_f32_sample_size_mismatch() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (_device, input_d) = match common::copy_f32_to_device(&[0.0_f32, 0.1, 0.2, 0.3, 0.4, 0.5]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let result = unsafe {
+        engine.encode_angle_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 2, 3)
+    };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => {
+            assert!(
+                msg.contains("sample_size=3") || msg.contains("got 2"),
+                "msg: {msg}"
+            );
+        }
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_angle_batch_from_gpu_ptr_f32_zero_samples() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let result = unsafe { engine.encode_angle_batch_from_gpu_ptr_f32(std::ptr::null(), 0, 2, 2) };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => assert!(msg.contains("zero") || msg.contains("samples")),
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_angle_batch_from_gpu_ptr_f32_non_finite_rejected() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (_device, input_d) =
+        match common::copy_f32_to_device(&[0.0_f32, f32::NAN, 0.2_f32, 0.3_f32]) {
+            Some(t) => t,
+            None => {
+                println!("SKIP: No CUDA device");
+                return;
+            }
+        };
+    let result = unsafe {
+        engine.encode_angle_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 2, 2)
+    };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => {
+            assert!(
+                msg.contains("non-finite") || msg.contains("NaN"),
+                "msg: {msg}"
+            );
+        }
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_angle_batch_from_gpu_ptr_f32_success_f64_engine() {
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        println!("SKIP: No GPU");
+        return;
+    };
+    let (_device, input_d) = match common::copy_f32_to_device(&[
+        0.0_f32,
+        std::f32::consts::FRAC_PI_2,
+        std::f32::consts::FRAC_PI_4,
+        0.2_f32,
+        0.4_f32,
+        0.6_f32,
+    ]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_angle_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 3, 3)
+            .expect("encode_angle_batch_from_gpu_ptr_f32 (Float64 engine)")
+    };
+    unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 2, 8) };
+}

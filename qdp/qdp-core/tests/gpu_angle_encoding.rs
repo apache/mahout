@@ -143,3 +143,73 @@ fn test_angle_successful_encoding_from_parquet() {
         );
     }
 }
+
+#[test]
+fn test_angle_batch_f32_success() {
+    let Some(engine) = common::qdp_engine_with_precision(qdp_core::Precision::Float32) else {
+        println!("SKIP: No GPU available");
+        return;
+    };
+
+    let num_qubits = 3;
+    let num_samples = 2;
+    let data = vec![
+        0.0_f32,
+        std::f32::consts::FRAC_PI_2,
+        std::f32::consts::FRAC_PI_4,
+        0.2_f32,
+        0.4_f32,
+        0.6_f32,
+    ];
+
+    let dlpack_ptr = engine
+        .encode_batch_f32(&data, num_samples, num_qubits, num_qubits, "angle")
+        .expect("angle batch encode f32 should succeed");
+
+    unsafe {
+        common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, num_samples as i64, 8);
+    }
+}
+
+#[test]
+fn test_angle_batch_f32_rejects_sample_size_mismatch() {
+    let Some(engine) = common::qdp_engine_with_precision(qdp_core::Precision::Float32) else {
+        println!("SKIP: No GPU available");
+        return;
+    };
+
+    let data = vec![0.1_f32, 0.2, 0.3, 0.4];
+    let result = engine.encode_batch_f32(&data, 2, 2, 3, "angle");
+
+    assert!(result.is_err());
+    match result {
+        Err(MahoutError::InvalidInput(msg)) => {
+            assert!(
+                msg.contains("sample_size=3") || msg.contains("got 2"),
+                "msg: {msg}"
+            );
+        }
+        _ => panic!("expected InvalidInput, got {:?}", result),
+    }
+}
+
+#[test]
+fn test_angle_batch_f32_rejects_nan() {
+    let Some(engine) = common::qdp_engine_with_precision(qdp_core::Precision::Float32) else {
+        println!("SKIP: No GPU available");
+        return;
+    };
+
+    let data = vec![0.0_f32, f32::NAN, 0.2, 0.3];
+    let result = engine.encode_batch_f32(&data, 2, 2, 2, "angle");
+
+    assert!(result.is_err());
+    match result {
+        Err(MahoutError::InvalidInput(msg)) => {
+            assert!(msg.contains("Sample 0"), "msg: {msg}");
+            assert!(msg.contains("angle 1"), "msg: {msg}");
+            assert!(msg.contains("finite"), "msg: {msg}");
+        }
+        _ => panic!("expected InvalidInput, got {:?}", result),
+    }
+}

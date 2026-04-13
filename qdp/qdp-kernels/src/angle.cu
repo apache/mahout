@@ -88,6 +88,34 @@ __global__ void angle_encode_batch_kernel(
     }
 }
 
+__global__ void angle_encode_batch_kernel_f32(
+    const float* __restrict__ angles_batch,
+    cuComplex* __restrict__ state_batch,
+    size_t num_samples,
+    size_t state_len,
+    unsigned int num_qubits
+) {
+    const size_t total_elements = num_samples * state_len;
+    const size_t stride = gridDim.x * blockDim.x;
+    const size_t state_mask = state_len - 1;
+
+    for (size_t global_idx = blockIdx.x * blockDim.x + threadIdx.x;
+         global_idx < total_elements;
+         global_idx += stride) {
+        const size_t sample_idx = global_idx >> num_qubits;
+        const size_t element_idx = global_idx & state_mask;
+        const float* angles = angles_batch + sample_idx * num_qubits;
+
+        float amplitude = 1.0f;
+        for (unsigned int bit = 0; bit < num_qubits; ++bit) {
+            const float angle = angles[bit];
+            amplitude *= ((element_idx >> bit) & 1U) ? sinf(angle) : cosf(angle);
+        }
+
+        state_batch[global_idx] = make_cuComplex(amplitude, 0.0f);
+    }
+}
+
 extern "C" {
 
 /// Launch angle encoding kernel
@@ -197,6 +225,49 @@ int launch_angle_encode_batch(
     const size_t gridSize = (blocks_needed < max_blocks) ? blocks_needed : max_blocks;
 
     angle_encode_batch_kernel<<<gridSize, blockSize, 0, stream>>>(
+        angles_batch_d,
+        state_complex_d,
+        num_samples,
+        state_len,
+        num_qubits
+    );
+
+    return (int)cudaGetLastError();
+}
+
+/// Launch batch angle encoding kernel for float32 input
+///
+/// # Arguments
+/// * angles_batch_d - Device pointer to batch angles (num_samples * num_qubits)
+/// * state_batch_d - Device pointer to output batch state vectors
+/// * num_samples - Number of samples in batch
+/// * state_len - State vector size per sample (2^num_qubits)
+/// * num_qubits - Number of qubits (angles length)
+/// * stream - CUDA stream for async execution
+///
+/// # Returns
+/// CUDA error code (0 = cudaSuccess)
+int launch_angle_encode_batch_f32(
+    const float* angles_batch_d,
+    void* state_batch_d,
+    size_t num_samples,
+    size_t state_len,
+    unsigned int num_qubits,
+    cudaStream_t stream
+) {
+    if (num_samples == 0 || state_len == 0 || num_qubits == 0) {
+        return cudaErrorInvalidValue;
+    }
+
+    cuComplex* state_complex_d = static_cast<cuComplex*>(state_batch_d);
+
+    const int blockSize = DEFAULT_BLOCK_SIZE;
+    const size_t total_elements = num_samples * state_len;
+    const size_t blocks_needed = (total_elements + blockSize - 1) / blockSize;
+    const size_t max_blocks = MAX_GRID_BLOCKS;
+    const size_t gridSize = (blocks_needed < max_blocks) ? blocks_needed : max_blocks;
+
+    angle_encode_batch_kernel_f32<<<gridSize, blockSize, 0, stream>>>(
         angles_batch_d,
         state_complex_d,
         num_samples,
