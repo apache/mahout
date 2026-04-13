@@ -75,10 +75,14 @@ impl QdpEngine {
     ///         - Python list: [1.0, 2.0, 3.0, 4.0]
     ///         - NumPy array: 1D (single sample) or 2D (batch) array
     ///         - PyTorch tensor: CPU tensor (float64 recommended; will be copied to GPU)
+    ///           or CUDA tensor for zero-copy encoding
     ///         - String path: .parquet, .arrow, .feather, .npy, .pt, .pth, .pb file
     ///         - pathlib.Path: Path object (converted via os.fspath())
     ///     num_qubits: Number of qubits for encoding
     ///     encoding_method: Encoding strategy ("amplitude" default, "angle", or "basis")
+    ///         CUDA tensor note:
+    ///         - amplitude accepts float64 and float32
+    ///         - angle accepts float64 generally, plus float32 for 1D single-sample tensors
     ///
     /// Returns:
     ///     QuantumTensor: DLPack-compatible tensor for zero-copy PyTorch integration
