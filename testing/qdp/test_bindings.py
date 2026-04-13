@@ -398,7 +398,9 @@ def test_encode_cuda_tensor_angle_float16_rejected():
     engine = QdpEngine(0)
     data = torch.tensor([0.0, torch.pi / 2], dtype=torch.float16, device="cuda:0")
 
-    with pytest.raises(RuntimeError, match="float64 for angle encoding|supports only 1D"):
+    with pytest.raises(
+        RuntimeError, match="float64 for angle encoding|supports only 1D"
+    ):
         engine.encode(data, 2, "angle")
 
 
