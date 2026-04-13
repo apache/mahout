@@ -36,13 +36,6 @@ print(tensor)  # Complex tensor on CUDA
 | `basis` | Encode integer as computational basis state |
 | `iqp` | IQP-style encoding with entanglement |
 
-### CUDA Tensor Dtype Notes
-
-- `amplitude` accepts CUDA `float64` and `float32`.
-- `angle` accepts CUDA `float64` for general use, and CUDA `float32` only for 1D
-  single-sample tensors.
-- Batch `angle` encoding from CUDA tensors still requires `float64`.
-
 ## Input Sources
 
 ```python
@@ -55,13 +48,6 @@ qtensor = engine.encode(np.array([[1, 2, 3, 4], [4, 3, 2, 1]]), 2, "amplitude")
 # PyTorch tensor (CPU or CUDA)
 qtensor = engine.encode(torch.tensor([1.0, 2.0, 3.0, 4.0]), 2, "amplitude")
 
-# 1D CUDA float32 angle encoding is supported
-angles = torch.tensor([torch.pi / 2, 0.0], dtype=torch.float32, device="cuda")
-qtensor = engine.encode(angles, 2, "angle")
-
-# Batch CUDA angle encoding still requires float64
-batch_angles = torch.tensor([[0.0, 0.0], [torch.pi / 2, 0.0]], dtype=torch.float64, device="cuda")
-qtensor = engine.encode(batch_angles, 2, "angle")
 
 # File formats
 qtensor = engine.encode("data.parquet", 10, "amplitude")
