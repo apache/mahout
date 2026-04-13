@@ -36,6 +36,7 @@ Nikolay Sakharnykh      | nsakharnykh@...   | No  |
 Paritosh Ranjan         | pranjan@...       | Yes | @paritoshranjan
 Pat Ferrel              | pat@...           | Yes | (Emeritus PMC) @occam
 Robin Anil              | robinanil@...     | Yes |
+Ryan Huang              | hcr@...           | No  | @ryankert01
 Sean Owen               | srowen@...        | No  | (Emeritus PMC)
 Sebastian Schelter      | ssc@...           | Yes |
 Shannon Quinn           | squinn@...        | Yes | PMC Chair @magsol@quinnwitz.house
