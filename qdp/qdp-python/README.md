@@ -48,7 +48,6 @@ qtensor = engine.encode(np.array([[1, 2, 3, 4], [4, 3, 2, 1]]), 2, "amplitude")
 # PyTorch tensor (CPU or CUDA)
 qtensor = engine.encode(torch.tensor([1.0, 2.0, 3.0, 4.0]), 2, "amplitude")
 
-
 # File formats
 qtensor = engine.encode("data.parquet", 10, "amplitude")
 qtensor = engine.encode("data.arrow", 10, "amplitude")
