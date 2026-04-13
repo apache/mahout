@@ -387,6 +387,23 @@ def test_encode_cuda_tensor_wrong_dtype():
 
 @requires_qdp
 @pytest.mark.gpu
+def test_encode_cuda_tensor_angle_float16_rejected():
+    """Test error when CUDA tensor has wrong dtype for angle float32 fast path."""
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+    data = torch.tensor([0.0, torch.pi / 2], dtype=torch.float16, device="cuda:0")
+
+    with pytest.raises(RuntimeError, match="float64 for angle encoding|supports only 1D"):
+        engine.encode(data, 2, "angle")
+
+
+@requires_qdp
+@pytest.mark.gpu
 def test_encode_cuda_tensor_non_contiguous():
     """Test error when CUDA tensor is non-contiguous."""
     pytest.importorskip("torch")
@@ -1416,7 +1433,7 @@ def test_iqp_fwt_matches_naive_reference():
     if not torch.cuda.is_available():
         pytest.skip("GPU required for QdpEngine")
 
-    engine = QdpEngine(0)
+    engine = QdpEngine(0, precision="float64")
 
     for encoding_method, enable_zz in [("iqp-z", False), ("iqp", True)]:
         for num_qubits in [4, 5]:
