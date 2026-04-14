@@ -37,11 +37,11 @@ fn test_basis_wrong_sample_size_rejected() {
     let data: Vec<f64> = vec![0.0, 1.0, 2.0, 3.0];
     let wrong_sample_size = 2;
 
-    let path = "/tmp/test_basis_wrong_sample_size.parquet";
+    let tmp = tempfile::NamedTempFile::new().unwrap();
+    let path = tmp.path().to_str().unwrap();
     common::write_fixed_size_list_parquet(path, &data, wrong_sample_size);
 
     let result = engine.encode_from_parquet(path, 2, "basis");
-    let _ = std::fs::remove_file(path);
 
     assert!(result.is_err());
     match result {
@@ -61,11 +61,11 @@ fn test_basis_nan_rejected() {
     };
 
     let data = vec![f64::NAN];
-    let path = "/tmp/test_basis_nan.parquet";
+    let tmp = tempfile::NamedTempFile::new().unwrap();
+    let path = tmp.path().to_str().unwrap();
     common::write_fixed_size_list_parquet(path, &data, 1);
 
     let result = engine.encode_from_parquet(path, 2, "basis");
-    let _ = std::fs::remove_file(path);
 
     assert!(result.is_err());
     match result {
@@ -83,11 +83,11 @@ fn test_basis_infinity_rejected() {
     };
 
     let data = vec![f64::INFINITY];
-    let path = "/tmp/test_basis_infinity.parquet";
+    let tmp = tempfile::NamedTempFile::new().unwrap();
+    let path = tmp.path().to_str().unwrap();
     common::write_fixed_size_list_parquet(path, &data, 1);
 
     let result = engine.encode_from_parquet(path, 2, "basis");
-    let _ = std::fs::remove_file(path);
 
     assert!(result.is_err());
     match result {
@@ -105,11 +105,11 @@ fn test_basis_negative_rejected() {
     };
 
     let data = vec![-1.0_f64];
-    let path = "/tmp/test_basis_negative.parquet";
+    let tmp = tempfile::NamedTempFile::new().unwrap();
+    let path = tmp.path().to_str().unwrap();
     common::write_fixed_size_list_parquet(path, &data, 1);
 
     let result = engine.encode_from_parquet(path, 2, "basis");
-    let _ = std::fs::remove_file(path);
 
     assert!(result.is_err());
     match result {
@@ -127,11 +127,11 @@ fn test_basis_fractional_rejected() {
     };
 
     let data = vec![1.5_f64];
-    let path = "/tmp/test_basis_fractional.parquet";
+    let tmp = tempfile::NamedTempFile::new().unwrap();
+    let path = tmp.path().to_str().unwrap();
     common::write_fixed_size_list_parquet(path, &data, 1);
 
     let result = engine.encode_from_parquet(path, 2, "basis");
-    let _ = std::fs::remove_file(path);
 
     assert!(result.is_err());
     match result {
@@ -150,11 +150,11 @@ fn test_basis_out_of_range_rejected() {
 
     // num_qubits=2 → state_size = 2^2 = 4, so index 4 is out of range
     let data = vec![4.0_f64];
-    let path = "/tmp/test_basis_out_of_range.parquet";
+    let tmp = tempfile::NamedTempFile::new().unwrap();
+    let path = tmp.path().to_str().unwrap();
     common::write_fixed_size_list_parquet(path, &data, 1);
 
     let result = engine.encode_from_parquet(path, 2, "basis");
-    let _ = std::fs::remove_file(path);
 
     assert!(result.is_err());
     match result {
@@ -178,13 +178,13 @@ fn test_basis_successful_encoding_from_parquet() {
     let num_qubits = 2;
     let data: Vec<f64> = vec![0.0, 1.0, 2.0, 3.0]; // 4 samples, each with index in [0,3]
 
-    let path = "/tmp/test_basis_success.parquet";
+    let tmp = tempfile::NamedTempFile::new().unwrap();
+    let path = tmp.path().to_str().unwrap();
     common::write_fixed_size_list_parquet(path, &data, 1);
 
     let dlpack_ptr = engine
         .encode_from_parquet(path, num_qubits, "basis")
         .expect("basis streaming encode should succeed");
-    let _ = std::fs::remove_file(path);
 
     // 4 samples, state_size = 2^2 = 4
     unsafe {
