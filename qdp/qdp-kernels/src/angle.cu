@@ -42,6 +42,24 @@ __global__ void angle_encode_kernel(
     state[idx] = make_cuDoubleComplex(amplitude, 0.0);
 }
 
+__global__ void angle_encode_kernel_f32(
+    const float* __restrict__ angles,
+    cuComplex* __restrict__ state,
+    size_t state_len,
+    unsigned int num_qubits
+) {
+    size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx >= state_len) return;
+
+    float amplitude = 1.0f;
+    for (unsigned int bit = 0; bit < num_qubits; ++bit) {
+        float angle = angles[bit];
+        amplitude *= ((idx >> bit) & 1U) ? sinf(angle) : cosf(angle);
+    }
+
+    state[idx] = make_cuComplex(amplitude, 0.0f);
+}
+
 __global__ void angle_encode_batch_kernel(
     const double* __restrict__ angles_batch,
     cuDoubleComplex* __restrict__ state_batch,
@@ -100,6 +118,43 @@ int launch_angle_encode(
     const int gridSize = (state_len + blockSize - 1) / blockSize;
 
     angle_encode_kernel<<<gridSize, blockSize, 0, stream>>>(
+        angles_d,
+        state_complex_d,
+        state_len,
+        num_qubits
+    );
+
+    return (int)cudaGetLastError();
+}
+
+/// Launch angle encoding kernel for float32 input
+///
+/// # Arguments
+/// * angles_d - Device pointer to per-qubit angles
+/// * state_d - Device pointer to output state vector
+/// * state_len - Target state vector size (2^num_qubits)
+/// * num_qubits - Number of qubits (angles length)
+/// * stream - CUDA stream for async execution (nullptr = default stream)
+///
+/// # Returns
+/// CUDA error code (0 = cudaSuccess)
+int launch_angle_encode_f32(
+    const float* angles_d,
+    void* state_d,
+    size_t state_len,
+    unsigned int num_qubits,
+    cudaStream_t stream
+) {
+    if (state_len == 0 || num_qubits == 0) {
+        return cudaErrorInvalidValue;
+    }
+
+    cuComplex* state_complex_d = static_cast<cuComplex*>(state_d);
+
+    const int blockSize = DEFAULT_BLOCK_SIZE;
+    const int gridSize = (state_len + blockSize - 1) / blockSize;
+
+    angle_encode_kernel_f32<<<gridSize, blockSize, 0, stream>>>(
         angles_d,
         state_complex_d,
         state_len,

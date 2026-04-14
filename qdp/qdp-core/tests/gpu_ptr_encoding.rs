@@ -893,6 +893,216 @@ fn test_encode_from_gpu_ptr_f32_input_exceeds_state_len() {
 }
 
 #[test]
+fn test_encode_angle_from_gpu_ptr_f32_success() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (_device, input_d) = match common::copy_f32_to_device(&[0.0, std::f32::consts::FRAC_PI_2]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let ptr = *input_d.device_ptr() as *const f32;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_angle_from_gpu_ptr_f32(ptr, input_d.len(), 2)
+            .expect("encode_angle_from_gpu_ptr_f32")
+    };
+    unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 1, 4) };
+}
+
+#[test]
+fn test_encode_angle_from_gpu_ptr_f32_with_stream_success() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (device, input_d) = match common::copy_f32_to_device(&[0.0, std::f32::consts::FRAC_PI_2]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let stream = device.fork_default_stream().expect("fork_default_stream");
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_angle_from_gpu_ptr_f32_with_stream(
+                *input_d.device_ptr() as *const f32,
+                input_d.len(),
+                2,
+                stream.stream as *mut c_void,
+            )
+            .expect("encode_angle_from_gpu_ptr_f32_with_stream")
+    };
+    unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 1, 4) };
+}
+
+#[test]
+fn test_encode_angle_from_gpu_ptr_f32_success_f64_engine() {
+    let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
+        println!("SKIP: No GPU");
+        return;
+    };
+    let (_device, input_d) = match common::copy_f32_to_device(&[0.0, std::f32::consts::FRAC_PI_2]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let ptr = *input_d.device_ptr() as *const f32;
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_angle_from_gpu_ptr_f32(ptr, input_d.len(), 2)
+            .expect("encode_angle_from_gpu_ptr_f32 (Float64 engine)")
+    };
+    unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 1, 4) };
+}
+
+#[test]
+fn test_encode_angle_from_gpu_ptr_f32_empty_input() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (_device, input_d) = match common::copy_f32_to_device(&[0.0]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let ptr = *input_d.device_ptr() as *const f32;
+    let result = unsafe { engine.encode_angle_from_gpu_ptr_f32(ptr, 0, 1) };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => {
+            assert!(msg.contains("empty") || msg.contains("null"));
+        }
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_angle_from_gpu_ptr_f32_null_pointer() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let result = unsafe { engine.encode_angle_from_gpu_ptr_f32(std::ptr::null(), 2, 2) };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => assert!(msg.contains("null")),
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_angle_from_gpu_ptr_f32_qubit_mismatch() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (_device, input_d) = match common::copy_f32_to_device(&[0.0, std::f32::consts::FRAC_PI_2]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let ptr = *input_d.device_ptr() as *const f32;
+    let result = unsafe { engine.encode_angle_from_gpu_ptr_f32(ptr, input_d.len(), 1) };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => {
+            assert!(msg.contains("expects 1 values") || msg.contains("got 2"));
+        }
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_angle_from_gpu_ptr_f32_too_many_qubits() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let input = vec![0.0_f32; 31];
+    let (_device, input_d) = match common::copy_f32_to_device(&input) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let ptr = *input_d.device_ptr() as *const f32;
+    let result = unsafe { engine.encode_angle_from_gpu_ptr_f32(ptr, input_d.len(), 31) };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => {
+            assert!(msg.contains("exceeds practical limit"), "got: {msg}");
+        }
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_angle_from_gpu_ptr_f32_with_stream_too_many_qubits() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (device, input_d) = match common::copy_f32_to_device(&[0.0_f32; 31]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let stream = device.fork_default_stream().expect("fork_default_stream");
+    let result = unsafe {
+        engine.encode_angle_from_gpu_ptr_f32_with_stream(
+            *input_d.device_ptr() as *const f32,
+            input_d.len(),
+            31,
+            stream.stream as *mut c_void,
+        )
+    };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => {
+            assert!(msg.contains("exceeds practical limit"), "got: {msg}");
+        }
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
 fn test_encode_batch_from_gpu_ptr_f32_success() {
     let engine = match engine_f32() {
         Some(e) => e,
