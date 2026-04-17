@@ -199,7 +199,11 @@ class TritonAmdEngine:
 
         out_ri = torch.empty((batch, state_len, 2), device=x.device, dtype=x.dtype)
         total = batch * state_len
-        grid = lambda meta: (triton.cdiv(total, meta["BLOCK"]),)
+        block: Any = 256
+
+        def grid(meta: dict[str, int]) -> tuple[int]:
+            return (triton.cdiv(total, meta["BLOCK"]),)
+
         kernel: Any = _amplitude_pack_kernel[grid]
         kernel(
             x,
@@ -208,7 +212,7 @@ class TritonAmdEngine:
             sample_size,
             state_len,
             total,
-            BLOCK=256,
+            BLOCK=block,
         )
         return torch.view_as_complex(out_ri).to(self._complex_dtype())
 
@@ -224,16 +228,22 @@ class TritonAmdEngine:
 
         out_ri = torch.empty((batch, state_len, 2), device=angles.device, dtype=real_dtype)
         total = batch * state_len
-        grid = lambda meta: (triton.cdiv(total, meta["BLOCK"]),)
+        nq: Any = num_qubits
+        fp64: Any = self.precision == "float64"
+        block: Any = 128
+
+        def grid(meta: dict[str, int]) -> tuple[int]:
+            return (triton.cdiv(total, meta["BLOCK"]),)
+
         kernel: Any = _angle_kernel[grid]
         kernel(
             angles,
             out_ri,
             state_len,
             total,
-            NQ=num_qubits,
-            FP64=self.precision == "float64",
-            BLOCK=128,
+            NQ=nq,
+            FP64=fp64,
+            BLOCK=block,
         )
         return torch.view_as_complex(out_ri).to(self._complex_dtype())
 
@@ -258,15 +268,20 @@ class TritonAmdEngine:
         real_dtype = self._real_dtype()
         out_ri = torch.empty((batch, state_len, 2), device=idx.device, dtype=real_dtype)
         total = batch * state_len
-        grid = lambda meta: (triton.cdiv(total, meta["BLOCK"]),)
+        fp64: Any = self.precision == "float64"
+        block: Any = 256
+
+        def grid(meta: dict[str, int]) -> tuple[int]:
+            return (triton.cdiv(total, meta["BLOCK"]),)
+
         kernel: Any = _basis_kernel[grid]
         kernel(
             idx,
             out_ri,
             state_len,
             total,
-            FP64=self.precision == "float64",
-            BLOCK=256,
+            FP64=fp64,
+            BLOCK=block,
         )
         return torch.view_as_complex(out_ri).to(self._complex_dtype())
 

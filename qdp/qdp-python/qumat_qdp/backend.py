@@ -78,7 +78,7 @@ class QuantumTensor:
     value: Any
     backend: str
 
-    def __dlpack__(self, stream: int | None = None):
+    def __dlpack__(self, stream: int | None = None) -> Any:
         if not hasattr(self.value, "__dlpack__"):
             raise RuntimeError(
                 f"Backend '{self.backend}' returned object without __dlpack__ support: {type(self.value)!r}"
@@ -87,14 +87,14 @@ class QuantumTensor:
             return self.value.__dlpack__()
         return self.value.__dlpack__(stream=stream)
 
-    def __dlpack_device__(self):
+    def __dlpack_device__(self) -> Any:
         if not hasattr(self.value, "__dlpack_device__"):
             raise RuntimeError(
                 f"Backend '{self.backend}' returned object without __dlpack_device__ support: {type(self.value)!r}"
             )
         return self.value.__dlpack_device__()
 
-    def to_torch(self):
+    def to_torch(self) -> Any:
         import torch
 
         return torch.from_dlpack(self)
@@ -103,7 +103,9 @@ class QuantumTensor:
 class EngineRouter:
     """Select backend and expose a unified `encode -> QuantumTensor` interface."""
 
-    def __init__(self, *, backend: str = "auto", device_id: int = 0, precision: str = "float32"):
+    def __init__(
+        self, *, backend: str = "auto", device_id: int = 0, precision: str = "float32"
+    ) -> None:
         self.device_id = device_id
         self.precision = precision
         self.requested_backend = backend.lower().strip()
@@ -114,7 +116,9 @@ class EngineRouter:
         )
 
     @staticmethod
-    def _create_backend_engine(*, backend: str, device_id: int, precision: str):
+    def _create_backend_engine(
+        *, backend: str, device_id: int, precision: str
+    ) -> tuple[str, Any]:
         if backend == "auto":
             # Prefer vendor-neutral/non-CUDA paths first.
             rocm_hint = _rocm_runtime_hint()
