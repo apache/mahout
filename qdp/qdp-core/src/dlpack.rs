@@ -253,13 +253,16 @@ impl GpuStateVector {
     /// # Safety
     /// Freed by DLPack deleter when PyTorch releases tensor.
     /// Do not free manually.
+    #[allow(clippy::manual_is_multiple_of)]
     pub fn to_dlpack(&self) -> *mut DLManagedTensor {
         // Always return 2D tensor: Batch [num_samples, state_len], Single [1, state_len]
         let (shape, strides) = if let Some(num_samples) = self.num_samples {
             // Batch: [num_samples, state_len_per_sample]
             debug_assert!(
-                num_samples > 0 && self.size_elements.is_multiple_of(num_samples),
-                "Batch state vector size must be divisible by num_samples"
+                num_samples > 0 && self.size_elements % num_samples == 0,
+                "Batch mismatch: {} elements cannot be evenly divided into {} samples",
+                self.size_elements,
+                num_samples
             );
             let state_len_per_sample = self.size_elements / num_samples;
             let shape = vec![num_samples as i64, state_len_per_sample as i64];

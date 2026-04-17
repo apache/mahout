@@ -31,11 +31,13 @@ Holden Karau            | holden@...        | No  |
 Isabel Drost-Fromm      | isabel@...        | Yes | <!--Passion for free software (development, but to some extend also the political and economic implications), interested in agile development and project management, lives in Germany. Follow me on Twitter @MaineC-->
 Jacob Alexander Mannix  | jmannix@...       | Yes |
 Jeff Eastman            | jeastman@...      | No  | (Emeritus PMC)
+Jie-Kai (Jay) Chang     | jiekaichang@...   | Yes | @400Ping
 Krishna Dave            | krishnadave829@...| No  | @krishnadave
 Nikolay Sakharnykh      | nsakharnykh@...   | No  |
 Paritosh Ranjan         | pranjan@...       | Yes | @paritoshranjan
 Pat Ferrel              | pat@...           | Yes | (Emeritus PMC) @occam
 Robin Anil              | robinanil@...     | Yes |
+Ryan Huang              | hcr@...           | No  | @ryankert01
 Sean Owen               | srowen@...        | No  | (Emeritus PMC)
 Sebastian Schelter      | ssc@...           | Yes |
 Shannon Quinn           | squinn@...        | Yes | PMC Chair @magsol@quinnwitz.house

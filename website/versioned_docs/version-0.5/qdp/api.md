@@ -41,6 +41,7 @@ Encode classical input into a quantum state and return a DLPack tensor on GPU.
   - `torch.Tensor` (CPU, float64, contiguous)
   - `str` / `pathlib.Path` file path
     - `.parquet`, `.arrow` / `.feather`, `.npy`, `.pt` / `.pth`, `.pb`
+    - remote URL (`s3://bucket/key`, `gs://bucket/key`) when built with `remote-io`
 - `num_qubits` (int): Number of qubits, range 1–30.
 - `encoding_method` (str): `"amplitude" | "angle" | "basis" | "iqp" | "iqp-z"` (lowercase).
 
@@ -53,6 +54,7 @@ Encode classical input into a quantum state and return a DLPack tensor on GPU.
 - Output dtype is `complex64` (`precision="float32"`) or `complex128` (`precision="float64"`).
 - Parquet streaming currently supports `"amplitude"` and `"basis"`.
 - PyTorch file inputs (`.pt`, `.pth`) require building with the `pytorch` feature.
+- Remote URL query/fragment is not supported (`?versionId=...`, `#...`).
 
 **Raises**
 - `RuntimeError`: Invalid inputs, shapes, dtypes, or unsupported formats.

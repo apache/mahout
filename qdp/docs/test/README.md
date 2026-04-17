@@ -7,7 +7,7 @@ Unit tests for QDP core library covering input validation, API workflows, and me
 ### `validation.rs` - Input Validation
 
 - Invalid encoder strategy rejection
-- Qubit size validation (mismatch, zero, max limit 30)
+- Qubit size validation (mismatch, zero, configured max limit)
 - Empty and zero-norm data rejection
 - Error type formatting
 - Non-Linux platform graceful failure
@@ -42,9 +42,9 @@ Unit tests for QDP core library covering input validation, API workflows, and me
 cargo test --package qdp-core
 
 # Run specific test file
-cargo test --package qdp-core --test validation
-cargo test --package qdp-core --test api_workflow
-cargo test --package qdp-core --test memory_safety
+cargo test --package qdp-core --test gpu_validation
+cargo test --package qdp-core --test gpu_api_workflow
+cargo test --package qdp-core --test gpu_memory_safety
 ```
 
 ## Requirements

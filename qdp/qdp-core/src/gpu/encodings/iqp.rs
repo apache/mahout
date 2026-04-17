@@ -16,7 +16,7 @@
 
 // IQP (Instantaneous Quantum Polynomial) encoding: entangled quantum states via diagonal phases.
 
-use super::QuantumEncoder;
+use super::{QuantumEncoder, validate_qubit_count};
 #[cfg(target_os = "linux")]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
@@ -57,7 +57,8 @@ impl IqpEncoder {
     fn expected_data_len(&self, num_qubits: usize) -> usize {
         if self.enable_zz {
             // n single-qubit + n*(n-1)/2 two-qubit terms
-            num_qubits + num_qubits * (num_qubits - 1) / 2
+            let n_minus_one = num_qubits.saturating_sub(1);
+            num_qubits + num_qubits * n_minus_one / 2
         } else {
             num_qubits
         }
@@ -148,6 +149,8 @@ impl QuantumEncoder for IqpEncoder {
     ) -> Result<GpuStateVector> {
         crate::profile_scope!("IqpEncoder::encode_batch");
 
+        validate_qubit_count(num_qubits)?;
+
         let expected_len = self.expected_data_len(num_qubits);
         if sample_size != expected_len {
             return Err(MahoutError::InvalidInput(format!(
@@ -165,13 +168,6 @@ impl QuantumEncoder for IqpEncoder {
                 batch_data.len(),
                 num_samples,
                 sample_size
-            )));
-        }
-
-        if num_qubits == 0 || num_qubits > 30 {
-            return Err(MahoutError::InvalidInput(format!(
-                "Number of qubits {} must be between 1 and 30",
-                num_qubits
             )));
         }
 
@@ -241,18 +237,139 @@ impl QuantumEncoder for IqpEncoder {
         Ok(batch_state_vector)
     }
 
-    fn validate_input(&self, data: &[f64], num_qubits: usize) -> Result<()> {
-        if num_qubits == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Number of qubits must be at least 1".to_string(),
-            ));
-        }
-        if num_qubits > 30 {
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_from_gpu_ptr(
+        &self,
+        device: &Arc<CudaDevice>,
+        input_d: *const c_void,
+        input_len: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        validate_qubit_count(num_qubits)?;
+
+        let expected_len = self.expected_data_len(num_qubits);
+        if input_len != expected_len {
             return Err(MahoutError::InvalidInput(format!(
-                "Number of qubits {} exceeds practical limit of 30",
-                num_qubits
+                "IQP{} encoding expects {} values for {} qubits, got {}",
+                if self.enable_zz { "" } else { "-Z" },
+                expected_len,
+                num_qubits,
+                input_len
             )));
         }
+
+        let state_len = 1 << num_qubits;
+        let state_vector = {
+            crate::profile_scope!("GPU::Alloc");
+            GpuStateVector::new(device, num_qubits, Precision::Float64)?
+        };
+
+        let state_ptr = state_vector.ptr_f64().ok_or_else(|| {
+            MahoutError::InvalidInput(
+                "State vector precision mismatch (expected float64 buffer)".to_string(),
+            )
+        })?;
+
+        let ret = {
+            crate::profile_scope!("GPU::KernelLaunch");
+            unsafe {
+                qdp_kernels::launch_iqp_encode(
+                    input_d as *const f64,
+                    state_ptr as *mut c_void,
+                    state_len,
+                    num_qubits as u32,
+                    if self.enable_zz { 1 } else { 0 },
+                    stream,
+                )
+            }
+        };
+
+        if ret != 0 {
+            return Err(MahoutError::KernelLaunch(format!(
+                "IQP encoding kernel failed with CUDA error code: {} ({})",
+                ret,
+                cuda_error_to_string(ret)
+            )));
+        }
+
+        {
+            crate::profile_scope!("GPU::Synchronize");
+            crate::gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
+        }
+
+        Ok(state_vector)
+    }
+
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_batch_from_gpu_ptr(
+        &self,
+        device: &Arc<CudaDevice>,
+        input_batch_d: *const c_void,
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        validate_qubit_count(num_qubits)?;
+
+        let expected_len = self.expected_data_len(num_qubits);
+        if sample_size != expected_len {
+            return Err(MahoutError::InvalidInput(format!(
+                "IQP{} encoding expects sample_size={} for {} qubits, got {}",
+                if self.enable_zz { "" } else { "-Z" },
+                expected_len,
+                num_qubits,
+                sample_size
+            )));
+        }
+
+        let state_len = 1 << num_qubits;
+        let batch_state_vector = {
+            crate::profile_scope!("GPU::AllocBatch");
+            GpuStateVector::new_batch(device, num_samples, num_qubits, Precision::Float64)?
+        };
+
+        let state_ptr = batch_state_vector.ptr_f64().ok_or_else(|| {
+            MahoutError::InvalidInput(
+                "Batch state vector precision mismatch (expected float64 buffer)".to_string(),
+            )
+        })?;
+
+        {
+            crate::profile_scope!("GPU::BatchKernelLaunch");
+            let ret = unsafe {
+                qdp_kernels::launch_iqp_encode_batch(
+                    input_batch_d as *const f64,
+                    state_ptr as *mut c_void,
+                    num_samples,
+                    state_len,
+                    num_qubits as u32,
+                    sample_size as u32,
+                    if self.enable_zz { 1 } else { 0 },
+                    stream,
+                )
+            };
+
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Batch IQP encoding kernel failed: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
+                )));
+            }
+        }
+
+        {
+            crate::profile_scope!("GPU::Synchronize");
+            crate::gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
+        }
+
+        Ok(batch_state_vector)
+    }
+
+    fn validate_input(&self, data: &[f64], num_qubits: usize) -> Result<()> {
+        validate_qubit_count(num_qubits)?;
 
         let expected_len = self.expected_data_len(num_qubits);
         if data.len() != expected_len {

@@ -7,7 +7,7 @@ import rehypeKatex from 'rehype-katex';
 const config: Config = {
   title: 'Apache Mahout',
   tagline: 'Distributed Linear Algebra & Quantum Computing',
-  favicon: 'img/mahout-favicon.svg',
+  favicon: 'img/mahout-favicon.png',
 
   future: {
     v4: true,
@@ -86,16 +86,6 @@ const config: Config = {
     ],
   ],
 
-  // KaTeX stylesheet for math rendering
-  stylesheets: [
-    {
-      href: 'https://cdn.jsdelivr.net/npm/katex@0.13.24/dist/katex.min.css',
-      type: 'text/css',
-      integrity: 'sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM',
-      crossorigin: 'anonymous',
-    },
-  ],
-
   plugins: [
     [
       '@docusaurus/plugin-client-redirects',
@@ -123,7 +113,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/mahout-social-card.svg',
+    image: 'img/mascot_with_text.png',
     colorMode: {
       defaultMode: 'light',
       respectPrefersColorScheme: true,

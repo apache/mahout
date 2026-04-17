@@ -96,14 +96,25 @@ exclude = [
 [tool.ty.analysis]
 # _qdp: compiled Rust extension (no type info for members)
 # api: benchmark module loaded via sys.path in tests
-allowed-unresolved-imports = ["_qdp", "_qdp.*", "api", "api.*"]
+# qumat_qdp: optional QDP Python package (editable install from qdp/qdp-python)
+allowed-unresolved-imports = [
+    "_qdp",
+    "_qdp.*",
+    "api",
+    "api.*",
+    "qumat_qdp",
+    "qumat_qdp.*",
+]
 
 [tool.ruff]
-extend-exclude = ["**/*.ipynb"]
 target-version = "py310"
 
 [tool.ruff.lint]
 select = [
+    # flake8-annotations
+    "ANN",
+    # pycodestyle
+    "E",
     # Pyflakes
     "F",
     # pyupgrade
@@ -121,7 +132,16 @@ select = [
     "PT",
 ]
 
-ignore = ["PT011"]
+ignore = [
+    "E402",   # Module level import not at top of file
+    "E501",   # Line too long
+    # The following ignore rules are temporary and should be removed when the issues are fixed.
+    "PT011",  # TODO: `pytest.raises(ValueError)` is too broad
+    "ANN001", # TODO: fix (missing-type-function-argument)
+    "ANN201", # TODO: fix (missing-return-type-undocumented-public-function)
+    "ANN202", # TODO: fix (missing-return-type-private-function)
+    "ANN401",
+]
 
 [tool.ruff.lint.pyflakes]
 allowed-unused-imports = ["_qdp"]

@@ -232,6 +232,7 @@ impl QuantumEncoder for AngleEncoder {
                 num_qubits, input_len
             )));
         }
+        validate_qubit_count(num_qubits)?;
         let state_len = 1 << num_qubits;
         let angles_d = input_d as *const f64;
         let state_vector = {
@@ -290,6 +291,7 @@ impl QuantumEncoder for AngleEncoder {
                 num_qubits, sample_size
             )));
         }
+        validate_qubit_count(num_qubits)?;
         let state_len = 1 << num_qubits;
         let input_batch_d = input_batch_d as *const f64;
         let angle_validation_buffer = {
@@ -401,6 +403,75 @@ impl QuantumEncoder for AngleEncoder {
 }
 
 impl AngleEncoder {
+    /// Encodes `input_len` angle values from a device-resident `f32` buffer into a GPU state
+    /// vector, using the provided CUDA stream for all launched work.
+    ///
+    /// # Safety
+    /// The caller must ensure that `input_d` points to at least `input_len` contiguous `f32`
+    /// values in GPU-accessible memory and remains valid for the duration of this call.
+    /// The caller must also ensure that `stream` is either null or a valid CUDA stream handle
+    /// associated with `device`, and that no concurrent use of these raw pointers violates Rust's
+    /// aliasing or lifetime rules.
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_from_gpu_ptr_f32_with_stream(
+        device: &Arc<CudaDevice>,
+        input_d: *const f32,
+        input_len: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        if input_len == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Input data cannot be empty".into(),
+            ));
+        }
+        if input_len != num_qubits {
+            return Err(MahoutError::InvalidInput(format!(
+                "Angle encoding expects {} values (one per qubit), got {}",
+                num_qubits, input_len
+            )));
+        }
+
+        validate_qubit_count(num_qubits)?;
+        let state_len = 1 << num_qubits;
+        let state_vector = {
+            crate::profile_scope!("GPU::Alloc");
+            GpuStateVector::new(device, num_qubits, Precision::Float32)?
+        };
+        let state_ptr = state_vector.ptr_f32().ok_or_else(|| {
+            MahoutError::InvalidInput(
+                "State vector precision mismatch (expected float32 buffer)".to_string(),
+            )
+        })?;
+
+        {
+            crate::profile_scope!("GPU::KernelLaunch");
+            let ret = unsafe {
+                qdp_kernels::launch_angle_encode_f32(
+                    input_d,
+                    state_ptr as *mut c_void,
+                    state_len,
+                    num_qubits as u32,
+                    stream,
+                )
+            };
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Angle encoding kernel (f32) failed with CUDA error code: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
+                )));
+            }
+        }
+
+        {
+            crate::profile_scope!("GPU::Synchronize");
+            crate::gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
+        }
+
+        Ok(state_vector)
+    }
+
     #[cfg(target_os = "linux")]
     fn encode_batch_async_pipeline(
         device: &Arc<CudaDevice>,

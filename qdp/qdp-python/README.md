@@ -92,6 +92,10 @@ qtensor = engine.encode("data.parquet", 10, "amplitude")
 qtensor = engine.encode("data.arrow", 10, "amplitude")
 qtensor = engine.encode("data.npy", 10, "amplitude")
 qtensor = engine.encode("data.pt", 10, "amplitude")
+
+# Remote object storage URLs (requires building with remote-io feature)
+qtensor = engine.encode("s3://my-bucket/data.parquet", 10, "amplitude")
+qtensor = engine.encode("gs://my-bucket/data.parquet", 10, "amplitude")
 ```
 
 ## Links

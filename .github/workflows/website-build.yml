@@ -42,6 +42,10 @@ jobs:
         working-directory: website
         run: npm ci
 
+      - name: Type check website
+        working-directory: website
+        run: npm run typecheck
+
       - name: Build website
         working-directory: website
         run: npm run build

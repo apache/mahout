@@ -17,4 +17,4 @@
 from . import qdp
 from .qumat import QuMat
 
-__all__ = ["QuMat", "qdp"]
+__all__: list[str] = ["QuMat", "qdp"]

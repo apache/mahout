@@ -36,6 +36,20 @@ try:
     import _qdp as _qdp_mod
 except Exception:
     _qdp_mod = None
+# Backend detection: gracefully degrade when _qdp (Rust extension) is unavailable.
+from qumat_qdp._backend import Backend, force_backend, get_backend, get_qdp
+
+_qdp_mod = get_qdp()
+if _qdp_mod is not None:
+    QdpEngine = getattr(_qdp_mod, "QdpEngine")
+    QuantumTensor = getattr(_qdp_mod, "QuantumTensor")
+    run_throughput_pipeline_py = getattr(_qdp_mod, "run_throughput_pipeline_py", None)
+else:
+    QdpEngine = None
+    QuantumTensor = None
+    run_throughput_pipeline_py = None
+
+BACKEND = get_backend()
 
 from qumat_qdp.api import (
     LatencyResult,
@@ -79,6 +93,8 @@ def __getattr__(name: str):
     raise AttributeError(name)
 
 __all__ = [
+    "BACKEND",
+    "Backend",
     "LatencyResult",
     "AmdQdpEngine",
     "QdpBenchmark",
@@ -90,5 +106,6 @@ __all__ = [
     "ThroughputResult",
     "create_encoder_engine",
     "is_triton_amd_available",
+    "force_backend",
     "run_throughput_pipeline_py",
 ]

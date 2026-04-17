@@ -28,6 +28,8 @@ mod platform;
 pub mod preprocessing;
 pub mod reader;
 pub mod readers;
+#[cfg(feature = "remote-io")]
+pub mod remote;
 pub mod tf_proto;
 #[macro_use]
 mod profiling;
@@ -42,7 +44,7 @@ mod pipeline_runner;
 
 #[cfg(target_os = "linux")]
 pub use pipeline_runner::{
-    DataSource, PipelineConfig, PipelineIterator, PipelineRunResult, run_latency_pipeline,
+    PipelineConfig, PipelineIterator, PipelineRunResult, run_latency_pipeline,
     run_throughput_pipeline,
 };
 
@@ -208,6 +210,31 @@ impl QdpEngine {
 
         let encoder = get_encoder(encoding_method)?;
         let state_vector = encoder.encode_batch(
+            &self.device,
+            batch_data,
+            num_samples,
+            sample_size,
+            num_qubits,
+        )?;
+
+        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
+        let dlpack_ptr = state_vector.to_dlpack();
+        Ok(dlpack_ptr)
+    }
+
+    /// Encode multiple samples in a single fused kernel (most efficient) using f32 host input.
+    pub fn encode_batch_f32(
+        &self,
+        batch_data: &[f32],
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> Result<*mut DLManagedTensor> {
+        crate::profile_scope!("Mahout::EncodeBatchF32");
+
+        let encoder = get_encoder(encoding_method)?;
+        let state_vector = encoder.encode_batch_f32(
             &self.device,
             batch_data,
             num_samples,
@@ -608,6 +635,63 @@ impl QdpEngine {
             gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
         }
 
+        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
+        Ok(state_vector.to_dlpack())
+    }
+
+    /// Encode angle from existing GPU pointer (float32 input only).
+    ///
+    /// Zero-copy encoding from CUDA float32 tensors. Uses the default CUDA stream.
+    /// For stream interop use `encode_angle_from_gpu_ptr_f32_with_stream`.
+    ///
+    /// # Safety
+    /// The input pointer must:
+    /// - Point to valid GPU memory on the same device as the engine
+    /// - Contain at least `input_len` f32 elements
+    /// - Remain valid for the duration of this call
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_angle_from_gpu_ptr_f32(
+        &self,
+        input_d: *const f32,
+        input_len: usize,
+        num_qubits: usize,
+    ) -> Result<*mut DLManagedTensor> {
+        unsafe {
+            self.encode_angle_from_gpu_ptr_f32_with_stream(
+                input_d,
+                input_len,
+                num_qubits,
+                std::ptr::null_mut(),
+            )
+        }
+    }
+
+    /// Encode angle from existing GPU pointer (float32) on a specified CUDA stream.
+    ///
+    /// # Safety
+    /// In addition to the `encode_angle_from_gpu_ptr_f32` requirements, the stream pointer
+    /// must remain valid for the duration of this call.
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_angle_from_gpu_ptr_f32_with_stream(
+        &self,
+        input_d: *const f32,
+        input_len: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<*mut DLManagedTensor> {
+        crate::profile_scope!("Mahout::EncodeAngleFromGpuPtrF32");
+
+        validate_cuda_input_ptr(&self.device, input_d as *const c_void)?;
+
+        let state_vector = unsafe {
+            gpu::AngleEncoder::encode_from_gpu_ptr_f32_with_stream(
+                &self.device,
+                input_d,
+                input_len,
+                num_qubits,
+                stream,
+            )
+        }?;
         let state_vector = state_vector.to_precision(&self.device, self.precision)?;
         Ok(state_vector.to_dlpack())
     }

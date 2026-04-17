@@ -16,7 +16,8 @@
 
 // Input validation and error handling tests
 
-use qdp_core::{MahoutError, QdpEngine};
+use qdp_core::MahoutError;
+use qdp_core::gpu::encodings::MAX_QUBITS;
 
 mod common;
 
@@ -25,9 +26,8 @@ mod common;
 fn test_input_validation_invalid_strategy() {
     println!("Testing invalid strategy name rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data = common::create_test_data(100);
@@ -52,9 +52,8 @@ fn test_input_validation_invalid_strategy() {
 fn test_input_validation_qubit_mismatch() {
     println!("Testing qubit size validation...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data = common::create_test_data(100);
@@ -83,9 +82,8 @@ fn test_input_validation_qubit_mismatch() {
 fn test_input_validation_zero_qubits() {
     println!("Testing zero qubits rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data = common::create_test_data(10);
@@ -108,23 +106,22 @@ fn test_input_validation_zero_qubits() {
 #[test]
 #[cfg(target_os = "linux")]
 fn test_input_validation_max_qubits() {
-    println!("Testing maximum qubit limit (30)...");
+    println!("Testing maximum qubit limit ({MAX_QUBITS})...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data = common::create_test_data(100);
 
-    let result = engine.encode(&data, 35, "amplitude");
+    let result = engine.encode(&data, MAX_QUBITS + 5, "amplitude");
     assert!(result.is_err(), "Should reject excessive qubits");
 
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
             assert!(
-                msg.contains("exceeds") && msg.contains("30"),
-                "Error should mention 30 qubit limit"
+                msg.contains("exceeds") && msg.contains(&MAX_QUBITS.to_string()),
+                "Error should mention configured qubit limit"
             );
             println!("PASS: Correctly rejected excessive qubits: {}", msg);
         }
@@ -137,9 +134,8 @@ fn test_input_validation_max_qubits() {
 fn test_input_validation_batch_zero_samples() {
     println!("Testing zero num_samples rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let batch_data = vec![1.0, 2.0, 3.0, 4.0];
@@ -163,9 +159,8 @@ fn test_input_validation_batch_zero_samples() {
 fn test_empty_data() {
     println!("Testing empty data rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data: Vec<f64> = vec![];
@@ -187,9 +182,8 @@ fn test_empty_data() {
 fn test_zero_norm_data() {
     println!("Testing zero-norm data rejection...");
 
-    let engine = match QdpEngine::new(0) {
-        Ok(e) => e,
-        Err(_) => return,
+    let Some(engine) = common::qdp_engine() else {
+        return;
     };
 
     let data = vec![0.0; 128];

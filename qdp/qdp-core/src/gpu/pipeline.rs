@@ -274,6 +274,7 @@ where
 /// `align_elements` must evenly divide the host data length and ensures chunks do not
 /// split logical records (e.g., per-sample data in batch encoding).
 #[cfg(target_os = "linux")]
+#[allow(clippy::manual_is_multiple_of)]
 pub fn run_dual_stream_pipeline_aligned<F>(
     device: &Arc<CudaDevice>,
     host_data: &[f64],
@@ -290,7 +291,7 @@ where
             "Alignment must be greater than zero".to_string(),
         ));
     }
-    if !host_data.len().is_multiple_of(align_elements) {
+    if host_data.len() % align_elements != 0 {
         return Err(MahoutError::InvalidInput(format!(
             "Host data length {} is not aligned to {} elements",
             host_data.len(),
@@ -381,6 +382,7 @@ where
         ensure_device_memory_available(chunk_bytes, "pipeline chunk buffer allocation", None)?;
 
         // Allocate temporary device buffer for this chunk
+        #[allow(clippy::collapsible_if, clippy::manual_is_multiple_of)]
         let input_chunk_dev = unsafe { device.alloc::<f64>(chunk.len()) }.map_err(|e| {
             map_allocation_error(chunk_bytes, "pipeline chunk buffer allocation", None, e)
         })?;
@@ -403,14 +405,15 @@ where
 
             // Record copy start if overlap tracking enabled
             // Note: Overlap tracking is optional observability - failures should not stop the pipeline
-            if let Some(ref tracker) = overlap_tracker
-                && let Err(e) = tracker.record_copy_start(&ctx.stream_copy, event_slot)
-            {
-                log::warn!(
-                    "Chunk {}: Failed to record copy start event: {}. Overlap tracking may be incomplete.",
-                    chunk_idx,
-                    e
-                );
+            #[allow(clippy::collapsible_if)]
+            if let Some(ref tracker) = overlap_tracker {
+                if let Err(e) = tracker.record_copy_start(&ctx.stream_copy, event_slot) {
+                    log::warn!(
+                        "Chunk {}: Failed to record copy start event: {}. Overlap tracking may be incomplete.",
+                        chunk_idx,
+                        e
+                    );
+                }
             }
 
             unsafe {
@@ -422,14 +425,15 @@ where
 
                 // Record copy end if overlap tracking enabled
                 // Note: Overlap tracking is optional observability - failures should not stop the pipeline
-                if let Some(ref tracker) = overlap_tracker
-                    && let Err(e) = tracker.record_copy_end(&ctx.stream_copy, event_slot)
-                {
-                    log::warn!(
-                        "Chunk {}: Failed to record copy end event: {}. Overlap tracking may be incomplete.",
-                        chunk_idx,
-                        e
-                    );
+                #[allow(clippy::collapsible_if)]
+                if let Some(ref tracker) = overlap_tracker {
+                    if let Err(e) = tracker.record_copy_end(&ctx.stream_copy, event_slot) {
+                        log::warn!(
+                            "Chunk {}: Failed to record copy end event: {}. Overlap tracking may be incomplete.",
+                            chunk_idx,
+                            e
+                        );
+                    }
                 }
 
                 ctx.record_copy_done(event_slot)?;
@@ -456,28 +460,30 @@ where
 
             // Record compute start if overlap tracking enabled
             // Note: Overlap tracking is optional observability - failures should not stop the pipeline
-            if let Some(ref tracker) = overlap_tracker
-                && let Err(e) = tracker.record_compute_start(&ctx.stream_compute, event_slot)
-            {
-                log::warn!(
-                    "Chunk {}: Failed to record compute start event: {}. Overlap tracking may be incomplete.",
-                    chunk_idx,
-                    e
-                );
+            #[allow(clippy::collapsible_if)]
+            if let Some(ref tracker) = overlap_tracker {
+                if let Err(e) = tracker.record_compute_start(&ctx.stream_compute, event_slot) {
+                    log::warn!(
+                        "Chunk {}: Failed to record compute start event: {}. Overlap tracking may be incomplete.",
+                        chunk_idx,
+                        e
+                    );
+                }
             }
 
             kernel_launcher(&ctx.stream_compute, input_ptr, chunk_offset, chunk.len())?;
 
             // Record compute end if overlap tracking enabled
             // Note: Overlap tracking is optional observability - failures should not stop the pipeline
-            if let Some(ref tracker) = overlap_tracker
-                && let Err(e) = tracker.record_compute_end(&ctx.stream_compute, event_slot)
-            {
-                log::warn!(
-                    "Chunk {}: Failed to record compute end event: {}. Overlap tracking may be incomplete.",
-                    chunk_idx,
-                    e
-                );
+            #[allow(clippy::collapsible_if)]
+            if let Some(ref tracker) = overlap_tracker {
+                if let Err(e) = tracker.record_compute_end(&ctx.stream_compute, event_slot) {
+                    log::warn!(
+                        "Chunk {}: Failed to record compute end event: {}. Overlap tracking may be incomplete.",
+                        chunk_idx,
+                        e
+                    );
+                }
             }
         }
 
@@ -489,24 +495,25 @@ where
         // Note: log_overlap now handles both success and failure cases internally,
         // logging at appropriate levels (INFO for visibility, DEBUG for details).
         #[allow(clippy::manual_is_multiple_of)]
-        if let Some(ref tracker) = overlap_tracker
-            && (chunk_idx % 10 == 0 || chunk_idx == 0)
-        {
-            // Only log every Nth chunk to avoid excessive logging
-            // Note: log_overlap waits for events to complete, which may take time
-            // If events fail (e.g., invalid resource handle), log_overlap will log
-            // at INFO level so it's visible in both debug and info modes
-            if let Err(e) = tracker.log_overlap(chunk_idx) {
-                // log_overlap already logged the error at INFO level
-                // We only need to log additional details at DEBUG level if needed
-                if log::log_enabled!(log::Level::Debug) {
-                    log::debug!(
-                        "Overlap tracking failed for chunk {}: {}. Pipeline continues normally.",
-                        chunk_idx,
-                        e
-                    );
+        #[allow(clippy::collapsible_if)]
+        if let Some(ref tracker) = overlap_tracker {
+            if chunk_idx % 10 == 0 || chunk_idx == 0 {
+                // Only log every Nth chunk to avoid excessive logging
+                // Note: log_overlap waits for events to complete, which may take time
+                // If events fail (e.g., invalid resource handle), log_overlap will log
+                // at INFO level so it's visible in both debug and info modes
+                if let Err(e) = tracker.log_overlap(chunk_idx) {
+                    // log_overlap already logged the error at INFO level
+                    // We only need to log additional details at DEBUG level if needed
+                    if log::log_enabled!(log::Level::Debug) {
+                        log::debug!(
+                            "Overlap tracking failed for chunk {}: {}. Pipeline continues normally.",
+                            chunk_idx,
+                            e
+                        );
+                    }
+                    // Don't fail the pipeline - overlap tracking is optional observability
                 }
-                // Don't fail the pipeline - overlap tracking is optional observability
             }
         }
 
