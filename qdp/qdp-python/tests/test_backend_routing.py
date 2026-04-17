@@ -28,10 +28,8 @@ def test_backend_routing_rejects_unknown_backend():
 def test_auto_router_without_available_backends_fails_cleanly():
     # On environments without _qdp / Triton accelerators, auto should fail
     # with an actionable runtime error (instead of importing CUDA eagerly).
-    try:
+    with pytest.raises(RuntimeError, match="No available backend"):
         create_encoder_engine(backend="auto")
-    except RuntimeError as exc:
-        assert "No available backend" in str(exc)
 
 
 def test_unified_quantum_tensor_requires_dlpack():

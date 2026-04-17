@@ -86,17 +86,29 @@ def _angle_kernel(
     sample_idx = offs // state_len
     elem_idx = offs % state_len
 
-    amp = tl.full([BLOCK], 1.0, dtype=tl.float64 if FP64 else tl.float32)
-    angles_base = sample_idx * NQ
-    for bit in range(NQ):
-        ang = tl.load(angles_ptr + angles_base + bit, mask=mask, other=0.0)
-        bit_set = ((elem_idx >> bit) & 1) != 0
-        factor = tl.where(bit_set, tl.sin(ang), tl.cos(ang))
-        amp = amp * factor
+    amp_dtype = tl.float64 if FP64 else tl.float32
+    if NQ == 0:
+        amp = tl.full([BLOCK], 1.0, dtype=amp_dtype)
+    else:
+        bit_offsets = tl.arange(0, NQ)
+        angles_base = tl.expand_dims(sample_idx * NQ, 1)
+        bit_offsets_2d = tl.expand_dims(bit_offsets, 0)
+        angle_ptrs = angles_ptr + angles_base + bit_offsets_2d
+        angle_mask = tl.expand_dims(mask, 1)
+        angles = tl.load(angle_ptrs, mask=angle_mask, other=0.0)
+        elem_idx_2d = tl.expand_dims(elem_idx, 1)
+        bit_sets = ((elem_idx_2d >> bit_offsets_2d) & 1) != 0
+        factors = tl.where(bit_sets, tl.sin(angles), tl.cos(angles)).to(amp_dtype)
+        amp = tl.reduce(factors, axis=1, combine_fn=_product_reduce)
 
     out_base = offs * 2
     tl.store(out_ptr + out_base, amp, mask=mask)
     tl.store(out_ptr + out_base + 1, 0.0, mask=mask)
+
+
+@triton.jit
+def _product_reduce(a, b):
+    return a * b
 
 
 @triton.jit
@@ -188,7 +200,8 @@ class TritonAmdEngine:
         out_ri = torch.empty((batch, state_len, 2), device=x.device, dtype=x.dtype)
         total = batch * state_len
         grid = lambda meta: (triton.cdiv(total, meta["BLOCK"]),)
-        _amplitude_pack_kernel[grid](
+        kernel: Any = _amplitude_pack_kernel[grid]
+        kernel(
             x,
             inv,
             out_ri,
@@ -212,7 +225,8 @@ class TritonAmdEngine:
         out_ri = torch.empty((batch, state_len, 2), device=angles.device, dtype=real_dtype)
         total = batch * state_len
         grid = lambda meta: (triton.cdiv(total, meta["BLOCK"]),)
-        _angle_kernel[grid](
+        kernel: Any = _angle_kernel[grid]
+        kernel(
             angles,
             out_ri,
             state_len,
@@ -245,7 +259,8 @@ class TritonAmdEngine:
         out_ri = torch.empty((batch, state_len, 2), device=idx.device, dtype=real_dtype)
         total = batch * state_len
         grid = lambda meta: (triton.cdiv(total, meta["BLOCK"]),)
-        _basis_kernel[grid](
+        kernel: Any = _basis_kernel[grid]
+        kernel(
             idx,
             out_ri,
             state_len,

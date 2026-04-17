@@ -20,7 +20,6 @@
 from __future__ import annotations
 
 import argparse
-import time
 
 import torch
 
@@ -66,13 +65,16 @@ def main() -> int:
         _ = engine.encode(data, args.qubits, args.encoding_method)
     torch.cuda.synchronize()
 
-    t0 = time.perf_counter()
+    start = torch.cuda.Event(enable_timing=True)
+    end = torch.cuda.Event(enable_timing=True)
     processed = 0
+    start.record()
     for _ in range(args.batches):
         _ = engine.encode(data, args.qubits, args.encoding_method)
         processed += args.batch_size
+    end.record()
     torch.cuda.synchronize()
-    dt = time.perf_counter() - t0
+    dt = start.elapsed_time(end) / 1000.0
 
     throughput = processed / dt if dt > 0 else 0.0
     latency_ms_per_vector = (dt / processed) * 1000 if processed else 0.0
@@ -90,4 +92,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

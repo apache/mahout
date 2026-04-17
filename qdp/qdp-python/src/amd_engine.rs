@@ -120,7 +120,7 @@ impl AmdQdpEngine {
 
         let imag = torch.call_method1("zeros_like", (&normalized,))?;
         let complex_state = torch.call_method1("complex", (&normalized, &imag))?;
-        Ok(complex_state.call_method1("to", (self.complex_dtype_attr(torch)?,))?)
+        complex_state.call_method1("to", (self.complex_dtype_attr(torch)?,))
     }
 
     fn encode_basis<'py>(
@@ -245,7 +245,7 @@ impl AmdQdpEngine {
 
         let imag = torch.call_method1("zeros_like", (&amplitudes,))?;
         let complex_state = torch.call_method1("complex", (&amplitudes, &imag))?;
-        Ok(complex_state.call_method1("to", (self.complex_dtype_attr(torch)?,))?)
+        complex_state.call_method1("to", (self.complex_dtype_attr(torch)?,))
     }
 }
 
