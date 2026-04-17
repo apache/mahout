@@ -31,15 +31,12 @@ Usage:
 
 from __future__ import annotations
 
-# Rust extension is optional at import time. CUDA-specific objects are exposed when available.
-try:
-    import _qdp as _qdp_mod
-except Exception:
-    _qdp_mod = None
+from types import ModuleType
+
 # Backend detection: gracefully degrade when _qdp (Rust extension) is unavailable.
 from qumat_qdp._backend import Backend, force_backend, get_backend, get_qdp
 
-_qdp_mod = get_qdp()
+_qdp_mod: ModuleType | None = get_qdp()
 if _qdp_mod is not None:
     QdpEngine = getattr(_qdp_mod, "QdpEngine")
     QuantumTensor = getattr(_qdp_mod, "QuantumTensor")
@@ -86,12 +83,10 @@ else:
 
 
 def __getattr__(name: str):
-    if name in {"TritonAmdKernel", "TritonAmdEngine"}:
-        from qumat_qdp.triton_amd import TritonAmdKernel, TritonAmdEngine
+    if name == "TritonAmdKernel":
+        from qumat_qdp.triton_amd import TritonAmdKernel
 
-        if name == "TritonAmdKernel":
-            return TritonAmdKernel
-        return TritonAmdEngine
+        return TritonAmdKernel
     raise AttributeError(name)
 
 
@@ -107,7 +102,6 @@ __all__ = [
     "QuantumTensor",
     "ThroughputResult",
     "TritonAmdKernel",
-    "TritonAmdEngine",
     "create_encoder_engine",
     "force_backend",
     "is_triton_amd_available",

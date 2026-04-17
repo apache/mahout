@@ -371,7 +371,8 @@ class TestCrossValidation:
         import _qdp
         import numpy as np
 
-        engine = _qdp.QdpEngine(0)
+        qdp_engine = getattr(_qdp, "QdpEngine")
+        engine = qdp_engine(0)
         num_qubits = 3
         state_dim = 1 << num_qubits
 
