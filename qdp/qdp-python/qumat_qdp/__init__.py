@@ -24,7 +24,7 @@ CUDA and Triton AMD.
 
 Usage:
     from qumat_qdp import QdpEngine, AmdQdpEngine, QuantumTensor
-    from qumat_qdp import TritonAmdEngine, create_encoder_engine
+    from qumat_qdp import TritonAmdKernel, create_encoder_engine
     from qumat_qdp import QdpBenchmark, ThroughputResult, LatencyResult
     from qumat_qdp import QuantumDataLoader
 """
@@ -86,9 +86,11 @@ else:
 
 
 def __getattr__(name: str):
-    if name == "TritonAmdEngine":
-        from qumat_qdp.triton_amd import TritonAmdEngine
+    if name in {"TritonAmdKernel", "TritonAmdEngine"}:
+        from qumat_qdp.triton_amd import TritonAmdKernel, TritonAmdEngine
 
+        if name == "TritonAmdKernel":
+            return TritonAmdKernel
         return TritonAmdEngine
     raise AttributeError(name)
 
@@ -104,6 +106,7 @@ __all__ = [
     "QuantumDataLoader",
     "QuantumTensor",
     "ThroughputResult",
+    "TritonAmdKernel",
     "TritonAmdEngine",
     "create_encoder_engine",
     "force_backend",

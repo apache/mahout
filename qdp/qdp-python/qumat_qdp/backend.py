@@ -40,9 +40,9 @@ def _load_qdp_module(required: bool = False):
 
 
 def _load_triton_backend():
-    from qumat_qdp.triton_amd import TritonAmdEngine, is_triton_amd_available
+    from qumat_qdp.triton_amd import TritonAmdKernel, is_triton_amd_available
 
-    return TritonAmdEngine, is_triton_amd_available
+    return TritonAmdKernel, is_triton_amd_available
 
 
 def _rocm_runtime_hint() -> bool:
@@ -129,9 +129,9 @@ class EngineRouter:
             rocm_hint = _rocm_runtime_hint()
             if rocm_hint:
                 try:
-                    TritonAmdEngine, is_triton_amd_available = _load_triton_backend()
+                    TritonAmdKernel, is_triton_amd_available = _load_triton_backend()
                     if is_triton_amd_available():
-                        return "triton_amd", TritonAmdEngine(
+                        return "triton_amd", TritonAmdKernel(
                             device_id=device_id, precision=precision
                         )
                 except Exception:
@@ -150,9 +150,9 @@ class EngineRouter:
             # Final chance on Linux: try Triton probe even if hint was inconclusive.
             if sys.platform.startswith("linux"):
                 try:
-                    TritonAmdEngine, is_triton_amd_available = _load_triton_backend()
+                    TritonAmdKernel, is_triton_amd_available = _load_triton_backend()
                     if is_triton_amd_available():
-                        return "triton_amd", TritonAmdEngine(
+                        return "triton_amd", TritonAmdKernel(
                             device_id=device_id, precision=precision
                         )
                 except Exception:
@@ -163,8 +163,8 @@ class EngineRouter:
             )
 
         if backend == "triton_amd":
-            TritonAmdEngine, _ = _load_triton_backend()
-            engine = TritonAmdEngine(device_id=device_id, precision=precision)
+            TritonAmdKernel, _ = _load_triton_backend()
+            engine = TritonAmdKernel(device_id=device_id, precision=precision)
             engine.check_runtime()
             return "triton_amd", engine
 

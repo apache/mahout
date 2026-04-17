@@ -76,6 +76,7 @@ def _angle_kernel(
     state_len,
     total_elems,
     NQ: tl.constexpr,
+    NQ_PAD: tl.constexpr,
     FP64: tl.constexpr,
     BLOCK: tl.constexpr,
 ):
@@ -90,15 +91,21 @@ def _angle_kernel(
     if NQ == 0:
         amp = tl.full([BLOCK], 1.0, dtype=amp_dtype)
     else:
-        bit_offsets = tl.arange(0, NQ)
+        bit_offsets = tl.arange(0, NQ_PAD)
+        valid_bits = bit_offsets < NQ
         angles_base = tl.expand_dims(sample_idx * NQ, 1)
         bit_offsets_2d = tl.expand_dims(bit_offsets, 0)
         angle_ptrs = angles_ptr + angles_base + bit_offsets_2d
-        angle_mask = tl.expand_dims(mask, 1)
+        valid_bits_2d = tl.expand_dims(valid_bits, 0)
+        angle_mask = tl.expand_dims(mask, 1) & valid_bits_2d
         angles = tl.load(angle_ptrs, mask=angle_mask, other=0.0)
         elem_idx_2d = tl.expand_dims(elem_idx, 1)
         bit_sets = ((elem_idx_2d >> bit_offsets_2d) & 1) != 0
-        factors = tl.where(bit_sets, tl.sin(angles), tl.cos(angles)).to(amp_dtype)
+        factors = tl.where(
+            valid_bits_2d,
+            tl.where(bit_sets, tl.sin(angles), tl.cos(angles)),
+            1.0,
+        ).to(amp_dtype)
         amp = tl.reduce(factors, axis=1, combine_fn=_product_reduce)
 
     out_base = offs * 2
@@ -137,8 +144,8 @@ def _basis_kernel(
 
 
 @dataclass
-class TritonAmdEngine:
-    """Triton/ROCm backend implementing amplitude, angle, and basis encodings."""
+class TritonAmdKernel:
+    """Triton/ROCm kernel-backed implementation for AMD amplitude, angle, and basis encodings."""
 
     device_id: int = 0
     precision: str = "float32"
@@ -233,6 +240,7 @@ class TritonAmdEngine:
         )
         total = batch * state_len
         nq: Any = num_qubits
+        nq_pad: Any = 1 << max(0, num_qubits - 1).bit_length()
         fp64: Any = self.precision == "float64"
         block: Any = 128
 
@@ -246,6 +254,7 @@ class TritonAmdEngine:
             state_len,
             total,
             NQ=nq,  # ty: ignore[invalid-argument-type]
+            NQ_PAD=nq_pad,  # ty: ignore[invalid-argument-type]
             FP64=fp64,  # ty: ignore[invalid-argument-type]
             BLOCK=block,  # ty: ignore[invalid-argument-type]
         )

@@ -58,11 +58,6 @@ benchmark = [
 [tool.uv.sources]
 qumat = { path = "../..", editable = true }
 
-[[tool.uv.index]]
-name = "pytorch"
-url = "https://download.pytorch.org/whl/cu122"
-explicit = true
-
 # Invalidate uv cache when Rust or Cargo changes so extension is rebuilt (run_throughput_pipeline_py etc.).
 # Ref: https://docs.astral.sh/uv/concepts/cache/#dynamic-metadata
 [tool.uv]

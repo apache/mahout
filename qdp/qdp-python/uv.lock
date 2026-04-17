@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.10, <3.13"
 resolution-markers = [
     "python_full_version >= '3.12'",
@@ -1467,10 +1467,12 @@ benchmark = [
     { name = "tensorflow" },
     { name = "torch" },
     { name = "tqdm" },
+    { name = "triton" },
 ]
 dev = [
     { name = "pytest" },
     { name = "torch" },
+    { name = "triton" },
 ]
 
 [package.metadata]
@@ -1491,10 +1493,12 @@ benchmark = [
     { name = "tensorflow", specifier = ">=2.20" },
     { name = "torch", specifier = ">=2.2,<=2.9.0" },
     { name = "tqdm" },
+    { name = "triton", specifier = ">=3.0" },
 ]
 dev = [
     { name = "pytest" },
     { name = "torch", specifier = ">=2.2,<=2.9.0" },
+    { name = "triton", specifier = ">=3.0" },
 ]
 
 [[package]]

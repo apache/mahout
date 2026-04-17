@@ -2,10 +2,6 @@
 
 This document describes how to use the QDP Triton backend on AMD GPUs via ROCm.
 
-## Why
-
-The `triton_amd` backend provides a second production GPU path to reduce NVIDIA vendor lock-in.
-
 ## Prerequisites
 
 - AMD GPU supported by ROCm
