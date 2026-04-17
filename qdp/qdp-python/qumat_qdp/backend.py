@@ -19,9 +19,9 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
 import shutil
 import sys
+from dataclasses import dataclass
 from typing import Any
 
 
@@ -51,7 +51,12 @@ def _rocm_runtime_hint() -> bool:
         return False
     if any(
         key in os.environ
-        for key in ("ROCM_HOME", "ROCM_PATH", "HIP_VISIBLE_DEVICES", "HSA_OVERRIDE_GFX_VERSION")
+        for key in (
+            "ROCM_HOME",
+            "ROCM_PATH",
+            "HIP_VISIBLE_DEVICES",
+            "HSA_OVERRIDE_GFX_VERSION",
+        )
     ):
         return True
     # Common Ubuntu/ROCm signals.
@@ -126,7 +131,9 @@ class EngineRouter:
                 try:
                     TritonAmdEngine, is_triton_amd_available = _load_triton_backend()
                     if is_triton_amd_available():
-                        return "triton_amd", TritonAmdEngine(device_id=device_id, precision=precision)
+                        return "triton_amd", TritonAmdEngine(
+                            device_id=device_id, precision=precision
+                        )
                 except Exception:
                     pass
 
@@ -145,7 +152,9 @@ class EngineRouter:
                 try:
                     TritonAmdEngine, is_triton_amd_available = _load_triton_backend()
                     if is_triton_amd_available():
-                        return "triton_amd", TritonAmdEngine(device_id=device_id, precision=precision)
+                        return "triton_amd", TritonAmdEngine(
+                            device_id=device_id, precision=precision
+                        )
                 except Exception:
                     pass
             raise RuntimeError(
@@ -169,7 +178,9 @@ class EngineRouter:
             f"Unsupported backend '{backend}'. Use one of: auto, triton_amd, cuda."
         )
 
-    def encode(self, data: Any, num_qubits: int, encoding_method: str = "amplitude") -> QuantumTensor:
+    def encode(
+        self, data: Any, num_qubits: int, encoding_method: str = "amplitude"
+    ) -> QuantumTensor:
         value = self._engine.encode(data, num_qubits, encoding_method)
         if isinstance(value, QuantumTensor):
             return value

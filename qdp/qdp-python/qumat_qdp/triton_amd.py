@@ -161,7 +161,9 @@ class TritonAmdEngine:
                 "triton_amd backend requires PyTorch ROCm runtime (torch.version.hip + CUDA device visibility)."
             )
         if not is_triton_amd_available():
-            raise RuntimeError("triton_amd backend is unavailable: Triton HIP target not detected.")
+            raise RuntimeError(
+                "triton_amd backend is unavailable: Triton HIP target not detected."
+            )
 
     def _real_dtype(self) -> torch.dtype:
         return torch.float32 if self.precision == "float32" else torch.float64
@@ -212,7 +214,7 @@ class TritonAmdEngine:
             sample_size,
             state_len,
             total,
-            BLOCK=block,
+            BLOCK=block,  # ty: ignore[invalid-argument-type]
         )
         return torch.view_as_complex(out_ri).to(self._complex_dtype())
 
@@ -226,7 +228,9 @@ class TritonAmdEngine:
             )
         state_len = 1 << num_qubits
 
-        out_ri = torch.empty((batch, state_len, 2), device=angles.device, dtype=real_dtype)
+        out_ri = torch.empty(
+            (batch, state_len, 2), device=angles.device, dtype=real_dtype
+        )
         total = batch * state_len
         nq: Any = num_qubits
         fp64: Any = self.precision == "float64"
@@ -241,9 +245,9 @@ class TritonAmdEngine:
             out_ri,
             state_len,
             total,
-            NQ=nq,
-            FP64=fp64,
-            BLOCK=block,
+            NQ=nq,  # ty: ignore[invalid-argument-type]
+            FP64=fp64,  # ty: ignore[invalid-argument-type]
+            BLOCK=block,  # ty: ignore[invalid-argument-type]
         )
         return torch.view_as_complex(out_ri).to(self._complex_dtype())
 
@@ -280,8 +284,8 @@ class TritonAmdEngine:
             out_ri,
             state_len,
             total,
-            FP64=fp64,
-            BLOCK=block,
+            FP64=fp64,  # ty: ignore[invalid-argument-type]
+            BLOCK=block,  # ty: ignore[invalid-argument-type]
         )
         return torch.view_as_complex(out_ri).to(self._complex_dtype())
 

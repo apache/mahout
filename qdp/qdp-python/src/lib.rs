@@ -14,9 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod amd_engine;
 mod constants;
 mod dlpack;
-mod amd_engine;
 mod engine;
 mod loader;
 mod pytorch;

@@ -16,7 +16,6 @@
 
 import pytest
 import torch
-
 from qumat_qdp import TritonAmdEngine, create_encoder_engine, is_triton_amd_available
 
 
@@ -51,11 +50,17 @@ def _torch_basis_ref(idx: torch.Tensor, num_qubits: int) -> torch.Tensor:
     batch = idx.numel()
     state_len = 1 << num_qubits
     out = torch.zeros((batch, state_len), device=idx.device, dtype=torch.complex64)
-    out.scatter_(1, idx.reshape(batch, 1), torch.ones((batch, 1), device=idx.device, dtype=torch.complex64))
+    out.scatter_(
+        1,
+        idx.reshape(batch, 1),
+        torch.ones((batch, 1), device=idx.device, dtype=torch.complex64),
+    )
     return out
 
 
-@pytest.mark.skipif(not is_triton_amd_available(), reason="Triton AMD backend unavailable")
+@pytest.mark.skipif(
+    not is_triton_amd_available(), reason="Triton AMD backend unavailable"
+)
 @pytest.mark.rocm
 def test_triton_amd_amplitude_parity():
     engine = TritonAmdEngine(device_id=0, precision="float32")
@@ -67,7 +72,9 @@ def test_triton_amd_amplitude_parity():
     assert torch.allclose(got, ref, atol=1e-5, rtol=1e-5)
 
 
-@pytest.mark.skipif(not is_triton_amd_available(), reason="Triton AMD backend unavailable")
+@pytest.mark.skipif(
+    not is_triton_amd_available(), reason="Triton AMD backend unavailable"
+)
 @pytest.mark.rocm
 def test_triton_amd_angle_parity():
     engine = TritonAmdEngine(device_id=0, precision="float32")
@@ -78,7 +85,9 @@ def test_triton_amd_angle_parity():
     assert torch.allclose(got, ref, atol=2e-4, rtol=2e-4)
 
 
-@pytest.mark.skipif(not is_triton_amd_available(), reason="Triton AMD backend unavailable")
+@pytest.mark.skipif(
+    not is_triton_amd_available(), reason="Triton AMD backend unavailable"
+)
 @pytest.mark.rocm
 def test_triton_amd_basis_parity():
     engine = TritonAmdEngine(device_id=0, precision="float32")
@@ -89,7 +98,9 @@ def test_triton_amd_basis_parity():
     assert torch.equal(got, ref)
 
 
-@pytest.mark.skipif(not is_triton_amd_available(), reason="Triton AMD backend unavailable")
+@pytest.mark.skipif(
+    not is_triton_amd_available(), reason="Triton AMD backend unavailable"
+)
 @pytest.mark.rocm
 def test_triton_amd_angle_float64_precision_contract():
     engine = TritonAmdEngine(device_id=0, precision="float64")
@@ -119,7 +130,9 @@ def test_triton_amd_cuda_reference_optional():
     assert torch.allclose(got, ref, atol=1e-4, rtol=1e-4)
 
 
-@pytest.mark.skipif(not is_triton_amd_available(), reason="Triton AMD backend unavailable")
+@pytest.mark.skipif(
+    not is_triton_amd_available(), reason="Triton AMD backend unavailable"
+)
 @pytest.mark.rocm
 def test_triton_amd_direct_engine_returns_dlpack_contract():
     engine = TritonAmdEngine(device_id=0, precision="float32")
@@ -130,10 +143,14 @@ def test_triton_amd_direct_engine_returns_dlpack_contract():
     assert out.shape == (2, 4)
 
 
-@pytest.mark.skipif(not is_triton_amd_available(), reason="Triton AMD backend unavailable")
+@pytest.mark.skipif(
+    not is_triton_amd_available(), reason="Triton AMD backend unavailable"
+)
 @pytest.mark.rocm
 def test_unified_router_contract_returns_dlpack_object():
-    router = create_encoder_engine(backend="triton_amd", device_id=0, precision="float32")
+    router = create_encoder_engine(
+        backend="triton_amd", device_id=0, precision="float32"
+    )
     x = torch.randn(2, 4, device="cuda", dtype=torch.float32)
     qt = router.encode(x, 2, "amplitude")
     out = torch.from_dlpack(qt)

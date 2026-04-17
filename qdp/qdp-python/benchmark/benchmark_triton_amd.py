@@ -22,7 +22,6 @@ from __future__ import annotations
 import argparse
 
 import torch
-
 from qumat_qdp import TritonAmdEngine, is_triton_amd_available
 
 
@@ -41,7 +40,9 @@ def _build_input(method: str, batch_size: int, qubits: int) -> torch.Tensor:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Benchmark Triton AMD backend throughput/latency.")
+    parser = argparse.ArgumentParser(
+        description="Benchmark Triton AMD backend throughput/latency."
+    )
     parser.add_argument("--qubits", type=int, default=12)
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--batches", type=int, default=200)
@@ -51,11 +52,15 @@ def main() -> int:
         default="amplitude",
         choices=["amplitude", "angle", "basis"],
     )
-    parser.add_argument("--precision", type=str, default="float32", choices=["float32", "float64"])
+    parser.add_argument(
+        "--precision", type=str, default="float32", choices=["float32", "float64"]
+    )
     args = parser.parse_args()
 
     if not is_triton_amd_available():
-        raise SystemExit("triton_amd backend is unavailable (requires ROCm + Triton HIP target).")
+        raise SystemExit(
+            "triton_amd backend is unavailable (requires ROCm + Triton HIP target)."
+        )
 
     engine = TritonAmdEngine(device_id=0, precision=args.precision)
     data = _build_input(args.encoding_method, args.batch_size, args.qubits)

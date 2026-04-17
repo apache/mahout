@@ -24,7 +24,9 @@ def _rocm_available() -> bool:
     return bool(getattr(torch.version, "hip", None)) and torch.cuda.is_available()
 
 
-@pytest.mark.skipif(not hasattr(_qdp, "AmdQdpEngine"), reason="AmdQdpEngine not available")
+@pytest.mark.skipif(
+    not hasattr(_qdp, "AmdQdpEngine"), reason="AmdQdpEngine not available"
+)
 @pytest.mark.skipif(not _rocm_available(), reason="ROCm runtime not available")
 def test_amd_engine_amplitude_shape_and_dtype():
     engine = _qdp.AmdQdpEngine(0, precision="float32")
@@ -35,7 +37,9 @@ def test_amd_engine_amplitude_shape_and_dtype():
     assert out.dtype == torch.complex64
 
 
-@pytest.mark.skipif(not hasattr(_qdp, "AmdQdpEngine"), reason="AmdQdpEngine not available")
+@pytest.mark.skipif(
+    not hasattr(_qdp, "AmdQdpEngine"), reason="AmdQdpEngine not available"
+)
 @pytest.mark.skipif(not _rocm_available(), reason="ROCm runtime not available")
 def test_amd_engine_basis_shape_and_values():
     engine = _qdp.AmdQdpEngine(0, precision="float64")

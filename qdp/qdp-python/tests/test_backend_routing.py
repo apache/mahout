@@ -15,7 +15,6 @@
 # limitations under the License.
 
 import pytest
-
 from qumat_qdp import create_encoder_engine
 from qumat_qdp.backend import QuantumTensor
 
