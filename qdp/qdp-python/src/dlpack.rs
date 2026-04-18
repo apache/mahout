@@ -193,25 +193,28 @@ pub fn steal_dlpack_managed_tensor(tensor: &Bound<'_, PyAny>) -> PyResult<*mut D
     Ok(managed_ptr)
 }
 
-unsafe fn extract_managed_tensor(capsule_ptr: *mut ffi::PyObject) -> PyResult<*mut DLManagedTensor> {
-    if ffi::PyCapsule_IsValid(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8) == 0 {
+unsafe fn extract_managed_tensor(
+    capsule_ptr: *mut ffi::PyObject,
+) -> PyResult<*mut DLManagedTensor> {
+    if unsafe { ffi::PyCapsule_IsValid(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8) } == 0 {
         return Err(PyRuntimeError::new_err(
             "Invalid DLPack capsule (expected 'dltensor')",
         ));
     }
-    let managed_ptr = ffi::PyCapsule_GetPointer(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8)
-        as *mut DLManagedTensor;
+    let managed_ptr =
+        unsafe { ffi::PyCapsule_GetPointer(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8) }
+            as *mut DLManagedTensor;
     if managed_ptr.is_null() {
         return Err(PyRuntimeError::new_err(
             "Failed to extract DLManagedTensor from PyCapsule",
         ));
     }
-    validate_gpu_managed_tensor(managed_ptr)?;
+    unsafe { validate_gpu_managed_tensor(managed_ptr)? };
     Ok(managed_ptr)
 }
 
 unsafe fn validate_gpu_managed_tensor(managed_ptr: *mut DLManagedTensor) -> PyResult<()> {
-    let dl_tensor = &(*managed_ptr).dl_tensor;
+    let dl_tensor = unsafe { &(*managed_ptr).dl_tensor };
     if dl_tensor.data.is_null() {
         return Err(PyRuntimeError::new_err(
             "DLPack tensor has null data pointer",
@@ -228,5 +231,5 @@ unsafe fn validate_gpu_managed_tensor(managed_ptr: *mut DLManagedTensor) -> PyRe
 }
 
 unsafe fn mark_capsule_used(capsule_ptr: *mut ffi::PyObject) {
-    ffi::PyCapsule_SetName(capsule_ptr, USED_DLTENSOR_NAME.as_ptr() as *const i8);
+    unsafe { ffi::PyCapsule_SetName(capsule_ptr, USED_DLTENSOR_NAME.as_ptr() as *const i8) };
 }

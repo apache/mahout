@@ -32,6 +32,7 @@ Usage:
 from __future__ import annotations
 
 from types import ModuleType
+from typing import TYPE_CHECKING, Literal, overload
 
 # Backend detection: gracefully degrade when _qdp (Rust extension) is unavailable.
 from qumat_qdp._backend import Backend, force_backend, get_backend, get_qdp
@@ -61,6 +62,9 @@ from qumat_qdp.backend import (
 )
 from qumat_qdp.loader import QuantumDataLoader
 
+if TYPE_CHECKING:
+    from qumat_qdp.triton_amd import TritonAmdKernel
+
 
 def is_triton_amd_available() -> bool:
     try:
@@ -69,6 +73,15 @@ def is_triton_amd_available() -> bool:
         return _fn()
     except Exception:
         return False
+
+
+@overload
+def __getattr__(name: Literal["TritonAmdKernel"]) -> type[TritonAmdKernel]: ...
+
+
+@overload
+def __getattr__(name: str) -> object: ...
+
 
 def __getattr__(name: str) -> object:
     if name == "TritonAmdKernel":
