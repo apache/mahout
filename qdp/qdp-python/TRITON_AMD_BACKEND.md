@@ -37,9 +37,9 @@ The check validates:
 
 ```python
 import torch
-from qumat_qdp import TritonAmdEngine
+from qumat_qdp import TritonAmdKernel
 
-engine = TritonAmdEngine(device_id=0, precision="float32")
+engine = TritonAmdKernel(device_id=0, precision="float32")
 x = torch.randn(64, 1024, device="cuda", dtype=torch.float32)
 qt = engine.encode(x, num_qubits=10, encoding_method="amplitude")
 state = torch.from_dlpack(qt)

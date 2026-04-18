@@ -24,25 +24,32 @@ import sys
 from dataclasses import dataclass
 from typing import Any
 
+from qumat_qdp._backend import get_qdp
 
-def _load_qdp_module(required: bool = False):
-    try:
-        import _qdp
 
-        return _qdp
-    except Exception as exc:
-        if required:
-            raise RuntimeError(
-                "CUDA backend requires compiled _qdp extension. "
-                "Build with: uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml"
-            ) from exc
-        return None
+def _load_qdp_module(required: bool = False) -> Any:
+    qdp = get_qdp()
+    if qdp is None and required:
+        raise RuntimeError(
+            "CUDA backend requires compiled _qdp extension. "
+            "Build with: uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml"
+        )
+    return qdp
 
 
 def _load_triton_backend():
     from qumat_qdp.triton_amd import TritonAmdKernel, is_triton_amd_available
 
     return TritonAmdKernel, is_triton_amd_available
+
+
+def _create_triton_engine(*, device_id: int, precision: str) -> tuple[str, Any]:
+    TritonAmdKernel, is_triton_amd_available = _load_triton_backend()
+    if not is_triton_amd_available():
+        raise RuntimeError("Triton HIP target not detected.")
+    engine = TritonAmdKernel(device_id=device_id, precision=precision)
+    engine.check_runtime()
+    return "triton_amd", engine
 
 
 def _rocm_runtime_hint() -> bool:
@@ -129,13 +136,14 @@ class EngineRouter:
             rocm_hint = _rocm_runtime_hint()
             if rocm_hint:
                 try:
-                    TritonAmdKernel, is_triton_amd_available = _load_triton_backend()
-                    if is_triton_amd_available():
-                        return "triton_amd", TritonAmdKernel(
-                            device_id=device_id, precision=precision
-                        )
-                except Exception:
-                    pass
+                    return _create_triton_engine(
+                        device_id=device_id, precision=precision
+                    )
+                except Exception as exc:
+                    raise RuntimeError(
+                        "ROCm environment detected but triton_amd backend failed to initialize. "
+                        "Install Triton HIP support."
+                    ) from exc
 
             if rocm_hint:
                 raise RuntimeError(
@@ -150,11 +158,9 @@ class EngineRouter:
             # Final chance on Linux: try Triton probe even if hint was inconclusive.
             if sys.platform.startswith("linux"):
                 try:
-                    TritonAmdKernel, is_triton_amd_available = _load_triton_backend()
-                    if is_triton_amd_available():
-                        return "triton_amd", TritonAmdKernel(
-                            device_id=device_id, precision=precision
-                        )
+                    return _create_triton_engine(
+                        device_id=device_id, precision=precision
+                    )
                 except Exception:
                     pass
             raise RuntimeError(
@@ -163,10 +169,12 @@ class EngineRouter:
             )
 
         if backend == "triton_amd":
-            TritonAmdKernel, _ = _load_triton_backend()
-            engine = TritonAmdKernel(device_id=device_id, precision=precision)
-            engine.check_runtime()
-            return "triton_amd", engine
+            try:
+                return _create_triton_engine(device_id=device_id, precision=precision)
+            except Exception as exc:
+                raise RuntimeError(
+                    "triton_amd backend failed to initialize. Install Triton HIP support."
+                ) from exc
 
         if backend == "cuda":
             qdp = _load_qdp_module(required=True)

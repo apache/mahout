@@ -20,6 +20,9 @@ use pyo3::prelude::*;
 use qdp_core::dlpack::{DL_FLOAT, DLDeviceType, DLManagedTensor};
 use std::ffi::c_void;
 
+const DLTENSOR_NAME: &[u8] = b"dltensor\0";
+const USED_DLTENSOR_NAME: &[u8] = b"used_dltensor\0";
+
 /// DLPack tensor information extracted from a PyCapsule
 ///
 /// This struct owns the DLManagedTensor pointer and ensures proper cleanup
@@ -70,28 +73,7 @@ pub fn extract_dlpack_tensor(
     // Call tensor.__dlpack__() to get PyCapsule
     // Note: PyTorch's __dlpack__ uses the default stream when called without arguments
     let capsule = tensor.call_method0("__dlpack__")?;
-
-    const DLTENSOR_NAME: &[u8] = b"dltensor\0";
-
-    // SAFETY: capsule is a valid PyCapsule from tensor.__dlpack__(). DLTENSOR_NAME is a
-    // null-terminated C string for the lifetime of the call. We only read the capsule
-    // and call PyCapsule_IsValid / PyCapsule_GetPointer; we do not invalidate the capsule.
-    let managed_ptr = unsafe {
-        let capsule_ptr = capsule.as_ptr();
-        if ffi::PyCapsule_IsValid(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8) == 0 {
-            return Err(PyRuntimeError::new_err(
-                "Invalid DLPack capsule (expected 'dltensor')",
-            ));
-        }
-        let ptr = ffi::PyCapsule_GetPointer(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8)
-            as *mut DLManagedTensor;
-        if ptr.is_null() {
-            return Err(PyRuntimeError::new_err(
-                "Failed to extract DLManagedTensor from PyCapsule",
-            ));
-        }
-        ptr
-    };
+    let managed_ptr = unsafe { extract_managed_tensor(capsule.as_ptr())? };
 
     // SAFETY: managed_ptr is non-null and was returned by PyCapsule_GetPointer for a valid
     // "dltensor" capsule, so it points to a valid DLManagedTensor. The capsule (and thus
@@ -187,10 +169,7 @@ pub fn extract_dlpack_tensor(
         }
 
         let device_id = dl_tensor.device.device_id;
-
-        const USED_DLTENSOR_NAME: &[u8] = b"used_dltensor\0";
-        // SAFETY: capsule is the same PyCapsule we used above; renaming is allowed and does not free it.
-        ffi::PyCapsule_SetName(capsule.as_ptr(), USED_DLTENSOR_NAME.as_ptr() as *const i8);
+        mark_capsule_used(capsule.as_ptr());
 
         Ok(DLPackTensorInfo {
             managed_ptr,
@@ -208,42 +187,46 @@ pub fn extract_dlpack_tensor(
 /// and returns it to be wrapped by `QuantumTensor`.
 pub fn steal_dlpack_managed_tensor(tensor: &Bound<'_, PyAny>) -> PyResult<*mut DLManagedTensor> {
     let capsule = tensor.call_method0("__dlpack__")?;
-    const DLTENSOR_NAME: &[u8] = b"dltensor\0";
-
-    let managed_ptr = unsafe {
-        let capsule_ptr = capsule.as_ptr();
-        if ffi::PyCapsule_IsValid(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8) == 0 {
-            return Err(PyRuntimeError::new_err(
-                "Invalid DLPack capsule (expected 'dltensor')",
-            ));
-        }
-        let ptr = ffi::PyCapsule_GetPointer(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8)
-            as *mut DLManagedTensor;
-        if ptr.is_null() {
-            return Err(PyRuntimeError::new_err(
-                "Failed to extract DLManagedTensor from PyCapsule",
-            ));
-        }
-        ptr
-    };
-
-    unsafe {
-        let dl_tensor = &(*managed_ptr).dl_tensor;
-        if dl_tensor.data.is_null() {
-            return Err(PyRuntimeError::new_err(
-                "DLPack tensor has null data pointer",
-            ));
-        }
-        if dl_tensor.device.device_type != DLDeviceType::kDLCUDA
-            && dl_tensor.device.device_type != DLDeviceType::kDLROCM
-        {
-            return Err(PyRuntimeError::new_err(
-                "DLPack tensor must be on CUDA/ROCm device",
-            ));
-        }
-        const USED_DLTENSOR_NAME: &[u8] = b"used_dltensor\0";
-        ffi::PyCapsule_SetName(capsule.as_ptr(), USED_DLTENSOR_NAME.as_ptr() as *const i8);
-    }
+    let managed_ptr = unsafe { extract_managed_tensor(capsule.as_ptr())? };
+    unsafe { mark_capsule_used(capsule.as_ptr()) };
 
     Ok(managed_ptr)
+}
+
+unsafe fn extract_managed_tensor(capsule_ptr: *mut ffi::PyObject) -> PyResult<*mut DLManagedTensor> {
+    if ffi::PyCapsule_IsValid(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8) == 0 {
+        return Err(PyRuntimeError::new_err(
+            "Invalid DLPack capsule (expected 'dltensor')",
+        ));
+    }
+    let managed_ptr = ffi::PyCapsule_GetPointer(capsule_ptr, DLTENSOR_NAME.as_ptr() as *const i8)
+        as *mut DLManagedTensor;
+    if managed_ptr.is_null() {
+        return Err(PyRuntimeError::new_err(
+            "Failed to extract DLManagedTensor from PyCapsule",
+        ));
+    }
+    validate_gpu_managed_tensor(managed_ptr)?;
+    Ok(managed_ptr)
+}
+
+unsafe fn validate_gpu_managed_tensor(managed_ptr: *mut DLManagedTensor) -> PyResult<()> {
+    let dl_tensor = &(*managed_ptr).dl_tensor;
+    if dl_tensor.data.is_null() {
+        return Err(PyRuntimeError::new_err(
+            "DLPack tensor has null data pointer",
+        ));
+    }
+    if dl_tensor.device.device_type != DLDeviceType::kDLCUDA
+        && dl_tensor.device.device_type != DLDeviceType::kDLROCM
+    {
+        return Err(PyRuntimeError::new_err(
+            "DLPack tensor must be on CUDA/ROCm device",
+        ));
+    }
+    Ok(())
+}
+
+unsafe fn mark_capsule_used(capsule_ptr: *mut ffi::PyObject) {
+    ffi::PyCapsule_SetName(capsule_ptr, USED_DLTENSOR_NAME.as_ptr() as *const i8);
 }

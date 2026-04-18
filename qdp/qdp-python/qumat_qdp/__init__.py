@@ -38,11 +38,13 @@ from qumat_qdp._backend import Backend, force_backend, get_backend, get_qdp
 
 _qdp_mod: ModuleType | None = get_qdp()
 if _qdp_mod is not None:
-    QdpEngine = getattr(_qdp_mod, "QdpEngine")
-    QuantumTensor = getattr(_qdp_mod, "QuantumTensor")
+    QdpEngine = getattr(_qdp_mod, "QdpEngine", None)
+    AmdQdpEngine = getattr(_qdp_mod, "AmdQdpEngine", None)
+    QuantumTensor = getattr(_qdp_mod, "QuantumTensor", None)
     run_throughput_pipeline_py = getattr(_qdp_mod, "run_throughput_pipeline_py", None)
 else:
     QdpEngine = None
+    AmdQdpEngine = None
     QuantumTensor = None
     run_throughput_pipeline_py = None
 
@@ -68,21 +70,7 @@ def is_triton_amd_available() -> bool:
     except Exception:
         return False
 
-
-# Re-export Rust extension types when available.
-if _qdp_mod is not None:
-    QdpEngine = getattr(_qdp_mod, "QdpEngine", None)
-    AmdQdpEngine = getattr(_qdp_mod, "AmdQdpEngine", None)
-    QuantumTensor = getattr(_qdp_mod, "QuantumTensor", None)
-    run_throughput_pipeline_py = getattr(_qdp_mod, "run_throughput_pipeline_py", None)
-else:
-    QdpEngine = None
-    AmdQdpEngine = None
-    QuantumTensor = None
-    run_throughput_pipeline_py = None
-
-
-def __getattr__(name: str):
+def __getattr__(name: str) -> object:
     if name == "TritonAmdKernel":
         from qumat_qdp.triton_amd import TritonAmdKernel
 
