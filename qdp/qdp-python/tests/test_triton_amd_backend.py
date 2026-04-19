@@ -16,7 +16,8 @@
 
 import pytest
 import torch
-from qumat_qdp import TritonAmdKernel, create_encoder_engine, is_triton_amd_available
+from qumat_qdp import create_encoder_engine, is_triton_amd_available
+from qumat_qdp.triton_amd import TritonAmdKernel
 
 
 def _as_torch(value):
@@ -148,9 +149,7 @@ def test_triton_amd_direct_engine_returns_dlpack_contract():
 )
 @pytest.mark.rocm
 def test_unified_router_contract_returns_dlpack_object():
-    router = create_encoder_engine(
-        backend="triton_amd", device_id=0, precision="float32"
-    )
+    router = create_encoder_engine(backend="amd", device_id=0, precision="float32")
     x = torch.randn(2, 4, device="cuda", dtype=torch.float32)
     qt = router.encode(x, 2, "amplitude")
     out = torch.from_dlpack(qt)

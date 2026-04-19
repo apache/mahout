@@ -17,36 +17,21 @@
 """
 QDP (Quantum Data Processing) Python API.
 
-Public API: QdpEngine, AmdQdpEngine, QuantumTensor (Rust extension _qdp),
-QdpBenchmark, ThroughputResult, LatencyResult (benchmark API),
-QuantumDataLoader (data loader iterator), EngineRouter with backends:
-CUDA and Triton AMD.
-
-Usage:
-    from qumat_qdp import QdpEngine, AmdQdpEngine, QuantumTensor
-    from qumat_qdp import TritonAmdKernel, create_encoder_engine
-    from qumat_qdp import QdpBenchmark, ThroughputResult, LatencyResult
-    from qumat_qdp import QuantumDataLoader
+Public API: unified `QdpEngine` / `EngineRouter`, unified `QuantumTensor`,
+benchmark helpers, and loader utilities.
 """
 
 from __future__ import annotations
 
 from types import ModuleType
-from typing import TYPE_CHECKING, Literal, overload
 
 # Backend detection: gracefully degrade when _qdp (Rust extension) is unavailable.
 from qumat_qdp._backend import Backend, force_backend, get_backend, get_qdp
 
 _qdp_mod: ModuleType | None = get_qdp()
 if _qdp_mod is not None:
-    QdpEngine = getattr(_qdp_mod, "QdpEngine", None)
-    AmdQdpEngine = getattr(_qdp_mod, "AmdQdpEngine", None)
-    QuantumTensor = getattr(_qdp_mod, "QuantumTensor", None)
     run_throughput_pipeline_py = getattr(_qdp_mod, "run_throughput_pipeline_py", None)
 else:
-    QdpEngine = None
-    AmdQdpEngine = None
-    QuantumTensor = None
     run_throughput_pipeline_py = None
 
 BACKEND = get_backend()
@@ -58,12 +43,11 @@ from qumat_qdp.api import (
 )
 from qumat_qdp.backend import (
     EngineRouter,
+    QdpEngine,
+    QuantumTensor,
     create_encoder_engine,
 )
 from qumat_qdp.loader import QuantumDataLoader
-
-if TYPE_CHECKING:
-    from qumat_qdp.triton_amd import TritonAmdKernel
 
 
 def is_triton_amd_available() -> bool:
@@ -75,25 +59,8 @@ def is_triton_amd_available() -> bool:
         return False
 
 
-@overload
-def __getattr__(name: Literal["TritonAmdKernel"]) -> type[TritonAmdKernel]: ...
-
-
-@overload
-def __getattr__(name: str) -> object: ...
-
-
-def __getattr__(name: str) -> object:
-    if name == "TritonAmdKernel":
-        from qumat_qdp.triton_amd import TritonAmdKernel
-
-        return TritonAmdKernel
-    raise AttributeError(name)
-
-
 __all__ = [
     "BACKEND",
-    "AmdQdpEngine",
     "Backend",
     "EngineRouter",
     "LatencyResult",
@@ -102,7 +69,6 @@ __all__ = [
     "QuantumDataLoader",
     "QuantumTensor",
     "ThroughputResult",
-    "TritonAmdKernel",
     "create_encoder_engine",
     "force_backend",
     "is_triton_amd_available",

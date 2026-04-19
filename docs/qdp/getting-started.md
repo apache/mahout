@@ -8,9 +8,11 @@ QDP (Quantum Data Plane) is a GPU-accelerated library for encoding classical dat
 
 ## Prerequisites
 
-- Linux with NVIDIA GPU
-- CUDA toolkit installed (`nvcc --version` to verify)
+- Linux
 - Python 3.10+
+- One supported GPU runtime:
+  - NVIDIA GPU with CUDA
+  - AMD GPU with ROCm
 
 ## Installation
 
@@ -34,7 +36,7 @@ uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml
 import torch
 from qumat.qdp import QdpEngine
 
-engine = QdpEngine(0)  # GPU device 0
+engine = QdpEngine(0, backend="auto")  # GPU device 0, auto-select CUDA/AMD
 data = [0.5, 0.5, 0.5, 0.5]
 qtensor = engine.encode(data, num_qubits=2, encoding_method="amplitude")
 
@@ -70,6 +72,7 @@ Notes:
 ## Tips
 
 - Use `precision="float64"` for higher precision: `QdpEngine(0, precision="float64")`
+- Force AMD routing with `QdpEngine(0, backend="amd")` on ROCm systems
 - NumPy inputs must be `float64` dtype
 - Streaming only works with Parquet files
 

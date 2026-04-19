@@ -47,8 +47,8 @@ def _make_stub(name: str) -> type[Any]:
 
 
 try:
-    from _qdp import QdpEngine as QdpEngine
-    from _qdp import QuantumTensor as QuantumTensor
+    from qumat_qdp import QdpEngine as QdpEngine
+    from qumat_qdp import QuantumTensor as QuantumTensor
 except ImportError as e:
     import warnings
 

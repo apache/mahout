@@ -15,13 +15,49 @@
 # limitations under the License.
 
 import pytest
-from qumat_qdp import create_encoder_engine
-from qumat_qdp.backend import QuantumTensor
+from qumat_qdp import QdpEngine, create_encoder_engine
+from qumat_qdp.backend import EngineRouter, QuantumTensor
 
 
 def test_backend_routing_rejects_unknown_backend():
     with pytest.raises(ValueError):
         create_encoder_engine(backend="unknown-backend")
+
+
+def test_create_encoder_engine_returns_unified_qdp_engine(monkeypatch):
+    monkeypatch.setattr(
+        EngineRouter,
+        "_create_backend_engine",
+        staticmethod(lambda **kwargs: ("fake", object())),
+    )
+    engine = create_encoder_engine(backend="auto")
+    assert isinstance(engine, QdpEngine)
+
+
+def test_qdp_engine_wraps_backend_output_into_unified_quantum_tensor(monkeypatch):
+    class FakeValue:
+        def __dlpack__(self, stream=None):
+            return ("capsule", stream)
+
+        def __dlpack_device__(self):
+            return (2, 0)
+
+    class FakeBackendEngine:
+        def encode(self, data, num_qubits, encoding_method):
+            return FakeValue()
+
+    monkeypatch.setattr(
+        EngineRouter,
+        "_create_backend_engine",
+        staticmethod(lambda **kwargs: ("fake", FakeBackendEngine())),
+    )
+
+    engine = QdpEngine(device_id=0, precision="float32", backend="auto")
+    qt = engine.encode([1.0, 0.0, 0.0, 0.0], 2, "amplitude")
+
+    assert isinstance(qt, QuantumTensor)
+    assert qt.backend == "fake"
+    assert qt.__dlpack_device__() == (2, 0)
 
 
 def test_auto_router_without_available_backends_fails_cleanly():

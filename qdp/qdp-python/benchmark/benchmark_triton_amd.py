@@ -22,7 +22,8 @@ from __future__ import annotations
 import argparse
 
 import torch
-from qumat_qdp import TritonAmdKernel, is_triton_amd_available
+from qumat_qdp import is_triton_amd_available
+from qumat_qdp.triton_amd import TritonAmdKernel
 
 
 def _build_input(method: str, batch_size: int, qubits: int) -> torch.Tensor:

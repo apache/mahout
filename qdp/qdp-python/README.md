@@ -10,7 +10,7 @@ pip install qumat[qdp]
 
 Requires one of:
 - NVIDIA GPU (CUDA path via `QdpEngine`)
-- AMD GPU with ROCm (AMD path via `AmdQdpEngine`, with Triton-based AMD support via `TritonAmdKernel`)
+- AMD GPU with ROCm (AMD path via `QdpEngine(backend="amd")`)
 
 Recommended environment setup:
 
@@ -34,8 +34,9 @@ runtime stack.
 import qumat.qdp as qdp
 import torch
 
-# Initialize engine on GPU 0
-engine = qdp.QdpEngine(device_id=0)
+# Initialize the unified QDP engine on GPU 0.
+# backend="auto" will pick CUDA or AMD underneath.
+engine = qdp.QdpEngine(device_id=0, backend="auto")
 
 # Encode data into quantum state
 qtensor = engine.encode([1.0, 2.0, 3.0, 4.0], num_qubits=2, encoding_method="amplitude")
@@ -50,23 +51,17 @@ print(tensor)  # Complex tensor on CUDA
 ```python
 import qumat.qdp as qdp
 import torch
-from qumat_qdp import TritonAmdKernel, create_encoder_engine
 
-# AMD ROCm engine path
-engine = qdp.AmdQdpEngine(device_id=0, precision="float32")
-qtensor = engine.encode(torch.randn(8, 4, device="cuda"), 2, "amplitude")
-tensor = torch.from_dlpack(qtensor)
-print(tensor.device, tensor.dtype)  # cuda:0, complex64
-
-# Triton-backed AMD kernel path
-kernel = TritonAmdKernel(device_id=0, precision="float32")
-qt = kernel.encode(torch.randn(64, 1024, device="cuda"), 10, "amplitude")
+# Unified AMD engine route
+engine = qdp.QdpEngine(device_id=0, precision="float32", backend="amd")
+qt = engine.encode(torch.randn(8, 4, device="cuda"), 2, "amplitude")
 state = torch.from_dlpack(qt)
+print(state.device, state.dtype)  # cuda:0, complex64
 
-# Or let the router select the AMD Triton path automatically when available
-engine_auto = create_encoder_engine(backend="auto", device_id=0, precision="float32")
-qt = engine_auto.encode(torch.randn(8, 4, device="cuda"), 2, "amplitude")
-state = torch.from_dlpack(qt)
+# Or let the router select AMD / CUDA automatically
+engine_auto = qdp.QdpEngine(device_id=0, precision="float32", backend="auto")
+qt_auto = engine_auto.encode(torch.randn(8, 4, device="cuda"), 2, "amplitude")
+state_auto = torch.from_dlpack(qt_auto)
 ```
 
 See `qdp/qdp-python/TRITON_AMD_BACKEND.md` for Triton AMD setup and validation details.
@@ -82,7 +77,7 @@ See `qdp/qdp-python/TRITON_AMD_BACKEND.md` for Triton AMD setup and validation d
 
 Backend support boundary:
 - CUDA (`QdpEngine`): `amplitude`, `angle`, `basis`, `iqp`
-- AMD Triton path (`TritonAmdKernel` / `backend="triton_amd"`): `amplitude`, `angle`, `basis` (no `iqp` yet)
+- AMD (`QdpEngine(..., backend="amd")`): `amplitude`, `angle`, `basis` (no `iqp` yet)
 
 ## Input Sources
 

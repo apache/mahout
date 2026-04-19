@@ -1,6 +1,6 @@
-# Triton AMD Backend (`triton_amd`)
+# Triton AMD Backend
 
-This document describes how to use the QDP Triton backend on AMD GPUs via ROCm.
+This document describes the Triton-based implementation used by the QDP AMD backend on ROCm.
 
 ## Prerequisites
 
@@ -33,11 +33,25 @@ The check validates:
 
 ## Usage
 
-### Direct Triton backend
+### Unified AMD routing (recommended)
 
 ```python
 import torch
-from qumat_qdp import TritonAmdKernel
+from qumat_qdp import QdpEngine
+
+engine = QdpEngine(device_id=0, precision="float32", backend="amd")
+x = torch.randn(64, 1024, device="cuda", dtype=torch.float32)
+qt = engine.encode(x, num_qubits=10, encoding_method="amplitude")
+state = torch.from_dlpack(qt)
+```
+
+All routed backends return the same DLPack-compatible `QuantumTensor` from `qumat_qdp.backend`.
+
+### Triton implementation details
+
+```python
+import torch
+from qumat_qdp.triton_amd import TritonAmdKernel
 
 engine = TritonAmdKernel(device_id=0, precision="float32")
 x = torch.randn(64, 1024, device="cuda", dtype=torch.float32)
@@ -50,22 +64,8 @@ Supported methods:
 - `angle`
 - `basis`
 
-Not supported in `triton_amd`:
+Not supported in the AMD route yet:
 - `iqp` (currently CUDA backend only)
-
-### Unified Engine Routing (recommended)
-
-```python
-from qumat_qdp import create_encoder_engine
-import torch
-
-engine = create_encoder_engine(backend="auto", device_id=0, precision="float32")
-qt = engine.encode([[1.0, 0.0, 0.0, 0.0]], num_qubits=2, encoding_method="amplitude")
-state = torch.from_dlpack(qt)
-# auto order: triton_amd -> cuda
-```
-
-All routed backends return a unified DLPack-compatible object (`QuantumTensor` from `qumat_qdp.backend`).
 
 ## Correctness tests
 

@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Backend routing and output contract for QDP encoders."""
+"""Unified backend routing and DLPack contract for QDP encoders."""
 
 from __future__ import annotations
 
@@ -43,13 +43,28 @@ def _load_triton_backend():
     return TritonAmdKernel, is_triton_amd_available
 
 
-def _create_triton_engine(*, device_id: int, precision: str) -> tuple[str, Any]:
+def _load_unified_qdp_engine():
+    qdp = _load_qdp_module(required=False)
+    if qdp is None:
+        return None
+    return getattr(qdp, "QdpEngine", None)
+
+
+def _create_triton_engine(*, device_id: int, precision: str) -> Any:
     TritonAmdKernel, is_triton_amd_available = _load_triton_backend()
     if not is_triton_amd_available():
         raise RuntimeError("Triton HIP target not detected.")
     engine = TritonAmdKernel(device_id=device_id, precision=precision)
     engine.check_runtime()
-    return "triton_amd", engine
+    return engine
+
+
+def _create_amd_engine(*, device_id: int, precision: str) -> tuple[str, Any]:
+    qdp_engine = _load_unified_qdp_engine()
+    if qdp_engine is not None:
+        return "amd", qdp_engine(device_id=device_id, precision=precision, backend="amd")
+
+    return "amd", _create_triton_engine(device_id=device_id, precision=precision)
 
 
 def _rocm_runtime_hint() -> bool:
@@ -132,58 +147,50 @@ class EngineRouter:
         *, backend: str, device_id: int, precision: str
     ) -> tuple[str, Any]:
         if backend == "auto":
-            # Prefer vendor-neutral/non-CUDA paths first.
+            # Prefer unified AMD routing when ROCm is hinted, then fall back to CUDA.
             rocm_hint = _rocm_runtime_hint()
             if rocm_hint:
                 try:
-                    return _create_triton_engine(
-                        device_id=device_id, precision=precision
-                    )
+                    return _create_amd_engine(device_id=device_id, precision=precision)
                 except Exception as exc:
                     raise RuntimeError(
-                        "ROCm environment detected but triton_amd backend failed to initialize. "
-                        "Install Triton HIP support."
+                        "ROCm environment detected but AMD backend failed to initialize. "
+                        "Install the ROCm runtime and either build `_qdp` with AMD support or install Triton HIP support."
                     ) from exc
-
-            if rocm_hint:
-                raise RuntimeError(
-                    "ROCm environment detected but triton_amd backend is unavailable. "
-                    "Install Triton HIP support."
-                )
 
             qdp = _load_qdp_module(required=False)
             if qdp is not None and getattr(qdp, "QdpEngine", None) is not None:
                 return "cuda", qdp.QdpEngine(device_id=device_id, precision=precision)
 
-            # Final chance on Linux: try Triton probe even if hint was inconclusive.
+            # Final chance on Linux: probe the unified AMD route even if heuristics were inconclusive.
             if sys.platform.startswith("linux"):
                 try:
-                    return _create_triton_engine(
-                        device_id=device_id, precision=precision
-                    )
+                    return _create_amd_engine(device_id=device_id, precision=precision)
                 except Exception:
                     pass
             raise RuntimeError(
-                "No available backend for auto routing. Install Triton+ROCm (`triton_amd`), "
-                "or build CUDA extension (`_qdp`)."
+                "No available backend for auto routing. Install ROCm support for `backend=\"amd\"`, "
+                "or build the CUDA extension (`_qdp`)."
             )
 
-        if backend == "triton_amd":
+        if backend in {"amd", "triton_amd"}:
             try:
-                return _create_triton_engine(device_id=device_id, precision=precision)
+                return _create_amd_engine(device_id=device_id, precision=precision)
             except Exception as exc:
                 raise RuntimeError(
-                    "triton_amd backend failed to initialize. Install Triton HIP support."
+                    "AMD backend failed to initialize. Install the ROCm runtime and either build `_qdp` with AMD support or install Triton HIP support."
                 ) from exc
 
         if backend == "cuda":
-            qdp = _load_qdp_module(required=True)
-            if getattr(qdp, "QdpEngine", None) is None:
+            qdp_engine = _load_unified_qdp_engine()
+            if qdp_engine is None:
                 raise RuntimeError("_qdp.QdpEngine is unavailable.")
-            return "cuda", qdp.QdpEngine(device_id=device_id, precision=precision)
+            return "cuda", qdp_engine(
+                device_id=device_id, precision=precision, backend="cuda"
+            )
 
         raise ValueError(
-            f"Unsupported backend '{backend}'. Use one of: auto, triton_amd, cuda."
+            f"Unsupported backend '{backend}'. Use one of: auto, amd, cuda."
         )
 
     def encode(
@@ -195,11 +202,28 @@ class EngineRouter:
         return QuantumTensor(value=value, backend=self.backend)
 
 
+class QdpEngine(EngineRouter):
+    """
+    Unified QDP engine facade.
+
+    The public engine API routes to the concrete CUDA or AMD implementation
+    underneath, while always returning the same `QuantumTensor` contract.
+    """
+
+    def __init__(
+        self,
+        device_id: int = 0,
+        precision: str = "float32",
+        backend: str = "auto",
+    ) -> None:
+        super().__init__(backend=backend, device_id=device_id, precision=precision)
+
+
 def create_encoder_engine(
     *,
     backend: str = "auto",
     device_id: int = 0,
     precision: str = "float32",
-) -> EngineRouter:
+) -> QdpEngine:
     """Create a unified engine router (single input/output contract across backends)."""
-    return EngineRouter(backend=backend, device_id=device_id, precision=precision)
+    return QdpEngine(device_id=device_id, precision=precision, backend=backend)

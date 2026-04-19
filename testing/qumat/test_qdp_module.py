@@ -23,19 +23,19 @@ import pytest
 
 def _reload_qdp_without_extension():
     """
-    Safely reload qumat.qdp while simulating missing _qdp extension.
+    Safely reload qumat.qdp while simulating missing qumat_qdp package.
     Restores sys.modules after execution to avoid test pollution.
     """
     original_qdp = sys.modules.get("qumat.qdp")
-    original_ext = sys.modules.get("_qdp")
+    original_pkg = sys.modules.get("qumat_qdp")
 
     try:
         # Remove cached modules
         sys.modules.pop("qumat.qdp", None)
-        sys.modules.pop("_qdp", None)
+        sys.modules.pop("qumat_qdp", None)
 
-        # Simulate missing compiled extension
-        with patch.dict(sys.modules, {"_qdp": None}):
+        # Simulate missing unified QDP package
+        with patch.dict(sys.modules, {"qumat_qdp": None}):
             module = importlib.import_module("qumat.qdp")
             return importlib.reload(module)
 
@@ -46,10 +46,10 @@ def _reload_qdp_without_extension():
         else:
             sys.modules.pop("qumat.qdp", None)
 
-        if original_ext is not None:
-            sys.modules["_qdp"] = original_ext
+        if original_pkg is not None:
+            sys.modules["qumat_qdp"] = original_pkg
         else:
-            sys.modules.pop("_qdp", None)
+            sys.modules.pop("qumat_qdp", None)
 
 
 def test_qdp_import_fallback_warning():
