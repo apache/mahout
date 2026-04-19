@@ -477,10 +477,11 @@ impl QdpEngine {
         num_qubits: usize,
         encoding_method: &str,
     ) -> PyResult<QuantumTensor> {
-        validate_cuda_tensor_for_encoding(data, self.engine.device().ordinal(), encoding_method)?;
-
-        let encoding = Encoding::from_str_ci(encoding_method)
-            .map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
+        let encoding = validate_cuda_tensor_for_encoding(
+            data,
+            self.engine.device().ordinal(),
+            encoding_method,
+        )?;
         let dtype = data.getattr("dtype")?;
         let dtype_str: String = dtype.str()?.extract()?;
         let is_f32 = dtype_str.to_ascii_lowercase().contains("float32");

@@ -144,13 +144,15 @@ pub fn get_torch_cuda_stream_ptr(tensor: &Bound<'_, PyAny>) -> PyResult<*mut c_v
     })
 }
 
-/// Validate a CUDA tensor for direct GPU encoding
-/// Checks: dtype matches encoding method, contiguous, non-empty, device_id matches engine
+/// Validate a CUDA tensor for direct GPU encoding and return the parsed `Encoding`.
+///
+/// Checks dtype compatibility, contiguity, non-empty, and device match.
+/// Returns the parsed `Encoding` so the caller avoids re-parsing the same string.
 pub fn validate_cuda_tensor_for_encoding(
     tensor: &Bound<'_, PyAny>,
     expected_device_id: usize,
     encoding_method: &str,
-) -> PyResult<()> {
+) -> PyResult<Encoding> {
     let encoding = Encoding::from_str_ci(encoding_method)
         .map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
 
@@ -223,7 +225,7 @@ pub fn validate_cuda_tensor_for_encoding(
         )));
     }
 
-    Ok(())
+    Ok(encoding)
 }
 
 /// Minimal CUDA tensor metadata extracted via PyTorch APIs.

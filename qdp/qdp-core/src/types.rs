@@ -32,10 +32,10 @@ use crate::gpu::encodings::{
     iqp_z_encoder,
 };
 
-/// Dtype for pipeline configuration (alias of [`crate::gpu::memory::Precision`]).
-pub type Dtype = crate::gpu::memory::Precision;
+/// Dtype for pipeline configuration (re-export of [`crate::gpu::memory::Precision`]).
+pub use crate::gpu::memory::Precision as Dtype;
 
-impl Dtype {
+impl crate::gpu::memory::Precision {
     /// Parse dtype from a short user string (case-insensitive, trimmed).
     pub fn from_str_ci(s: &str) -> Result<Self> {
         let t = s.trim();
@@ -115,14 +115,21 @@ impl Encoding {
         }
     }
 
-    /// Feature dimension per sample for this encoding and qubit count.
+    /// Input feature dimension per sample for this encoding and qubit count.
+    ///
+    /// Matches each encoder's `expected_data_len` / `sample_size` contract:
+    /// - `Amplitude`: full state vector (`2^n`)
+    /// - `Angle` / `IqpZ` / `Phase`: one value per qubit (`n`)
+    /// - `Iqp`: single-qubit + pairwise ZZ terms (`n + n*(n-1)/2`)
+    /// - `Basis`: single integer index (`1`)
     #[must_use]
     pub const fn vector_len(self, num_qubits: u32) -> usize {
         let n = num_qubits as usize;
         match self {
-            Self::Angle => n,
+            Self::Amplitude => 1 << n,
+            Self::Angle | Self::IqpZ | Self::Phase => n,
+            Self::Iqp => n + n * n.saturating_sub(1) / 2,
             Self::Basis => 1,
-            Self::Amplitude | Self::Iqp | Self::IqpZ | Self::Phase => 1 << n,
         }
     }
 
