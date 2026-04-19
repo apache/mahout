@@ -63,6 +63,7 @@ use crate::dlpack::DLManagedTensor;
 use crate::gpu::PipelineContext;
 use crate::gpu::memory::{GpuStateVector, PinnedHostBuffer};
 use crate::reader::StreamingDataReader;
+use crate::types::Encoding;
 use crate::{MahoutError, QdpEngine, Result};
 
 /// 512MB staging buffer for large Parquet row groups (reduces fragmentation)
@@ -370,22 +371,23 @@ pub(crate) fn encode_from_parquet(
     num_qubits: usize,
     encoding_method: &str,
 ) -> Result<*mut DLManagedTensor> {
-    match encoding_method {
-        "amplitude" => {
+    let encoding = Encoding::from_str_ci(encoding_method)?;
+    match encoding {
+        Encoding::Amplitude => {
             crate::profile_scope!("Mahout::EncodeAmplitudeFromParquet");
             stream_encode(engine, path, num_qubits, amplitude::AmplitudeEncoder)
         }
-        "angle" => {
+        Encoding::Angle => {
             crate::profile_scope!("Mahout::EncodeAngleFromParquet");
             stream_encode(engine, path, num_qubits, angle::AngleEncoder)
         }
-        "basis" => {
+        Encoding::Basis => {
             crate::profile_scope!("Mahout::EncodeBasisFromParquet");
             stream_encode(engine, path, num_qubits, basis::BasisEncoder)
         }
         _ => Err(MahoutError::NotImplemented(format!(
             "Encoding method '{}' not supported for streaming",
-            encoding_method
+            encoding.as_str()
         ))),
     }
 }

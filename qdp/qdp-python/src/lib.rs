@@ -49,11 +49,16 @@ fn run_throughput_pipeline_py(
         num_qubits,
         batch_size,
         total_batches,
-        encoding_method,
+        encoding: qdp_core::Encoding::from_str_ci(&encoding_method)
+            .map_err(|e| PyRuntimeError::new_err(format!("Invalid encoding_method: {e}")))?,
         seed,
         warmup_batches,
         null_handling: qdp_core::NullHandling::default(),
-        float32_pipeline,
+        dtype: if float32_pipeline {
+            qdp_core::Precision::Float32
+        } else {
+            qdp_core::Precision::Float64
+        },
         prefetch_depth: 16,
     };
     let result = py

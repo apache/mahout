@@ -31,7 +31,7 @@ pub(crate) mod cuda_ffi;
 
 #[cfg(target_os = "linux")]
 pub use buffer_pool::{PinnedBufferHandle, PinnedBufferPool};
-pub use encodings::{AmplitudeEncoder, AngleEncoder, BasisEncoder, QuantumEncoder, get_encoder};
+pub use encodings::{AmplitudeEncoder, AngleEncoder, BasisEncoder, QuantumEncoder};
 pub use memory::GpuStateVector;
 pub use pipeline::run_dual_stream_pipeline;
 

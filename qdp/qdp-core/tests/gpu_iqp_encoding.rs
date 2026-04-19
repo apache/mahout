@@ -797,7 +797,7 @@ fn test_iqp_fwt_zero_parameters_identity() {
 #[test]
 #[cfg(target_os = "linux")]
 fn test_iqp_encoder_via_factory() {
-    println!("Testing IQP encoder creation via get_encoder...");
+    println!("Testing IQP encoder creation via Encoding::from_str_ci / encode...");
 
     let Some(engine) = common::qdp_engine() else {
         println!("SKIP: No GPU available");
@@ -836,7 +836,7 @@ fn test_iqp_encoder_via_factory() {
 #[test]
 #[cfg(target_os = "linux")]
 fn test_iqp_z_encoder_via_factory() {
-    println!("Testing IQP-Z encoder creation via get_encoder...");
+    println!("Testing IQP-Z encoder creation via encode...");
 
     let Some(engine) = common::qdp_engine() else {
         println!("SKIP: No GPU available");

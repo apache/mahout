@@ -24,9 +24,11 @@ use std::time::Instant;
 use crate::QdpEngine;
 use crate::dlpack::DLManagedTensor;
 use crate::error::{MahoutError, Result};
+use crate::gpu::memory::Precision;
 use crate::io;
 use crate::reader::{NullHandling, StreamingDataReader};
 use crate::readers::ParquetStreamingReader;
+use crate::types::Encoding;
 
 /// Configuration for throughput/latency pipeline runs (Python run_throughput_pipeline_py).
 #[derive(Clone, Debug)]
@@ -35,24 +37,31 @@ pub struct PipelineConfig {
     pub num_qubits: u32,
     pub batch_size: usize,
     pub total_batches: usize,
-    pub encoding_method: String,
+    pub encoding: Encoding,
     pub seed: Option<u64>,
     pub warmup_batches: usize,
     pub null_handling: NullHandling,
-    pub float32_pipeline: bool,
+    /// Pipeline element dtype for synthetic batch fill and `encode_batch` dispatch.
+    ///
+    /// If [`Encoding::supports_f32`](crate::types::Encoding::supports_f32) is false for the
+    /// chosen [`encoding`](PipelineConfig::encoding), [`normalize`](PipelineConfig::normalize)
+    /// downgrades this to [`Precision::Float64`] (see `types` module docs: batch f32 is wired
+    /// only for encodings with a real `encode_batch_f32` today).
+    pub dtype: Precision,
     pub prefetch_depth: usize,
 }
 
 impl PipelineConfig {
-    /// Normalizes the configuration, such as falling back to f64 if f32 is requested
-    /// but the encoding doesn't support it.
+    /// Normalizes the configuration: if `dtype` is float32 but the encoding cannot use the
+    /// f32 batch encode path ([`Encoding::supports_f32`](crate::types::Encoding::supports_f32)),
+    /// falls back to float64.
     pub fn normalize(&mut self) {
-        if self.float32_pipeline && !encoding_supports_f32(&self.encoding_method) {
+        if matches!(self.dtype, Precision::Float32) && !self.encoding.supports_f32() {
             log::info!(
-                "float32_pipeline requested but encoding '{}' does not support f32; falling back to f64",
-                self.encoding_method
+                "float32 pipeline requested but encoding '{}' does not support f32; falling back to f64",
+                self.encoding.as_str()
             );
-            self.float32_pipeline = false;
+            self.dtype = Precision::Float64;
         }
     }
 }
@@ -64,11 +73,11 @@ impl Default for PipelineConfig {
             num_qubits: 16,
             batch_size: 64,
             total_batches: 100,
-            encoding_method: "amplitude".to_string(),
+            encoding: Encoding::Amplitude,
             seed: None,
             warmup_batches: 0,
             null_handling: NullHandling::FillZero,
-            float32_pipeline: false,
+            dtype: Precision::Float64,
             prefetch_depth: 16,
         }
     }
@@ -99,12 +108,6 @@ pub trait BatchProducer: Send + 'static {
     fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>>;
 }
 
-/// Returns true if the given encoding method has a native f32 GPU kernel.
-/// Used to auto-gate `float32_pipeline` so unsupported encodings fall back to f64.
-fn encoding_supports_f32(encoding_method: &str) -> bool {
-    matches!(encoding_method.to_lowercase().as_str(), "amplitude")
-}
-
 pub struct SyntheticProducer {
     pub config: PipelineConfig,
     pub vector_len: usize,
@@ -131,16 +134,16 @@ impl BatchProducer for SyntheticProducer {
         }
 
         let mut data = match recycled {
-            Some(BatchData::F32(mut buf)) if self.config.float32_pipeline => {
+            Some(BatchData::F32(mut buf)) if matches!(self.config.dtype, Precision::Float32) => {
                 buf.resize(self.config.batch_size * self.vector_len, 0.0);
                 BatchData::F32(buf)
             }
-            Some(BatchData::F64(mut buf)) if !self.config.float32_pipeline => {
+            Some(BatchData::F64(mut buf)) if matches!(self.config.dtype, Precision::Float64) => {
                 buf.resize(self.config.batch_size * self.vector_len, 0.0);
                 BatchData::F64(buf)
             }
             _ => {
-                if self.config.float32_pipeline {
+                if matches!(self.config.dtype, Precision::Float32) {
                     BatchData::F32(vec![0.0f32; self.config.batch_size * self.vector_len])
                 } else {
                     BatchData::F64(vec![0.0f64; self.config.batch_size * self.vector_len])
@@ -366,7 +369,7 @@ pub struct PipelineIterator {
 impl PipelineIterator {
     pub fn new_synthetic(engine: QdpEngine, mut config: PipelineConfig) -> Result<Self> {
         config.normalize();
-        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = vector_len(config.num_qubits, config.encoding);
         let producer = SyntheticProducer::new(config.clone(), vector_len);
         let prefetch_depth = config.prefetch_depth;
         let (rx, recycle_tx, _producer_handle) = spawn_producer(producer, prefetch_depth)?;
@@ -393,13 +396,16 @@ impl PipelineIterator {
         config.normalize();
         let path = path.as_ref();
         let (data, num_samples, sample_size) = read_file_by_extension(path, config.null_handling)?;
-        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = vector_len(config.num_qubits, config.encoding);
 
         // Dimension validation at construction.
         if sample_size != vector_len {
             return Err(MahoutError::InvalidInput(format!(
                 "File feature length {} does not match vector_len {} for num_qubits={}, encoding={}",
-                sample_size, vector_len, config.num_qubits, config.encoding_method
+                sample_size,
+                vector_len,
+                config.num_qubits,
+                config.encoding.as_str()
             )));
         }
         if data.len() != num_samples * sample_size {
@@ -454,7 +460,7 @@ impl PipelineIterator {
             Some(DEFAULT_PARQUET_ROW_GROUP_SIZE),
             config.null_handling,
         )?;
-        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = vector_len(config.num_qubits, config.encoding);
 
         // Read first chunk to learn sample_size; reuse as initial buffer.
         const INITIAL_CHUNK_CAP: usize = 64 * 1024;
@@ -474,7 +480,10 @@ impl PipelineIterator {
         if sample_size != vector_len {
             return Err(MahoutError::InvalidInput(format!(
                 "File feature length {} does not match vector_len {} for num_qubits={}, encoding={}",
-                sample_size, vector_len, config.num_qubits, config.encoding_method
+                sample_size,
+                vector_len,
+                config.num_qubits,
+                config.encoding.as_str()
             )));
         }
 
@@ -511,19 +520,19 @@ impl PipelineIterator {
             Err(_) => return Ok(None),
         };
         let ptr = match &batch.data {
-            BatchData::F64(buf) => self.engine.encode_batch(
+            BatchData::F64(buf) => self.engine.encode_batch_for_pipeline(
                 buf,
                 batch.batch_n,
                 batch.sample_size,
                 batch.num_qubits,
-                &self.config.encoding_method,
+                self.config.encoding,
             )?,
-            BatchData::F32(buf) => self.engine.encode_batch_f32(
+            BatchData::F32(buf) => self.engine.encode_batch_f32_for_pipeline(
                 buf,
                 batch.batch_n,
                 batch.sample_size,
                 batch.num_qubits,
-                &self.config.encoding_method,
+                self.config.encoding,
             )?,
         };
         let _ = self.recycle_tx.lock().unwrap().send(batch.data);
@@ -532,38 +541,33 @@ impl PipelineIterator {
 }
 
 /// Vector length per sample for given encoding (used by pipeline and iterator).
-pub fn vector_len(num_qubits: u32, encoding_method: &str) -> usize {
-    let n = num_qubits as usize;
-    match encoding_method.to_lowercase().as_str() {
-        "angle" => n,
-        "basis" => 1,
-        _ => 1 << n, // amplitude
-    }
+pub fn vector_len(num_qubits: u32, encoding: Encoding) -> usize {
+    encoding.vector_len(num_qubits)
 }
 
 /// Deterministic sample generation matching Python utils.build_sample (amplitude/angle/basis).
-fn fill_sample(seed: u64, out: &mut [f64], encoding_method: &str, num_qubits: usize) -> Result<()> {
+fn fill_sample(seed: u64, out: &mut [f64], encoding: Encoding, num_qubits: usize) -> Result<()> {
     let len = out.len();
     if len == 0 {
         return Ok(());
     }
-    match encoding_method.to_lowercase().as_str() {
-        "basis" => {
+    match encoding {
+        Encoding::Basis => {
             // For basis encoding, use 2^num_qubits as the state space size for mask calculation
             let state_space_size = 1 << num_qubits;
             let mask = (state_space_size - 1) as u64;
             let idx = seed & mask;
             out[0] = idx as f64;
         }
-        "angle" => {
+        Encoding::Angle => {
             let scale = (2.0 * PI) / len as f64;
             for (i, v) in out.iter_mut().enumerate() {
                 let mixed = (i as u64 + seed) % (len as u64);
                 *v = mixed as f64 * scale;
             }
         }
-        _ => {
-            // amplitude
+        Encoding::Amplitude | Encoding::Iqp | Encoding::IqpZ | Encoding::Phase => {
+            // amplitude-like synthetic pattern
             let mask = (len - 1) as u64;
             let scale = 1.0 / len as f64;
             for (i, v) in out.iter_mut().enumerate() {
@@ -600,7 +604,7 @@ fn fill_batch_inplace(
         let _ = fill_sample(
             seed_base + i as u64,
             &mut batch_buf[offset..offset + vector_len],
-            &config.encoding_method,
+            config.encoding,
             config.num_qubits as usize,
         );
     }
@@ -610,29 +614,28 @@ fn fill_batch_inplace(
 fn fill_sample_f32(
     seed: u64,
     out: &mut [f32],
-    encoding_method: &str,
+    encoding: Encoding,
     num_qubits: usize,
 ) -> Result<()> {
     let len = out.len();
     if len == 0 {
         return Ok(());
     }
-    match encoding_method.to_lowercase().as_str() {
-        "basis" => {
+    match encoding {
+        Encoding::Basis => {
             let state_space_size = 1 << num_qubits;
             let mask = (state_space_size - 1) as u64;
             let idx = seed & mask;
             out[0] = idx as f32;
         }
-        "angle" => {
+        Encoding::Angle => {
             let scale = (2.0 * std::f32::consts::PI) / len as f32;
             for (i, v) in out.iter_mut().enumerate() {
                 let mixed = (i as u64 + seed) % (len as u64);
                 *v = mixed as f32 * scale;
             }
         }
-        _ => {
-            // amplitude
+        Encoding::Amplitude | Encoding::Iqp | Encoding::IqpZ | Encoding::Phase => {
             let mask = (len - 1) as u64;
             let scale = 1.0 / len as f32;
             for (i, v) in out.iter_mut().enumerate() {
@@ -660,7 +663,7 @@ fn fill_batch_inplace_f32(
         let _ = fill_sample_f32(
             seed_base + i as u64,
             &mut batch_buf[offset..offset + vector_len],
-            &config.encoding_method,
+            config.encoding,
             config.num_qubits as usize,
         );
     }
@@ -683,20 +686,20 @@ pub fn run_throughput_pipeline(config: &PipelineConfig) -> Result<PipelineRunRes
     config.normalize();
 
     let engine = QdpEngine::new(config.device_id)?;
-    let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+    let vector_len = vector_len(config.num_qubits, config.encoding);
     let num_qubits = config.num_qubits as usize;
 
     // Warmup
-    if config.float32_pipeline {
+    if matches!(config.dtype, Precision::Float32) {
         let mut batch_buf = vec![0.0f32; config.batch_size * vector_len];
         for b in 0..config.warmup_batches {
             fill_batch_inplace_f32(&config, b, vector_len, &mut batch_buf);
-            let ptr = engine.encode_batch_f32(
+            let ptr = engine.encode_batch_f32_for_pipeline(
                 &batch_buf,
                 config.batch_size,
                 vector_len,
                 num_qubits,
-                &config.encoding_method,
+                config.encoding,
             )?;
             unsafe { release_dlpack(ptr) };
         }
@@ -704,12 +707,12 @@ pub fn run_throughput_pipeline(config: &PipelineConfig) -> Result<PipelineRunRes
         let mut batch_buf = vec![0.0f64; config.batch_size * vector_len];
         for b in 0..config.warmup_batches {
             fill_batch_inplace(&config, b, vector_len, &mut batch_buf);
-            let ptr = engine.encode_batch(
+            let ptr = engine.encode_batch_for_pipeline(
                 &batch_buf,
                 config.batch_size,
                 vector_len,
                 num_qubits,
-                &config.encoding_method,
+                config.encoding,
             )?;
             unsafe { release_dlpack(ptr) };
         }
@@ -726,19 +729,19 @@ pub fn run_throughput_pipeline(config: &PipelineConfig) -> Result<PipelineRunRes
     while let Ok(result) = rx.recv() {
         let batch = result?;
         let ptr = match &batch.data {
-            BatchData::F64(buf) => engine.encode_batch(
+            BatchData::F64(buf) => engine.encode_batch_for_pipeline(
                 buf,
                 batch.batch_n,
                 batch.sample_size,
                 batch.num_qubits,
-                &config.encoding_method,
+                config.encoding,
             )?,
-            BatchData::F32(buf) => engine.encode_batch_f32(
+            BatchData::F32(buf) => engine.encode_batch_f32_for_pipeline(
                 buf,
                 batch.batch_n,
                 batch.sample_size,
                 batch.num_qubits,
-                &config.encoding_method,
+                config.encoding,
             )?,
         };
         unsafe { release_dlpack(ptr) };
@@ -781,12 +784,12 @@ mod tests {
         let config = PipelineConfig {
             num_qubits: 5,
             batch_size: 8,
-            encoding_method: encoding_method.to_string(),
+            encoding: Encoding::from_str_ci(encoding_method).unwrap(),
             seed: Some(123),
             ..Default::default()
         };
 
-        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = vector_len(config.num_qubits, config.encoding);
 
         // Test edge cases: 0 and batch_size-1
         for batch_idx in [0, config.batch_size - 1, 7] {
@@ -802,12 +805,12 @@ mod tests {
         let config = PipelineConfig {
             num_qubits: 5,
             batch_size: 8,
-            encoding_method: encoding_method.to_string(),
+            encoding: Encoding::from_str_ci(encoding_method).unwrap(),
             seed: Some(123),
             ..Default::default()
         };
 
-        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = vector_len(config.num_qubits, config.encoding);
 
         let batch0 = generate_batch(&config, 0, vector_len);
         let batch1 = generate_batch(&config, 1, vector_len);
@@ -849,12 +852,12 @@ mod tests {
         let config = PipelineConfig {
             num_qubits: 5,
             batch_size: 8,
-            encoding_method: "amplitude".to_string(),
+            encoding: Encoding::Amplitude,
             seed: None,
             ..Default::default()
         };
 
-        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = vector_len(config.num_qubits, config.encoding);
         let batch = generate_batch(&config, 0, vector_len);
         assert_eq!(batch.len(), config.batch_size * vector_len);
 
@@ -868,12 +871,12 @@ mod tests {
         let config = PipelineConfig {
             num_qubits: 5,
             batch_size: 1,
-            encoding_method: "amplitude".to_string(),
+            encoding: Encoding::Amplitude,
             seed: Some(123),
             ..Default::default()
         };
 
-        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = vector_len(config.num_qubits, config.encoding);
         let batch = generate_batch(&config, 0, vector_len);
         assert_eq!(batch.len(), vector_len);
 
@@ -891,7 +894,7 @@ mod tests {
         let config_lower = PipelineConfig {
             num_qubits: 5,
             batch_size: 8,
-            encoding_method: "amplitude".to_string(),
+            encoding: Encoding::Amplitude,
             seed: Some(123),
             ..Default::default()
         };
@@ -899,12 +902,12 @@ mod tests {
         let config_upper = PipelineConfig {
             num_qubits: 5,
             batch_size: 8,
-            encoding_method: "AMPLITUDE".to_string(),
+            encoding: Encoding::from_str_ci("AMPLITUDE").unwrap(),
             seed: Some(123),
             ..Default::default()
         };
 
-        let vector_len = vector_len(config_lower.num_qubits, &config_lower.encoding_method);
+        let vector_len = vector_len(config_lower.num_qubits, config_lower.encoding);
         let batch_lower = generate_batch(&config_lower, 0, vector_len);
         let batch_upper = generate_batch(&config_upper, 0, vector_len);
         assert_eq!(batch_lower, batch_upper);
@@ -915,12 +918,12 @@ mod tests {
         let config = PipelineConfig {
             num_qubits: 5,
             batch_size: 8,
-            encoding_method: "amplitude".to_string(),
+            encoding: Encoding::Amplitude,
             seed: Some(123),
             ..Default::default()
         };
 
-        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = vector_len(config.num_qubits, config.encoding);
 
         for batch_idx in 0..5 {
             let batch = generate_batch(&config, batch_idx, vector_len);
@@ -940,12 +943,12 @@ mod tests {
         let config = PipelineConfig {
             num_qubits: 5,
             batch_size: 8,
-            encoding_method: "amplitude".to_string(),
+            encoding: Encoding::Amplitude,
             seed: None,
             ..Default::default()
         };
 
-        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = vector_len(config.num_qubits, config.encoding);
         let batch = generate_batch(&config, 0, vector_len);
 
         for &value in &batch {
@@ -962,12 +965,12 @@ mod tests {
         let config = PipelineConfig {
             num_qubits: 5,
             batch_size: 1,
-            encoding_method: "amplitude".to_string(),
+            encoding: Encoding::Amplitude,
             seed: Some(123),
             ..Default::default()
         };
 
-        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = vector_len(config.num_qubits, config.encoding);
         let batch = generate_batch(&config, 0, vector_len);
 
         for &value in &batch {
@@ -984,10 +987,10 @@ mod tests {
             total_batches: 5,
             num_qubits: 3,
             batch_size: 4,
-            encoding_method: "amplitude".to_string(),
+            encoding: Encoding::Amplitude,
             ..Default::default()
         };
-        let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = super::vector_len(config.num_qubits, config.encoding);
         let mut producer = SyntheticProducer::new(config, vector_len);
 
         let mut count = 0;
@@ -1003,10 +1006,10 @@ mod tests {
             total_batches: 1,
             num_qubits: 3,
             batch_size: 4,
-            encoding_method: "amplitude".to_string(),
+            encoding: Encoding::Amplitude,
             ..Default::default()
         };
-        let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = super::vector_len(config.num_qubits, config.encoding);
         let mut producer = SyntheticProducer::new(config.clone(), vector_len);
 
         let batch_from_producer = producer.produce(None).unwrap().unwrap();
@@ -1020,7 +1023,7 @@ mod tests {
         let config = PipelineConfig {
             batch_size: 5,
             num_qubits: 2,
-            encoding_method: "amplitude".to_string(),
+            encoding: Encoding::Amplitude,
             ..Default::default()
         };
         let sample_size = 4; // 2^2
@@ -1050,7 +1053,7 @@ mod tests {
             prefetch_depth: 16,
             ..Default::default()
         };
-        let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = super::vector_len(config.num_qubits, config.encoding);
         let producer = SyntheticProducer::new(config, vector_len);
 
         let (rx, _recycle_tx, handle) = spawn_producer(producer, 16).unwrap();
@@ -1072,7 +1075,7 @@ mod tests {
             prefetch_depth: 16,
             ..Default::default()
         };
-        let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = super::vector_len(config.num_qubits, config.encoding);
         let producer = SyntheticProducer::new(config, vector_len);
 
         let (rx, _recycle_tx, handle) = spawn_producer(producer, 16).unwrap();
@@ -1093,18 +1096,18 @@ mod tests {
             total_batches: 2,
             num_qubits: 3,
             batch_size: 4,
-            encoding_method: "amplitude".to_string(),
-            float32_pipeline: true,
+            encoding: Encoding::Amplitude,
+            dtype: Precision::Float32,
             ..Default::default()
         };
         config.normalize();
-        let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = super::vector_len(config.num_qubits, config.encoding);
         let mut producer = SyntheticProducer::new(config, vector_len);
 
         let batch = producer.produce(None).unwrap().unwrap();
         assert!(
             matches!(batch.data, BatchData::F32(_)),
-            "amplitude with float32_pipeline=true should produce F32 data"
+            "amplitude with dtype=Float32 should produce F32 data"
         );
 
         // Verify data is non-zero (was actually filled)
@@ -1122,18 +1125,18 @@ mod tests {
             total_batches: 1,
             num_qubits: 3,
             batch_size: 4,
-            encoding_method: "angle".to_string(),
-            float32_pipeline: true, // requested f32, but angle doesn't support it
+            encoding: Encoding::Angle,
+            dtype: Precision::Float32, // requested f32, but angle doesn't support native f32 batch path
             ..Default::default()
         };
         config.normalize();
-        let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = super::vector_len(config.num_qubits, config.encoding);
         let mut producer = SyntheticProducer::new(config, vector_len);
 
         let batch = producer.produce(None).unwrap().unwrap();
         assert!(
             matches!(batch.data, BatchData::F64(_)),
-            "angle with float32_pipeline=true should fall back to F64 data"
+            "angle with requested Float32 should fall back to F64 batch data (no encode_batch_f32 yet)"
         );
     }
 
@@ -1143,28 +1146,28 @@ mod tests {
             total_batches: 1,
             num_qubits: 3,
             batch_size: 4,
-            encoding_method: "basis".to_string(),
-            float32_pipeline: true,
+            encoding: Encoding::Basis,
+            dtype: Precision::Float32,
             ..Default::default()
         };
         config.normalize();
-        let vector_len = super::vector_len(config.num_qubits, &config.encoding_method);
+        let vector_len = super::vector_len(config.num_qubits, config.encoding);
         let mut producer = SyntheticProducer::new(config, vector_len);
 
         let batch = producer.produce(None).unwrap().unwrap();
         assert!(
             matches!(batch.data, BatchData::F64(_)),
-            "basis with float32_pipeline=true should fall back to F64 data"
+            "basis with requested Float32 should fall back to F64 batch data (no encode_batch_f32 yet)"
         );
     }
 
     #[test]
     fn test_encoding_supports_f32() {
-        assert!(super::encoding_supports_f32("amplitude"));
-        assert!(super::encoding_supports_f32("Amplitude"));
-        assert!(super::encoding_supports_f32("AMPLITUDE"));
-        assert!(!super::encoding_supports_f32("angle"));
-        assert!(!super::encoding_supports_f32("basis"));
-        assert!(!super::encoding_supports_f32("iqp"));
+        assert!(Encoding::Amplitude.supports_f32());
+        assert!(Encoding::from_str_ci("Amplitude").unwrap().supports_f32());
+        assert!(Encoding::from_str_ci("AMPLITUDE").unwrap().supports_f32());
+        assert!(!Encoding::Angle.supports_f32());
+        assert!(!Encoding::Basis.supports_f32());
+        assert!(!Encoding::Iqp.supports_f32());
     }
 }
