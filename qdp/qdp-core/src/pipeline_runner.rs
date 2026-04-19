@@ -559,21 +559,14 @@ fn fill_sample(seed: u64, out: &mut [f64], encoding: Encoding, num_qubits: usize
             let idx = seed & mask;
             out[0] = idx as f64;
         }
-        Encoding::Angle => {
+        Encoding::Angle | Encoding::Iqp | Encoding::IqpZ | Encoding::Phase => {
             let scale = (2.0 * PI) / len as f64;
             for (i, v) in out.iter_mut().enumerate() {
                 let mixed = (i as u64 + seed) % (len as u64);
                 *v = mixed as f64 * scale;
             }
         }
-        Encoding::Iqp | Encoding::IqpZ => {
-            let scale = (2.0 * PI) / len as f64;
-            for (i, v) in out.iter_mut().enumerate() {
-                let mixed = (i as u64 + seed) % (len as u64);
-                *v = mixed as f64 * scale;
-            }
-        }
-        Encoding::Amplitude | Encoding::Phase => {
+        Encoding::Amplitude => {
             let mask = (len - 1) as u64;
             let scale = 1.0 / len as f64;
             for (i, v) in out.iter_mut().enumerate() {
@@ -634,21 +627,14 @@ fn fill_sample_f32(
             let idx = seed & mask;
             out[0] = idx as f32;
         }
-        Encoding::Angle => {
+        Encoding::Angle | Encoding::Iqp | Encoding::IqpZ | Encoding::Phase => {
             let scale = (2.0 * std::f32::consts::PI) / len as f32;
             for (i, v) in out.iter_mut().enumerate() {
                 let mixed = (i as u64 + seed) % (len as u64);
                 *v = mixed as f32 * scale;
             }
         }
-        Encoding::Iqp | Encoding::IqpZ => {
-            let scale = (2.0 * std::f32::consts::PI) / len as f32;
-            for (i, v) in out.iter_mut().enumerate() {
-                let mixed = (i as u64 + seed) % (len as u64);
-                *v = mixed as f32 * scale;
-            }
-        }
-        Encoding::Amplitude | Encoding::Phase => {
+        Encoding::Amplitude => {
             let mask = (len - 1) as u64;
             let scale = 1.0 / len as f32;
             for (i, v) in out.iter_mut().enumerate() {

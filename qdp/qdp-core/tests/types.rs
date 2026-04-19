@@ -37,11 +37,14 @@ fn encoding_unknown_returns_err() {
 }
 
 #[test]
-fn vector_len_matches_legacy_behavior() {
+fn vector_len_matches_encoder_contracts() {
     let n = 5u32;
-    assert_eq!(Encoding::Angle.vector_len(n), 5);
+    assert_eq!(Encoding::Amplitude.vector_len(n), 32); // 2^5
+    assert_eq!(Encoding::Angle.vector_len(n), 5); // n
+    assert_eq!(Encoding::IqpZ.vector_len(n), 5); // n (z-only)
+    assert_eq!(Encoding::Phase.vector_len(n), 5); // n (one angle per qubit)
+    assert_eq!(Encoding::Iqp.vector_len(n), 5 + 5 * 4 / 2); // n + n*(n-1)/2 = 15
     assert_eq!(Encoding::Basis.vector_len(n), 1);
-    assert_eq!(Encoding::Amplitude.vector_len(n), 32);
 }
 
 #[test]
