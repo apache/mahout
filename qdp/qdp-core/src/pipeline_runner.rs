@@ -151,14 +151,23 @@ fn compute_optimal_prefetch_depth(
     const MIN_DEPTH: usize = 1;
     const MAX_DEPTH: usize = 32;
 
-    let sample_len = encoding.vector_len(num_qubits as u32);
+    // Use checked arithmetic throughout; treat any overflow as "extremely large batch"
+    // and return MIN_DEPTH so we never buffer more than one batch.
+    // `Encoding::vector_len` itself uses `1 << n` which would panic at huge n; defend by
+    // recomputing with `checked_shl` for amplitude, which is the only path that can blow up.
+    let sample_len: Option<usize> = match encoding {
+        Encoding::Amplitude => 1usize.checked_shl(num_qubits as u32),
+        _ => Some(encoding.vector_len(num_qubits as u32)),
+    };
     let bytes_per_element = dtype.bytes();
-    let bytes_per_batch = batch_size * sample_len * bytes_per_element;
+    let bytes_per_batch = sample_len
+        .and_then(|s| batch_size.checked_mul(s))
+        .and_then(|b| b.checked_mul(bytes_per_element));
 
-    if bytes_per_batch == 0 {
-        return MAX_DEPTH;
+    match bytes_per_batch {
+        None | Some(0) => MIN_DEPTH,
+        Some(bpb) => (TARGET_BYTES / bpb).clamp(MIN_DEPTH, MAX_DEPTH),
     }
-    (TARGET_BYTES / bytes_per_batch).clamp(MIN_DEPTH, MAX_DEPTH)
 }
 
 pub struct SyntheticProducer {
@@ -419,18 +428,22 @@ fn read_file_by_extension(
 pub struct PipelineIterator {
     engine: QdpEngine,
     config: PipelineConfig,
-    rx: std::sync::Mutex<std::sync::mpsc::Receiver<Result<PrefetchedBatch>>>,
+    rx: std::sync::Mutex<Option<std::sync::mpsc::Receiver<Result<PrefetchedBatch>>>>,
     recycle_tx: Option<std::sync::mpsc::Sender<BatchData>>,
     producer_handle: Option<std::thread::JoinHandle<()>>,
 }
 
 impl Drop for PipelineIterator {
     fn drop(&mut self) {
-        // Drop the recycle sender first to unblock the producer if it's waiting on try_recv.
-        // Doing it explicitly before joining makes the shutdown order deterministic.
+        // Drop the recycle sender first to unblock the producer if it is waiting on try_recv.
         drop(self.recycle_tx.take());
-        // Drain any remaining items so the producer's send() unblocks.
-        while self.rx.lock().unwrap().try_recv().is_ok() {}
+        // Close the receiver by taking it out of the Option.  This makes any pending
+        // or future tx.send() in the producer thread return Err(SendError), so the
+        // producer exits its loop without us having to drain the channel manually.
+        // The previous drain-loop approach had a TOCTOU race: after we drained, the
+        // producer could refill the sync_channel and block on tx.send() forever
+        // while we were waiting on join().
+        drop(self.rx.lock().unwrap().take());
         if let Some(handle) = self.producer_handle.take() {
             let _ = handle.join();
         }
@@ -447,7 +460,7 @@ impl PipelineIterator {
         Ok(Self {
             engine,
             config,
-            rx: std::sync::Mutex::new(rx),
+            rx: std::sync::Mutex::new(Some(rx)),
             recycle_tx: Some(recycle_tx),
             producer_handle: Some(_producer_handle),
         })
@@ -502,7 +515,7 @@ impl PipelineIterator {
         Ok(Self {
             engine,
             config,
-            rx: std::sync::Mutex::new(rx),
+            rx: std::sync::Mutex::new(Some(rx)),
             recycle_tx: Some(recycle_tx),
             producer_handle: Some(_producer_handle),
         })
@@ -577,7 +590,7 @@ impl PipelineIterator {
         Ok(Self {
             engine,
             config,
-            rx: std::sync::Mutex::new(rx),
+            rx: std::sync::Mutex::new(Some(rx)),
             recycle_tx: Some(recycle_tx),
             producer_handle: Some(_producer_handle),
         })
@@ -585,7 +598,7 @@ impl PipelineIterator {
 
     /// Returns the next batch as a DLPack pointer; `Ok(None)` when exhausted.
     pub fn next_batch(&mut self) -> Result<Option<*mut DLManagedTensor>> {
-        let batch = match self.rx.lock().unwrap().recv() {
+        let batch = match self.rx.lock().unwrap().as_ref().unwrap().recv() {
             Ok(Ok(b)) => b,
             Ok(Err(e)) => return Err(e),
             Err(_) => return Ok(None),
