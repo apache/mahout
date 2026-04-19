@@ -39,7 +39,9 @@ enum EngineImpl {
 #[pyclass]
 pub struct QdpEngine {
     engine: EngineImpl,
+    #[allow(dead_code)]
     device_id: usize,
+    #[allow(dead_code)]
     precision: Precision,
     backend: String,
 }
@@ -628,6 +630,7 @@ impl QdpEngine {
     ///     >>> engine = QdpEngine(device_id=0)
     ///     >>> batched = engine.encode_from_tensorflow("data.pb", 16, "amplitude")
     ///     >>> torch_tensor = torch.from_dlpack(batched)  # Shape: [200, 65536]
+    #[allow(dead_code)]
     fn encode_from_tensorflow(
         &self,
         path: &str,
@@ -656,7 +659,11 @@ impl QdpEngine {
         num_qubits: usize,
         encoding_method: &str,
     ) -> PyResult<QuantumTensor> {
-        validate_cuda_tensor_for_encoding(data, self.core_engine()?.device().ordinal(), encoding_method)?;
+        validate_cuda_tensor_for_encoding(
+            data,
+            self.core_engine()?.device().ordinal(),
+            encoding_method,
+        )?;
 
         let dtype = data.getattr("dtype")?;
         let dtype_str: String = dtype.str()?.extract()?;
@@ -805,13 +812,14 @@ impl QdpEngine {
             nh,
             true,
         );
-        let iter = qdp_core::PipelineIterator::new_synthetic(engine, config).map_err(
-            |e| PyRuntimeError::new_err(format!("create_synthetic_loader failed: {}", e)),
-        )?;
+        let iter = qdp_core::PipelineIterator::new_synthetic(engine, config).map_err(|e| {
+            PyRuntimeError::new_err(format!("create_synthetic_loader failed: {}", e))
+        })?;
         Ok(PyQuantumLoader::new(Some(iter)))
     }
 
     #[cfg(target_os = "linux")]
+    #[allow(clippy::too_many_arguments)]
     fn create_file_loader_impl(
         &self,
         py: Python<'_>,
@@ -858,6 +866,7 @@ impl QdpEngine {
     }
 
     #[cfg(target_os = "linux")]
+    #[allow(clippy::too_many_arguments)]
     fn create_streaming_file_loader_impl(
         &self,
         py: Python<'_>,

@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Any
+
 import pytest
 from qumat_qdp import QdpEngine, create_encoder_engine
 from qumat_qdp.backend import EngineRouter, QuantumTensor
@@ -36,10 +38,10 @@ def test_create_encoder_engine_returns_unified_qdp_engine(monkeypatch):
 
 def test_qdp_engine_wraps_backend_output_into_unified_quantum_tensor(monkeypatch):
     class FakeValue:
-        def __dlpack__(self, stream=None):
+        def __dlpack__(self, stream: Any | None = None) -> Any:
             return ("capsule", stream)
 
-        def __dlpack_device__(self):
+        def __dlpack_device__(self) -> Any:
             return (2, 0)
 
     class FakeBackendEngine:

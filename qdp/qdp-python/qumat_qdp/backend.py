@@ -62,7 +62,9 @@ def _create_triton_engine(*, device_id: int, precision: str) -> Any:
 def _create_amd_engine(*, device_id: int, precision: str) -> tuple[str, Any]:
     qdp_engine = _load_unified_qdp_engine()
     if qdp_engine is not None:
-        return "amd", qdp_engine(device_id=device_id, precision=precision, backend="amd")
+        return "amd", qdp_engine(
+            device_id=device_id, precision=precision, backend="amd"
+        )
 
     return "amd", _create_triton_engine(device_id=device_id, precision=precision)
 
@@ -169,7 +171,7 @@ class EngineRouter:
                 except Exception:
                     pass
             raise RuntimeError(
-                "No available backend for auto routing. Install ROCm support for `backend=\"amd\"`, "
+                'No available backend for auto routing. Install ROCm support for `backend="amd"`, '
                 "or build the CUDA extension (`_qdp`)."
             )
 
