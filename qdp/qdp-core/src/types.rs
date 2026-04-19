@@ -136,13 +136,13 @@ impl Encoding {
     /// Whether the **synthetic batch pipeline** may keep [`crate::gpu::memory::Precision::Float32`]
     /// end-to-end (prefetched host `Vec<f32>` plus [`crate::QdpEngine::encode_batch_f32`]).
     ///
-    /// This must match encoders that actually implement [`QuantumEncoder::encode_batch_f32`].
-    /// Long-term design may include angle/basis here; today only amplitude does, so angle/basis
-    /// still normalize to `Float64` in [`crate::pipeline_runner::PipelineConfig::normalize`]
-    /// until their batch f32 GPU paths exist in the encoder implementations.
+    /// Returns true for encodings whose batch host fill and `encode_batch_f32` paths are wired
+    /// end-to-end: amplitude, angle, basis. IQP / IQP-Z / Phase still normalize to `Float64`
+    /// in [`crate::pipeline_runner::PipelineConfig::normalize`] until their batch f32 GPU
+    /// paths exist.
     #[must_use]
     pub const fn supports_f32(self) -> bool {
-        matches!(self, Self::Amplitude)
+        matches!(self, Self::Amplitude | Self::Angle | Self::Basis)
     }
 
     /// Static encoder dispatch (no per-call heap allocation).

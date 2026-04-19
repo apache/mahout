@@ -343,6 +343,98 @@ impl QuantumEncoder for BasisEncoder {
         Ok(())
     }
 
+    #[cfg(target_os = "linux")]
+    fn encode_batch_f32(
+        &self,
+        device: &Arc<CudaDevice>,
+        batch_data: &[f32],
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+    ) -> Result<GpuStateVector> {
+        crate::profile_scope!("BasisEncoder::encode_batch_f32");
+
+        if sample_size != 1 {
+            return Err(MahoutError::InvalidInput(format!(
+                "Basis encoding expects sample_size=1 (one index per sample), got {}",
+                sample_size
+            )));
+        }
+        if batch_data.len() != num_samples {
+            return Err(MahoutError::InvalidInput(format!(
+                "Batch data length {} doesn't match num_samples {}",
+                batch_data.len(),
+                num_samples
+            )));
+        }
+        validate_qubit_count(num_qubits)?;
+
+        let state_len = 1 << num_qubits;
+
+        // Convert f32 indices to usize (reuse the same validation as F64)
+        let basis_indices: Vec<usize> = batch_data
+            .iter()
+            .enumerate()
+            .map(|(i, &val)| {
+                Self::validate_basis_index(val as f64, state_len)
+                    .map_err(|e| MahoutError::InvalidInput(format!("Sample {}: {}", i, e)))
+            })
+            .collect::<Result<Vec<_>>>()?;
+
+        let batch_state_vector = {
+            crate::profile_scope!("GPU::AllocBatch");
+            GpuStateVector::new_batch(device, num_samples, num_qubits, Precision::Float32)?
+        };
+
+        let indices_gpu = {
+            crate::profile_scope!("GPU::H2D_BasisIndices");
+            device.htod_sync_copy(&basis_indices).map_err(|e| {
+                map_allocation_error(
+                    num_samples * std::mem::size_of::<usize>(),
+                    "basis indices f32 upload",
+                    Some(num_qubits),
+                    e,
+                )
+            })?
+        };
+
+        let state_ptr = batch_state_vector.ptr_f32().ok_or_else(|| {
+            MahoutError::InvalidInput(
+                "Batch state vector precision mismatch (expected float32 buffer)".to_string(),
+            )
+        })?;
+
+        {
+            crate::profile_scope!("GPU::BatchKernelLaunch_f32");
+            let ret = unsafe {
+                qdp_kernels::launch_basis_encode_batch_f32(
+                    *indices_gpu.device_ptr() as *const usize,
+                    state_ptr as *mut c_void,
+                    num_samples,
+                    state_len,
+                    num_qubits as u32,
+                    std::ptr::null_mut(),
+                )
+            };
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Batch basis encoding f32 kernel failed: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
+                )));
+            }
+        }
+
+        {
+            crate::profile_scope!("GPU::Synchronize");
+            device
+                .synchronize()
+                .map_err(|e| MahoutError::Cuda(format!("Sync failed: {:?}", e)))?;
+        }
+
+        Ok(batch_state_vector)
+    }
+
     fn name(&self) -> &'static str {
         "basis"
     }
