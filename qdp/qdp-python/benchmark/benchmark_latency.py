@@ -91,6 +91,7 @@ def run_mahout(
     batch_size: int,
     prefetch: int,
     encoding_method: str = "amplitude",
+    warmup: int = 5,
 ):
     """Run Mahout latency using the generic user API (QdpBenchmark)."""
     try:
@@ -100,6 +101,7 @@ def run_mahout(
             .encoding(encoding_method)
             .batches(total_batches, size=batch_size)
             .prefetch(prefetch)
+            .warmup(warmup)
             .run_latency()
         )
     except Exception as exc:
@@ -239,6 +241,12 @@ def main() -> None:
         choices=["amplitude", "angle", "basis"],
         help="Encoding method to use for Mahout (amplitude, angle, or basis).",
     )
+    parser.add_argument(
+        "--warmup",
+        type=int,
+        default=5,
+        help="Number of warm-up batches (excluded from timing).",
+    )
     args = parser.parse_args()
 
     if not torch.cuda.is_available():
@@ -259,6 +267,7 @@ def main() -> None:
     print(f"  Prefetch     : {args.prefetch}")
     print(f"  Frameworks   : {', '.join(frameworks)}")
     print(f"  Encode method: {args.encoding_method}")
+    print(f"  Warmup       : {args.warmup}")
     bytes_per_vec = vector_len * 8
     print(f"  Generated {total_vectors} samples")
     print(
@@ -308,6 +317,7 @@ def main() -> None:
             args.batch_size,
             args.prefetch,
             args.encoding_method,
+            warmup=args.warmup,
         )
 
     print()
