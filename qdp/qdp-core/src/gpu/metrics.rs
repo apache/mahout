@@ -23,6 +23,7 @@
 
 #[cfg(target_os = "linux")]
 use cudarc::driver::CudaDevice;
+#[cfg(target_os = "linux")]
 use std::sync::Arc;
 
 #[cfg(target_os = "linux")]
@@ -34,8 +35,9 @@ use crate::error::{MahoutError, Result};
 /// given as interleaved (re, im) f64 slices of equal length.
 ///
 /// Both slices must have length `2 * state_dim` (re0, im0, re1, im1, ...).
-/// Returns a value in [0, 1].  Fidelity == 1 means identical states (up to
-/// global phase).
+/// Inputs must be normalized; the result is clamped to `[0, 1]` to absorb
+/// floating-point rounding error.  Fidelity == 1 means identical states (up
+/// to global phase).
 pub fn fidelity_f64(state_a: &[f64], state_b: &[f64]) -> Result<f64> {
     if state_a.len() != state_b.len() {
         return Err(MahoutError::InvalidInput(format!(
@@ -64,7 +66,7 @@ pub fn fidelity_f64(state_a: &[f64], state_b: &[f64]) -> Result<f64> {
         im_acc += a_re * b_im - a_im * b_re;
     }
 
-    Ok(re_acc * re_acc + im_acc * im_acc)
+    Ok((re_acc * re_acc + im_acc * im_acc).clamp(0.0, 1.0))
 }
 
 /// Compute fidelity from interleaved f32 data (promoted to f64 for accumulation).
@@ -93,7 +95,7 @@ pub fn fidelity_f32(state_a: &[f32], state_b: &[f32]) -> Result<f64> {
         im_acc += a_re * b_im - a_im * b_re;
     }
 
-    Ok(re_acc * re_acc + im_acc * im_acc)
+    Ok((re_acc * re_acc + im_acc * im_acc).clamp(0.0, 1.0))
 }
 
 /// Cross-precision fidelity: compare an f32 state against an f64 reference.
@@ -123,7 +125,7 @@ pub fn fidelity_cross_precision(state_f32: &[f32], state_f64: &[f64]) -> Result<
         im_acc += a_re * b_im - a_im * b_re;
     }
 
-    Ok(re_acc * re_acc + im_acc * im_acc)
+    Ok((re_acc * re_acc + im_acc * im_acc).clamp(0.0, 1.0))
 }
 
 /// Trace distance between two pure states: √(1 − |⟨ψ|φ⟩|²).

@@ -244,10 +244,10 @@ class QuantumDataLoader:
     def backend(self, name: str) -> QuantumDataLoader:
         """Set encoding backend: ``'rust'``, ``'pytorch'``, or ``'auto'``.
 
-        ``'auto'`` (default-like): tries the Rust backend first and silently
-        falls back to the PyTorch reference backend if the Rust extension is
-        unavailable.  ``'rust'`` raises if the extension is missing.
-        ``'pytorch'`` always uses the pure-PyTorch path.
+        ``'auto'``: tries the Rust backend first and falls back to the PyTorch
+        reference backend if the Rust extension is unavailable, emitting a
+        ``RuntimeWarning`` when the fallback occurs.  ``'rust'`` raises if the
+        extension is missing.  ``'pytorch'`` always uses the pure-PyTorch path.
         Returns self for chaining.
         """
         if name not in ("rust", "pytorch", "auto"):
