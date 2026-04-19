@@ -31,12 +31,14 @@ pub mod readers;
 #[cfg(feature = "remote-io")]
 pub mod remote;
 pub mod tf_proto;
+pub mod types;
 #[macro_use]
 mod profiling;
 
 pub use error::{MahoutError, Result, cuda_error_to_string};
 pub use gpu::memory::Precision;
 pub use reader::{NullHandling, handle_float64_nulls};
+pub use types::{Dtype, Encoding};
 
 // Throughput/latency pipeline runner: single path using QdpEngine and encode_batch in Rust.
 #[cfg(target_os = "linux")]
@@ -52,7 +54,6 @@ use std::ffi::c_void;
 use std::sync::Arc;
 
 use crate::dlpack::DLManagedTensor;
-use crate::gpu::get_encoder;
 use cudarc::driver::CudaDevice;
 
 #[cfg(target_os = "linux")]
@@ -160,7 +161,8 @@ impl QdpEngine {
     ) -> Result<*mut DLManagedTensor> {
         crate::profile_scope!("Mahout::Encode");
 
-        let encoder = get_encoder(encoding_method)?;
+        let encoding = Encoding::from_str_ci(encoding_method)?;
+        let encoder = encoding.encoder();
         let state_vector = encoder.encode(&self.device, data, num_qubits)?;
         let state_vector = state_vector.to_precision(&self.device, self.precision)?;
         let dlpack_ptr = {
@@ -206,9 +208,22 @@ impl QdpEngine {
         num_qubits: usize,
         encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
+        let encoding = Encoding::from_str_ci(encoding_method)?;
+        self.encode_batch_for_pipeline(batch_data, num_samples, sample_size, num_qubits, encoding)
+    }
+
+    /// Same as [`encode_batch`](Self::encode_batch) with a resolved [`Encoding`] (no string parse).
+    pub(crate) fn encode_batch_for_pipeline(
+        &self,
+        batch_data: &[f64],
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+        encoding: Encoding,
+    ) -> Result<*mut DLManagedTensor> {
         crate::profile_scope!("Mahout::EncodeBatch");
 
-        let encoder = get_encoder(encoding_method)?;
+        let encoder = encoding.encoder();
         let state_vector = encoder.encode_batch(
             &self.device,
             batch_data,
@@ -231,9 +246,28 @@ impl QdpEngine {
         num_qubits: usize,
         encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
+        let encoding = Encoding::from_str_ci(encoding_method)?;
+        self.encode_batch_f32_for_pipeline(
+            batch_data,
+            num_samples,
+            sample_size,
+            num_qubits,
+            encoding,
+        )
+    }
+
+    /// Same as [`encode_batch_f32`](Self::encode_batch_f32) with a resolved [`Encoding`].
+    pub(crate) fn encode_batch_f32_for_pipeline(
+        &self,
+        batch_data: &[f32],
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+        encoding: Encoding,
+    ) -> Result<*mut DLManagedTensor> {
         crate::profile_scope!("Mahout::EncodeBatchF32");
 
-        let encoder = get_encoder(encoding_method)?;
+        let encoder = encoding.encoder();
         let state_vector = encoder.encode_batch_f32(
             &self.device,
             batch_data,
@@ -263,8 +297,9 @@ impl QdpEngine {
         encoding_method: &str,
     ) -> Result<()> {
         crate::profile_scope!("Mahout::RunDualStreamEncode");
-        match encoding_method.to_lowercase().as_str() {
-            "amplitude" => {
+        let encoding = Encoding::from_str_ci(encoding_method)?;
+        match encoding {
+            Encoding::Amplitude => {
                 gpu::encodings::amplitude::AmplitudeEncoder::run_amplitude_dual_stream_pipeline(
                     &self.device,
                     host_data,
@@ -273,7 +308,7 @@ impl QdpEngine {
             }
             _ => Err(MahoutError::InvalidInput(format!(
                 "run_dual_stream_encode supports only 'amplitude' for now, got '{}'",
-                encoding_method
+                encoding.as_str()
             ))),
         }
     }
@@ -507,7 +542,8 @@ impl QdpEngine {
 
         validate_cuda_input_ptr(&self.device, input_d)?;
 
-        let encoder = get_encoder(encoding_method)?;
+        let encoding = Encoding::from_str_ci(encoding_method)?;
+        let encoder = encoding.encoder();
         let state_vector = unsafe {
             encoder.encode_from_gpu_ptr(&self.device, input_d, input_len, num_qubits, stream)
         }?;
@@ -913,7 +949,8 @@ impl QdpEngine {
 
         validate_cuda_input_ptr(&self.device, input_batch_d)?;
 
-        let encoder = get_encoder(encoding_method)?;
+        let encoding = Encoding::from_str_ci(encoding_method)?;
+        let encoder = encoding.encoder();
         let batch_state_vector = unsafe {
             encoder.encode_batch_from_gpu_ptr(
                 &self.device,

@@ -38,8 +38,8 @@ fn test_input_validation_invalid_strategy() {
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
             assert!(
-                msg.contains("Unknown encoder"),
-                "Error message should mention unknown encoder"
+                msg.contains("Unknown encoding"),
+                "Error message should mention unknown encoding"
             );
             println!("PASS: Correctly rejected invalid strategy: {}", msg);
         }

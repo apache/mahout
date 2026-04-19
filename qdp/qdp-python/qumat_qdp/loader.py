@@ -41,6 +41,11 @@ if TYPE_CHECKING:
 # Seed must fit Rust u64: 0 <= seed <= 2^64 - 1.
 _U64_MAX = 2**64 - 1
 
+# Canonical encoding names (must match Encoding enum in qdp-core/src/types.rs).
+_VALID_ENCODINGS: frozenset[str] = frozenset(
+    {"amplitude", "angle", "basis", "iqp", "iqp-z", "phase"}
+)
+
 # Fallback-supported file extensions (loadable without _qdp).
 _TORCH_FILE_EXTS = frozenset({".pt", ".pth"})
 _NUMPY_FILE_EXTS = frozenset({".npy"})
@@ -70,6 +75,11 @@ def _validate_loader_args(
     if not encoding_method or not isinstance(encoding_method, str):
         raise ValueError(
             f"encoding_method must be a non-empty string, got {encoding_method!r}"
+        )
+    if encoding_method.lower() not in _VALID_ENCODINGS:
+        raise ValueError(
+            f"Unknown encoding_method {encoding_method!r}. "
+            f"Valid options: {sorted(_VALID_ENCODINGS)}"
         )
     if seed is not None:
         if not isinstance(seed, int):
@@ -171,6 +181,11 @@ class QuantumDataLoader:
         if not method or not isinstance(method, str):
             raise ValueError(
                 f"encoding_method must be a non-empty string, got {method!r}"
+            )
+        if method.lower() not in _VALID_ENCODINGS:
+            raise ValueError(
+                f"Unknown encoding {method!r}. "
+                f"Valid options: {sorted(_VALID_ENCODINGS)}"
             )
         self._encoding_method = method
         return self
