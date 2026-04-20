@@ -17,16 +17,16 @@
 """
 QDP (Quantum Data Processing) Python API.
 
-Public API: unified `QdpEngine` / `EngineRouter`, unified `QuantumTensor`,
-benchmark helpers, and loader utilities.
+Public API: unified Python `QdpEngine` facade over the Rust CUDA engine and
+the Triton AMD engine, plus benchmark helpers and loaders.
 """
 
 from __future__ import annotations
 
 from types import ModuleType
 
-# Backend detection: gracefully degrade when _qdp (Rust extension) is unavailable.
-from qumat_qdp._backend import Backend, force_backend, get_backend, get_qdp
+# Backend availability helpers.
+from qumat_qdp._backend import Backend, force_backend, get_default_backend, get_qdp
 
 _qdp_mod: ModuleType | None = get_qdp()
 if _qdp_mod is not None:
@@ -34,7 +34,7 @@ if _qdp_mod is not None:
 else:
     run_throughput_pipeline_py = None
 
-BACKEND = get_backend()
+DEFAULT_BACKEND = get_default_backend()
 
 from qumat_qdp.api import (
     LatencyResult,
@@ -42,10 +42,8 @@ from qumat_qdp.api import (
     ThroughputResult,
 )
 from qumat_qdp.backend import (
-    EngineRouter,
     QdpEngine,
-    QuantumTensor,
-    create_encoder_engine,
+    QuantumTensorWrapper,
 )
 from qumat_qdp.loader import QuantumDataLoader
 
@@ -60,16 +58,14 @@ def is_triton_amd_available() -> bool:
 
 
 __all__ = [
-    "BACKEND",
+    "DEFAULT_BACKEND",
     "Backend",
-    "EngineRouter",
     "LatencyResult",
     "QdpBenchmark",
     "QdpEngine",
     "QuantumDataLoader",
-    "QuantumTensor",
+    "QuantumTensorWrapper",
     "ThroughputResult",
-    "create_encoder_engine",
     "force_backend",
     "is_triton_amd_available",
     "run_throughput_pipeline_py",

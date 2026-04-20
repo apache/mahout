@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::dlpack::{extract_dlpack_tensor, steal_dlpack_managed_tensor};
+use crate::dlpack::extract_dlpack_tensor;
 use crate::pytorch::{
     extract_cuda_tensor_info, get_tensor_device_id, get_torch_cuda_stream_ptr, is_cuda_tensor,
     is_pytorch_tensor, validate_cuda_tensor_for_encoding, validate_shape, validate_tensor,
@@ -28,17 +28,31 @@ use qdp_core::{Precision, QdpEngine as CoreEngine};
 #[cfg(target_os = "linux")]
 use crate::loader::{PyQuantumLoader, config_from_args, parse_null_handling, path_from_py};
 
-/// PyO3 wrapper for QdpEngine
-///
-/// Provides Python bindings for GPU-accelerated quantum state encoding.
-enum EngineImpl {
-    Core(CoreEngine),
-    Py(Py<PyAny>),
+struct CudaEngineAdapter {
+    engine: CoreEngine,
 }
+
+impl CudaEngineAdapter {
+    fn new(device_id: usize, precision: Precision) -> PyResult<Self> {
+        let engine = CoreEngine::new_with_precision(device_id, precision).map_err(|e| {
+            PyRuntimeError::new_err(format!("Failed to initialize CUDA backend: {}", e))
+        })?;
+        Ok(Self { engine })
+    }
+
+    fn engine(&self) -> &CoreEngine {
+        &self.engine
+    }
+}
+
+/// PyO3 wrapper for the Rust/CUDA QdpEngine.
+///
+/// The public Python facade routes AMD/Triton directly in `qumat_qdp.backend`.
+/// `_qdp.QdpEngine` stays focused on the Rust CUDA core and its tensor contract.
 
 #[pyclass]
 pub struct QdpEngine {
-    engine: EngineImpl,
+    engine: CudaEngineAdapter,
     #[allow(dead_code)]
     device_id: usize,
     #[allow(dead_code)]
@@ -60,8 +74,8 @@ impl QdpEngine {
     /// Raises:
     ///     RuntimeError: If CUDA device initialization fails
     #[new]
-    #[pyo3(signature = (device_id=0, precision="float32", backend="auto"))]
-    fn new(py: Python<'_>, device_id: usize, precision: &str, backend: &str) -> PyResult<Self> {
+    #[pyo3(signature = (device_id=0, precision="float32", backend="cuda"))]
+    fn new(device_id: usize, precision: &str, backend: &str) -> PyResult<Self> {
         let precision = match precision.to_ascii_lowercase().as_str() {
             "float32" | "f32" | "float" => Precision::Float32,
             "float64" | "f64" | "double" => Precision::Float64,
@@ -74,37 +88,29 @@ impl QdpEngine {
         };
 
         let backend_name = backend.to_ascii_lowercase();
-        let engine = match backend_name.as_str() {
-            "cuda" => EngineImpl::Core(
-                CoreEngine::new_with_precision(device_id, precision).map_err(|e| {
-                    PyRuntimeError::new_err(format!("Failed to initialize CUDA backend: {}", e))
-                })?,
+        let (engine, resolved_backend) = match backend_name.as_str() {
+            "cuda" => (
+                CudaEngineAdapter::new(device_id, precision)?,
+                "cuda".to_string(),
             ),
             "amd" | "triton_amd" => {
-                EngineImpl::Py(Self::init_triton_backend(py, device_id, precision)?)
+                return Err(PyRuntimeError::new_err(
+                    "AMD/Triton routing is provided by the Python facade `qumat_qdp.QdpEngine`; `_qdp.QdpEngine` only supports the Rust CUDA backend.",
+                ));
             }
-            "auto" => match CoreEngine::new_with_precision(device_id, precision) {
-                Ok(engine) => EngineImpl::Core(engine),
-                Err(_) => EngineImpl::Py(Self::init_triton_backend(py, device_id, precision)?),
-            },
             other => {
                 return Err(PyRuntimeError::new_err(format!(
-                    "Unsupported backend '{}'. Use 'auto', 'cuda', or 'amd'.",
+                    "Unsupported backend '{}'. Use 'cuda'.",
                     other
                 )));
             }
-        };
-
-        let backend = match &engine {
-            EngineImpl::Core(_) => "cuda".to_string(),
-            EngineImpl::Py(_) => "amd".to_string(),
         };
 
         Ok(Self {
             engine,
             device_id,
             precision,
-            backend,
+            backend: resolved_backend,
         })
     }
 
@@ -138,15 +144,10 @@ impl QdpEngine {
     #[pyo3(signature = (data, num_qubits, encoding_method="amplitude"))]
     fn encode(
         &self,
-        py: Python<'_>,
         data: &Bound<'_, PyAny>,
         num_qubits: usize,
         encoding_method: &str,
     ) -> PyResult<QuantumTensor> {
-        if matches!(self.engine, EngineImpl::Py(_)) {
-            return self.encode_with_py_backend(py, data, num_qubits, encoding_method);
-        }
-
         self.encode_with_core(data, num_qubits, encoding_method)
     }
 
@@ -225,48 +226,8 @@ impl QdpEngine {
 }
 
 impl QdpEngine {
-    fn init_triton_backend(
-        py: Python<'_>,
-        device_id: usize,
-        precision: Precision,
-    ) -> PyResult<Py<PyAny>> {
-        let module = PyModule::import(py, "qumat_qdp.triton_amd")?;
-        let cls = module.getattr("TritonAmdKernel")?;
-        let precision_name = match precision {
-            Precision::Float32 => "float32",
-            Precision::Float64 => "float64",
-        };
-        let backend = cls.call1((device_id, precision_name))?;
-        Ok(backend.unbind())
-    }
-
     fn core_engine(&self) -> PyResult<&CoreEngine> {
-        match &self.engine {
-            EngineImpl::Core(engine) => Ok(engine),
-            EngineImpl::Py(_) => Err(PyRuntimeError::new_err(
-                "This operation is unavailable on the AMD Triton backend.",
-            )),
-        }
-    }
-
-    fn encode_with_py_backend(
-        &self,
-        py: Python<'_>,
-        data: &Bound<'_, PyAny>,
-        num_qubits: usize,
-        encoding_method: &str,
-    ) -> PyResult<QuantumTensor> {
-        let EngineImpl::Py(backend) = &self.engine else {
-            unreachable!("encode_with_py_backend called on non-Python backend");
-        };
-        let value = backend
-            .bind(py)
-            .call_method1("encode", (data, num_qubits, encoding_method))?;
-        let ptr = steal_dlpack_managed_tensor(&value)?;
-        Ok(QuantumTensor {
-            ptr,
-            consumed: false,
-        })
+        Ok(self.engine.engine())
     }
 
     fn encode_with_core(

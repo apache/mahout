@@ -14,18 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Backend detection and selection for QDP.
-
-Available backends:
-1. _qdp (Rust+CUDA) -- native extension, highest performance
-2. torch (PyTorch) -- reference implementation, must be explicitly selected
-
-Auto-detection only activates the Rust backend.  To use the PyTorch
-reference backend, call ``force_backend(Backend.PYTORCH)`` or use
-the ``.backend("pytorch")`` builder method on ``QdpBenchmark`` /
-``QuantumDataLoader``.
-"""
+"""Backend availability helpers for QDP."""
 
 from __future__ import annotations
 
@@ -35,15 +24,11 @@ from types import ModuleType
 
 
 class Backend(enum.Enum):
-    """Available QDP encoding backends."""
+    """Available QDP backends exposed by the Python facade."""
 
-    RUST_CUDA = "rust_cuda"
-    PYTORCH = "pytorch"
+    CUDA = "cuda"
+    AMD = "amd"
     NONE = "none"
-
-
-# Module-level override; set via force_backend().
-_forced_backend: Backend | None = None
 
 
 @lru_cache(maxsize=1)
@@ -68,36 +53,29 @@ def get_torch() -> ModuleType | None:
         return None
 
 
-def get_backend() -> Backend:
-    """Return the active backend.
-
-    Only the Rust backend is auto-detected.  The PyTorch reference
-    backend must be selected explicitly via :func:`force_backend`.
-    """
-    if _forced_backend is not None:
-        return _forced_backend
+def get_default_backend() -> Backend:
+    """Return the default backend for the current environment."""
     if get_qdp() is not None:
-        return Backend.RUST_CUDA
+        return Backend.CUDA
     return Backend.NONE
 
 
 def force_backend(backend: Backend | None) -> None:
-    """Override automatic backend detection.
+    """Backward-compatible no-op.
 
-    Pass ``None`` to restore auto-detection.  Primarily useful for
-    testing and benchmarking.
+    Backend selection is now explicit in ``qumat_qdp.QdpEngine(..., backend=...)``.
+    This function remains to avoid breaking existing imports.
     """
-    global _forced_backend
-    _forced_backend = backend
+    if backend is not None and backend not in (Backend.CUDA, Backend.AMD, Backend.NONE):
+        raise ValueError(f"Unsupported backend override: {backend!r}")
 
 
 def require_backend() -> Backend:
-    """Return the current backend or raise if none is available."""
-    b = get_backend()
-    if b is Backend.NONE:
+    """Return the default available backend or raise if none is available."""
+    backend = get_default_backend()
+    if backend is Backend.NONE:
         raise RuntimeError(
-            "No QDP encoding backend available. "
-            "Build the Rust extension (maturin develop) or explicitly select the "
-            "PyTorch reference backend with force_backend(Backend.PYTORCH)."
+            "No QDP backend available. Build the Rust CUDA extension for `backend=\"cuda\"`, "
+            "or install the ROCm/Triton runtime for `backend=\"amd\"`."
         )
-    return b
+    return backend

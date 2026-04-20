@@ -17,26 +17,65 @@
 from typing import Any
 
 import pytest
-from qumat_qdp import QdpEngine, create_encoder_engine
-from qumat_qdp.backend import EngineRouter, QuantumTensor
+from qumat_qdp import QdpEngine
+from qumat_qdp import backend as backend_mod
 
 
 def test_backend_routing_rejects_unknown_backend():
     with pytest.raises(ValueError):
-        create_encoder_engine(backend="unknown-backend")
+        QdpEngine(backend="unknown-backend")
 
 
-def test_create_encoder_engine_returns_unified_qdp_engine(monkeypatch):
+def test_create_encoder_engine_instantiates_python_facade(monkeypatch):
+    class FakeAdapter:
+        def encode(self, data, num_qubits, encoding_method):
+            return "ok"
+
     monkeypatch.setattr(
-        EngineRouter,
-        "_create_backend_engine",
-        staticmethod(lambda **kwargs: ("fake", object())),
+        backend_mod,
+        "_select_engine_adapter",
+        lambda **kwargs: ("fake", FakeAdapter()),
     )
-    engine = create_encoder_engine(backend="auto")
+
+    engine = QdpEngine(backend="cuda")
     assert isinstance(engine, QdpEngine)
+    assert engine.backend == "fake"
 
 
-def test_qdp_engine_wraps_backend_output_into_unified_quantum_tensor(monkeypatch):
+def test_cuda_route_uses_rust_engine(monkeypatch):
+    seen: dict[str, Any] = {}
+
+    class FakeRustEngine:
+        def __init__(self, device_id=0, precision="float32"):
+            seen["init"] = {
+                "device_id": device_id,
+                "precision": precision,
+            }
+
+        def encode(self, data, num_qubits, encoding_method):
+            seen["encode"] = {
+                "data": data,
+                "num_qubits": num_qubits,
+                "encoding_method": encoding_method,
+            }
+            return "rust-quantum-tensor"
+
+    monkeypatch.setattr(
+        backend_mod,
+        "_load_rust_cuda_engine_class",
+        lambda required=False: FakeRustEngine,
+    )
+
+    engine = QdpEngine(device_id=3, precision="float64", backend="cuda")
+    value = engine.encode([1.0, 0.0], 1, "amplitude")
+
+    assert engine.backend == "cuda"
+    assert value == "rust-quantum-tensor"
+    assert seen["init"] == {"device_id": 3, "precision": "float64"}
+    assert seen["encode"]["encoding_method"] == "amplitude"
+
+
+def test_amd_route_wraps_triton_output(monkeypatch):
     class FakeValue:
         def __dlpack__(self, stream: Any | None = None) -> Any:
             return ("capsule", stream)
@@ -44,31 +83,41 @@ def test_qdp_engine_wraps_backend_output_into_unified_quantum_tensor(monkeypatch
         def __dlpack_device__(self) -> Any:
             return (2, 0)
 
-    class FakeBackendEngine:
+    class FakeTritonEngine:
+        def __init__(self, device_id=0, precision="float32"):
+            self.device_id = device_id
+            self.precision = precision
+
+        def check_runtime(self):
+            return None
+
         def encode(self, data, num_qubits, encoding_method):
             return FakeValue()
 
     monkeypatch.setattr(
-        EngineRouter,
-        "_create_backend_engine",
-        staticmethod(lambda **kwargs: ("fake", FakeBackendEngine())),
+        backend_mod,
+        "_load_triton_engine_components",
+        lambda: (FakeTritonEngine, lambda: True),
     )
 
-    engine = QdpEngine(device_id=0, precision="float32", backend="auto")
-    qt = engine.encode([1.0, 0.0, 0.0, 0.0], 2, "amplitude")
+    engine = QdpEngine(device_id=1, precision="float32", backend="amd")
+    qt = engine.encode([1.0, 0.0], 1, "amplitude")
 
-    assert isinstance(qt, QuantumTensor)
-    assert qt.backend == "fake"
+    assert engine.backend == "amd"
+    assert isinstance(qt, backend_mod.QuantumTensorWrapper)
     assert qt.__dlpack_device__() == (2, 0)
 
+def test_missing_cuda_backend_fails_cleanly(monkeypatch):
+    monkeypatch.setattr(
+        backend_mod,
+        "_load_rust_cuda_engine_class",
+        lambda required=False: None,
+    )
 
-def test_auto_router_without_available_backends_fails_cleanly():
-    # On environments without _qdp / Triton accelerators, auto should fail
-    # with an actionable runtime error (instead of importing CUDA eagerly).
-    with pytest.raises(RuntimeError, match="No available backend"):
-        create_encoder_engine(backend="auto")
+    with pytest.raises(RuntimeError, match="_qdp.QdpEngine is unavailable"):
+        QdpEngine(backend="cuda")
 
 
-def test_unified_quantum_tensor_requires_dlpack():
+def test_quantum_tensor_wrapper_requires_dlpack():
     with pytest.raises(RuntimeError):
-        QuantumTensor(value=object(), backend="fake").__dlpack__()
+        backend_mod.QuantumTensorWrapper(value=object(), backend="fake").__dlpack__()

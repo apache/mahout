@@ -144,8 +144,8 @@ def _basis_kernel(
 
 
 @dataclass
-class TritonAmdKernel:
-    """Triton/ROCm kernel-backed implementation for AMD amplitude, angle, and basis encodings."""
+class TritonAmdEngine:
+    """Triton/ROCm engine for AMD amplitude, angle, and basis encodings."""
 
     device_id: int = 0
     precision: str = "float32"
@@ -319,6 +319,6 @@ class TritonAmdKernel:
             )
 
         # Return the same routed contract even when engine is used directly.
-        from qumat_qdp.backend import QuantumTensor
+        from qumat_qdp.backend import QuantumTensorWrapper
 
-        return QuantumTensor(value=value, backend=self.backend)
+        return QuantumTensorWrapper(value=value, backend=self.backend)

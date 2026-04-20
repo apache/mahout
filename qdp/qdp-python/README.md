@@ -35,8 +35,8 @@ import qumat.qdp as qdp
 import torch
 
 # Initialize the unified QDP engine on GPU 0.
-# backend="auto" will pick CUDA or AMD underneath.
-engine = qdp.QdpEngine(device_id=0, backend="auto")
+# Choose the backend explicitly.
+engine = qdp.QdpEngine(device_id=0, backend="cuda")
 
 # Encode data into quantum state
 qtensor = engine.encode([1.0, 2.0, 3.0, 4.0], num_qubits=2, encoding_method="amplitude")
@@ -58,11 +58,11 @@ qt = engine.encode(torch.randn(8, 4, device="cuda"), 2, "amplitude")
 state = torch.from_dlpack(qt)
 print(state.device, state.dtype)  # cuda:0, complex64
 
-# Or let the router select AMD / CUDA automatically
-engine_auto = qdp.QdpEngine(device_id=0, precision="float32", backend="auto")
-qt_auto = engine_auto.encode(torch.randn(8, 4, device="cuda"), 2, "amplitude")
-state_auto = torch.from_dlpack(qt_auto)
 ```
+
+The public `QdpEngine` is a unified Python facade with explicit backend selection:
+- `backend="cuda"` routes to the Rust `_qdp.QdpEngine`
+- `backend="amd"` routes to the Triton AMD engine directly
 
 See `qdp/qdp-python/TRITON_AMD_BACKEND.md` for Triton AMD setup and validation details.
 

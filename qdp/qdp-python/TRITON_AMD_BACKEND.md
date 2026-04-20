@@ -45,15 +45,17 @@ qt = engine.encode(x, num_qubits=10, encoding_method="amplitude")
 state = torch.from_dlpack(qt)
 ```
 
-All routed backends return the same DLPack-compatible `QuantumTensor` from `qumat_qdp.backend`.
+The public `QdpEngine(..., backend="amd")` route goes directly to the Triton
+engine and returns the Python `QuantumTensorWrapper` compatibility wrapper.
+The CUDA route remains Rust-owned and returns the extension `QuantumTensor`.
 
 ### Triton implementation details
 
 ```python
 import torch
-from qumat_qdp.triton_amd import TritonAmdKernel
+from qumat_qdp.triton_amd import TritonAmdEngine
 
-engine = TritonAmdKernel(device_id=0, precision="float32")
+engine = TritonAmdEngine(device_id=0, precision="float32")
 x = torch.randn(64, 1024, device="cuda", dtype=torch.float32)
 qt = engine.encode(x, num_qubits=10, encoding_method="amplitude")
 state = torch.from_dlpack(qt)

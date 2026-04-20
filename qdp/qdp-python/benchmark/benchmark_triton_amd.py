@@ -23,7 +23,7 @@ import argparse
 
 import torch
 from qumat_qdp import is_triton_amd_available
-from qumat_qdp.triton_amd import TritonAmdKernel
+from qumat_qdp.triton_amd import TritonAmdEngine
 
 
 def _build_input(method: str, batch_size: int, qubits: int) -> torch.Tensor:
@@ -63,7 +63,7 @@ def main() -> int:
             "triton_amd backend is unavailable (requires ROCm + Triton HIP target)."
         )
 
-    engine = TritonAmdKernel(device_id=0, precision=args.precision)
+    engine = TritonAmdEngine(device_id=0, precision=args.precision)
     data = _build_input(args.encoding_method, args.batch_size, args.qubits)
 
     # Warmup
