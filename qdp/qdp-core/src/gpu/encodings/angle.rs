@@ -384,6 +384,11 @@ impl QuantumEncoder for AngleEncoder {
     ) -> Result<GpuStateVector> {
         crate::profile_scope!("AngleEncoder::encode_batch_f32");
 
+        if num_samples == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Number of samples cannot be zero".into(),
+            ));
+        }
         if sample_size == 0 {
             return Err(MahoutError::InvalidInput(
                 "Sample size cannot be zero".into(),
@@ -395,7 +400,10 @@ impl QuantumEncoder for AngleEncoder {
                 num_qubits, sample_size
             )));
         }
-        if batch_data.len() != num_samples * sample_size {
+        let expected_len = num_samples
+            .checked_mul(sample_size)
+            .ok_or_else(|| MahoutError::InvalidInput("Angle batch size overflow".to_string()))?;
+        if batch_data.len() != expected_len {
             return Err(MahoutError::InvalidInput(format!(
                 "Batch data length {} doesn't match num_samples {} * sample_size {}",
                 batch_data.len(),
@@ -499,27 +507,29 @@ impl QuantumEncoder for AngleEncoder {
         validate_qubit_count(num_qubits)?;
         let state_len = 1 << num_qubits;
         let input_batch_d = input_batch_d as *const f32;
+        let total_angles = num_samples
+            .checked_mul(sample_size)
+            .ok_or_else(|| MahoutError::InvalidInput("Angle batch size overflow".to_string()))?;
         let angle_validation_buffer = {
             crate::profile_scope!("GPU::AngleFiniteCheckBatchF32");
             use cudarc::driver::DevicePtrMut;
-            let mut buffer = device.alloc_zeros::<f32>(num_samples).map_err(|e| {
+            let mut buffer = device.alloc_zeros::<i32>(1).map_err(|e| {
                 MahoutError::MemoryAllocation(format!(
                     "Failed to allocate angle validation buffer: {:?}",
                     e
                 ))
             })?;
             let ret = unsafe {
-                qdp_kernels::launch_l2_norm_batch_f32(
+                qdp_kernels::launch_check_finite_batch_f32(
                     input_batch_d,
-                    num_samples,
-                    sample_size,
-                    *buffer.device_ptr_mut() as *mut f32,
+                    total_angles,
+                    *buffer.device_ptr_mut() as *mut i32,
                     stream,
                 )
             };
             if ret != 0 {
                 return Err(MahoutError::KernelLaunch(format!(
-                    "Angle validation norm kernel (f32) failed with CUDA error code: {} ({})",
+                    "Angle finite validation kernel (f32) failed with CUDA error code: {} ({})",
                     ret,
                     cuda_error_to_string(ret)
                 )));
@@ -528,15 +538,15 @@ impl QuantumEncoder for AngleEncoder {
         };
         {
             crate::profile_scope!("GPU::AngleFiniteValidationHostCopyF32");
-            let host_norms = device
+            let host_flags = device
                 .dtoh_sync_copy(&angle_validation_buffer)
                 .map_err(|e| {
                     MahoutError::Cuda(format!(
-                        "Failed to copy angle validation norms to host: {:?}",
+                        "Failed to copy angle validation flags to host: {:?}",
                         e
                     ))
                 })?;
-            if host_norms.iter().any(|v| !v.is_finite()) {
+            if host_flags.first().copied().unwrap_or_default() != 0 {
                 return Err(MahoutError::InvalidInput(
                     "Angle encoding batch contains non-finite values (NaN or Inf)".to_string(),
                 ));
