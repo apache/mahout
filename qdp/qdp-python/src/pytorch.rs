@@ -18,7 +18,8 @@ use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use std::ffi::c_void;
 
-use crate::constants::{CUDA_ENCODING_METHODS, format_supported_cuda_encoding_methods};
+use crate::constants::format_supported_cuda_encoding_methods;
+use qdp_core::Encoding;
 
 /// Helper to detect PyTorch tensor
 pub fn is_pytorch_tensor(obj: &Bound<'_, PyAny>) -> PyResult<bool> {
@@ -143,16 +144,20 @@ pub fn get_torch_cuda_stream_ptr(tensor: &Bound<'_, PyAny>) -> PyResult<*mut c_v
     })
 }
 
-/// Validate a CUDA tensor for direct GPU encoding
-/// Checks: dtype matches encoding method, contiguous, non-empty, device_id matches engine
+/// Validate a CUDA tensor for direct GPU encoding and return the parsed `Encoding`.
+///
+/// Checks dtype compatibility, contiguity, non-empty, and device match.
+/// Returns the parsed `Encoding` so the caller avoids re-parsing the same string.
 pub fn validate_cuda_tensor_for_encoding(
     tensor: &Bound<'_, PyAny>,
     expected_device_id: usize,
     encoding_method: &str,
-) -> PyResult<()> {
-    let method = encoding_method.to_ascii_lowercase();
+) -> PyResult<Encoding> {
+    let encoding = Encoding::from_str_ci(encoding_method)
+        .map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
 
-    if !CUDA_ENCODING_METHODS.contains(&method.as_str()) {
+    // Phase has no CUDA tensor path yet.
+    if matches!(encoding, Encoding::Phase) {
         return Err(PyRuntimeError::new_err(format!(
             "CUDA tensor encoding currently only supports {} methods, got '{}'. \
              Use tensor.cpu() to convert to CPU tensor for other encoding methods.",
@@ -161,12 +166,11 @@ pub fn validate_cuda_tensor_for_encoding(
         )));
     }
 
-    // Check encoding method support and dtype (ASCII lowercase for case-insensitive match).
     let dtype = tensor.getattr("dtype")?;
     let dtype_str: String = dtype.str()?.extract()?;
     let dtype_str_lower = dtype_str.to_ascii_lowercase();
-    match method.as_str() {
-        "amplitude" => {
+    match encoding {
+        Encoding::Amplitude => {
             if !(dtype_str_lower.contains("float64") || dtype_str_lower.contains("float32")) {
                 return Err(PyRuntimeError::new_err(format!(
                     "CUDA tensor must have dtype float64 or float32 for amplitude encoding, got {}. \
@@ -175,16 +179,17 @@ pub fn validate_cuda_tensor_for_encoding(
                 )));
             }
         }
-        "angle" | "iqp" | "iqp-z" => {
+        Encoding::Angle | Encoding::Iqp | Encoding::IqpZ => {
             if !dtype_str_lower.contains("float64") {
                 return Err(PyRuntimeError::new_err(format!(
                     "CUDA tensor must have dtype float64 for {} encoding, got {}. \
                      Use tensor.to(torch.float64)",
-                    method, dtype_str
+                    encoding.as_str(),
+                    dtype_str
                 )));
             }
         }
-        "basis" => {
+        Encoding::Basis => {
             if !dtype_str_lower.contains("int64") {
                 return Err(PyRuntimeError::new_err(format!(
                     "CUDA tensor must have dtype int64 for basis encoding, got {}. \
@@ -193,12 +198,7 @@ pub fn validate_cuda_tensor_for_encoding(
                 )));
             }
         }
-        _ => {
-            return Err(PyRuntimeError::new_err(format!(
-                "Internal error: missing CUDA validation branch for supported method '{}'",
-                method
-            )));
-        }
+        Encoding::Phase => unreachable!("Phase filtered above"),
     }
 
     // Check contiguous
@@ -225,7 +225,7 @@ pub fn validate_cuda_tensor_for_encoding(
         )));
     }
 
-    Ok(())
+    Ok(encoding)
 }
 
 /// Minimal CUDA tensor metadata extracted via PyTorch APIs.

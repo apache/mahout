@@ -23,6 +23,7 @@ use crate::error::{MahoutError, Result};
 use crate::gpu::memory::{GpuStateVector, Precision};
 use cudarc::driver::CudaDevice;
 use std::sync::Arc;
+use std::sync::OnceLock;
 
 #[cfg(target_os = "linux")]
 use crate::gpu::memory::map_allocation_error;
@@ -404,4 +405,19 @@ impl QuantumEncoder for IqpEncoder {
             "IQP-Z encoding: product states with single-qubit Z rotations"
         }
     }
+}
+
+static IQP_FULL: OnceLock<IqpEncoder> = OnceLock::new();
+static IQP_Z_ONLY: OnceLock<IqpEncoder> = OnceLock::new();
+
+/// Shared `'static` IQP encoder (full ZZ). Used by [`crate::Encoding::encoder`](crate::Encoding::encoder).
+#[must_use]
+pub fn iqp_full_encoder() -> &'static IqpEncoder {
+    IQP_FULL.get_or_init(IqpEncoder::full)
+}
+
+/// Shared `'static` IQP-Z encoder. Used by [`crate::Encoding::encoder`](crate::Encoding::encoder).
+#[must_use]
+pub fn iqp_z_encoder() -> &'static IqpEncoder {
+    IQP_Z_ONLY.get_or_init(IqpEncoder::z_only)
 }

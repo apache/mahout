@@ -23,7 +23,7 @@ use crate::tensor::QuantumTensor;
 use numpy::{PyReadonlyArray1, PyReadonlyArray2, PyUntypedArrayMethods};
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
-use qdp_core::{Precision, QdpEngine as CoreEngine};
+use qdp_core::{Dtype, Encoding, QdpEngine as CoreEngine};
 
 #[cfg(target_os = "linux")]
 use crate::loader::{PyQuantumLoader, config_from_args, parse_null_handling, path_from_py};
@@ -52,16 +52,8 @@ impl QdpEngine {
     #[new]
     #[pyo3(signature = (device_id=0, precision="float32"))]
     fn new(device_id: usize, precision: &str) -> PyResult<Self> {
-        let precision = match precision.to_ascii_lowercase().as_str() {
-            "float32" | "f32" | "float" => Precision::Float32,
-            "float64" | "f64" | "double" => Precision::Float64,
-            other => {
-                return Err(PyRuntimeError::new_err(format!(
-                    "Unsupported precision '{}'. Use 'float32' (default) or 'float64'.",
-                    other
-                )));
-            }
-        };
+        let precision =
+            Dtype::from_str_ci(precision).map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
 
         let engine = CoreEngine::new_with_precision(device_id, precision)
             .map_err(|e| PyRuntimeError::new_err(format!("Failed to initialize: {}", e)))?;
@@ -485,17 +477,18 @@ impl QdpEngine {
         num_qubits: usize,
         encoding_method: &str,
     ) -> PyResult<QuantumTensor> {
-        validate_cuda_tensor_for_encoding(data, self.engine.device().ordinal(), encoding_method)?;
-
+        let encoding = validate_cuda_tensor_for_encoding(
+            data,
+            self.engine.device().ordinal(),
+            encoding_method,
+        )?;
         let dtype = data.getattr("dtype")?;
         let dtype_str: String = dtype.str()?.extract()?;
-        let dtype_str_lower = dtype_str.to_ascii_lowercase();
-        let is_f32 = dtype_str_lower.contains("float32");
-        let method = encoding_method.to_ascii_lowercase();
+        let is_f32 = dtype_str.to_ascii_lowercase().contains("float32");
         let ndim: usize = data.call_method0("dim")?.extract()?;
         let tensor_info = extract_cuda_tensor_info(data)?;
 
-        if method.as_str() == "amplitude" && is_f32 {
+        if encoding == Encoding::Amplitude && is_f32 {
             match ndim {
                 1 => {
                     let input_len: usize = data.call_method0("numel")?.extract()?;
@@ -634,7 +627,7 @@ impl QdpEngine {
             seed,
             nh,
             true,
-        );
+        )?;
         let iter = qdp_core::PipelineIterator::new_synthetic(self.engine.clone(), config).map_err(
             |e| PyRuntimeError::new_err(format!("create_synthetic_loader failed: {}", e)),
         )?;
@@ -667,7 +660,7 @@ impl QdpEngine {
             None,
             nh,
             true, // float32_pipeline
-        );
+        )?;
         let engine = self.engine.clone();
         // Resolve remote URLs before detaching from GIL. The _resolved guard keeps the
         // temp file alive until after the file is fully read inside py.detach.
@@ -716,7 +709,7 @@ impl QdpEngine {
             None,
             nh,
             true, // float32_pipeline
-        );
+        )?;
         let engine = self.engine.clone();
         // Resolve remote URLs before detaching from GIL. The _resolved guard keeps the
         // temp file alive; the streaming reader's open fd preserves data after drop.

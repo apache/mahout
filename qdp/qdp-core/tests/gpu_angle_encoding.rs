@@ -114,6 +114,28 @@ fn test_angle_infinity_rejected() {
 
 // ---- Successful encoding (kernel launch path) ----
 
+/// Regression: streaming Parquet path accepts mixed-case encoding names via `Encoding::from_str_ci`.
+#[test]
+fn test_angle_parquet_encoding_case_insensitive() {
+    let Some(engine) = common::qdp_engine() else {
+        return;
+    };
+
+    let num_qubits = 2;
+    let data: Vec<f64> = vec![0.1, 0.2];
+    let path = "/tmp/test_angle_case.parquet";
+    common::write_fixed_size_list_parquet(path, &data, num_qubits);
+
+    let dlpack_ptr = engine
+        .encode_from_parquet(path, num_qubits, "Angle")
+        .expect("mixed-case 'Angle' should match streaming angle encoder");
+    let _ = std::fs::remove_file(path);
+
+    unsafe {
+        common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 1, (1 << num_qubits) as i64);
+    }
+}
+
 #[test]
 fn test_angle_successful_encoding_from_parquet() {
     let Some(engine) = common::qdp_engine() else {

@@ -84,6 +84,12 @@ cargo test --workspace
 cd ..
 ```
 
+**Encoding / pipeline dtype:** `qdp_core::Encoding::supports_f32` gates whether
+`PipelineConfig::normalize()` keeps `dtype = Float32` for the synthetic pipeline. It reflects
+**which encoders implement `encode_batch_f32` today** (currently amplitude only), not every
+encoding that might eventually get a batch f32 path. When angle/basis gain real batch f32
+support, widen `supports_f32` and adjust tests accordingly.
+
 Run Python tests:
 
 ```bash

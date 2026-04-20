@@ -21,7 +21,9 @@ mod loader_impl {
     use pyo3::exceptions::PyRuntimeError;
     use pyo3::prelude::*;
     use qdp_core::reader::NullHandling;
-    use qdp_core::{PipelineConfig, PipelineIterator, QdpEngine as CoreEngine};
+    use qdp_core::{
+        Encoding, PipelineConfig, PipelineIterator, Precision, QdpEngine as CoreEngine,
+    };
 
     /// Rust-backed iterator yielding one QuantumTensor per batch; used by QuantumDataLoader.
     #[pyclass]
@@ -94,19 +96,25 @@ mod loader_impl {
         seed: Option<u64>,
         null_handling: NullHandling,
         float32_pipeline: bool,
-    ) -> PipelineConfig {
-        PipelineConfig {
+    ) -> PyResult<PipelineConfig> {
+        let encoding = Encoding::from_str_ci(encoding_method)
+            .map_err(|e| PyRuntimeError::new_err(format!("Invalid encoding: {e}")))?;
+        Ok(PipelineConfig {
             device_id: 0,
             num_qubits,
             batch_size,
             total_batches,
-            encoding_method: encoding_method.to_string(),
+            encoding,
             seed,
             warmup_batches: 0,
             null_handling,
-            float32_pipeline,
+            dtype: if float32_pipeline {
+                Precision::Float32
+            } else {
+                Precision::Float64
+            },
             prefetch_depth: 16,
-        }
+        })
     }
 
     /// Resolve path from Python str or pathlib.Path (__fspath__).
