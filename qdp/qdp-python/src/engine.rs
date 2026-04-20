@@ -531,7 +531,7 @@ impl QdpEngine {
                                         e
                                     ))
                                 })?,
-                            _ => unreachable!("matches!() should have limited f32 methods"),
+                            _ => unreachable!("unreachable: unhandled f32 encoding method"),
                         }
                     };
 
