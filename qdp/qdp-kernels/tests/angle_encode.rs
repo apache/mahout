@@ -283,6 +283,36 @@ fn test_check_finite_batch_f32_reports_non_finite() {
 
 #[test]
 #[cfg(target_os = "linux")]
+fn test_check_finite_batch_f32_reports_nan() {
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    let input_d = device
+        .htod_copy(vec![0.0_f32, f32::NAN, 0.2_f32, 0.3_f32])
+        .unwrap();
+    let mut status_d = device.alloc_zeros::<i32>(1).unwrap();
+
+    let result = unsafe {
+        launch_check_finite_batch_f32(
+            *input_d.device_ptr() as *const f32,
+            4,
+            *status_d.device_ptr_mut() as *mut i32,
+            std::ptr::null_mut(),
+        )
+    };
+    assert_eq!(result, 0, "Finite-check launch should succeed");
+
+    let status_h = device.dtoh_sync_copy(&status_d).unwrap();
+    assert_eq!(status_h, vec![1], "Expected NaN flag to be set");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
 fn test_check_finite_batch_f32_all_finite_stays_clear() {
     let device = match CudaDevice::new(0) {
         Ok(d) => d,
@@ -309,4 +339,60 @@ fn test_check_finite_batch_f32_all_finite_stays_clear() {
 
     let status_h = device.dtoh_sync_copy(&status_d).unwrap();
     assert_eq!(status_h, vec![0], "Expected finite flag to remain clear");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_angle_encode_batch_f32_rejects_zero_state_len() {
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    let input_d = device.htod_copy(vec![0.0_f32, 1.0_f32]).unwrap();
+    let mut state_d = device.alloc_zeros::<CuComplex>(1).unwrap();
+
+    let result = unsafe {
+        launch_angle_encode_batch_f32(
+            *input_d.device_ptr() as *const f32,
+            *state_d.device_ptr_mut() as *mut std::ffi::c_void,
+            1,
+            0,
+            1,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_ne!(result, 0, "Zero state-len batch launch should fail");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_angle_encode_batch_f32_rejects_zero_qubits() {
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    let input_d = device.htod_copy(vec![0.0_f32, 1.0_f32]).unwrap();
+    let mut state_d = device.alloc_zeros::<CuComplex>(1).unwrap();
+
+    let result = unsafe {
+        launch_angle_encode_batch_f32(
+            *input_d.device_ptr() as *const f32,
+            *state_d.device_ptr_mut() as *mut std::ffi::c_void,
+            1,
+            1,
+            0,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_ne!(result, 0, "Zero-qubit batch launch should fail");
 }
