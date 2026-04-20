@@ -11,7 +11,7 @@ Public Python API for QDP: GPU-accelerated encoding, benchmark helpers, and a ba
 
 The **qumat_qdp** package wraps the native extension `_qdp` and adds:
 
-- **Encoding:** unified `QdpEngine` and `QuantumTensor` for encoding classical data into quantum states and zero-copy DLPack integration.
+- **Encoding:** `QdpEngine` and `QuantumTensor` for encoding classical data into quantum states and zero-copy DLPack integration.
 - **Benchmark:** `QdpBenchmark` for throughput/latency runs (full pipeline in Rust, GIL released).
 - **Data loader:** `QuantumDataLoader` for iterating encoded batches one at a time (`for qt in loader:`).
 
@@ -29,7 +29,7 @@ from qumat_qdp import (
 )
 ```
 
-**Requirements:** Linux with a supported GPU runtime (CUDA or ROCm). Loader and pipeline helpers remain Rust/CUDA only unless documented otherwise.
+**Requirements:** Linux with NVIDIA GPU (CUDA). Loader and pipeline helpers are stubs on other platforms and raise `RuntimeError`.
 
 ---
 
@@ -37,13 +37,12 @@ from qumat_qdp import (
 
 ### QdpEngine
 
-Unified GPU encoder. Constructor and main methods:
+GPU encoder. Constructor and main methods:
 
-**`QdpEngine(device_id=0, precision="float32", backend="auto")`**
+**`QdpEngine(device_id=0, precision="float32")`**
 
-- `device_id` (int): GPU device ID.
+- `device_id` (int): CUDA device ID.
 - `precision` (str): `"float32"` or `"float64"`.
-- `backend` (str): `"auto"` (default), `"cuda"`, or `"amd"`.
 - Raises `RuntimeError` on init failure or unsupported precision.
 
 **`encode(data, num_qubits, encoding_method="amplitude") -> QuantumTensor`**

@@ -50,16 +50,20 @@ try:
     from qumat_qdp import QdpEngine as QdpEngine
     from qumat_qdp import QuantumTensor as QuantumTensor
 except ImportError as e:
-    import warnings
+    try:
+        from _qdp import QdpEngine as QdpEngine
+        from _qdp import QuantumTensor as QuantumTensor
+    except ImportError:
+        import warnings
 
-    warnings.warn(
-        f"QDP module not available: {e}. "
-        "QDP requires the qumat-qdp native extension which needs to be built with maturin. "
-        "See qdp/qdp-python/README.md for installation instructions.",
-        ImportWarning,
-    )
+        warnings.warn(
+            f"QDP module not available: {e}. "
+            "QDP requires the qumat-qdp package or native extension to be built. "
+            "See qdp/qdp-python/README.md for installation instructions.",
+            ImportWarning,
+        )
 
-    QdpEngine: type[Any] = _make_stub("QdpEngine")
-    QuantumTensor: type[Any] = _make_stub("QuantumTensor")
+        QdpEngine = _make_stub("QdpEngine")
+        QuantumTensor = _make_stub("QuantumTensor")
 
 __all__: list[str] = ["QdpEngine", "QuantumTensor"]

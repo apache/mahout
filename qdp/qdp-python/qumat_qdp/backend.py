@@ -18,115 +18,53 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Any
 
-from qumat_qdp._backend import get_qdp
+from qumat_qdp.backends.cuda import CudaBackendEngine
+
+AmdBackendEngine: Any | None = None
 
 
-def _load_qdp_module(required: bool = False) -> Any:
-    qdp = get_qdp()
-    if qdp is None and required:
-        raise RuntimeError(
-            "CUDA backend requires the compiled _qdp extension. "
-            "Build with: uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml"
-        )
-    return qdp
+def _load_amd_backend_engine_class() -> type[Any]:
+    global AmdBackendEngine
+    if AmdBackendEngine is None:
+        from qumat_qdp.backends.amd import AmdBackendEngine as cls
+
+        AmdBackendEngine = cls
+    return AmdBackendEngine
 
 
-def _load_rust_cuda_engine_class(required: bool = False) -> Any:
-    qdp = _load_qdp_module(required=required)
-    if qdp is None:
-        return None
-    return getattr(qdp, "QdpEngine", None)
+def _load_triton_engine_type() -> tuple[type[Any], Any]:
+    from qumat_qdp.triton_amd import is_triton_amd_available
+
+    return _load_amd_backend_engine_class(), is_triton_amd_available
 
 
-def _load_triton_engine_components():
-    from qumat_qdp.triton_amd import TritonAmdEngine, is_triton_amd_available
-
-    return TritonAmdEngine, is_triton_amd_available
+def _load_rust_cuda_engine_class() -> type[Any]:
+    return CudaBackendEngine
 
 
-@dataclass
-class QuantumTensorWrapper:
-    """Thin DLPack wrapper for backend-native values."""
-
-    value: Any
-    backend: str
-
-    def __dlpack__(self, stream: int | None = None) -> Any:
-        if not hasattr(self.value, "__dlpack__"):
-            raise RuntimeError(
-                f"Backend '{self.backend}' returned object without __dlpack__ support: {type(self.value)!r}"
-            )
-        if stream is None:
-            return self.value.__dlpack__()
-        return self.value.__dlpack__(stream=stream)
-
-    def __dlpack_device__(self) -> Any:
-        if not hasattr(self.value, "__dlpack_device__"):
-            raise RuntimeError(
-                f"Backend '{self.backend}' returned object without __dlpack_device__ support: {type(self.value)!r}"
-            )
-        return self.value.__dlpack_device__()
-
-    def to_torch(self) -> Any:
-        import torch
-
-        return torch.from_dlpack(self)
-
-
-class _CudaEngineAdapter:
-    """Adapter for the Rust CUDA engine route."""
-
-    backend = "cuda"
-
-    def __init__(self, *, device_id: int, precision: str) -> None:
-        rust_engine_class = _load_rust_cuda_engine_class(required=True)
-        if rust_engine_class is None:
-            raise RuntimeError("_qdp.QdpEngine is unavailable.")
-        self._engine = rust_engine_class(device_id=device_id, precision=precision)
-
-    def encode(
-        self, data: Any, num_qubits: int, encoding_method: str = "amplitude"
-    ) -> Any:
-        return self._engine.encode(data, num_qubits, encoding_method)
-
-
-class _TritonEngineAdapter:
-    """Adapter for the direct Triton AMD engine route."""
-
-    backend = "amd"
-
-    def __init__(self, *, device_id: int, precision: str) -> None:
-        triton_engine_class, is_triton_amd_available = _load_triton_engine_components()
-        if not is_triton_amd_available():
-            raise RuntimeError("Triton HIP target not detected.")
-        engine = triton_engine_class(device_id=device_id, precision=precision)
-        engine.check_runtime()
-        self._engine = engine
-
-    def encode(
-        self, data: Any, num_qubits: int, encoding_method: str = "amplitude"
-    ) -> Any:
-        value = self._engine.encode(data, num_qubits, encoding_method)
-        if isinstance(value, QuantumTensorWrapper):
-            return value
-        return QuantumTensorWrapper(value=value, backend=self.backend)
+def _load_rust_cuda_engine(*, device_id: int, precision: str) -> Any:
+    engine_class = _load_rust_cuda_engine_class()
+    return engine_class(device_id=device_id, precision=precision)
 
 
 def _select_engine_adapter(
-    *, backend: str, device_id: int, precision: str
+    backend: str,
+    device_id: int,
+    precision: str,
 ) -> tuple[str, Any]:
     requested_backend = backend.lower().strip()
 
     if requested_backend == "cuda":
-        return "cuda", _CudaEngineAdapter(device_id=device_id, precision=precision)
-
-    if requested_backend in {"amd", "triton_amd"}:
-        return "amd", _TritonEngineAdapter(
-            device_id=device_id, precision=precision
+        return "cuda", _load_rust_cuda_engine(
+            device_id=device_id,
+            precision=precision,
         )
+
+    if requested_backend in frozenset({"triton_amd", "amd"}):
+        engine_class, _ = _load_triton_engine_type()
+        return "amd", engine_class(device_id=device_id, precision=precision)
 
     raise ValueError(f"Unsupported backend '{backend}'. Use one of: amd, cuda.")
 
@@ -149,6 +87,9 @@ class QdpEngine:
         )
 
     def encode(
-        self, data: Any, num_qubits: int, encoding_method: str = "amplitude"
+        self,
+        data: Any,
+        num_qubits: int,
+        encoding_method: str = "amplitude",
     ) -> Any:
         return self._engine_adapter.encode(data, num_qubits, encoding_method)

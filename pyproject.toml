@@ -83,7 +83,7 @@ python_functions = "test_*"
 addopts = ["-v", "--tb=short", "-rs"]
 markers = [
     "gpu: marks tests as requiring GPU and _qdp extension (auto-skipped if unavailable)",
-    "rocm: marks tests that require ROCm + Triton AMD backend",
+    "rocm: marks tests as requiring ROCm/Triton AMD runtime",
     "slow: marks tests as slow running",
 ]
 

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -20,79 +19,75 @@
 from __future__ import annotations
 
 import argparse
+import time
 
 import torch
+
 from qumat_qdp import is_triton_amd_available
 from qumat_qdp.triton_amd import TritonAmdEngine
 
 
-def _build_input(method: str, batch_size: int, qubits: int) -> torch.Tensor:
-    if method == "basis":
-        return torch.randint(
-            low=0,
-            high=1 << qubits,
-            size=(batch_size,),
-            device="cuda",
-            dtype=torch.int64,
-        )
-    if method == "angle":
-        return torch.randn(batch_size, qubits, device="cuda", dtype=torch.float32)
-    return torch.randn(batch_size, 1 << qubits, device="cuda", dtype=torch.float32)
+def _build_input(
+    batch_size: int,
+    num_qubits: int,
+    encoding_method: str,
+    *,
+    device: str,
+    dtype: torch.dtype,
+) -> torch.Tensor:
+    if encoding_method == "basis":
+        return torch.randint(0, 1 << num_qubits, (batch_size,), device=device)
+    width = num_qubits if encoding_method == "angle" else 1 << num_qubits
+    return torch.randn(batch_size, width, device=device, dtype=dtype)
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Benchmark Triton AMD backend throughput/latency."
-    )
-    parser.add_argument("--qubits", type=int, default=12)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--device-id", type=int, default=0)
+    parser.add_argument("--num-qubits", type=int, default=8)
     parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--batches", type=int, default=200)
+    parser.add_argument("--iters", type=int, default=100)
     parser.add_argument(
-        "--encoding-method",
-        type=str,
+        "--encoding",
+        choices=("amplitude", "angle", "basis"),
         default="amplitude",
-        choices=["amplitude", "angle", "basis"],
     )
-    parser.add_argument(
-        "--precision", type=str, default="float32", choices=["float32", "float64"]
-    )
+    parser.add_argument("--precision", choices=("float32", "float64"), default="float32")
     args = parser.parse_args()
 
     if not is_triton_amd_available():
-        raise SystemExit(
-            "triton_amd backend is unavailable (requires ROCm + Triton HIP target)."
-        )
+        raise SystemExit("Triton AMD backend unavailable.")
 
-    engine = TritonAmdEngine(device_id=0, precision=args.precision)
-    data = _build_input(args.encoding_method, args.batch_size, args.qubits)
+    dtype = torch.float32 if args.precision == "float32" else torch.float64
+    device = f"cuda:{args.device_id}"
+    engine = TritonAmdEngine(device_id=args.device_id, precision=args.precision)
+    data = _build_input(
+        args.batch_size,
+        args.num_qubits,
+        args.encoding,
+        device=device,
+        dtype=dtype,
+    )
 
-    # Warmup
-    for _ in range(10):
-        _ = engine.encode(data, args.qubits, args.encoding_method)
+    for _ in range(5):
+        engine.encode(data, args.num_qubits, args.encoding)
     torch.cuda.synchronize()
 
-    start = torch.cuda.Event(enable_timing=True)
-    end = torch.cuda.Event(enable_timing=True)
-    processed = 0
-    start.record()
-    for _ in range(args.batches):
-        _ = engine.encode(data, args.qubits, args.encoding_method)
-        processed += args.batch_size
-    end.record()
+    start = time.perf_counter()
+    for _ in range(args.iters):
+        engine.encode(data, args.num_qubits, args.encoding)
     torch.cuda.synchronize()
-    dt = start.elapsed_time(end) / 1000.0
+    duration = time.perf_counter() - start
 
-    throughput = processed / dt if dt > 0 else 0.0
-    latency_ms_per_vector = (dt / processed) * 1000 if processed else 0.0
-
-    print("TRITON AMD BASELINE")
-    print(f"- Encoding: {args.encoding_method}")
-    print(f"- Qubits: {args.qubits}")
-    print(f"- Batch size: {args.batch_size}")
-    print(f"- Batches: {args.batches}")
-    print(f"- Duration: {dt:.4f} s")
-    print(f"- Throughput: {throughput:.1f} vectors/sec")
-    print(f"- Latency: {latency_ms_per_vector:.6f} ms/vector")
+    total_vectors = args.batch_size * args.iters
+    print("Triton AMD benchmark")
+    print(f"  encoding:       {args.encoding}")
+    print(f"  precision:      {args.precision}")
+    print(f"  num_qubits:     {args.num_qubits}")
+    print(f"  batch_size:     {args.batch_size}")
+    print(f"  iterations:     {args.iters}")
+    print(f"  duration_sec:   {duration:.6f}")
+    print(f"  vectors_per_s:  {total_vectors / duration:.2f}")
     return 0
 
 
