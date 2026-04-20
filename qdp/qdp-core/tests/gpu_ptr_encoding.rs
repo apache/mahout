@@ -1468,6 +1468,38 @@ fn test_encode_angle_batch_from_gpu_ptr_f32_non_finite_rejected() {
 }
 
 #[test]
+fn test_encode_angle_batch_from_gpu_ptr_f32_infinity_rejected() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (_device, input_d) =
+        match common::copy_f32_to_device(&[0.0_f32, f32::INFINITY, 0.2_f32, 0.3_f32]) {
+            Some(t) => t,
+            None => {
+                println!("SKIP: No CUDA device");
+                return;
+            }
+        };
+    let result = unsafe {
+        engine.encode_angle_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 2, 2)
+    };
+    assert!(result.is_err());
+    match &result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => {
+            assert!(
+                msg.contains("non-finite") || msg.contains("Inf"),
+                "msg: {msg}"
+            );
+        }
+        e => panic!("Expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
 fn test_encode_angle_batch_from_gpu_ptr_f32_success_f64_engine() {
     let Some(engine) = common::qdp_engine_with_precision(Precision::Float64) else {
         println!("SKIP: No GPU");

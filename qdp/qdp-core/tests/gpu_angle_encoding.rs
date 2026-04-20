@@ -213,3 +213,63 @@ fn test_angle_batch_f32_rejects_nan() {
         _ => panic!("expected InvalidInput, got {:?}", result),
     }
 }
+
+#[test]
+fn test_angle_batch_f32_rejects_infinity() {
+    let Some(engine) = common::qdp_engine_with_precision(qdp_core::Precision::Float32) else {
+        println!("SKIP: No GPU available");
+        return;
+    };
+
+    let data = vec![0.0_f32, f32::INFINITY, 0.2, 0.3];
+    let result = engine.encode_batch_f32(&data, 2, 2, 2, "angle");
+
+    assert!(result.is_err());
+    match result {
+        Err(MahoutError::InvalidInput(msg)) => {
+            assert!(msg.contains("Sample 0"), "msg: {msg}");
+            assert!(msg.contains("angle 1"), "msg: {msg}");
+            assert!(msg.contains("finite"), "msg: {msg}");
+        }
+        _ => panic!("expected InvalidInput, got {:?}", result),
+    }
+}
+
+#[test]
+fn test_angle_batch_f32_rejects_zero_samples() {
+    let Some(engine) = common::qdp_engine_with_precision(qdp_core::Precision::Float32) else {
+        println!("SKIP: No GPU available");
+        return;
+    };
+
+    let result = engine.encode_batch_f32(&[], 0, 2, 2, "angle");
+
+    assert!(result.is_err());
+    match result {
+        Err(MahoutError::InvalidInput(msg)) => {
+            assert!(
+                msg.contains("zero") || msg.contains("samples"),
+                "msg: {msg}"
+            );
+        }
+        _ => panic!("expected InvalidInput, got {:?}", result),
+    }
+}
+
+#[test]
+fn test_angle_batch_f32_rejects_length_overflow() {
+    let Some(engine) = common::qdp_engine_with_precision(qdp_core::Precision::Float32) else {
+        println!("SKIP: No GPU available");
+        return;
+    };
+
+    let result = engine.encode_batch_f32(&[], usize::MAX, 2, 2, "angle");
+
+    assert!(result.is_err());
+    match result {
+        Err(MahoutError::InvalidInput(msg)) => {
+            assert!(msg.contains("overflow"), "msg: {msg}");
+        }
+        _ => panic!("expected InvalidInput, got {:?}", result),
+    }
+}

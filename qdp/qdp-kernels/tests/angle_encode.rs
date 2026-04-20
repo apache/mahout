@@ -21,7 +21,10 @@
 #[cfg(target_os = "linux")]
 use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
-use qdp_kernels::{CuComplex, launch_angle_encode_batch_f32, launch_angle_encode_f32};
+use qdp_kernels::{
+    CuComplex, launch_angle_encode_batch_f32, launch_angle_encode_f32,
+    launch_check_finite_batch_f32,
+};
 
 const EPSILON_F32: f32 = 1e-5;
 
@@ -246,4 +249,64 @@ fn test_angle_encode_batch_f32_rejects_zero_samples() {
     };
 
     assert_ne!(result, 0, "Zero-sample batch launch should fail");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_check_finite_batch_f32_reports_non_finite() {
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    let input_d = device
+        .htod_copy(vec![0.0_f32, f32::INFINITY, 0.2_f32, 0.3_f32])
+        .unwrap();
+    let mut status_d = device.alloc_zeros::<i32>(1).unwrap();
+
+    let result = unsafe {
+        launch_check_finite_batch_f32(
+            *input_d.device_ptr() as *const f32,
+            4,
+            *status_d.device_ptr_mut() as *mut i32,
+            std::ptr::null_mut(),
+        )
+    };
+    assert_eq!(result, 0, "Finite-check launch should succeed");
+
+    let status_h = device.dtoh_sync_copy(&status_d).unwrap();
+    assert_eq!(status_h, vec![1], "Expected non-finite flag to be set");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_check_finite_batch_f32_all_finite_stays_clear() {
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    let input_d = device
+        .htod_copy(vec![0.0_f32, 0.1_f32, 0.2_f32, 0.3_f32])
+        .unwrap();
+    let mut status_d = device.alloc_zeros::<i32>(1).unwrap();
+
+    let result = unsafe {
+        launch_check_finite_batch_f32(
+            *input_d.device_ptr() as *const f32,
+            4,
+            *status_d.device_ptr_mut() as *mut i32,
+            std::ptr::null_mut(),
+        )
+    };
+    assert_eq!(result, 0, "Finite-check launch should succeed");
+
+    let status_h = device.dtoh_sync_copy(&status_d).unwrap();
+    assert_eq!(status_h, vec![0], "Expected finite flag to remain clear");
 }
