@@ -541,12 +541,6 @@ impl QdpEngine {
                     })
                 }
                 2 => {
-                    if method.as_str() == "angle" {
-                        return Err(PyRuntimeError::new_err(
-                            "CUDA tensor float32 angle encoding currently supports only 1D single-sample tensors. \
-                             Use tensor.to(torch.float64) for batch angle encoding.",
-                        ));
-                    }
                     let num_samples = tensor_info.shape[0] as usize;
                     let sample_size = tensor_info.shape[1] as usize;
                     let stream_ptr = get_torch_cuda_stream_ptr(data)?;
