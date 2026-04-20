@@ -176,3 +176,13 @@ impl ChunkEncoder for BasisEncoder {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn needs_staging_copy_is_false() {
+        assert!(!BasisEncoder.needs_staging_copy());
+    }
+}
