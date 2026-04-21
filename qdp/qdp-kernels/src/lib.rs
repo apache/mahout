@@ -254,6 +254,32 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
+    /// Launch batch angle encoding kernel for float32 inputs.
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before freeing
+    pub fn launch_angle_encode_batch_f32(
+        angles_batch_d: *const f32,
+        state_batch_d: *mut c_void,
+        num_samples: usize,
+        state_len: usize,
+        num_qubits: u32,
+        stream: *mut c_void,
+    ) -> i32;
+
+    /// Launch float32 batch finite-value validation.
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before reading the output flag.
+    pub fn launch_check_finite_batch_f32(
+        input_batch_d: *const f32,
+        total_angles: usize,
+        has_non_finite_d: *mut i32,
+        stream: *mut c_void,
+    ) -> i32;
+
     /// Launch IQP encoding kernel
     /// Returns CUDA error code (0 = success)
     ///
@@ -491,6 +517,30 @@ pub extern "C" fn launch_angle_encode_batch(
     _num_samples: usize,
     _state_len: usize,
     _num_qubits: u32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_angle_encode_batch_f32(
+    _angles_batch_d: *const f32,
+    _state_batch_d: *mut c_void,
+    _num_samples: usize,
+    _state_len: usize,
+    _num_qubits: u32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_check_finite_batch_f32(
+    _input_batch_d: *const f32,
+    _total_angles: usize,
+    _has_non_finite_d: *mut i32,
     _stream: *mut c_void,
 ) -> i32 {
     999
