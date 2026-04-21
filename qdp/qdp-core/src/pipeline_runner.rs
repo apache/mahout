@@ -431,6 +431,47 @@ impl PipelineIterator {
         })
     }
 
+    /// Create a pipeline iterator from an in-memory array (e.g. from Python numpy).
+    /// Data is owned by the iterator; the full encode loop runs in Rust (take_batch + encode_batch).
+    pub fn new_from_array(
+        engine: QdpEngine,
+        data: Vec<f64>,
+        num_samples: usize,
+        sample_size: usize,
+        config: PipelineConfig,
+        batch_limit: usize,
+    ) -> Result<Self> {
+        let vector_len = vector_len(config.num_qubits, &config.encoding_method);
+        if sample_size != vector_len {
+            return Err(MahoutError::InvalidInput(format!(
+                "Array sample_size {} does not match vector_len {} for num_qubits={}, encoding={}",
+                sample_size, vector_len, config.num_qubits, config.encoding_method
+            )));
+        }
+        if data.len() != num_samples * sample_size {
+            return Err(MahoutError::InvalidInput(format!(
+                "Array length {} is not num_samples ({}) * sample_size ({})",
+                data.len(),
+                num_samples,
+                sample_size
+            )));
+        }
+        let source = DataSource::InMemory {
+            data,
+            cursor: 0,
+            num_samples,
+            sample_size,
+            batches_yielded: 0,
+            batch_limit,
+        };
+        Ok(Self {
+            engine,
+            config,
+            source,
+            vector_len,
+        })
+    }
+
     /// Create a pipeline iterator from a Parquet file using streaming read (Phase 2b).
     /// Only `.parquet` is supported; reduces memory for large files by reading in chunks.
     /// Validates sample_size == vector_len after the first chunk.

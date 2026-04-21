@@ -245,21 +245,9 @@ impl QuantumEncoder for AmplitudeEncoder {
             buffer
         };
 
-        // Validate norms on host to catch zero or NaN samples early
-        {
-            crate::profile_scope!("GPU::NormValidation");
-            let host_inv_norms = device
-                .dtoh_sync_copy(&inv_norms_gpu)
-                .map_err(|e| MahoutError::Cuda(format!("Failed to copy norms to host: {:?}", e)))?;
-
-            if host_inv_norms.iter().any(|v| !v.is_finite() || *v == 0.0) {
-                return Err(MahoutError::InvalidInput(
-                    "One or more samples have zero or invalid norm".to_string(),
-                ));
-            }
-        }
-
-        // Launch batch kernel
+        // Launch batch encode kernel — takes GPU norm buffer directly, no D2H needed yet.
+        // We defer the norm validation D2H copy until AFTER the encode kernel + sync so that
+        // the norm kernel → encode kernel sequence runs without an intermediate GPU-CPU roundtrip.
         {
             crate::profile_scope!("GPU::BatchKernelLaunch");
             let state_ptr = batch_state_vector.ptr_f64().ok_or_else(|| {
@@ -288,12 +276,28 @@ impl QuantumEncoder for AmplitudeEncoder {
             }
         }
 
-        // Synchronize
+        // Synchronize — all GPU work (norm + encode) complete after this point.
         {
             crate::profile_scope!("GPU::Synchronize");
             device
                 .synchronize()
                 .map_err(|e| MahoutError::Cuda(format!("Sync failed: {:?}", e)))?;
+        }
+
+        // Validate norms on host AFTER sync: D2H copy no longer blocks the encode kernel.
+        // This preserves error detection for zero/NaN samples without adding a mid-pipeline
+        // GPU-CPU roundtrip between the norm and encode kernels.
+        {
+            crate::profile_scope!("GPU::NormValidation");
+            let host_inv_norms = device
+                .dtoh_sync_copy(&inv_norms_gpu)
+                .map_err(|e| MahoutError::Cuda(format!("Failed to copy norms to host: {:?}", e)))?;
+
+            if host_inv_norms.iter().any(|v| !v.is_finite() || *v == 0.0) {
+                return Err(MahoutError::InvalidInput(
+                    "One or more samples have zero or invalid norm".to_string(),
+                ));
+            }
         }
 
         Ok(batch_state_vector)
@@ -412,17 +416,8 @@ impl QuantumEncoder for AmplitudeEncoder {
             }
             buffer
         };
-        {
-            crate::profile_scope!("GPU::NormValidation");
-            let host_inv_norms = device
-                .dtoh_sync_copy(&inv_norms_gpu)
-                .map_err(|e| MahoutError::Cuda(format!("Failed to copy norms to host: {:?}", e)))?;
-            if host_inv_norms.iter().any(|v| !v.is_finite() || *v == 0.0) {
-                return Err(MahoutError::InvalidInput(
-                    "One or more samples have zero or invalid norm".to_string(),
-                ));
-            }
-        }
+        // Launch encode kernel before D2H norm validation: GPU norm buffer is passed directly,
+        // so the encode kernel can run immediately after the norm kernel without a CPU roundtrip.
         {
             crate::profile_scope!("GPU::BatchKernelLaunch");
             use cudarc::driver::DevicePtr;
@@ -450,9 +445,21 @@ impl QuantumEncoder for AmplitudeEncoder {
                 )));
             }
         }
+        // Synchronize first; then validate norms on host (D2H after all GPU work is done).
         {
             crate::profile_scope!("GPU::Synchronize");
             sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
+        }
+        {
+            crate::profile_scope!("GPU::NormValidation");
+            let host_inv_norms = device
+                .dtoh_sync_copy(&inv_norms_gpu)
+                .map_err(|e| MahoutError::Cuda(format!("Failed to copy norms to host: {:?}", e)))?;
+            if host_inv_norms.iter().any(|v| !v.is_finite() || *v == 0.0) {
+                return Err(MahoutError::InvalidInput(
+                    "One or more samples have zero or invalid norm".to_string(),
+                ));
+            }
         }
         Ok(batch_state_vector)
     }
