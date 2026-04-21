@@ -121,10 +121,14 @@ impl QdpEngine {
     ///         - Python list: [1.0, 2.0, 3.0, 4.0]
     ///         - NumPy array: 1D (single sample) or 2D (batch) array
     ///         - PyTorch tensor: CPU tensor (float64 recommended; will be copied to GPU)
+    ///           or CUDA tensor for zero-copy encoding
     ///         - String path: .parquet, .arrow, .feather, .npy, .pt, .pth, .pb file
     ///         - pathlib.Path: Path object (converted via os.fspath())
     ///     num_qubits: Number of qubits for encoding
     ///     encoding_method: Encoding strategy ("amplitude" default, "angle", or "basis")
+    ///         CUDA tensor note:
+    ///         - amplitude accepts float64 and float32
+    ///         - angle accepts float64 generally, plus float32 for 1D single-sample tensors
     ///
     /// Returns:
     ///     QuantumTensor: DLPack-compatible tensor for zero-copy PyTorch integration
@@ -612,7 +616,7 @@ impl QdpEngine {
 
     /// Encode directly from a PyTorch CUDA tensor. Internal helper.
     ///
-    /// Dispatches to the core f32 GPU pointer API for float32 amplitude encoding,
+    /// Dispatches to the core f32 GPU pointer APIs for supported float32 CUDA paths,
     /// or to the float64/basis GPU pointer APIs for other dtypes and methods.
     fn _encode_from_cuda_tensor(
         &self,
@@ -634,7 +638,7 @@ impl QdpEngine {
         let ndim: usize = data.call_method0("dim")?.extract()?;
         let tensor_info = extract_cuda_tensor_info(data)?;
 
-        if method.as_str() == "amplitude" && is_f32 {
+        if is_f32 && matches!(method.as_str(), "amplitude" | "angle") {
             match ndim {
                 1 => {
                     let input_len: usize = data.call_method0("numel")?.extract()?;
@@ -653,6 +657,31 @@ impl QdpEngine {
                                     e
                                 ))
                             })?
+                        match method.as_str() {
+                            "amplitude" => self
+                                .engine
+                                .encode_from_gpu_ptr_f32_with_stream(
+                                    data_ptr, input_len, num_qubits, stream_ptr,
+                                )
+                                .map_err(|e| {
+                                    PyRuntimeError::new_err(format!(
+                                        "Encoding failed (float32 amplitude): {}",
+                                        e
+                                    ))
+                                })?,
+                            "angle" => self
+                                .engine
+                                .encode_angle_from_gpu_ptr_f32_with_stream(
+                                    data_ptr, input_len, num_qubits, stream_ptr,
+                                )
+                                .map_err(|e| {
+                                    PyRuntimeError::new_err(format!(
+                                        "Encoding failed (float32 angle): {}",
+                                        e
+                                    ))
+                                })?,
+                            _ => unreachable!("unreachable: unhandled f32 encoding method"),
+                        }
                     };
 
                     Ok(QuantumTensor {

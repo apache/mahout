@@ -116,6 +116,65 @@ def test_cuda_float32_amplitude_2d_respects_engine_precision() -> None:
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
+def test_cuda_float32_angle_supported_single_sample() -> None:
+    """1D float32 CUDA tensor should be supported for single-sample angle encoding."""
+    engine = _engine()
+    t = torch.tensor([torch.pi / 2, 0.0], dtype=torch.float32, device="cuda")
+
+    result = engine.encode(t, num_qubits=2, encoding_method="angle")
+    assert result is not None
+
+    qt = torch.from_dlpack(result)
+    assert qt.is_cuda
+    assert qt.shape == (1, 4)
+    assert qt.dtype == torch.complex64
+
+    expected = torch.tensor(
+        [[0.0 + 0j, 1.0 + 0j, 0.0 + 0j, 0.0 + 0j]],
+        dtype=torch.complex64,
+        device="cuda",
+    )
+    assert torch.allclose(qt, expected, atol=1e-6, rtol=1e-6)
+
+
+@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
+def test_cuda_float32_angle_2d_rejected() -> None:
+    """Float32 CUDA angle encoding should remain single-sample only."""
+    engine = _engine()
+    t = torch.tensor(
+        [[0.0, 0.0], [torch.pi / 2, 0.0]],
+        dtype=torch.float32,
+        device="cuda",
+    )
+
+    with pytest.raises(RuntimeError, match="1D single-sample"):
+        engine.encode(t, num_qubits=2, encoding_method="angle")
+
+
+@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
+def test_cuda_float32_angle_non_contiguous_rejected() -> None:
+    """1D float32 CUDA angle tensor must still be contiguous."""
+    engine = _engine()
+    t = torch.randn(4, dtype=torch.float32, device="cuda")[::2]
+    assert t.stride(0) != 1
+
+    with pytest.raises(RuntimeError, match="contiguous"):
+        engine.encode(t, num_qubits=2, encoding_method="angle")
+
+
+@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
+def test_cuda_float16_angle_rejected() -> None:
+    """Angle encoding should not accept float16 CUDA tensors."""
+    engine = _engine()
+    t = torch.tensor([0.0, torch.pi / 2], dtype=torch.float16, device="cuda")
+
+    with pytest.raises(
+        RuntimeError, match="float64 for angle encoding|supports only 1D"
+    ):
+        engine.encode(t, num_qubits=2, encoding_method="angle")
+
+
+@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
 def test_stride_1d_non_contiguous_rejected() -> None:
     """Non-contiguous 1D CUDA tensor (stride != 1) should fail with contiguous requirement."""
     engine = _engine()

@@ -34,6 +34,7 @@ fn main() {
     println!("cargo:rerun-if-changed=src/amplitude.cu");
     println!("cargo:rerun-if-changed=src/basis.cu");
     println!("cargo:rerun-if-changed=src/angle.cu");
+    println!("cargo:rerun-if-changed=src/validation.cu");
     println!("cargo:rerun-if-changed=src/iqp.cu");
     println!("cargo:rerun-if-changed=src/phase.cu");
     println!("cargo:rerun-if-env-changed=QDP_NO_CUDA");
@@ -100,6 +101,7 @@ fn main() {
         .file("src/amplitude.cu")
         .file("src/basis.cu")
         .file("src/angle.cu")
+        .file("src/validation.cu")
         .file("src/iqp.cu")
         .file("src/phase.cu")
         .compile("kernels");

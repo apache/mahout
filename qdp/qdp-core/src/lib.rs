@@ -768,6 +768,78 @@ impl QdpEngine {
         Ok(batch_state_vector.to_dlpack())
     }
 
+    /// Encode an angle batch from an existing GPU pointer (float32 input only).
+    ///
+    /// Zero-copy batch encoding from CUDA float32 tensors. Uses the default CUDA stream.
+    /// For stream interop use `encode_angle_batch_from_gpu_ptr_f32_with_stream`.
+    ///
+    /// # Safety
+    /// The input pointer must:
+    /// - Point to valid GPU memory on the same device as the engine
+    /// - Contain at least `num_samples * sample_size` f32 elements
+    /// - Remain valid for the duration of this call
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_angle_batch_from_gpu_ptr_f32(
+        &self,
+        input_batch_d: *const f32,
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+    ) -> Result<*mut DLManagedTensor> {
+        unsafe {
+            self.encode_angle_batch_from_gpu_ptr_f32_with_stream(
+                input_batch_d,
+                num_samples,
+                sample_size,
+                num_qubits,
+                std::ptr::null_mut(),
+            )
+        }
+    }
+
+    /// Encode an angle batch from an existing GPU pointer (float32) on a specified CUDA stream.
+    ///
+    /// # Safety
+    /// In addition to the `encode_angle_batch_from_gpu_ptr_f32` requirements, the stream pointer
+    /// must remain valid for the duration of this call.
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_angle_batch_from_gpu_ptr_f32_with_stream(
+        &self,
+        input_batch_d: *const f32,
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<*mut DLManagedTensor> {
+        crate::profile_scope!("Mahout::EncodeAngleBatchFromGpuPtrF32");
+
+        if num_samples == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Number of samples cannot be zero".into(),
+            ));
+        }
+        if sample_size == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Sample size cannot be zero".into(),
+            ));
+        }
+
+        validate_cuda_input_ptr(&self.device, input_batch_d as *const c_void)?;
+
+        let batch_state_vector = unsafe {
+            gpu::AngleEncoder::encode_batch_from_gpu_ptr_f32_with_stream(
+                &self.device,
+                input_batch_d,
+                num_samples,
+                sample_size,
+                num_qubits,
+                stream,
+            )
+        }?;
+        let batch_state_vector = batch_state_vector.to_precision(&self.device, self.precision)?;
+        Ok(batch_state_vector.to_dlpack())
+    }
+
     /// Encode batch from existing GPU pointer (zero-copy for CUDA tensors)
     ///
     /// This method enables zero-copy batch encoding from PyTorch CUDA tensors.

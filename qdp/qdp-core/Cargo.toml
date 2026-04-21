@@ -38,3 +38,4 @@ remote-io = ["object_store", "tokio", "tempfile", "futures"]
 [dev-dependencies]
 approx = "0.5.1"
 env_logger = "0.11"
+tempfile = { workspace = true }
