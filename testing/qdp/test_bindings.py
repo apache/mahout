@@ -387,6 +387,25 @@ def test_encode_cuda_tensor_wrong_dtype():
 
 @requires_qdp
 @pytest.mark.gpu
+def test_encode_cuda_tensor_angle_float16_rejected():
+    """Test error when CUDA tensor has wrong dtype for angle float32 fast path."""
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+    data = torch.tensor([0.0, torch.pi / 2], dtype=torch.float16, device="cuda:0")
+
+    with pytest.raises(
+        RuntimeError, match="float64 for angle encoding|supports only 1D"
+    ):
+        engine.encode(data, 2, "angle")
+
+
+@requires_qdp
+@pytest.mark.gpu
 def test_encode_cuda_tensor_non_contiguous():
     """Test error when CUDA tensor is non-contiguous."""
     pytest.importorskip("torch")
@@ -641,6 +660,57 @@ def test_encode_cuda_tensor_float32_input_output_dtype(precision, expected_dtype
     assert result.dtype == expected_dtype, (
         f"Expected {expected_dtype}, got {result.dtype}"
     )
+
+
+@requires_qdp
+@pytest.mark.gpu
+@pytest.mark.parametrize(
+    ("precision", "expected_dtype"),
+    [
+        ("float32", torch.complex64),
+        ("float64", torch.complex128),
+    ],
+)
+def test_angle_encode_cuda_tensor_float32_input_output_dtype(precision, expected_dtype):
+    """Test that 1D float32 CUDA angle encoding respects engine precision (f32 path)."""
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0, precision=precision)
+    data = torch.tensor([torch.pi / 2, 0.0], dtype=torch.float32, device="cuda:0")
+    result = torch.from_dlpack(engine.encode(data, 2, "angle"))
+
+    assert result.dtype == expected_dtype, (
+        f"Expected {expected_dtype}, got {result.dtype}"
+    )
+    assert result.shape == (1, 4)
+
+    expected = torch.tensor([[0.0 + 0j, 1.0 + 0j, 0.0 + 0j, 0.0 + 0j]], device="cuda:0")
+    assert torch.allclose(result, expected.to(result.dtype), atol=1e-6, rtol=1e-6)
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_angle_encode_cuda_tensor_float32_batch_rejected():
+    """Test that float32 CUDA angle encoding stays limited to 1D single-sample tensors."""
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+    data = torch.tensor(
+        [[0.0, 0.0], [torch.pi / 2, 0.0]],
+        dtype=torch.float32,
+        device="cuda:0",
+    )
+
+    with pytest.raises(RuntimeError, match="supports only 1D single-sample tensors"):
+        engine.encode(data, 2, "angle")
 
 
 @requires_qdp
@@ -1365,7 +1435,7 @@ def test_iqp_fwt_matches_naive_reference():
     if not torch.cuda.is_available():
         pytest.skip("GPU required for QdpEngine")
 
-    engine = QdpEngine(0)
+    engine = QdpEngine(0, precision="float64")
 
     for encoding_method, enable_zz in [("iqp-z", False), ("iqp", True)]:
         for num_qubits in [4, 5]:

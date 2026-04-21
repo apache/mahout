@@ -151,6 +151,7 @@ pub fn validate_cuda_tensor_for_encoding(
     encoding_method: &str,
 ) -> PyResult<()> {
     let method = encoding_method.to_ascii_lowercase();
+    let ndim: usize = tensor.call_method0("dim")?.extract()?;
 
     if !CUDA_ENCODING_METHODS.contains(&method.as_str()) {
         return Err(PyRuntimeError::new_err(format!(
@@ -176,7 +177,14 @@ pub fn validate_cuda_tensor_for_encoding(
             }
         }
         "angle" | "iqp" | "iqp-z" => {
-            if !dtype_str_lower.contains("float64") {
+            if method == "angle" && dtype_str_lower.contains("float32") {
+                if ndim != 1 {
+                    return Err(PyRuntimeError::new_err(
+                        "CUDA tensor float32 angle encoding currently supports only 1D single-sample tensors. \
+                         Use tensor.to(torch.float64) for batch angle encoding.",
+                    ));
+                }
+            } else if !dtype_str_lower.contains("float64") {
                 return Err(PyRuntimeError::new_err(format!(
                     "CUDA tensor must have dtype float64 for {} encoding, got {}. \
                      Use tensor.to(torch.float64)",
