@@ -22,17 +22,43 @@ on:
     paths:
       - "**.py"
       - "pyproject.toml"
+      - "qdp/qdp-core/**/*.rs"
+      - "qdp/qdp-kernels/**/*.rs"
+      - "qdp/qdp-python/**/*.rs"
+      - "qdp/**/Cargo.toml"
       - ".github/workflows/python-testing.yml"
   pull_request:
     branches: [main]
     paths:
       - "**.py"
       - "pyproject.toml"
+      - "qdp/qdp-core/**/*.rs"
+      - "qdp/qdp-kernels/**/*.rs"
+      - "qdp/qdp-python/**/*.rs"
+      - "qdp/**/Cargo.toml"
       - ".github/workflows/python-testing.yml"
   workflow_dispatch:
 
 jobs:
+  rust-check:
+    # Fast gate: type-check both with and without CUDA stubs so duplicate
+    # stub definitions or cfg mismatches fail in ~30s instead of surfacing
+    # during the slower maturin build below.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cargo check (no-CUDA stubs)
+        working-directory: qdp
+        env:
+          QDP_NO_CUDA: "1"
+        run: cargo check --workspace --tests
+
   test:
+    needs: rust-check
     runs-on: ubuntu-latest
     strategy:
       matrix:

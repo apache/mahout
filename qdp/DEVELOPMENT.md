@@ -97,6 +97,23 @@ uv run pytest testing/qdp -v
 uv run pytest testing/qdp_python -v
 ```
 
+### Pre-push sanity: no-CUDA build
+
+CI builds on a runner without `nvcc`, which activates the `qdp_no_cuda`
+cfg and swaps every `extern "C"` CUDA launcher for its stub. If you only
+ever build locally with CUDA, duplicate stubs or cfg mismatches can slip
+through unnoticed. Before pushing Rust / FFI changes, run:
+
+```bash
+cd qdp
+QDP_NO_CUDA=1 cargo build --workspace --lib --release
+cargo check --workspace --tests
+cd ..
+```
+
+The first command is what `maturin develop --release` runs on CI; the
+second verifies tests type-check in the CUDA build.
+
 ## 4. Benchmarks
 
 From the repo root, set up and prepare benchmarks:
