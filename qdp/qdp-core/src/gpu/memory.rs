@@ -598,18 +598,18 @@ impl GpuStateVector {
 ///
 /// Allocates page-locked memory to maximize H2D throughput in streaming IO paths.
 #[cfg(target_os = "linux")]
-pub struct PinnedHostBuffer {
-    ptr: *mut f64,
+pub struct PinnedHostBuffer<T: Copy = f64> {
+    ptr: *mut T,
     size_elements: usize,
 }
 
 #[cfg(target_os = "linux")]
-impl PinnedHostBuffer {
-    /// Allocate pinned memory
+impl<T: Copy> PinnedHostBuffer<T> {
+    /// Allocate pinned memory holding `elements` values of type `T`.
     pub fn new(elements: usize) -> Result<Self> {
         unsafe {
             let bytes = elements
-                .checked_mul(std::mem::size_of::<f64>())
+                .checked_mul(std::mem::size_of::<T>())
                 .ok_or_else(|| {
                     MahoutError::MemoryAllocation(format!(
                         "Requested pinned buffer allocation size overflow (elements={})",
@@ -628,24 +628,24 @@ impl PinnedHostBuffer {
             }
 
             Ok(Self {
-                ptr: ptr as *mut f64,
+                ptr: ptr as *mut T,
                 size_elements: elements,
             })
         }
     }
 
     /// Get mutable slice to write data into
-    pub fn as_slice_mut(&mut self) -> &mut [f64] {
+    pub fn as_slice_mut(&mut self) -> &mut [T] {
         unsafe { std::slice::from_raw_parts_mut(self.ptr, self.size_elements) }
     }
 
     /// Immutable slice view of the pinned region
-    pub fn as_slice(&self) -> &[f64] {
+    pub fn as_slice(&self) -> &[T] {
         unsafe { std::slice::from_raw_parts(self.ptr, self.size_elements) }
     }
 
     /// Get raw pointer for CUDA memcpy
-    pub fn ptr(&self) -> *const f64 {
+    pub fn ptr(&self) -> *const T {
         self.ptr
     }
 
@@ -659,7 +659,7 @@ impl PinnedHostBuffer {
 }
 
 #[cfg(target_os = "linux")]
-impl Drop for PinnedHostBuffer {
+impl<T: Copy> Drop for PinnedHostBuffer<T> {
     fn drop(&mut self) {
         unsafe {
             let result = cudaFreeHost(self.ptr as *mut c_void);
@@ -676,7 +676,7 @@ impl Drop for PinnedHostBuffer {
 
 // Safety: Pinned memory is accessible from any thread
 #[cfg(target_os = "linux")]
-unsafe impl Send for PinnedHostBuffer {}
+unsafe impl<T: Copy + Send> Send for PinnedHostBuffer<T> {}
 
 #[cfg(target_os = "linux")]
-unsafe impl Sync for PinnedHostBuffer {}
+unsafe impl<T: Copy + Sync> Sync for PinnedHostBuffer<T> {}

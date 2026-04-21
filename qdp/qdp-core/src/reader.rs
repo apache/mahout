@@ -96,6 +96,11 @@ pub fn handle_float64_nulls(
 ///
 /// This interface enables zero-copy streaming where possible and maintains
 /// memory efficiency for large datasets.
+//
+// Structural debt: this trait hard-codes `Vec<f64>` in `read_batch`, so
+// `float32_pipeline=true` still forces every file-backed source to materialise
+// as f64 before casting. A future refactor should parameterise over the element
+// type (`T: FloatElem`) so f32 pipelines stay f32 end-to-end.
 pub trait DataReader {
     /// Read all data from the source.
     ///

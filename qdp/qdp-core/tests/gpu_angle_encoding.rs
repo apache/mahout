@@ -295,3 +295,33 @@ fn test_angle_batch_f32_rejects_length_overflow() {
         _ => panic!("expected InvalidInput, got {:?}", result),
     }
 }
+
+/// Exercises the dual-stream async path by feeding a batch above the
+/// `ASYNC_THRESHOLD_ELEMENTS` threshold (1 MB of f32 = 262144 angles).
+/// Validates that large-batch f32 angle encoding returns a correctly-shaped
+/// DLPack tensor via the async pipeline.
+#[test]
+fn test_angle_batch_f32_async_pipeline_path() {
+    let Some(engine) = common::qdp_engine_with_precision(qdp_core::Precision::Float32) else {
+        println!("SKIP: No GPU available");
+        return;
+    };
+
+    let num_qubits = 4;
+    // 2 * 1024 * 1024 / 4 = 524288 angles, well above the 262144 threshold.
+    let num_samples = 2 * 1024 * 1024 / num_qubits;
+    let sample_size = num_qubits;
+    let data = vec![0.0_f32; num_samples * sample_size];
+
+    let dlpack_ptr = engine
+        .encode_batch_f32(&data, num_samples, sample_size, num_qubits, "angle")
+        .expect("angle batch f32 async path should succeed");
+
+    unsafe {
+        common::assert_dlpack_shape_2d_and_delete(
+            dlpack_ptr,
+            num_samples as i64,
+            (1 << num_qubits) as i64,
+        );
+    }
+}

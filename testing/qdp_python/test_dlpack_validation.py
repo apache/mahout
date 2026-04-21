@@ -138,8 +138,9 @@ def test_cuda_float32_angle_supported_single_sample() -> None:
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
-def test_cuda_float32_angle_2d_supported() -> None:
-    """2D float32 CUDA tensor should use the batch GPU-pointer float32 angle path."""
+def test_cuda_float32_angle_2d_batch_supported() -> None:
+    """Float32 CUDA angle batch encoding (2D) is supported via the
+    f32 zero-copy batch path."""
     engine = _engine()
     t = torch.tensor(
         [[0.0, 0.0], [torch.pi / 2, 0.0]],

@@ -551,10 +551,15 @@ impl QdpEngine {
         Ok(state_vector.to_dlpack())
     }
 
-    /// Encode from existing GPU pointer (float32 input, amplitude encoding only)
+    /// Encode from existing GPU pointer (float32 input, **amplitude encoding only**).
     ///
     /// Zero-copy encoding from PyTorch CUDA float32 tensors. Uses the default CUDA stream.
     /// For stream interop use `encode_from_gpu_ptr_f32_with_stream`.
+    ///
+    /// This method does **not** dispatch by `encoding_method` — it always runs amplitude.
+    /// For other encodings use the explicit variants
+    /// ([`encode_angle_from_gpu_ptr_f32`](Self::encode_angle_from_gpu_ptr_f32),
+    /// [`encode_basis_from_gpu_ptr_f32`](Self::encode_basis_from_gpu_ptr_f32)).
     ///
     /// # Arguments
     /// * `input_d` - Device pointer to input data (f32 array on GPU)
@@ -732,10 +737,15 @@ impl QdpEngine {
         Ok(state_vector.to_dlpack())
     }
 
-    /// Encode a batch from an existing GPU pointer (float32 input, amplitude encoding only).
+    /// Encode a batch from an existing GPU pointer (float32 input, **amplitude encoding only**).
     ///
     /// Zero-copy batch encoding from PyTorch CUDA float32 tensors. Uses the default CUDA stream.
     /// For stream interop use `encode_batch_from_gpu_ptr_f32_with_stream`.
+    ///
+    /// This method does **not** dispatch by `encoding_method` — it always runs amplitude.
+    /// For other encodings use the explicit variants
+    /// ([`encode_angle_batch_from_gpu_ptr_f32`](Self::encode_angle_batch_from_gpu_ptr_f32),
+    /// [`encode_basis_batch_from_gpu_ptr_f32`](Self::encode_basis_batch_from_gpu_ptr_f32)).
     ///
     /// # Safety
     /// The input pointer must:
@@ -864,6 +874,136 @@ impl QdpEngine {
 
         let batch_state_vector = unsafe {
             gpu::AngleEncoder::encode_batch_from_gpu_ptr_f32_with_stream(
+                &self.device,
+                input_batch_d,
+                num_samples,
+                sample_size,
+                num_qubits,
+                stream,
+            )
+        }?;
+        let batch_state_vector = batch_state_vector.to_precision(&self.device, self.precision)?;
+        Ok(batch_state_vector.to_dlpack())
+    }
+
+    /// Encode a single basis index from an existing GPU pointer (float32).
+    ///
+    /// The GPU validates the index (finite, non-negative, integer-valued,
+    /// `< 2^num_qubits`) before encoding. Uses the default CUDA stream.
+    ///
+    /// # Safety
+    /// The input pointer must:
+    /// - Point to one valid f32 in GPU memory on the same device as the engine
+    /// - Remain valid for the duration of this call
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_basis_from_gpu_ptr_f32(
+        &self,
+        input_d: *const f32,
+        num_qubits: usize,
+    ) -> Result<*mut DLManagedTensor> {
+        unsafe {
+            self.encode_basis_from_gpu_ptr_f32_with_stream(
+                input_d,
+                num_qubits,
+                std::ptr::null_mut(),
+            )
+        }
+    }
+
+    /// Encode a single basis index from an existing GPU pointer (float32) on a
+    /// specified CUDA stream.
+    ///
+    /// # Safety
+    /// In addition to the `encode_basis_from_gpu_ptr_f32` requirements, the
+    /// stream pointer must remain valid for the duration of this call.
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_basis_from_gpu_ptr_f32_with_stream(
+        &self,
+        input_d: *const f32,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<*mut DLManagedTensor> {
+        crate::profile_scope!("Mahout::EncodeBasisFromGpuPtrF32");
+
+        validate_cuda_input_ptr(&self.device, input_d as *const c_void)?;
+
+        let state_vector = unsafe {
+            gpu::BasisEncoder::encode_from_gpu_ptr_f32_with_stream(
+                &self.device,
+                input_d,
+                num_qubits,
+                stream,
+            )
+        }?;
+        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
+        Ok(state_vector.to_dlpack())
+    }
+
+    /// Encode a basis batch from an existing GPU pointer (float32 index input).
+    ///
+    /// Zero-copy batch encoding from CUDA float32 tensors. Each element is treated
+    /// as a basis index; the GPU validates (finite, non-negative, integer-valued,
+    /// `< 2^num_qubits`) and casts to `size_t` before encoding.
+    ///
+    /// Uses the default CUDA stream. For stream interop use
+    /// `encode_basis_batch_from_gpu_ptr_f32_with_stream`.
+    ///
+    /// # Safety
+    /// The input pointer must:
+    /// - Point to valid GPU memory on the same device as the engine
+    /// - Contain at least `num_samples` f32 elements
+    /// - Remain valid for the duration of this call
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_basis_batch_from_gpu_ptr_f32(
+        &self,
+        input_batch_d: *const f32,
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+    ) -> Result<*mut DLManagedTensor> {
+        unsafe {
+            self.encode_basis_batch_from_gpu_ptr_f32_with_stream(
+                input_batch_d,
+                num_samples,
+                sample_size,
+                num_qubits,
+                std::ptr::null_mut(),
+            )
+        }
+    }
+
+    /// Encode a basis batch from an existing GPU pointer (float32 index input)
+    /// on a specified CUDA stream.
+    ///
+    /// # Safety
+    /// In addition to the `encode_basis_batch_from_gpu_ptr_f32` requirements,
+    /// the stream pointer must remain valid for the duration of this call.
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_basis_batch_from_gpu_ptr_f32_with_stream(
+        &self,
+        input_batch_d: *const f32,
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<*mut DLManagedTensor> {
+        crate::profile_scope!("Mahout::EncodeBasisBatchFromGpuPtrF32");
+
+        if num_samples == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Number of samples cannot be zero".into(),
+            ));
+        }
+        if sample_size == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Sample size cannot be zero".into(),
+            ));
+        }
+
+        validate_cuda_input_ptr(&self.device, input_batch_d as *const c_void)?;
+
+        let batch_state_vector = unsafe {
+            gpu::BasisEncoder::encode_batch_from_gpu_ptr_f32_with_stream(
                 &self.device,
                 input_batch_d,
                 num_samples,

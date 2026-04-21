@@ -240,8 +240,21 @@ impl QuantumEncoder for BasisEncoder {
                 input_len
             )));
         }
+        validate_qubit_count(num_qubits)?;
         let state_len = 1 << num_qubits;
         let basis_indices_d = input_d as *const usize;
+        {
+            crate::profile_scope!("GPU::BasisIndexBoundsCheck");
+            unsafe {
+                crate::gpu::validation::assert_basis_indices_in_range_usize(
+                    device,
+                    basis_indices_d,
+                    1,
+                    state_len,
+                    stream,
+                )?;
+            }
+        }
         let state_vector = {
             crate::profile_scope!("GPU::Alloc");
             GpuStateVector::new(device, num_qubits, Precision::Float64)?
@@ -288,14 +301,32 @@ impl QuantumEncoder for BasisEncoder {
         num_qubits: usize,
         stream: *mut c_void,
     ) -> Result<GpuStateVector> {
+        if num_samples == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Number of samples cannot be zero".into(),
+            ));
+        }
         if sample_size != 1 {
             return Err(MahoutError::InvalidInput(format!(
                 "Basis encoding expects sample_size=1 (one index per sample), got {}",
                 sample_size
             )));
         }
+        validate_qubit_count(num_qubits)?;
         let state_len = 1 << num_qubits;
         let basis_indices_d = input_batch_d as *const usize;
+        {
+            crate::profile_scope!("GPU::BasisIndexBoundsCheck");
+            unsafe {
+                crate::gpu::validation::assert_basis_indices_in_range_usize(
+                    device,
+                    basis_indices_d,
+                    num_samples,
+                    state_len,
+                    stream,
+                )?;
+            }
+        }
         let batch_state_vector = {
             crate::profile_scope!("GPU::AllocBatch");
             GpuStateVector::new_batch(device, num_samples, num_qubits, Precision::Float64)?
@@ -382,12 +413,12 @@ impl QuantumEncoder for BasisEncoder {
             .collect::<Result<Vec<_>>>()?;
 
         let batch_state_vector = {
-            crate::profile_scope!("GPU::AllocBatch");
+            crate::profile_scope!("GPU::AllocBatchF32");
             GpuStateVector::new_batch(device, num_samples, num_qubits, Precision::Float32)?
         };
 
         let indices_gpu = {
-            crate::profile_scope!("GPU::H2D_BasisIndices");
+            crate::profile_scope!("GPU::H2D_BasisIndicesF32");
             device.htod_sync_copy(&basis_indices).map_err(|e| {
                 map_allocation_error(
                     num_samples * std::mem::size_of::<usize>(),
@@ -405,7 +436,7 @@ impl QuantumEncoder for BasisEncoder {
         })?;
 
         {
-            crate::profile_scope!("GPU::BatchKernelLaunch_f32");
+            crate::profile_scope!("GPU::BatchKernelLaunchF32");
             let ret = unsafe {
                 qdp_kernels::launch_basis_encode_batch_f32(
                     *indices_gpu.device_ptr() as *const usize,
@@ -435,6 +466,81 @@ impl QuantumEncoder for BasisEncoder {
         Ok(batch_state_vector)
     }
 
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_batch_from_gpu_ptr_f32(
+        &self,
+        device: &Arc<CudaDevice>,
+        input_batch_d: *const c_void,
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        if num_samples == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Number of samples cannot be zero".into(),
+            ));
+        }
+        if sample_size != 1 {
+            return Err(MahoutError::InvalidInput(format!(
+                "Basis encoding expects sample_size=1 (one index per sample), got {}",
+                sample_size
+            )));
+        }
+        validate_qubit_count(num_qubits)?;
+        let state_len = 1 << num_qubits;
+        let input_batch_d = input_batch_d as *const f32;
+
+        let indices_gpu = {
+            crate::profile_scope!("GPU::BasisIndexValidateCastF32");
+            unsafe {
+                crate::gpu::validation::validate_and_cast_basis_indices_f32(
+                    device,
+                    input_batch_d,
+                    num_samples,
+                    state_len,
+                    stream,
+                )?
+            }
+        };
+
+        let batch_state_vector = {
+            crate::profile_scope!("GPU::AllocBatchF32");
+            GpuStateVector::new_batch(device, num_samples, num_qubits, Precision::Float32)?
+        };
+        let state_ptr = batch_state_vector.ptr_f32().ok_or_else(|| {
+            MahoutError::InvalidInput(
+                "Batch state vector precision mismatch (expected float32 buffer)".to_string(),
+            )
+        })?;
+
+        {
+            crate::profile_scope!("GPU::BatchKernelLaunchF32");
+            let ret = unsafe {
+                qdp_kernels::launch_basis_encode_batch_f32(
+                    *indices_gpu.device_ptr() as *const usize,
+                    state_ptr as *mut c_void,
+                    num_samples,
+                    state_len,
+                    num_qubits as u32,
+                    stream,
+                )
+            };
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Batch basis encoding kernel (f32) failed: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
+                )));
+            }
+        }
+        {
+            crate::profile_scope!("GPU::Synchronize");
+            crate::gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
+        }
+        Ok(batch_state_vector)
+    }
+
     fn name(&self) -> &'static str {
         "basis"
     }
@@ -445,7 +551,70 @@ impl QuantumEncoder for BasisEncoder {
 }
 
 impl BasisEncoder {
-    /// Validate and convert a f64 value to a valid basis index
+    /// Encode a batch of basis indices supplied as a device-resident `f32` buffer.
+    ///
+    /// Each sample is one index; the kernel validates and casts to `size_t` on the
+    /// device in a single pass before launching the encode kernel.
+    ///
+    /// # Safety
+    /// The caller must ensure that `input_batch_d` points to at least `num_samples`
+    /// contiguous `f32` values in GPU-accessible memory and remains valid for the
+    /// duration of this call. `stream` must be either null or a valid CUDA stream
+    /// handle associated with `device`.
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_batch_from_gpu_ptr_f32_with_stream(
+        device: &Arc<CudaDevice>,
+        input_batch_d: *const f32,
+        num_samples: usize,
+        sample_size: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        unsafe {
+            BasisEncoder.encode_batch_from_gpu_ptr_f32(
+                device,
+                input_batch_d as *const c_void,
+                num_samples,
+                sample_size,
+                num_qubits,
+                stream,
+            )
+        }
+    }
+
+    /// Encode a single basis index supplied as a device-resident `f32`.
+    ///
+    /// Thin wrapper around the batch path with `num_samples = 1`.
+    ///
+    /// # Safety
+    /// `input_d` must point to one valid `f32` in GPU-accessible memory on `device`,
+    /// remain valid for the duration of this call, and `stream` must be either null
+    /// or a valid CUDA stream handle associated with `device`.
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_from_gpu_ptr_f32_with_stream(
+        device: &Arc<CudaDevice>,
+        input_d: *const f32,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        unsafe {
+            BasisEncoder.encode_batch_from_gpu_ptr_f32(
+                device,
+                input_d as *const c_void,
+                1,
+                1,
+                num_qubits,
+                stream,
+            )
+        }
+    }
+
+    /// Validate and convert a f64 value to a valid basis index.
+    //
+    // Structural debt: the streaming encoder in `qdp-core/src/encoding/basis.rs`
+    // carries a near-identical host-side validator (with "Sample {idx}:" error
+    // prefix). These two trait hierarchies (`QuantumEncoder` vs `ChunkEncoder`)
+    // should be merged so the validator lives in exactly one place.
     fn validate_basis_index(value: f64, state_len: usize) -> Result<usize> {
         // Check for non-finite values
         if !value.is_finite() {

@@ -27,6 +27,10 @@ const USED_DLTENSOR_NAME: &[u8] = b"used_dltensor\0";
 ///
 /// This struct owns the DLManagedTensor pointer and ensures proper cleanup
 /// via the DLPack deleter when dropped (RAII pattern).
+///
+/// Currently unused: `_encode_from_cuda_tensor` uses `extract_cuda_tensor_info`
+/// from `pytorch.rs`. Preserved for a planned DLPack-first dispatcher refactor.
+#[allow(dead_code)]
 pub struct DLPackTensorInfo {
     /// Raw DLManagedTensor pointer from PyTorch DLPack capsule
     /// This is owned by this struct and will be freed via deleter on drop
@@ -66,6 +70,7 @@ impl Drop for DLPackTensorInfo {
 /// for the entire duration that `data_ptr` is in use. Python's GIL ensures
 /// the tensor won't be garbage collected during `encode()`, but the caller
 /// must not deallocate or resize the tensor while encoding is in progress.
+#[allow(dead_code)]
 pub fn extract_dlpack_tensor(
     _py: Python<'_>,
     tensor: &Bound<'_, PyAny>,

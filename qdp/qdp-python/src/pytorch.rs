@@ -192,10 +192,10 @@ pub fn validate_cuda_tensor_for_encoding(
             }
         }
         Encoding::Basis => {
-            if !dtype_str_lower.contains("int64") {
+            if !(dtype_str_lower.contains("int64") || dtype_str_lower.contains("float32")) {
                 return Err(PyRuntimeError::new_err(format!(
-                    "CUDA tensor must have dtype int64 for basis encoding, got {}. \
-                     Use tensor.to(torch.int64)",
+                    "CUDA tensor must have dtype int64 or float32 for basis encoding, got {}. \
+                     Use tensor.to(torch.int64) or tensor.to(torch.float32)",
                     dtype_str
                 )));
             }
