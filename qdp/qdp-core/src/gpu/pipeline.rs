@@ -39,7 +39,7 @@ use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
 use crate::gpu::overlap_tracker::OverlapTracker;
 #[cfg(target_os = "linux")]
 use crate::gpu::pool_metrics::PoolMetrics;
-use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, safe::CudaStream};
+use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, DeviceRepr, safe::CudaStream};
 use std::ffi::c_void;
 use std::sync::Arc;
 
@@ -98,21 +98,21 @@ impl PipelineContext {
     /// Async H2D copy on the copy stream.
     ///
     /// # Safety
-    /// `src` must be valid for `len_elements` `f64` values and properly aligned.
-    /// `dst` must point to device memory for `len_elements` `f64` values on the same device.
+    /// `src` must be valid for `len_bytes` bytes and properly aligned.
+    /// `dst` must point to device memory for `len_bytes` bytes on the same device.
     /// Both pointers must remain valid until the copy completes on `stream_copy`.
     pub unsafe fn async_copy_to_device(
         &self,
         src: *const c_void,
         dst: *mut c_void,
-        len_elements: usize,
+        len_bytes: usize,
     ) -> Result<()> {
         crate::profile_scope!("GPU::H2D_Copy");
         unsafe {
             let ret = cudaMemcpyAsync(
                 dst,
                 src,
-                len_elements * std::mem::size_of::<f64>(),
+                len_bytes,
                 CUDA_MEMCPY_HOST_TO_DEVICE,
                 self.stream_copy.stream as *mut c_void,
             );
@@ -261,7 +261,7 @@ where
     crate::profile_scope!("GPU::AsyncPipeline");
 
     const CHUNK_SIZE_ELEMENTS: usize = 8 * 1024 * 1024 / std::mem::size_of::<f64>(); // 8MB
-    run_dual_stream_pipeline_with_chunk_size(
+    run_dual_stream_pipeline_with_chunk_size::<f64, _>(
         device,
         host_data,
         CHUNK_SIZE_ELEMENTS,
@@ -284,6 +284,46 @@ pub fn run_dual_stream_pipeline_aligned<F>(
 where
     F: FnMut(&CudaStream, *const f64, usize, usize) -> Result<()>,
 {
+    run_dual_stream_pipeline_aligned_typed::<f64, _>(
+        device,
+        host_data,
+        align_elements,
+        kernel_launcher,
+    )
+}
+
+/// f32 variant of `run_dual_stream_pipeline_aligned`.
+#[cfg(target_os = "linux")]
+#[allow(clippy::manual_is_multiple_of)]
+pub fn run_dual_stream_pipeline_aligned_f32<F>(
+    device: &Arc<CudaDevice>,
+    host_data: &[f32],
+    align_elements: usize,
+    kernel_launcher: F,
+) -> Result<()>
+where
+    F: FnMut(&CudaStream, *const f32, usize, usize) -> Result<()>,
+{
+    run_dual_stream_pipeline_aligned_typed::<f32, _>(
+        device,
+        host_data,
+        align_elements,
+        kernel_launcher,
+    )
+}
+
+#[cfg(target_os = "linux")]
+#[allow(clippy::manual_is_multiple_of)]
+fn run_dual_stream_pipeline_aligned_typed<T, F>(
+    device: &Arc<CudaDevice>,
+    host_data: &[T],
+    align_elements: usize,
+    kernel_launcher: F,
+) -> Result<()>
+where
+    T: DeviceRepr + Copy + Send + Sync + Unpin + 'static,
+    F: FnMut(&CudaStream, *const T, usize, usize) -> Result<()>,
+{
     crate::profile_scope!("GPU::AsyncPipelineAligned");
 
     if align_elements == 0 {
@@ -299,14 +339,14 @@ where
         )));
     }
 
-    const BASE_CHUNK_SIZE_ELEMENTS: usize = 8 * 1024 * 1024 / std::mem::size_of::<f64>(); // 8MB
-    let chunk_size_elements = if align_elements >= BASE_CHUNK_SIZE_ELEMENTS {
+    let base_chunk_size_elements: usize = 8 * 1024 * 1024 / std::mem::size_of::<T>(); // 8MB
+    let chunk_size_elements = if align_elements >= base_chunk_size_elements {
         align_elements
     } else {
-        BASE_CHUNK_SIZE_ELEMENTS - (BASE_CHUNK_SIZE_ELEMENTS % align_elements)
+        base_chunk_size_elements - (base_chunk_size_elements % align_elements)
     };
 
-    run_dual_stream_pipeline_with_chunk_size(
+    run_dual_stream_pipeline_with_chunk_size::<T, _>(
         device,
         host_data,
         chunk_size_elements,
@@ -315,14 +355,15 @@ where
 }
 
 #[cfg(target_os = "linux")]
-fn run_dual_stream_pipeline_with_chunk_size<F>(
+fn run_dual_stream_pipeline_with_chunk_size<T, F>(
     device: &Arc<CudaDevice>,
-    host_data: &[f64],
+    host_data: &[T],
     chunk_size_elements: usize,
     mut kernel_launcher: F,
 ) -> Result<()>
 where
-    F: FnMut(&CudaStream, *const f64, usize, usize) -> Result<()>,
+    T: DeviceRepr + Copy + Send + Sync + Unpin + 'static,
+    F: FnMut(&CudaStream, *const T, usize, usize) -> Result<()>,
 {
     if chunk_size_elements == 0 {
         return Err(MahoutError::InvalidInput(
@@ -362,9 +403,9 @@ where
     // TODO: tune dynamically based on GPU/PCIe bandwidth.
     // 3. Keep temporary buffers alive until all streams complete
     // This prevents Rust from dropping them while GPU is still using them
-    let mut keep_alive_buffers: Vec<CudaSlice<f64>> = Vec::new();
+    let mut keep_alive_buffers: Vec<CudaSlice<T>> = Vec::new();
     // Keep pinned buffers alive until the copy stream has completed their H2D copy
-    let mut in_flight_pinned: Vec<PinnedBufferHandle> = Vec::new();
+    let mut in_flight_pinned: Vec<PinnedBufferHandle<T>> = Vec::new();
 
     // 4. Pipeline loop: copy on copy stream, compute on compute stream with event handoff
     let mut chunk_idx = 0usize;
@@ -383,7 +424,7 @@ where
 
         // Allocate temporary device buffer for this chunk
         #[allow(clippy::collapsible_if, clippy::manual_is_multiple_of)]
-        let input_chunk_dev = unsafe { device.alloc::<f64>(chunk.len()) }.map_err(|e| {
+        let input_chunk_dev = unsafe { device.alloc::<T>(chunk.len()) }.map_err(|e| {
             map_allocation_error(chunk_bytes, "pipeline chunk buffer allocation", None, e)
         })?;
 
@@ -420,7 +461,7 @@ where
                 ctx.async_copy_to_device(
                     pinned_buf.ptr() as *const c_void,
                     *input_chunk_dev.device_ptr() as *mut c_void,
-                    chunk.len(),
+                    std::mem::size_of_val(chunk),
                 )?;
 
                 // Record copy end if overlap tracking enabled
@@ -452,7 +493,7 @@ where
         }
 
         // Get device pointer for kernel launch
-        let input_ptr = *input_chunk_dev.device_ptr() as *const f64;
+        let input_ptr = *input_chunk_dev.device_ptr() as *const T;
 
         // Invoke caller's kernel launcher (non-blocking)
         {

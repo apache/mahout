@@ -138,8 +138,9 @@ def test_cuda_float32_angle_supported_single_sample() -> None:
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
-def test_cuda_float32_angle_2d_rejected() -> None:
-    """Float32 CUDA angle encoding should remain single-sample only."""
+def test_cuda_float32_angle_2d_batch_supported() -> None:
+    """Float32 CUDA angle batch encoding (2D) is supported via the
+    f32 zero-copy batch path."""
     engine = _engine()
     t = torch.tensor(
         [[0.0, 0.0], [torch.pi / 2, 0.0]],
@@ -147,8 +148,13 @@ def test_cuda_float32_angle_2d_rejected() -> None:
         device="cuda",
     )
 
-    with pytest.raises(RuntimeError, match="1D single-sample"):
-        engine.encode(t, num_qubits=2, encoding_method="angle")
+    result = engine.encode(t, num_qubits=2, encoding_method="angle")
+    assert result is not None
+
+    qt = torch.from_dlpack(result)
+    assert qt.is_cuda
+    assert qt.shape == (2, 4)
+    assert qt.dtype == torch.complex64
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")

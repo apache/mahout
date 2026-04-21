@@ -26,6 +26,8 @@ pub mod overlap_tracker;
 pub mod pipeline;
 #[cfg(target_os = "linux")]
 pub mod pool_metrics;
+#[cfg(target_os = "linux")]
+pub(crate) mod validation;
 
 #[cfg(target_os = "linux")]
 pub(crate) mod cuda_ffi;
