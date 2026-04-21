@@ -647,19 +647,9 @@ impl QdpEngine {
                     let data_ptr = data_ptr_u64 as *const f32;
 
                     let ptr = unsafe {
-                        self.core_engine()?
-                            .encode_from_gpu_ptr_f32_with_stream(
-                                data_ptr, input_len, num_qubits, stream_ptr,
-                            )
-                            .map_err(|e| {
-                                PyRuntimeError::new_err(format!(
-                                    "Encoding failed (float32 amplitude): {}",
-                                    e
-                                ))
-                            })?
                         match method.as_str() {
                             "amplitude" => self
-                                .engine
+                                .core_engine()?
                                 .encode_from_gpu_ptr_f32_with_stream(
                                     data_ptr, input_len, num_qubits, stream_ptr,
                                 )
@@ -670,7 +660,7 @@ impl QdpEngine {
                                     ))
                                 })?,
                             "angle" => self
-                                .engine
+                                .core_engine()?
                                 .encode_angle_from_gpu_ptr_f32_with_stream(
                                     data_ptr, input_len, num_qubits, stream_ptr,
                                 )
