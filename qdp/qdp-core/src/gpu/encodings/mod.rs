@@ -185,6 +185,14 @@ pub use iqp::IqpEncoder;
 pub use phase::PhaseEncoder;
 
 /// Create encoder by name: "amplitude", "angle", "basis", "iqp", or "iqp-z"
+//
+// Structural debt: the encoders are unit structs, yet this performs two heap
+// allocations per call (String from `to_lowercase`, Box<dyn>) to dispatch to
+// `'static` functions. A future refactor should replace this with a
+// `Copy` enum that returns `&'static dyn QuantumEncoder` for zero-alloc
+// static dispatch, and unify with `encoding::ChunkEncoder` (which has its own
+// parallel implementation of amplitude/angle/basis with a case-sensitive
+// dispatcher — see `qdp-core/src/encoding/mod.rs`).
 pub fn get_encoder(name: &str) -> Result<Box<dyn QuantumEncoder>> {
     match name.to_lowercase().as_str() {
         "amplitude" => Ok(Box::new(AmplitudeEncoder)),

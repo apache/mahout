@@ -1526,3 +1526,228 @@ fn test_encode_angle_batch_from_gpu_ptr_f32_success_f64_engine() {
     };
     unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 2, 8) };
 }
+
+// ── Basis f32 batch from GPU pointer ────────────────────────────────────
+
+#[test]
+fn test_encode_basis_batch_from_gpu_ptr_f32_success() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let num_samples = 3;
+    let num_qubits = 3;
+    let (_device, input_d) = match common::copy_f32_to_device(&[0.0_f32, 3.0_f32, 7.0_f32]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_basis_batch_from_gpu_ptr_f32(
+                *input_d.device_ptr() as *const f32,
+                num_samples,
+                1,
+                num_qubits,
+            )
+            .expect("encode_basis_batch_from_gpu_ptr_f32")
+    };
+    unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, num_samples as i64, 8) };
+}
+
+#[test]
+fn test_encode_basis_batch_from_gpu_ptr_f32_with_stream_success() {
+    let engine = match engine_f32() {
+        Some(e) => e,
+        None => {
+            println!("SKIP: No GPU");
+            return;
+        }
+    };
+    let (device, input_d) = match common::copy_f32_to_device(&[1.0_f32, 2.0_f32]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let stream = device.fork_default_stream().expect("fork_default_stream");
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_basis_batch_from_gpu_ptr_f32_with_stream(
+                *input_d.device_ptr() as *const f32,
+                2,
+                1,
+                2,
+                stream.stream as *mut c_void,
+            )
+            .expect("encode_basis_batch_from_gpu_ptr_f32_with_stream")
+    };
+    unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 2, 4) };
+}
+
+#[test]
+fn test_encode_basis_batch_from_gpu_ptr_f32_null_pointer() {
+    let Some(engine) = engine_f32() else {
+        println!("SKIP: No GPU");
+        return;
+    };
+    let result = unsafe { engine.encode_basis_batch_from_gpu_ptr_f32(std::ptr::null(), 2, 1, 2) };
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_encode_basis_batch_from_gpu_ptr_f32_zero_samples() {
+    let Some(engine) = engine_f32() else {
+        println!("SKIP: No GPU");
+        return;
+    };
+    let result = unsafe { engine.encode_basis_batch_from_gpu_ptr_f32(std::ptr::null(), 0, 1, 2) };
+    assert!(result.is_err());
+    match result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => assert!(msg.contains("samples"), "msg: {msg}"),
+        e => panic!("expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_basis_batch_from_gpu_ptr_f32_sample_size_mismatch() {
+    let Some(engine) = engine_f32() else {
+        println!("SKIP: No GPU");
+        return;
+    };
+    let (_device, input_d) = match common::copy_f32_to_device(&[0.0_f32, 1.0_f32]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let result = unsafe {
+        engine.encode_basis_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 2, 2)
+    };
+    assert!(result.is_err());
+    match result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => assert!(msg.contains("sample_size=1"), "msg: {msg}"),
+        e => panic!("expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_basis_batch_from_gpu_ptr_f32_non_finite_rejected() {
+    let Some(engine) = engine_f32() else {
+        println!("SKIP: No GPU");
+        return;
+    };
+    let (_device, input_d) = match common::copy_f32_to_device(&[0.0_f32, f32::NAN]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let result = unsafe {
+        engine.encode_basis_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 1, 2)
+    };
+    assert!(result.is_err());
+    match result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => assert!(msg.contains("non-finite"), "msg: {msg}"),
+        e => panic!("expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_basis_batch_from_gpu_ptr_f32_out_of_range_rejected() {
+    let Some(engine) = engine_f32() else {
+        println!("SKIP: No GPU");
+        return;
+    };
+    // state_len = 2^2 = 4; index 10 is out of range
+    let (_device, input_d) = match common::copy_f32_to_device(&[0.0_f32, 10.0_f32]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let result = unsafe {
+        engine.encode_basis_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 1, 2)
+    };
+    assert!(result.is_err());
+    match result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => assert!(msg.contains("out of range"), "msg: {msg}"),
+        e => panic!("expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_basis_batch_from_gpu_ptr_f32_non_integer_rejected() {
+    let Some(engine) = engine_f32() else {
+        println!("SKIP: No GPU");
+        return;
+    };
+    let (_device, input_d) = match common::copy_f32_to_device(&[0.0_f32, 1.5_f32]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let result = unsafe {
+        engine.encode_basis_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 1, 2)
+    };
+    assert!(result.is_err());
+    match result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => assert!(msg.contains("non-integer"), "msg: {msg}"),
+        e => panic!("expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_basis_batch_from_gpu_ptr_f32_negative_rejected() {
+    let Some(engine) = engine_f32() else {
+        println!("SKIP: No GPU");
+        return;
+    };
+    let (_device, input_d) = match common::copy_f32_to_device(&[0.0_f32, -1.0_f32]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let result = unsafe {
+        engine.encode_basis_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 1, 2)
+    };
+    assert!(result.is_err());
+    match result.unwrap_err() {
+        MahoutError::InvalidInput(msg) => assert!(msg.contains("negative"), "msg: {msg}"),
+        e => panic!("expected InvalidInput, got {:?}", e),
+    }
+}
+
+#[test]
+fn test_encode_basis_from_gpu_ptr_f32_single_sample_success() {
+    let Some(engine) = engine_f32() else {
+        println!("SKIP: No GPU");
+        return;
+    };
+    let (_device, input_d) = match common::copy_f32_to_device(&[5.0_f32]) {
+        Some(t) => t,
+        None => {
+            println!("SKIP: No CUDA device");
+            return;
+        }
+    };
+    let dlpack_ptr = unsafe {
+        engine
+            .encode_basis_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 3)
+            .expect("encode_basis_from_gpu_ptr_f32")
+    };
+    unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 1, 8) };
+}

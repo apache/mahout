@@ -694,8 +694,8 @@ def test_angle_encode_cuda_tensor_float32_input_output_dtype(precision, expected
 
 @requires_qdp
 @pytest.mark.gpu
-def test_angle_encode_cuda_tensor_float32_batch_rejected():
-    """Test that float32 CUDA angle encoding stays limited to 1D single-sample tensors."""
+def test_angle_encode_cuda_tensor_float32_batch_supported():
+    """Float32 CUDA angle 2D batch is supported via the f32 zero-copy batch path."""
     pytest.importorskip("torch")
     from _qdp import QdpEngine
 
@@ -709,8 +709,11 @@ def test_angle_encode_cuda_tensor_float32_batch_rejected():
         device="cuda:0",
     )
 
-    with pytest.raises(RuntimeError, match="supports only 1D single-sample tensors"):
-        engine.encode(data, 2, "angle")
+    result = engine.encode(data, 2, "angle")
+    assert result is not None
+    qt = torch.from_dlpack(result)
+    assert qt.is_cuda
+    assert qt.shape == (2, 4)
 
 
 @requires_qdp

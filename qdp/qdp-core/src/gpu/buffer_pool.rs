@@ -28,14 +28,14 @@ use crate::gpu::pool_metrics::PoolMetrics;
 
 /// Handle that automatically returns a buffer to the pool on drop.
 #[cfg(target_os = "linux")]
-pub struct PinnedBufferHandle {
-    buffer: Option<PinnedHostBuffer>,
-    pool: Arc<PinnedBufferPool>,
+pub struct PinnedBufferHandle<T: Copy = f64> {
+    buffer: Option<PinnedHostBuffer<T>>,
+    pool: Arc<PinnedBufferPool<T>>,
 }
 
 #[cfg(target_os = "linux")]
-impl std::ops::Deref for PinnedBufferHandle {
-    type Target = PinnedHostBuffer;
+impl<T: Copy> std::ops::Deref for PinnedBufferHandle<T> {
+    type Target = PinnedHostBuffer<T>;
 
     fn deref(&self) -> &Self::Target {
         self.buffer
@@ -45,7 +45,7 @@ impl std::ops::Deref for PinnedBufferHandle {
 }
 
 #[cfg(target_os = "linux")]
-impl std::ops::DerefMut for PinnedBufferHandle {
+impl<T: Copy> std::ops::DerefMut for PinnedBufferHandle<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.buffer
             .as_mut()
@@ -54,7 +54,7 @@ impl std::ops::DerefMut for PinnedBufferHandle {
 }
 
 #[cfg(target_os = "linux")]
-impl Drop for PinnedBufferHandle {
+impl<T: Copy> Drop for PinnedBufferHandle<T> {
     fn drop(&mut self) {
         if let Some(buf) = self.buffer.take() {
             let mut free = self.pool.lock_free();
@@ -66,16 +66,16 @@ impl Drop for PinnedBufferHandle {
 
 /// Pool of pinned host buffers sized for a fixed batch shape.
 #[cfg(target_os = "linux")]
-pub struct PinnedBufferPool {
-    free: Mutex<Vec<PinnedHostBuffer>>,
+pub struct PinnedBufferPool<T: Copy = f64> {
+    free: Mutex<Vec<PinnedHostBuffer<T>>>,
     available_cv: Condvar,
     capacity: usize,
     elements_per_buffer: usize,
 }
 
 #[cfg(target_os = "linux")]
-impl PinnedBufferPool {
-    /// Create a pool with `pool_size` pinned buffers, each sized for `elements_per_buffer` f64 values.
+impl<T: Copy> PinnedBufferPool<T> {
+    /// Create a pool with `pool_size` pinned buffers, each sized for `elements_per_buffer` values of `T`.
     pub fn new(pool_size: usize, elements_per_buffer: usize) -> Result<Arc<Self>> {
         if pool_size == 0 {
             return Err(MahoutError::InvalidInput(
@@ -90,7 +90,7 @@ impl PinnedBufferPool {
 
         let mut buffers = Vec::with_capacity(pool_size);
         for _ in 0..pool_size {
-            buffers.push(PinnedHostBuffer::new(elements_per_buffer)?);
+            buffers.push(PinnedHostBuffer::<T>::new(elements_per_buffer)?);
         }
 
         Ok(Arc::new(Self {
@@ -101,7 +101,7 @@ impl PinnedBufferPool {
         }))
     }
 
-    fn lock_free(&self) -> MutexGuard<'_, Vec<PinnedHostBuffer>> {
+    fn lock_free(&self) -> MutexGuard<'_, Vec<PinnedHostBuffer<T>>> {
         // Ignore poisoning to keep the pool usable after a panic elsewhere.
         self.free
             .lock()
@@ -109,7 +109,7 @@ impl PinnedBufferPool {
     }
 
     /// Acquire a pinned buffer, blocking until one is available.
-    pub fn acquire(self: &Arc<Self>) -> PinnedBufferHandle {
+    pub fn acquire(self: &Arc<Self>) -> PinnedBufferHandle<T> {
         self.acquire_with_metrics(None)
     }
 
@@ -123,7 +123,7 @@ impl PinnedBufferPool {
     pub fn acquire_with_metrics(
         self: &Arc<Self>,
         metrics: Option<&PoolMetrics>,
-    ) -> PinnedBufferHandle {
+    ) -> PinnedBufferHandle<T> {
         let mut free = self.lock_free();
 
         // Record available count while holding the lock to avoid TOCTOU race condition
@@ -161,7 +161,7 @@ impl PinnedBufferPool {
     ///
     /// Returns `None` if the pool is currently empty; callers can choose to spin/wait
     /// or fall back to synchronous paths.
-    pub fn try_acquire(self: &Arc<Self>) -> Option<PinnedBufferHandle> {
+    pub fn try_acquire(self: &Arc<Self>) -> Option<PinnedBufferHandle<T>> {
         let mut free = self.lock_free();
         free.pop().map(|buffer| PinnedBufferHandle {
             buffer: Some(buffer),

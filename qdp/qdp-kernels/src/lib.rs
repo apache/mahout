@@ -187,12 +187,12 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
-    /// Launch basis encoding kernel
+    /// Launch basis encoding kernel.
     /// Maps an integer index to a computational basis state.
     /// Returns CUDA error code (0 = success)
     ///
     /// # Safety
-    /// Requires valid GPU pointer, must sync before freeing
+    /// Requires valid GPU pointer; must sync before freeing.
     pub fn launch_basis_encode(
         basis_index: usize,
         state_d: *mut c_void,
@@ -200,11 +200,11 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
-    /// Launch batch basis encoding kernel
+    /// Launch batch basis encoding kernel.
     /// Returns CUDA error code (0 = success)
     ///
     /// # Safety
-    /// Requires valid GPU pointers, must sync before freeing
+    /// Requires valid GPU pointers; must sync before freeing.
     pub fn launch_basis_encode_batch(
         basis_indices_d: *const usize,
         state_batch_d: *mut c_void,
@@ -214,11 +214,38 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
-    /// Launch angle encoding kernel
+    /// Launch basis encoding kernel (float32).
+    /// Maps an integer index to a computational basis state.
     /// Returns CUDA error code (0 = success)
     ///
     /// # Safety
-    /// Requires valid GPU pointers, must sync before freeing
+    /// Requires valid GPU pointer; must sync before freeing.
+    pub fn launch_basis_encode_f32(
+        basis_index: usize,
+        state_d: *mut c_void,
+        state_len: usize,
+        stream: *mut c_void,
+    ) -> i32;
+
+    /// Launch batch basis encoding kernel (float32).
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers; must sync before freeing.
+    pub fn launch_basis_encode_batch_f32(
+        basis_indices_d: *const usize,
+        state_batch_d: *mut c_void,
+        num_samples: usize,
+        state_len: usize,
+        num_qubits: u32,
+        stream: *mut c_void,
+    ) -> i32;
+
+    /// Launch angle encoding kernel.
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers; must sync before freeing.
     pub fn launch_angle_encode(
         angles_d: *const f64,
         state_d: *mut c_void,
@@ -227,24 +254,11 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
-    /// Launch angle encoding kernel for float32 inputs.
+    /// Launch batch angle encoding kernel.
     /// Returns CUDA error code (0 = success)
     ///
     /// # Safety
-    /// Requires valid GPU pointers, must sync before freeing
-    pub fn launch_angle_encode_f32(
-        angles_d: *const f32,
-        state_d: *mut c_void,
-        state_len: usize,
-        num_qubits: u32,
-        stream: *mut c_void,
-    ) -> i32;
-
-    /// Launch batch angle encoding kernel
-    /// Returns CUDA error code (0 = success)
-    ///
-    /// # Safety
-    /// Requires valid GPU pointers, must sync before freeing
+    /// Requires valid GPU pointers; must sync before freeing.
     pub fn launch_angle_encode_batch(
         angles_batch_d: *const f64,
         state_batch_d: *mut c_void,
@@ -254,11 +268,24 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
-    /// Launch batch angle encoding kernel for float32 inputs.
+    /// Launch angle encoding kernel (float32).
     /// Returns CUDA error code (0 = success)
     ///
     /// # Safety
-    /// Requires valid GPU pointers, must sync before freeing
+    /// Requires valid GPU pointers; must sync before freeing.
+    pub fn launch_angle_encode_f32(
+        angles_d: *const f32,
+        state_d: *mut c_void,
+        state_len: usize,
+        num_qubits: u32,
+        stream: *mut c_void,
+    ) -> i32;
+
+    /// Launch batch angle encoding kernel (float32).
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers; must sync before freeing.
     pub fn launch_angle_encode_batch_f32(
         angles_batch_d: *const f32,
         state_batch_d: *mut c_void,
@@ -277,6 +304,45 @@ unsafe extern "C" {
         input_batch_d: *const f32,
         total_angles: usize,
         has_non_finite_d: *mut i32,
+        stream: *mut c_void,
+    ) -> i32;
+
+    /// Launch float64 batch finite-value validation.
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before reading the output flag.
+    pub fn launch_check_finite_batch_f64(
+        input_batch_d: *const f64,
+        total_values: usize,
+        has_non_finite_d: *mut i32,
+        stream: *mut c_void,
+    ) -> i32;
+
+    /// Launch combined validation + cast for float32 basis indices.
+    /// `error_flags_d` receives a bitmask (0 = all indices valid); `indices_out_d`
+    /// receives the truncated `size_t` indices (0 for invalid slots).
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before reading the output flag.
+    pub fn launch_validate_and_cast_basis_indices_f32(
+        input_batch_d: *const f32,
+        num_samples: usize,
+        state_len: usize,
+        indices_out_d: *mut usize,
+        error_flags_d: *mut i32,
+        stream: *mut c_void,
+    ) -> i32;
+
+    /// Launch bounds-check for an existing `size_t` basis-index buffer.
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before reading the output flag.
+    pub fn launch_check_basis_indices_usize(
+        indices_d: *const usize,
+        num_samples: usize,
+        state_len: usize,
+        error_flags_d: *mut i32,
         stream: *mut c_void,
     ) -> i32;
 
@@ -487,9 +553,21 @@ pub extern "C" fn launch_basis_encode_batch(
 
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_angle_encode(
-    _angles_d: *const f64,
+pub extern "C" fn launch_basis_encode_f32(
+    _basis_index: usize,
     _state_d: *mut c_void,
+    _state_len: usize,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_basis_encode_batch_f32(
+    _basis_indices_d: *const usize,
+    _state_batch_d: *mut c_void,
+    _num_samples: usize,
     _state_len: usize,
     _num_qubits: u32,
     _stream: *mut c_void,
@@ -499,8 +577,8 @@ pub extern "C" fn launch_angle_encode(
 
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_angle_encode_f32(
-    _angles_d: *const f32,
+pub extern "C" fn launch_angle_encode(
+    _angles_d: *const f64,
     _state_d: *mut c_void,
     _state_len: usize,
     _num_qubits: u32,
@@ -515,6 +593,18 @@ pub extern "C" fn launch_angle_encode_batch(
     _angles_batch_d: *const f64,
     _state_batch_d: *mut c_void,
     _num_samples: usize,
+    _state_len: usize,
+    _num_qubits: u32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_angle_encode_f32(
+    _angles_d: *const f32,
+    _state_d: *mut c_void,
     _state_len: usize,
     _num_qubits: u32,
     _stream: *mut c_void,
@@ -541,6 +631,42 @@ pub extern "C" fn launch_check_finite_batch_f32(
     _input_batch_d: *const f32,
     _total_angles: usize,
     _has_non_finite_d: *mut i32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_check_finite_batch_f64(
+    _input_batch_d: *const f64,
+    _total_values: usize,
+    _has_non_finite_d: *mut i32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_validate_and_cast_basis_indices_f32(
+    _input_batch_d: *const f32,
+    _num_samples: usize,
+    _state_len: usize,
+    _indices_out_d: *mut usize,
+    _error_flags_d: *mut i32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_check_basis_indices_usize(
+    _indices_d: *const usize,
+    _num_samples: usize,
+    _state_len: usize,
+    _error_flags_d: *mut i32,
     _stream: *mut c_void,
 ) -> i32 {
     999

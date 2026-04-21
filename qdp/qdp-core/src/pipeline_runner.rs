@@ -45,7 +45,7 @@ pub struct PipelineConfig {
 
 impl PipelineConfig {
     /// Normalizes the configuration, such as falling back to f64 if f32 is requested
-    /// but the encoding doesn't support it.
+    /// but the encoding doesn't support it, and auto-computing prefetch depth if not set.
     pub fn normalize(&mut self) {
         if self.float32_pipeline && !encoding_supports_f32(&self.encoding_method) {
             log::info!(
@@ -53,6 +53,22 @@ impl PipelineConfig {
                 self.encoding_method
             );
             self.float32_pipeline = false;
+        }
+        if self.prefetch_depth == 0 {
+            self.prefetch_depth = compute_optimal_prefetch_depth(
+                self.num_qubits as usize,
+                self.batch_size,
+                &self.encoding_method,
+                self.float32_pipeline,
+            );
+            log::debug!(
+                "auto prefetch_depth={} (qubits={}, batch={}, encoding={}, f32={})",
+                self.prefetch_depth,
+                self.num_qubits,
+                self.batch_size,
+                self.encoding_method,
+                self.float32_pipeline,
+            );
         }
     }
 }
@@ -69,7 +85,7 @@ impl Default for PipelineConfig {
             warmup_batches: 0,
             null_handling: NullHandling::FillZero,
             float32_pipeline: false,
-            prefetch_depth: 16,
+            prefetch_depth: 0, // 0 = auto-compute in normalize()
         }
     }
 }
@@ -99,10 +115,55 @@ pub trait BatchProducer: Send + 'static {
     fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>>;
 }
 
+/// Compute optimal prefetch depth to keep the CPU-side prefetch buffer under ~256 MB,
+/// clamped to [1, 32].
+///
+/// The CPU prefetch buffer holds `prefetch_depth` batches of raw input data (not
+/// encoded state vectors, which live on the GPU).  For amplitude encoding the input
+/// size dominates; for angle/basis it is tiny, so the cap kicks in at the upper bound.
+///
+/// | num_qubits | encoding   | bytes/batch (f64, bs=64) | auto depth |
+/// |------------|------------ |--------------------------|------------|
+/// |  8         | amplitude  |  ~128 KB                 | 32         |
+/// | 12         | amplitude  |  ~2 MB                   | 32         |
+/// | 16         | amplitude  |  ~32 MB                  | 8          |
+/// | 20         | amplitude  |  ~512 MB                 | 1          |
+/// |  *         | angle/basis|  tiny                    | 32         |
+fn compute_optimal_prefetch_depth(
+    num_qubits: usize,
+    batch_size: usize,
+    encoding_method: &str,
+    float32: bool,
+) -> usize {
+    const TARGET_BYTES: usize = 256 * 1024 * 1024; // 256 MB
+    const MIN_DEPTH: usize = 1;
+    const MAX_DEPTH: usize = 32;
+
+    let sample_len = match encoding_method.to_lowercase().as_str() {
+        "angle" => Some(num_qubits),
+        "basis" => Some(1),
+        _ => 1usize.checked_shl(num_qubits as u32), // amplitude / iqp; None on overflow
+    };
+    let bytes_per_element = if float32 { 4usize } else { 8usize };
+    // Use checked arithmetic throughout; treat any overflow as "extremely large batch"
+    // and return MIN_DEPTH so we never buffer more than one batch.
+    let bytes_per_batch = sample_len
+        .and_then(|s| batch_size.checked_mul(s))
+        .and_then(|b| b.checked_mul(bytes_per_element));
+
+    match bytes_per_batch {
+        None | Some(0) => MIN_DEPTH,
+        Some(bpb) => (TARGET_BYTES / bpb).clamp(MIN_DEPTH, MAX_DEPTH),
+    }
+}
+
 /// Returns true if the given encoding method has a native f32 GPU kernel.
 /// Used to auto-gate `float32_pipeline` so unsupported encodings fall back to f64.
 fn encoding_supports_f32(encoding_method: &str) -> bool {
-    matches!(encoding_method.to_lowercase().as_str(), "amplitude")
+    matches!(
+        encoding_method.to_lowercase().as_str(),
+        "amplitude" | "angle" | "basis"
+    )
 }
 
 pub struct SyntheticProducer {
@@ -355,12 +416,34 @@ fn read_file_by_extension(
 
 /// Stateful iterator that yields one batch DLPack at a time for Python `for` loop consumption.
 /// Reads prefetched batches via a bounded channel.
+///
+/// # Thread safety
+/// `Receiver` is `!Sync`, so `rx` is wrapped in a `Mutex` to satisfy PyO3's `#[pyclass]`
+/// `Sync` bound.  In practice, `PyRefMut` guarantees exclusive access, so the lock is
+/// never contended at runtime.  `Sender` is already `Send + Sync` and needs no wrapper.
 pub struct PipelineIterator {
     engine: QdpEngine,
     config: PipelineConfig,
-    rx: std::sync::Mutex<std::sync::mpsc::Receiver<Result<PrefetchedBatch>>>,
-    recycle_tx: std::sync::Mutex<std::sync::mpsc::Sender<BatchData>>,
-    _producer_handle: std::sync::Mutex<std::thread::JoinHandle<()>>,
+    rx: std::sync::Mutex<Option<std::sync::mpsc::Receiver<Result<PrefetchedBatch>>>>,
+    recycle_tx: Option<std::sync::mpsc::Sender<BatchData>>,
+    producer_handle: Option<std::thread::JoinHandle<()>>,
+}
+
+impl Drop for PipelineIterator {
+    fn drop(&mut self) {
+        // Drop the recycle sender first to unblock the producer if it is waiting on try_recv.
+        drop(self.recycle_tx.take());
+        // Close the receiver by taking it out of the Option.  This makes any pending
+        // or future tx.send() in the producer thread return Err(SendError), so the
+        // producer exits its loop without us having to drain the channel manually.
+        // The previous drain-loop approach had a TOCTOU race: after we drained, the
+        // producer could refill the sync_channel and block on tx.send() forever
+        // while we were waiting on join().
+        drop(self.rx.lock().unwrap().take());
+        if let Some(handle) = self.producer_handle.take() {
+            let _ = handle.join();
+        }
+    }
 }
 
 impl PipelineIterator {
@@ -373,9 +456,9 @@ impl PipelineIterator {
         Ok(Self {
             engine,
             config,
-            rx: std::sync::Mutex::new(rx),
-            recycle_tx: std::sync::Mutex::new(recycle_tx),
-            _producer_handle: std::sync::Mutex::new(_producer_handle),
+            rx: std::sync::Mutex::new(Some(rx)),
+            recycle_tx: Some(recycle_tx),
+            producer_handle: Some(_producer_handle),
         })
     }
 
@@ -425,9 +508,9 @@ impl PipelineIterator {
         Ok(Self {
             engine,
             config,
-            rx: std::sync::Mutex::new(rx),
-            recycle_tx: std::sync::Mutex::new(recycle_tx),
-            _producer_handle: std::sync::Mutex::new(_producer_handle),
+            rx: std::sync::Mutex::new(Some(rx)),
+            recycle_tx: Some(recycle_tx),
+            producer_handle: Some(_producer_handle),
         })
     }
 
@@ -497,15 +580,15 @@ impl PipelineIterator {
         Ok(Self {
             engine,
             config,
-            rx: std::sync::Mutex::new(rx),
-            recycle_tx: std::sync::Mutex::new(recycle_tx),
-            _producer_handle: std::sync::Mutex::new(_producer_handle),
+            rx: std::sync::Mutex::new(Some(rx)),
+            recycle_tx: Some(recycle_tx),
+            producer_handle: Some(_producer_handle),
         })
     }
 
     /// Returns the next batch as a DLPack pointer; `Ok(None)` when exhausted.
     pub fn next_batch(&mut self) -> Result<Option<*mut DLManagedTensor>> {
-        let batch = match self.rx.lock().unwrap().recv() {
+        let batch = match self.rx.lock().unwrap().as_ref().unwrap().recv() {
             Ok(Ok(b)) => b,
             Ok(Err(e)) => return Err(e),
             Err(_) => return Ok(None),
@@ -526,7 +609,9 @@ impl PipelineIterator {
                 &self.config.encoding_method,
             )?,
         };
-        let _ = self.recycle_tx.lock().unwrap().send(batch.data);
+        if let Some(tx) = &self.recycle_tx {
+            let _ = tx.send(batch.data);
+        }
         Ok(Some(ptr))
     }
 }
@@ -1117,13 +1202,13 @@ mod tests {
     }
 
     #[test]
-    fn test_synthetic_producer_f32_fallback_for_angle() {
+    fn test_synthetic_producer_f32_for_angle() {
         let mut config = PipelineConfig {
             total_batches: 1,
             num_qubits: 3,
             batch_size: 4,
             encoding_method: "angle".to_string(),
-            float32_pipeline: true, // requested f32, but angle doesn't support it
+            float32_pipeline: true,
             ..Default::default()
         };
         config.normalize();
@@ -1132,13 +1217,13 @@ mod tests {
 
         let batch = producer.produce(None).unwrap().unwrap();
         assert!(
-            matches!(batch.data, BatchData::F64(_)),
-            "angle with float32_pipeline=true should fall back to F64 data"
+            matches!(batch.data, BatchData::F32(_)),
+            "angle with float32_pipeline=true should produce F32 data"
         );
     }
 
     #[test]
-    fn test_synthetic_producer_f32_fallback_for_basis() {
+    fn test_synthetic_producer_f32_for_basis() {
         let mut config = PipelineConfig {
             total_batches: 1,
             num_qubits: 3,
@@ -1153,8 +1238,8 @@ mod tests {
 
         let batch = producer.produce(None).unwrap().unwrap();
         assert!(
-            matches!(batch.data, BatchData::F64(_)),
-            "basis with float32_pipeline=true should fall back to F64 data"
+            matches!(batch.data, BatchData::F32(_)),
+            "basis with float32_pipeline=true should produce F32 data"
         );
     }
 
@@ -1163,8 +1248,62 @@ mod tests {
         assert!(super::encoding_supports_f32("amplitude"));
         assert!(super::encoding_supports_f32("Amplitude"));
         assert!(super::encoding_supports_f32("AMPLITUDE"));
-        assert!(!super::encoding_supports_f32("angle"));
-        assert!(!super::encoding_supports_f32("basis"));
+        assert!(super::encoding_supports_f32("angle"));
+        assert!(super::encoding_supports_f32("basis"));
         assert!(!super::encoding_supports_f32("iqp"));
+    }
+
+    #[test]
+    fn test_compute_optimal_prefetch_depth_bounds() {
+        // Small qubit count → hits MAX_DEPTH cap (32)
+        let d = super::compute_optimal_prefetch_depth(4, 64, "amplitude", false);
+        assert_eq!(d, 32, "4 qubits/amplitude should hit max depth");
+
+        // angle/basis are tiny input → should also hit MAX_DEPTH
+        let d_angle = super::compute_optimal_prefetch_depth(16, 64, "angle", false);
+        assert_eq!(
+            d_angle, 32,
+            "angle encoding has small input, should hit max"
+        );
+
+        let d_basis = super::compute_optimal_prefetch_depth(16, 64, "basis", false);
+        assert_eq!(
+            d_basis, 32,
+            "basis encoding has 1-element input, should hit max"
+        );
+
+        // Large qubit count amplitude → depth should be ≥ 1 and ≤ 32
+        let d_large = super::compute_optimal_prefetch_depth(20, 64, "amplitude", false);
+        assert!(
+            (1..=32).contains(&d_large),
+            "20 qubits depth out of range: {d_large}"
+        );
+        // At 20 qubits, amplitude batch is ~512 MB — floor(256M/512M) = 0, clamped to 1
+        assert_eq!(d_large, 1);
+
+        // 16 qubits f64, bs=64: 65536*64*8 = 32 MB → 256M/32M = 8
+        let d16 = super::compute_optimal_prefetch_depth(16, 64, "amplitude", false);
+        assert_eq!(d16, 8);
+
+        // 16 qubits f32, bs=64: 65536*64*4 = 16 MB → 256M/16M = 16
+        let d16_f32 = super::compute_optimal_prefetch_depth(16, 64, "amplitude", true);
+        assert_eq!(d16_f32, 16);
+    }
+
+    #[test]
+    fn test_normalize_sets_prefetch_depth() {
+        // Default config has prefetch_depth=0; normalize() should compute it.
+        let mut config = PipelineConfig {
+            num_qubits: 16,
+            batch_size: 64,
+            encoding_method: "amplitude".to_string(),
+            ..Default::default()
+        };
+        assert_eq!(config.prefetch_depth, 0, "default should be 0 (auto)");
+        config.normalize();
+        assert!(
+            config.prefetch_depth > 0,
+            "normalize() must set prefetch_depth > 0"
+        );
     }
 }
