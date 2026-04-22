@@ -175,11 +175,17 @@ pub fn validate_cuda_tensor_for_encoding(
                 )));
             }
         }
-        "angle" | "iqp" | "iqp-z" => {
-            if method == "angle" && dtype_str_lower.contains("float32") {
-                // qdp-core provides dedicated float32 angle kernels for both single-sample and
-                // batched CUDA tensors, so keep validation aligned with the available binding path.
-            } else if !dtype_str_lower.contains("float64") {
+        "angle" => {
+            if !(dtype_str_lower.contains("float64") || dtype_str_lower.contains("float32")) {
+                return Err(PyRuntimeError::new_err(format!(
+                    "CUDA tensor must have dtype float64 or float32 for angle encoding, got {}. \
+                     Use tensor.to(torch.float64) or tensor.to(torch.float32)",
+                    dtype_str
+                )));
+            }
+        }
+        "iqp" | "iqp-z" => {
+            if !dtype_str_lower.contains("float64") {
                 return Err(PyRuntimeError::new_err(format!(
                     "CUDA tensor must have dtype float64 for {} encoding, got {}. \
                      Use tensor.to(torch.float64)",

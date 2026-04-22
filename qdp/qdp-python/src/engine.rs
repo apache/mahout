@@ -125,8 +125,7 @@ impl QdpEngine {
     ///         - String path: .parquet, .arrow, .feather, .npy, .pt, .pth, .pb file
     ///         - pathlib.Path: Path object (converted via os.fspath())
     ///     num_qubits: Number of qubits for encoding
-    ///     encoding_method: Encoding strategy ("amplitude" default, "angle", or "basis")
-    ///         CUDA tensor note:
+    ///     encoding_method: Encoding strategy ("amplitude" default, "angle", or "basis"). CUDA tensor notes:
     ///         - amplitude accepts float64 and float32
     ///         - angle accepts float64 generally, plus float32 for 1D and 2D CUDA tensors
     ///
