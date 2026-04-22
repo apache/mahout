@@ -26,6 +26,134 @@
 use std::env;
 use std::process::Command;
 
+const DEFAULT_CUBIN_ARCHES: &[&str] = &["75", "80", "86", "89", "90", "100", "120"];
+const DEFAULT_PTX_CANDIDATES: &[&str] = &["120", "100", "90", "89", "86", "80", "75"];
+const LEGACY_FALLBACK_ARCHES: &[&str] = &["75", "80", "86"];
+
+fn add_sm_target(build: &mut cc::Build, arch: &str) {
+    build.flag("-gencode");
+    build.flag(format!("arch=compute_{arch},code=sm_{arch}"));
+}
+
+fn add_ptx_target(build: &mut cc::Build, arch: &str) {
+    build.flag("-gencode");
+    build.flag(format!("arch=compute_{arch},code=compute_{arch}"));
+}
+
+fn parse_arch_name(raw: &str) -> Result<String, String> {
+    let trimmed = raw.trim();
+    if trimmed.is_empty()
+        || !trimmed
+            .chars()
+            .all(|ch| ch.is_ascii_alphanumeric() || ch == '_')
+        || !trimmed.chars().next().is_some_and(|ch| ch.is_ascii_digit())
+    {
+        return Err(format!(
+            "Invalid CUDA architecture '{trimmed}' in QDP_CUDA_ARCH_LIST. Expected entries like \
+             '89', '90a', or '120+PTX'."
+        ));
+    }
+
+    Ok(trimmed.to_ascii_lowercase())
+}
+
+fn apply_env_arch_list(build: &mut cc::Build, raw: &str) -> Result<(), String> {
+    let mut saw_target = false;
+    for entry in raw.split(',') {
+        let trimmed = entry.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+
+        if let Some(base) = trimmed
+            .strip_suffix("+PTX")
+            .or_else(|| trimmed.strip_suffix("+ptx"))
+        {
+            let arch = parse_arch_name(base)?;
+            add_sm_target(build, &arch);
+            add_ptx_target(build, &arch);
+            saw_target = true;
+            continue;
+        }
+
+        let arch = parse_arch_name(trimmed)?;
+        add_sm_target(build, &arch);
+        saw_target = true;
+    }
+
+    if !saw_target {
+        return Err(
+            "QDP_CUDA_ARCH_LIST did not contain any usable CUDA architectures after parsing."
+                .to_string(),
+        );
+    }
+
+    Ok(())
+}
+
+fn query_nvcc_list(flag: &str) -> Vec<String> {
+    let Ok(output) = Command::new("nvcc").arg(flag).output() else {
+        return Vec::new();
+    };
+
+    if !output.status.success() {
+        return Vec::new();
+    }
+
+    String::from_utf8_lossy(&output.stdout)
+        .lines()
+        .filter_map(|line| {
+            line.trim()
+                .strip_prefix("sm_")
+                .or_else(|| line.trim().strip_prefix("compute_"))
+        })
+        .map(|suffix| suffix.to_ascii_lowercase())
+        .collect()
+}
+
+fn nvcc_supports(supported_arches: &[String], arch: &str) -> bool {
+    supported_arches.iter().any(|supported| supported == arch)
+}
+
+fn apply_default_arch_targets(build: &mut cc::Build) {
+    let supported_sm = query_nvcc_list("--list-gpu-code");
+    let supported_compute = query_nvcc_list("--list-gpu-arch");
+
+    if supported_sm.is_empty() && supported_compute.is_empty() {
+        for arch in LEGACY_FALLBACK_ARCHES {
+            add_sm_target(build, arch);
+        }
+        return;
+    }
+
+    let cubin_arches = if supported_sm.is_empty() {
+        &supported_compute
+    } else {
+        &supported_sm
+    };
+    let mut added_cubin = false;
+
+    for arch in DEFAULT_CUBIN_ARCHES {
+        if nvcc_supports(cubin_arches, arch) {
+            add_sm_target(build, arch);
+            added_cubin = true;
+        }
+    }
+
+    if !added_cubin {
+        for arch in LEGACY_FALLBACK_ARCHES {
+            add_sm_target(build, arch);
+        }
+    }
+
+    if let Some(ptx_arch) = DEFAULT_PTX_CANDIDATES
+        .iter()
+        .find(|arch| nvcc_supports(&supported_compute, arch))
+    {
+        add_ptx_target(build, ptx_arch);
+    }
+}
+
 fn main() {
     // Let rustc know about our build-script-defined cfg flags (avoids `unexpected_cfgs` warnings).
     println!("cargo::rustc-check-cfg=cfg(qdp_no_cuda)");
@@ -38,6 +166,7 @@ fn main() {
     println!("cargo:rerun-if-changed=src/iqp.cu");
     println!("cargo:rerun-if-changed=src/phase.cu");
     println!("cargo:rerun-if-env-changed=QDP_NO_CUDA");
+    println!("cargo:rerun-if-env-changed=QDP_CUDA_ARCH_LIST");
     println!("cargo:rerun-if-changed=src/kernel_config.h");
 
     // Check if CUDA is available by looking for nvcc
@@ -81,23 +210,15 @@ fn main() {
     build
         .cuda(true)
         .flag("-cudart=shared") // Use shared CUDA runtime
-        .flag("-std=c++17") // C++17 for modern CUDA features
-        // GPU architecture targets
-        // SM 75 = Turing (T4, RTX 2000 series)
-        // SM 80 = Ampere (A100, RTX 3000 series)
-        // SM 86 = Ampere (RTX 3090, A40)
-        // SM 89 = Ada Lovelace (RTX 4000 series)
-        // SM 90 = Hopper (H100)
-        // Support both Turing (sm_75) and Ampere+ architectures
-        .flag("-gencode")
-        .flag("arch=compute_75,code=sm_75")
-        .flag("-gencode")
-        .flag("arch=compute_80,code=sm_80")
-        .flag("-gencode")
-        .flag("arch=compute_86,code=sm_86")
-        // Optional: Add more architectures for production
-        // .flag("-gencode")
-        // .flag("arch=compute_89,code=sm_89")
+        .flag("-std=c++17"); // C++17 for modern CUDA features
+
+    if let Ok(raw) = env::var("QDP_CUDA_ARCH_LIST") {
+        apply_env_arch_list(&mut build, &raw).unwrap_or_else(|message| panic!("{message}"));
+    } else {
+        apply_default_arch_targets(&mut build);
+    }
+
+    build
         .file("src/amplitude.cu")
         .file("src/basis.cu")
         .file("src/angle.cu")
