@@ -22,7 +22,6 @@ import argparse
 import time
 
 import torch
-
 from qumat_qdp import is_triton_amd_available
 from qumat_qdp.triton_amd import TritonAmdEngine
 
@@ -52,7 +51,9 @@ def main() -> int:
         choices=("amplitude", "angle", "basis"),
         default="amplitude",
     )
-    parser.add_argument("--precision", choices=("float32", "float64"), default="float32")
+    parser.add_argument(
+        "--precision", choices=("float32", "float64"), default="float32"
+    )
     args = parser.parse_args()
 
     if not is_triton_amd_available():

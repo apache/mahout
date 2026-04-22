@@ -17,7 +17,6 @@
 from typing import Any
 
 import pytest
-
 import qumat_qdp
 from qumat_qdp import QdpEngine
 from qumat_qdp import backend as backend_mod
@@ -28,7 +27,9 @@ def test_backend_routing_rejects_unknown_backend() -> None:
         QdpEngine(backend="unknown-backend")
 
 
-def test_create_encoder_engine_instantiates_python_facade(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_create_encoder_engine_instantiates_python_facade(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     class FakeAdapter:
         def encode(self) -> str:
             return "ok"
@@ -59,7 +60,9 @@ def test_cuda_route_uses_rust_engine(monkeypatch: pytest.MonkeyPatch) -> None:
             }
             return "rust-quantum-tensor"
 
-    monkeypatch.setattr(backend_mod, "_load_rust_cuda_engine_class", lambda: FakeRustEngine)
+    monkeypatch.setattr(
+        backend_mod, "_load_rust_cuda_engine_class", lambda: FakeRustEngine
+    )
 
     engine = QdpEngine(device_id=3, precision="float64", backend="cuda")
     value = engine.encode([1.0, 0.0], 1, "amplitude")
@@ -70,7 +73,9 @@ def test_cuda_route_uses_rust_engine(monkeypatch: pytest.MonkeyPatch) -> None:
     assert seen["encode"]["encoding_method"] == "amplitude"
 
 
-def test_amd_route_returns_triton_output_directly(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_amd_route_returns_triton_output_directly(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     class FakeValue:
         def __dlpack__(self, stream: Any | None = None) -> Any:
             return ("capsule", stream)

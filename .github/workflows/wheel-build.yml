@@ -68,13 +68,19 @@ jobs:
             dnf install -y gcc-toolset-13-gcc gcc-toolset-13-gcc-c++
             export CC=/opt/rh/gcc-toolset-13/root/usr/bin/gcc
             export CXX=/opt/rh/gcc-toolset-13/root/usr/bin/g++
-            # Install CUDA 12.5 toolkit (nvcc + headers + cudart) for kernel compilation
+            # Try to install the CUDA 12.5 toolkit for kernel compilation.
+            # If the external NVIDIA repo is temporarily unavailable, fall back
+            # to a no-CUDA smoke build instead of failing the PR wheel job.
             dnf install -y 'dnf-command(config-manager)'
-            dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
-            dnf install -y cuda-nvcc-12-5 cuda-cudart-devel-12-5
-            export CUDA_PATH=/usr/local/cuda-12.5
-            export PATH=/usr/local/cuda-12.5/bin:$PATH
-            nvcc --version
+            if dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo \
+              && dnf install -y cuda-nvcc-12-5 cuda-cudart-devel-12-5; then
+              export CUDA_PATH=/usr/local/cuda-12.5
+              export PATH=/usr/local/cuda-12.5/bin:$PATH
+              nvcc --version
+            else
+              echo "CUDA repo unavailable; continuing with QDP_NO_CUDA=1 smoke build."
+              export QDP_NO_CUDA=1
+            fi
           sccache: true
 
       - uses: actions/upload-artifact@v5

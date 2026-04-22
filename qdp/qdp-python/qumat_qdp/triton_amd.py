@@ -19,30 +19,36 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from importlib import import_module
 from typing import Any
 
-try:
-    import torch
-except ImportError:  # pragma: no cover - import failure is surfaced in check_runtime
-    torch = None
 
-try:  # pragma: no branch - availability is handled dynamically below
-    import triton  # type: ignore
-except ImportError:
-    triton = None
+def _load_optional_module(name: str) -> Any | None:
+    try:
+        return import_module(name)
+    except (
+        ImportError
+    ):  # pragma: no cover - import failure is surfaced in check_runtime
+        return None
+
+
+torch_mod = _load_optional_module("torch")
+triton_mod = _load_optional_module("triton")
 
 
 def _is_rocm_runtime() -> bool:
-    if torch is None:
+    if torch_mod is None:
         return False
-    return bool(getattr(torch.version, "hip", None)) and torch.cuda.is_available()
+    return (
+        bool(getattr(torch_mod.version, "hip", None)) and torch_mod.cuda.is_available()
+    )
 
 
 def is_triton_amd_available() -> bool:
-    if not _is_rocm_runtime() or triton is None:
+    if not _is_rocm_runtime() or triton_mod is None:
         return False
     try:
-        target = triton.runtime.driver.active.get_current_target()
+        target = triton_mod.runtime.driver.active.get_current_target()
         return str(getattr(target, "backend", "")).lower() == "hip"
     except Exception:
         return True
@@ -72,7 +78,7 @@ class TritonAmdEngine:
             raise RuntimeError(
                 "Triton AMD backend unavailable: no PyTorch ROCm device detected."
             )
-        if triton is None:
+        if triton_mod is None:
             raise RuntimeError(
                 "Triton AMD backend unavailable: install the Triton Python package."
             )
@@ -80,24 +86,24 @@ class TritonAmdEngine:
     def _device(self) -> str:
         return f"cuda:{self.device_id}"
 
-    def _require_torch(self):
-        if torch is None:
+    def _require_torch(self) -> Any:
+        if torch_mod is None:
             raise RuntimeError(
                 "Triton AMD backend unavailable: PyTorch is not installed."
             )
-        return torch
+        return torch_mod
 
-    def _real_dtype(self):
+    def _real_dtype(self) -> Any:
         torch_mod = self._require_torch()
         return torch_mod.float32 if self.precision == "float32" else torch_mod.float64
 
-    def _complex_dtype(self):
+    def _complex_dtype(self) -> Any:
         torch_mod = self._require_torch()
         return (
             torch_mod.complex64 if self.precision == "float32" else torch_mod.complex128
         )
 
-    def _to_2d(self, data: Any, *, dtype):
+    def _to_2d(self, data: Any, *, dtype: Any) -> Any:
         torch_mod = self._require_torch()
         x = torch_mod.as_tensor(data, device=self._device(), dtype=dtype)
         if x.ndim == 1:
@@ -106,7 +112,7 @@ class TritonAmdEngine:
             raise ValueError(f"Expected 1D or 2D input, got {x.ndim}D.")
         return x.contiguous()
 
-    def encode_amplitude(self, data: Any, num_qubits: int):
+    def encode_amplitude(self, data: Any, num_qubits: int) -> Any:
         torch_mod = self._require_torch()
         x = self._to_2d(data, dtype=self._real_dtype())
         _, sample_size = x.shape
@@ -122,7 +128,7 @@ class TritonAmdEngine:
             self._complex_dtype()
         )
 
-    def encode_angle(self, data: Any, num_qubits: int):
+    def encode_angle(self, data: Any, num_qubits: int) -> Any:
         torch_mod = self._require_torch()
         real_dtype = self._real_dtype()
         angles = self._to_2d(data, dtype=real_dtype)
@@ -134,9 +140,7 @@ class TritonAmdEngine:
 
         state_len = 1 << num_qubits
         idx = torch_mod.arange(state_len, device=angles.device).reshape(1, state_len)
-        amp = torch_mod.ones(
-            (batch, state_len), device=angles.device, dtype=real_dtype
-        )
+        amp = torch_mod.ones((batch, state_len), device=angles.device, dtype=real_dtype)
         for bit in range(num_qubits):
             col = angles[:, bit].unsqueeze(1)
             factor = torch_mod.where(
@@ -150,7 +154,7 @@ class TritonAmdEngine:
             self._complex_dtype()
         )
 
-    def encode_basis(self, data: Any, num_qubits: int):
+    def encode_basis(self, data: Any, num_qubits: int) -> Any:
         torch_mod = self._require_torch()
         idx = torch_mod.as_tensor(data, device=self._device(), dtype=torch_mod.int64)
         if idx.ndim == 2:

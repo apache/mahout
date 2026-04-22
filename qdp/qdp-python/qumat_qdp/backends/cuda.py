@@ -18,10 +18,18 @@
 
 from __future__ import annotations
 
-try:
-    import _qdp as _qdp_mod
-except ImportError:
-    _qdp_mod = None
+from importlib import import_module
+from typing import Any
+
+
+def _load_qdp_module() -> Any | None:
+    try:
+        return import_module("_qdp")
+    except ImportError:
+        return None
+
+
+_qdp_mod = _load_qdp_module()
 
 
 class _MissingCudaBackendEngine:

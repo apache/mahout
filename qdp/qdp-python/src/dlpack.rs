@@ -180,19 +180,6 @@ pub fn extract_dlpack_tensor(
     }
 }
 
-/// Acquire ownership of a DLManagedTensor pointer from a producer tensor.
-///
-/// This function is used when qdp-python acts as a pass-through producer:
-/// it takes ownership of the managed tensor pointer from `tensor.__dlpack__()`
-/// and returns it to be wrapped by `QuantumTensor`.
-pub fn steal_dlpack_managed_tensor(tensor: &Bound<'_, PyAny>) -> PyResult<*mut DLManagedTensor> {
-    let capsule = tensor.call_method0("__dlpack__")?;
-    let managed_ptr = unsafe { extract_managed_tensor(capsule.as_ptr())? };
-    unsafe { mark_capsule_used(capsule.as_ptr()) };
-
-    Ok(managed_ptr)
-}
-
 unsafe fn extract_managed_tensor(
     capsule_ptr: *mut ffi::PyObject,
 ) -> PyResult<*mut DLManagedTensor> {

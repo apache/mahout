@@ -46,13 +46,22 @@ def _make_stub(name: str) -> type[Any]:
     return type(name, (), {"__init__": __init__, "__doc__": f"Stub class - {name}"})
 
 
+QdpEngine: type[Any]
+QuantumTensor: type[Any]
+
 try:
-    from qumat_qdp import QdpEngine as QdpEngine
-    from qumat_qdp import QuantumTensor as QuantumTensor
+    from qumat_qdp import QdpEngine as _QdpEngine
+    from qumat_qdp import QuantumTensor as _QuantumTensor
+
+    QdpEngine = _QdpEngine
+    QuantumTensor = _QuantumTensor
 except ImportError as e:
     try:
-        from _qdp import QdpEngine as QdpEngine
-        from _qdp import QuantumTensor as QuantumTensor
+        from _qdp import QdpEngine as _QdpEngine
+        from _qdp import QuantumTensor as _QuantumTensor
+
+        QdpEngine = _QdpEngine
+        QuantumTensor = _QuantumTensor
     except ImportError:
         import warnings
 

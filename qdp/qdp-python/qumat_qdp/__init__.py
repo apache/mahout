@@ -44,29 +44,29 @@ else:
 
 BACKEND = get_backend()
 
-from qumat_qdp.backend import QdpEngine
-from qumat_qdp.tensor import QdpTensor, QuantumTensor
-from qumat_qdp.triton_amd import TritonAmdEngine, is_triton_amd_available
 from qumat_qdp.api import (
     LatencyResult,
     QdpBenchmark,
     ThroughputResult,
 )
+from qumat_qdp.backend import QdpEngine
 from qumat_qdp.loader import QuantumDataLoader
+from qumat_qdp.tensor import QdpTensor, QuantumTensor
+from qumat_qdp.triton_amd import TritonAmdEngine, is_triton_amd_available
 
 __all__ = [
     "BACKEND",
     "Backend",
     "LatencyResult",
+    "NativeQuantumTensor",
     "QdpBenchmark",
     "QdpEngine",
     "QdpTensor",
     "QuantumDataLoader",
     "QuantumTensor",
     "RustQdpEngine",
-    "NativeQuantumTensor",
-    "TritonAmdEngine",
     "ThroughputResult",
+    "TritonAmdEngine",
     "force_backend",
     "is_triton_amd_available",
     "run_throughput_pipeline_py",
