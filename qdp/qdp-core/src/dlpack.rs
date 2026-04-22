@@ -19,7 +19,7 @@
 #[cfg(target_os = "linux")]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
-use crate::gpu::memory::{BufferStorage, GpuStateVector, Precision};
+use crate::gpu::memory::{BufferStorage, GpuDeviceType, GpuStateVector, Precision};
 use std::os::raw::{c_int, c_void};
 use std::sync::Arc;
 
@@ -113,6 +113,7 @@ pub unsafe fn synchronize_stream(_stream: *mut c_void) -> Result<()> {
 pub enum DLDeviceType {
     kDLCPU = 1,
     kDLCUDA = 2,
+    kDLROCM = 10,
     // Other types omitted
 }
 
@@ -291,7 +292,10 @@ impl GpuStateVector {
         let tensor = DLTensor {
             data: self.ptr_void(),
             device: DLDevice {
-                device_type: DLDeviceType::kDLCUDA,
+                device_type: match self.device_type {
+                    GpuDeviceType::Cuda => DLDeviceType::kDLCUDA,
+                    GpuDeviceType::Rocm => DLDeviceType::kDLROCM,
+                },
                 device_id: self.device_id as c_int,
             },
             ndim,

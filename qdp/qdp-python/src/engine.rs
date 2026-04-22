@@ -28,12 +28,36 @@ use qdp_core::{Precision, QdpEngine as CoreEngine};
 #[cfg(target_os = "linux")]
 use crate::loader::{PyQuantumLoader, config_from_args, parse_null_handling, path_from_py};
 
-/// PyO3 wrapper for QdpEngine
+struct CudaEngineAdapter {
+    engine: CoreEngine,
+}
+
+impl CudaEngineAdapter {
+    fn new(device_id: usize, precision: Precision) -> PyResult<Self> {
+        let engine = CoreEngine::new_with_precision(device_id, precision).map_err(|e| {
+            PyRuntimeError::new_err(format!("Failed to initialize CUDA backend: {}", e))
+        })?;
+        Ok(Self { engine })
+    }
+
+    fn engine(&self) -> &CoreEngine {
+        &self.engine
+    }
+}
+
+/// PyO3 wrapper for the Rust/CUDA QdpEngine.
 ///
-/// Provides Python bindings for GPU-accelerated quantum state encoding.
+/// The public Python facade routes AMD/Triton directly in `qumat_qdp.backend`.
+/// `_qdp.QdpEngine` stays focused on the Rust CUDA core and its tensor contract.
+
 #[pyclass]
 pub struct QdpEngine {
-    pub engine: CoreEngine,
+    engine: CudaEngineAdapter,
+    #[allow(dead_code)]
+    device_id: usize,
+    #[allow(dead_code)]
+    precision: Precision,
+    backend: String,
 }
 
 #[pymethods]
@@ -50,8 +74,8 @@ impl QdpEngine {
     /// Raises:
     ///     RuntimeError: If CUDA device initialization fails
     #[new]
-    #[pyo3(signature = (device_id=0, precision="float32"))]
-    fn new(device_id: usize, precision: &str) -> PyResult<Self> {
+    #[pyo3(signature = (device_id=0, precision="float32", backend="cuda"))]
+    fn new(device_id: usize, precision: &str, backend: &str) -> PyResult<Self> {
         let precision = match precision.to_ascii_lowercase().as_str() {
             "float32" | "f32" | "float" => Precision::Float32,
             "float64" | "f64" | "double" => Precision::Float64,
@@ -63,9 +87,31 @@ impl QdpEngine {
             }
         };
 
-        let engine = CoreEngine::new_with_precision(device_id, precision)
-            .map_err(|e| PyRuntimeError::new_err(format!("Failed to initialize: {}", e)))?;
-        Ok(Self { engine })
+        let backend_name = backend.to_ascii_lowercase();
+        let (engine, resolved_backend) = match backend_name.as_str() {
+            "cuda" => (
+                CudaEngineAdapter::new(device_id, precision)?,
+                "cuda".to_string(),
+            ),
+            "amd" | "triton_amd" => {
+                return Err(PyRuntimeError::new_err(
+                    "AMD/Triton routing is provided by the Python facade `qumat_qdp.QdpEngine`; `_qdp.QdpEngine` only supports the Rust CUDA backend.",
+                ));
+            }
+            other => {
+                return Err(PyRuntimeError::new_err(format!(
+                    "Unsupported backend '{}'. Use 'cuda'.",
+                    other
+                )));
+            }
+        };
+
+        Ok(Self {
+            engine,
+            device_id,
+            precision,
+            backend: resolved_backend,
+        })
     }
 
     /// Encode classical data into quantum state (auto-detects input type)
@@ -101,6 +147,94 @@ impl QdpEngine {
     ///     >>> tensor = engine.encode(Path("data.npy"), 10)
     #[pyo3(signature = (data, num_qubits, encoding_method="amplitude"))]
     fn encode(
+        &self,
+        data: &Bound<'_, PyAny>,
+        num_qubits: usize,
+        encoding_method: &str,
+    ) -> PyResult<QuantumTensor> {
+        self.encode_with_core(data, num_qubits, encoding_method)
+    }
+
+    fn backend(&self) -> &str {
+        &self.backend
+    }
+
+    #[cfg(target_os = "linux")]
+    #[pyo3(signature = (total_batches, batch_size, num_qubits, encoding_method, seed=None, null_handling=None))]
+    fn create_synthetic_loader(
+        &self,
+        total_batches: usize,
+        batch_size: usize,
+        num_qubits: u32,
+        encoding_method: &str,
+        seed: Option<u64>,
+        null_handling: Option<&str>,
+    ) -> PyResult<PyQuantumLoader> {
+        self.create_synthetic_loader_impl(
+            total_batches,
+            batch_size,
+            num_qubits,
+            encoding_method,
+            seed,
+            null_handling,
+        )
+    }
+
+    #[cfg(target_os = "linux")]
+    #[allow(clippy::too_many_arguments)]
+    #[pyo3(signature = (path, batch_size, num_qubits, encoding_method, batch_limit=None, null_handling=None))]
+    fn create_file_loader(
+        &self,
+        py: Python<'_>,
+        path: &Bound<'_, PyAny>,
+        batch_size: usize,
+        num_qubits: u32,
+        encoding_method: &str,
+        batch_limit: Option<usize>,
+        null_handling: Option<&str>,
+    ) -> PyResult<PyQuantumLoader> {
+        self.create_file_loader_impl(
+            py,
+            path,
+            batch_size,
+            num_qubits,
+            encoding_method,
+            batch_limit,
+            null_handling,
+        )
+    }
+
+    #[cfg(target_os = "linux")]
+    #[allow(clippy::too_many_arguments)]
+    #[pyo3(signature = (path, batch_size, num_qubits, encoding_method, batch_limit=None, null_handling=None))]
+    fn create_streaming_file_loader(
+        &self,
+        py: Python<'_>,
+        path: &Bound<'_, PyAny>,
+        batch_size: usize,
+        num_qubits: u32,
+        encoding_method: &str,
+        batch_limit: Option<usize>,
+        null_handling: Option<&str>,
+    ) -> PyResult<PyQuantumLoader> {
+        self.create_streaming_file_loader_impl(
+            py,
+            path,
+            batch_size,
+            num_qubits,
+            encoding_method,
+            batch_limit,
+            null_handling,
+        )
+    }
+}
+
+impl QdpEngine {
+    fn core_engine(&self) -> PyResult<&CoreEngine> {
+        Ok(self.engine.engine())
+    }
+
+    fn encode_with_core(
         &self,
         data: &Bound<'_, PyAny>,
         num_qubits: usize,
@@ -158,7 +292,7 @@ impl QdpEngine {
                     PyRuntimeError::new_err("NumPy array must be contiguous (C-order)")
                 })?;
                 let ptr = self
-                    .engine
+                    .core_engine()?
                     .encode(data_slice, num_qubits, encoding_method)
                     .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
                 Ok(QuantumTensor {
@@ -180,7 +314,7 @@ impl QdpEngine {
                     PyRuntimeError::new_err("NumPy array must be contiguous (C-order)")
                 })?;
                 let ptr = self
-                    .engine
+                    .core_engine()?
                     .encode_batch(
                         data_slice,
                         num_samples,
@@ -210,7 +344,7 @@ impl QdpEngine {
             // Validate CUDA tensor for direct GPU encoding
             validate_cuda_tensor_for_encoding(
                 data,
-                self.engine.device().ordinal(),
+                self.core_engine()?.device().ordinal(),
                 encoding_method,
             )?;
 
@@ -239,7 +373,7 @@ impl QdpEngine {
                     // (held by Python's GIL), and we validated dtype/contiguity/device above.
                     // The DLPackTensorInfo RAII wrapper will call deleter when dropped.
                     let ptr = unsafe {
-                        self.engine
+                        self.core_engine()?
                             .encode_from_gpu_ptr(
                                 dlpack_info.data_ptr,
                                 input_len,
@@ -261,7 +395,7 @@ impl QdpEngine {
                     let sample_size = dlpack_info.shape[1] as usize;
                     // SAFETY: Same as above - pointer from validated DLPack tensor
                     let ptr = unsafe {
-                        self.engine
+                        self.core_engine()?
                             .encode_batch_from_gpu_ptr(
                                 dlpack_info.data_ptr,
                                 num_samples,
@@ -317,7 +451,7 @@ impl QdpEngine {
                     )
                 })?;
                 let ptr = self
-                    .engine
+                    .core_engine()?
                     .encode(data_slice, num_qubits, encoding_method)
                     .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
                 Ok(QuantumTensor {
@@ -343,7 +477,7 @@ impl QdpEngine {
                     )
                 })?;
                 let ptr = self
-                    .engine
+                    .core_engine()?
                     .encode_batch(
                         data_slice,
                         num_samples,
@@ -374,7 +508,7 @@ impl QdpEngine {
             )
         })?;
         let ptr = self
-            .engine
+            .core_engine()?
             .encode(&vec_data, num_qubits, encoding_method)
             .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
         Ok(QuantumTensor {
@@ -405,31 +539,31 @@ impl QdpEngine {
         };
 
         let ptr = if path.ends_with(".parquet") {
-            self.engine
+            self.core_engine()?
                 .encode_from_parquet(path, num_qubits, encoding_method)
                 .map_err(|e| {
                     PyRuntimeError::new_err(format!("Encoding from parquet failed: {}", e))
                 })?
         } else if path.ends_with(".arrow") || path.ends_with(".feather") {
-            self.engine
+            self.core_engine()?
                 .encode_from_arrow_ipc(path, num_qubits, encoding_method)
                 .map_err(|e| {
                     PyRuntimeError::new_err(format!("Encoding from Arrow IPC failed: {}", e))
                 })?
         } else if path.ends_with(".npy") {
-            self.engine
+            self.core_engine()?
                 .encode_from_numpy(path, num_qubits, encoding_method)
                 .map_err(|e| {
                     PyRuntimeError::new_err(format!("Encoding from NumPy failed: {}", e))
                 })?
         } else if path.ends_with(".pt") || path.ends_with(".pth") {
-            self.engine
+            self.core_engine()?
                 .encode_from_torch(path, num_qubits, encoding_method)
                 .map_err(|e| {
                     PyRuntimeError::new_err(format!("Encoding from PyTorch failed: {}", e))
                 })?
         } else if path.ends_with(".pb") {
-            self.engine
+            self.core_engine()?
                 .encode_from_tensorflow(path, num_qubits, encoding_method)
                 .map_err(|e| {
                     PyRuntimeError::new_err(format!("Encoding from TensorFlow failed: {}", e))
@@ -461,6 +595,7 @@ impl QdpEngine {
     ///     >>> engine = QdpEngine(device_id=0)
     ///     >>> batched = engine.encode_from_tensorflow("data.pb", 16, "amplitude")
     ///     >>> torch_tensor = torch.from_dlpack(batched)  # Shape: [200, 65536]
+    #[allow(dead_code)]
     fn encode_from_tensorflow(
         &self,
         path: &str,
@@ -468,7 +603,7 @@ impl QdpEngine {
         encoding_method: &str,
     ) -> PyResult<QuantumTensor> {
         let ptr = self
-            .engine
+            .core_engine()?
             .encode_from_tensorflow(path, num_qubits, encoding_method)
             .map_err(|e| {
                 PyRuntimeError::new_err(format!("Encoding from TensorFlow failed: {}", e))
@@ -489,7 +624,11 @@ impl QdpEngine {
         num_qubits: usize,
         encoding_method: &str,
     ) -> PyResult<QuantumTensor> {
-        validate_cuda_tensor_for_encoding(data, self.engine.device().ordinal(), encoding_method)?;
+        validate_cuda_tensor_for_encoding(
+            data,
+            self.core_engine()?.device().ordinal(),
+            encoding_method,
+        )?;
 
         let dtype = data.getattr("dtype")?;
         let dtype_str: String = dtype.str()?.extract()?;
@@ -510,7 +649,7 @@ impl QdpEngine {
                     let ptr = unsafe {
                         match method.as_str() {
                             "amplitude" => self
-                                .engine
+                                .core_engine()?
                                 .encode_from_gpu_ptr_f32_with_stream(
                                     data_ptr, input_len, num_qubits, stream_ptr,
                                 )
@@ -521,7 +660,7 @@ impl QdpEngine {
                                     ))
                                 })?,
                             "angle" => self
-                                .engine
+                                .core_engine()?
                                 .encode_angle_from_gpu_ptr_f32_with_stream(
                                     data_ptr, input_len, num_qubits, stream_ptr,
                                 )
@@ -548,7 +687,7 @@ impl QdpEngine {
                     let data_ptr = data_ptr_u64 as *const f32;
 
                     let ptr = unsafe {
-                        self.engine
+                        self.core_engine()?
                             .encode_batch_from_gpu_ptr_f32_with_stream(
                                 data_ptr,
                                 num_samples,
@@ -582,7 +721,7 @@ impl QdpEngine {
                 1 => {
                     let input_len = tensor_info.shape[0] as usize;
                     let ptr = unsafe {
-                        self.engine
+                        self.core_engine()?
                             .encode_from_gpu_ptr_with_stream(
                                 tensor_info.data_ptr as *const std::ffi::c_void,
                                 input_len,
@@ -603,7 +742,7 @@ impl QdpEngine {
                     let num_samples = tensor_info.shape[0] as usize;
                     let sample_size = tensor_info.shape[1] as usize;
                     let ptr = unsafe {
-                        self.engine
+                        self.core_engine()?
                             .encode_batch_from_gpu_ptr_with_stream(
                                 tensor_info.data_ptr as *const std::ffi::c_void,
                                 num_samples,
@@ -632,9 +771,7 @@ impl QdpEngine {
 
     // --- Loader factory methods (Linux only) ---
     #[cfg(target_os = "linux")]
-    /// Create a synthetic-data pipeline iterator (for QuantumDataLoader.source_synthetic()).
-    #[pyo3(signature = (total_batches, batch_size, num_qubits, encoding_method, seed=None, null_handling=None))]
-    fn create_synthetic_loader(
+    fn create_synthetic_loader_impl(
         &self,
         total_batches: usize,
         batch_size: usize,
@@ -643,9 +780,10 @@ impl QdpEngine {
         seed: Option<u64>,
         null_handling: Option<&str>,
     ) -> PyResult<PyQuantumLoader> {
+        let engine = self.core_engine()?.clone();
         let nh = parse_null_handling(null_handling)?;
         let config = config_from_args(
-            &self.engine,
+            &engine,
             batch_size,
             num_qubits,
             encoding_method,
@@ -654,17 +792,15 @@ impl QdpEngine {
             nh,
             true,
         );
-        let iter = qdp_core::PipelineIterator::new_synthetic(self.engine.clone(), config).map_err(
-            |e| PyRuntimeError::new_err(format!("create_synthetic_loader failed: {}", e)),
-        )?;
+        let iter = qdp_core::PipelineIterator::new_synthetic(engine, config).map_err(|e| {
+            PyRuntimeError::new_err(format!("create_synthetic_loader failed: {}", e))
+        })?;
         Ok(PyQuantumLoader::new(Some(iter)))
     }
 
     #[cfg(target_os = "linux")]
-    /// Create a file-backed pipeline iterator (full read then batch; for QuantumDataLoader.source_file(path)).
     #[allow(clippy::too_many_arguments)]
-    #[pyo3(signature = (path, batch_size, num_qubits, encoding_method, batch_limit=None, null_handling=None))]
-    fn create_file_loader(
+    fn create_file_loader_impl(
         &self,
         py: Python<'_>,
         path: &Bound<'_, PyAny>,
@@ -676,9 +812,10 @@ impl QdpEngine {
     ) -> PyResult<PyQuantumLoader> {
         let path_str = path_from_py(path)?;
         let batch_limit = batch_limit.unwrap_or(usize::MAX);
+        let engine = self.core_engine()?.clone();
         let nh = parse_null_handling(null_handling)?;
         let config = config_from_args(
-            &self.engine,
+            &engine,
             batch_size,
             num_qubits,
             encoding_method,
@@ -687,7 +824,6 @@ impl QdpEngine {
             nh,
             true, // float32_pipeline
         );
-        let engine = self.engine.clone();
         // Resolve remote URLs before detaching from GIL. The _resolved guard keeps the
         // temp file alive until after the file is fully read inside py.detach.
         #[cfg(feature = "remote-io")]
@@ -710,10 +846,8 @@ impl QdpEngine {
     }
 
     #[cfg(target_os = "linux")]
-    /// Create a streaming Parquet pipeline iterator (for QuantumDataLoader.source_file(path, streaming=True)).
     #[allow(clippy::too_many_arguments)]
-    #[pyo3(signature = (path, batch_size, num_qubits, encoding_method, batch_limit=None, null_handling=None))]
-    fn create_streaming_file_loader(
+    fn create_streaming_file_loader_impl(
         &self,
         py: Python<'_>,
         path: &Bound<'_, PyAny>,
@@ -725,9 +859,10 @@ impl QdpEngine {
     ) -> PyResult<PyQuantumLoader> {
         let path_str = path_from_py(path)?;
         let batch_limit = batch_limit.unwrap_or(usize::MAX);
+        let engine = self.core_engine()?.clone();
         let nh = parse_null_handling(null_handling)?;
         let config = config_from_args(
-            &self.engine,
+            &engine,
             batch_size,
             num_qubits,
             encoding_method,
@@ -736,7 +871,6 @@ impl QdpEngine {
             nh,
             true, // float32_pipeline
         );
-        let engine = self.engine.clone();
         // Resolve remote URLs before detaching from GIL. The _resolved guard keeps the
         // temp file alive; the streaming reader's open fd preserves data after drop.
         #[cfg(feature = "remote-io")]

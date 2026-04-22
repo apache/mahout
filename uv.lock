@@ -2095,10 +2095,12 @@ benchmark = [
     { name = "tensorflow", specifier = ">=2.20" },
     { name = "torch", specifier = ">=2.2,<=2.9.0" },
     { name = "tqdm" },
+    { name = "triton", specifier = ">=3.0" },
 ]
 dev = [
     { name = "pytest" },
     { name = "torch", specifier = ">=2.2,<=2.9.0" },
+    { name = "triton", specifier = ">=3.0" },
 ]
 
 [[package]]

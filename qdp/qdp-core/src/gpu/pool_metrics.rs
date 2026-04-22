@@ -112,7 +112,7 @@ impl PoolMetrics {
             } else {
                 0.0
             },
-            avg_wait_time_ns: if waits > 0 { wait_time_ns / waits } else { 0 },
+            avg_wait_time_ns: wait_time_ns.checked_div(waits).unwrap_or(0),
         }
     }
 

@@ -17,7 +17,7 @@
 """
 QDP (Quantum Data Processing) Python API.
 
-Public API: QdpEngine, QuantumTensor (Rust extension _qdp),
+Public API: QdpEngine (unified router), QdpTensor/QuantumTensor (DLPack facade),
 QdpBenchmark, ThroughputResult, LatencyResult (benchmark API),
 QuantumDataLoader (data loader iterator).
 
@@ -34,12 +34,12 @@ from qumat_qdp._backend import Backend, force_backend, get_backend, get_qdp
 
 _qdp_mod = get_qdp()
 if _qdp_mod is not None:
-    QdpEngine = getattr(_qdp_mod, "QdpEngine")
-    QuantumTensor = getattr(_qdp_mod, "QuantumTensor")
+    RustQdpEngine = getattr(_qdp_mod, "QdpEngine")
+    NativeQuantumTensor = getattr(_qdp_mod, "QuantumTensor")
     run_throughput_pipeline_py = getattr(_qdp_mod, "run_throughput_pipeline_py", None)
 else:
-    QdpEngine = None
-    QuantumTensor = None
+    RustQdpEngine = None
+    NativeQuantumTensor = None
     run_throughput_pipeline_py = None
 
 BACKEND = get_backend()
@@ -49,17 +49,25 @@ from qumat_qdp.api import (
     QdpBenchmark,
     ThroughputResult,
 )
+from qumat_qdp.backend import QdpEngine
 from qumat_qdp.loader import QuantumDataLoader
+from qumat_qdp.tensor import QdpTensor, QuantumTensor
+from qumat_qdp.triton_amd import TritonAmdEngine, is_triton_amd_available
 
 __all__ = [
     "BACKEND",
     "Backend",
     "LatencyResult",
+    "NativeQuantumTensor",
     "QdpBenchmark",
     "QdpEngine",
+    "QdpTensor",
     "QuantumDataLoader",
     "QuantumTensor",
+    "RustQdpEngine",
     "ThroughputResult",
+    "TritonAmdEngine",
     "force_backend",
+    "is_triton_amd_available",
     "run_throughput_pipeline_py",
 ]

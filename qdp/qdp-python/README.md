@@ -8,7 +8,25 @@ GPU-accelerated quantum state encoding for [Apache Mahout Qumat](https://github.
 pip install qumat[qdp]
 ```
 
-Requires CUDA-capable GPU.
+Requires one of:
+- NVIDIA GPU (CUDA path via `QdpEngine`)
+- AMD GPU with ROCm (AMD path via `QdpEngine(backend="amd")`)
+
+Recommended environment setup:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+
+# Install the GPU runtime for your platform first:
+# - NVIDIA users: CUDA-compatible torch / triton
+# - AMD users: ROCm-compatible torch / triton
+
+uv sync --active --project qdp/qdp-python --group dev
+```
+
+Use `--active` so `uv` reuses the environment that already has the correct GPU
+runtime stack.
 
 ## Usage
 
@@ -16,8 +34,9 @@ Requires CUDA-capable GPU.
 import qumat.qdp as qdp
 import torch
 
-# Initialize engine on GPU 0
-engine = qdp.QdpEngine(device_id=0)
+# Initialize the unified QDP engine on GPU 0.
+# Choose the backend explicitly.
+engine = qdp.QdpEngine(device_id=0, backend="cuda")
 
 # Encode data into quantum state
 qtensor = engine.encode([1.0, 2.0, 3.0, 4.0], num_qubits=2, encoding_method="amplitude")
@@ -27,6 +46,26 @@ tensor = torch.from_dlpack(qtensor)
 print(tensor)  # Complex tensor on CUDA
 ```
 
+### AMD ROCm Usage
+
+```python
+import qumat.qdp as qdp
+import torch
+
+# Unified AMD engine route
+engine = qdp.QdpEngine(device_id=0, precision="float32", backend="amd")
+qt = engine.encode(torch.randn(8, 4, device="cuda"), 2, "amplitude")
+state = torch.from_dlpack(qt)
+print(state.device, state.dtype)  # cuda:0, complex64
+
+```
+
+The public `QdpEngine` is a unified Python facade with explicit backend selection:
+- `backend="cuda"` routes to the Rust `_qdp.QdpEngine`
+- `backend="amd"` routes to the Triton AMD engine directly
+
+See `qdp/qdp-python/TRITON_AMD_BACKEND.md` for Triton AMD setup and validation details.
+
 ## Encoding Methods
 
 | Method | Description |
@@ -35,6 +74,10 @@ print(tensor)  # Complex tensor on CUDA
 | `angle` | Map values to rotation angles (one per qubit) |
 | `basis` | Encode integer as computational basis state |
 | `iqp` | IQP-style encoding with entanglement |
+
+Backend support boundary:
+- CUDA (`QdpEngine`): `amplitude`, `angle`, `basis`, `iqp`
+- AMD (`QdpEngine(..., backend="amd")`): `amplitude`, `angle`, `basis` (no `iqp` yet)
 
 ## Input Sources
 

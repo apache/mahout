@@ -8,9 +8,10 @@ QDP (Quantum Data Plane) is a GPU-accelerated library for encoding classical dat
 
 ## Prerequisites
 
-- Linux with NVIDIA GPU
-- CUDA toolkit installed (`nvcc --version` to verify)
 - Python 3.10+
+- One of:
+  - NVIDIA GPU with CUDA toolkit installed (`nvcc --version` to verify)
+  - AMD GPU with ROCm and PyTorch ROCm installed (`python -c "import torch; print(torch.version.hip)"`)
 
 ## Installation
 
@@ -28,18 +29,33 @@ source .venv/bin/activate
 uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml
 ```
 
+For AMD ROCm with the Triton backend:
+
+```bash
+uv sync --group dev --extra qdp
+pip install triton
+```
+
 ## Quick Start
 
 ```python
 import torch
 from qumat.qdp import QdpEngine
 
-engine = QdpEngine(0)  # GPU device 0
+engine = QdpEngine(device_id=0, backend="cuda")
 data = [0.5, 0.5, 0.5, 0.5]
 qtensor = engine.encode(data, num_qubits=2, encoding_method="amplitude")
 
 # Convert to PyTorch (zero-copy)
 tensor = torch.from_dlpack(qtensor)  # Note: can only be consumed once
+```
+
+AMD ROCm uses the same API with a different backend selector:
+
+```python
+engine = QdpEngine(device_id=0, backend="amd", precision="float32")
+qtensor = engine.encode(data, num_qubits=2, encoding_method="amplitude")
+tensor = torch.from_dlpack(qtensor)
 ```
 
 ## Encoding Methods
@@ -79,6 +95,7 @@ Notes:
 |---------|----------|
 | Import fails | Activate root venv: `source mahout/.venv/bin/activate` (or `cd mahout && source .venv/bin/activate`) |
 | CUDA errors | Run `cargo clean` in `qdp/` and rebuild |
+| AMD backend unavailable | Verify ROCm PyTorch reports `torch.version.hip` and install `triton` |
 | Out of memory | Reduce `num_qubits` or use `precision="float32"` |
 
 ## Next Steps
