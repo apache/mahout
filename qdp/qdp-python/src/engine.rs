@@ -126,8 +126,7 @@ impl QdpEngine {
     ///         - pathlib.Path: Path object (converted via os.fspath())
     ///     num_qubits: Number of qubits for encoding
     ///     encoding_method: Encoding strategy ("amplitude" default, "angle", or "basis"). CUDA tensor notes:
-    ///         - amplitude accepts float64 and float32
-    ///         - angle accepts float64 generally, plus float32 for 1D and 2D CUDA tensors
+    ///         - amplitude and angle accept float64 and float32
     ///
     /// Returns:
     ///     QuantumTensor: DLPack-compatible tensor for zero-copy PyTorch integration
