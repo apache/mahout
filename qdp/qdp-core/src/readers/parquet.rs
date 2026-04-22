@@ -389,11 +389,10 @@ impl StreamingDataReader for ParquetStreamingReader {
         let mut written = 0;
         let buf_cap = buffer.len();
         let calc_limit = |ss: usize| -> usize {
-            if ss == 0 {
-                buf_cap
-            } else {
-                (buf_cap / ss) * ss
-            }
+            buf_cap
+                .checked_div(ss)
+                .map(|chunks| chunks * ss)
+                .unwrap_or(buf_cap)
         };
         let mut limit = self.sample_size.map_or(buf_cap, calc_limit);
 
