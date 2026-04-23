@@ -64,7 +64,14 @@ tensor = torch.from_dlpack(qtensor)
 |--------|-----------|---------|
 | `amplitude` | data length ≤ 2^num_qubits | `encode([0.5, 0.5, 0.5, 0.5], num_qubits=2, encoding_method="amplitude")` |
 | `angle` | data length = num_qubits | `encode([0.1, 0.2, 0.3, 0.4], num_qubits=4, encoding_method="angle")` |
-| `basis` | data length = num_qubits | `encode([1, 0, 1, 1], num_qubits=4, encoding_method="basis")` |
+| `basis` | one integer index in `[0, 2^num_qubits)` per sample | `encode([3], num_qubits=2, encoding_method="basis")` |
+| `phase` | data length = num_qubits | `encode([0.0, 1.57], num_qubits=2, encoding_method="phase")` |
+| `iqp-z` | data length = num_qubits | `encode([0.1, -0.2], num_qubits=2, encoding_method="iqp-z")` |
+| `iqp` | data length = num_qubits + num_qubits*(num_qubits-1)/2 | `encode([0.1, -0.2, 0.3], num_qubits=2, encoding_method="iqp")` |
+
+Notes:
+- `phase`, `iqp`, and `iqp-z` are currently CUDA-route features. The AMD Triton route supports `amplitude`, `angle`, and `basis`.
+- For detailed input contracts and route-specific support, see the [API Reference](./api/) and [Python API](./python-api/).
 
 ## File Inputs
 

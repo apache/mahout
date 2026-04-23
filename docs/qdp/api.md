@@ -19,13 +19,14 @@ import qumat.qdp as qdp
 
 ## Class: `QdpEngine`
 
-### `QdpEngine(device_id=0, precision="float32")`
+### `QdpEngine(device_id=0, precision="float32", backend="cuda")`
 
 Create a GPU encoder instance.
 
 **Parameters**
 - `device_id` (int): CUDA device ID, default `0`.
 - `precision` (str): `"float32"` or `"float64"`.
+- `backend` (str): Public Python route selector. `qumat.qdp` uses `"cuda"` for the Rust/CUDA path and `"amd"` for the Triton AMD route.
 
 **Raises**
 - `RuntimeError`: Initialization failure or unsupported precision.
@@ -43,7 +44,7 @@ Encode classical input into a quantum state and return a DLPack tensor on GPU.
     - `.parquet`, `.arrow` / `.feather`, `.npy`, `.pt` / `.pth`, `.pb`
     - remote URL (`s3://bucket/key`, `gs://bucket/key`) when built with `remote-io`
 - `num_qubits` (int): Number of qubits, range 1–30.
-- `encoding_method` (str): `"amplitude" | "angle" | "basis" | "iqp" | "iqp-z"` (lowercase).
+- `encoding_method` (str): `"amplitude" | "angle" | "basis" | "phase" | "iqp" | "iqp-z"` (lowercase).
 
 **Returns**
 - `QuantumTensor` with 2D shape:
@@ -55,6 +56,20 @@ Encode classical input into a quantum state and return a DLPack tensor on GPU.
 - Parquet streaming currently supports `"amplitude"` and `"basis"`.
 - PyTorch file inputs (`.pt`, `.pth`) require building with the `pytorch` feature.
 - Remote URL query/fragment is not supported (`?versionId=...`, `#...`).
+
+### Advanced Encoding Support Matrix
+
+For the advanced methods documented below, support currently differs by route:
+
+| Surface | `phase` | `iqp` | `iqp-z` |
+|---------|---------|-------|---------|
+| `qumat.qdp.QdpEngine(..., backend="cuda").encode(...)` | ✅ | ✅ | ✅ |
+| CUDA tensor direct-input fast path | ❌ | ✅ | ✅ |
+| `qumat.qdp.QdpEngine(..., backend="amd")` | ❌ | ❌ | ❌ |
+
+Notes:
+- `phase` is implemented and tested on the CUDA encode path, but it is not part of the CUDA tensor direct-input fast path today.
+- The AMD Triton route currently supports `amplitude`, `angle`, and `basis` only.
 
 **Raises**
 - `RuntimeError`: Invalid inputs, shapes, dtypes, or unsupported formats.
@@ -96,6 +111,13 @@ Return `(device_type, device_id)`; CUDA devices report `(2, gpu_id)`.
 
 - Each sample provides one integer index in `[0, 2^num_qubits)`.
 
+### `phase`
+
+- Expects `n` phase angles for `n = num_qubits`.
+- Produces a product state of the form `(1/sqrt(2^n)) * sum_b exp(i * phase(b)) |b>`.
+- All phase angles must be finite (no NaN/Inf).
+- Available on the CUDA encode path; not currently exposed through the AMD route.
+
 ### `iqp`
 
 - Expects `n + n*(n-1)/2` parameters for `n = num_qubits` (Z + ZZ terms).
@@ -120,6 +142,7 @@ Return `(device_type, device_id)`; CUDA devices report `(2, gpu_id)`.
 - Input length exceeds `2^num_qubits`.
 - Non-`float64` NumPy/Torch inputs.
 - Torch tensors not on CPU or not contiguous.
+- `phase` used through a CUDA tensor direct-input path.
 - DLPack capsule consumed more than once.
 
 ## Requirements & Deprecation

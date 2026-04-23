@@ -39,18 +39,35 @@ from qumat_qdp import (
 
 GPU encoder. Constructor and main methods:
 
-**`QdpEngine(device_id=0, precision="float32")`**
+**`QdpEngine(device_id=0, precision="float32", backend="cuda")`**
 
 - `device_id` (int): CUDA device ID.
 - `precision` (str): `"float32"` or `"float64"`.
+- `backend` (str): `"cuda"` for the Rust/CUDA route or `"amd"` for the Triton AMD route.
 - Raises `RuntimeError` on init failure or unsupported precision.
 
 **`encode(data, num_qubits, encoding_method="amplitude") -> QuantumTensor`**
 
 - `data`: list of floats, 1D/2D NumPy array (float64, C-contiguous), PyTorch tensor (CPU/CUDA), or file path (`.parquet`, `.arrow`, `.feather`, `.npy`, `.pt`, `.pth`, `.pb`).
 - `num_qubits` (int): Number of qubits.
-- `encoding_method` (str): `"amplitude"` | `"angle"` | `"basis"` | `"iqp"` | `"iqp-z"`.
+- `encoding_method` (str): `"amplitude"` | `"angle"` | `"basis"` | `"phase"` | `"iqp"` | `"iqp-z"`.
 - Returns a DLPack-compatible tensor; use `torch.from_dlpack(qtensor)`. Shape `[batch_size, 2^num_qubits]`.
+
+### Advanced Encoding Support
+
+The advanced methods `phase`, `iqp`, and `iqp-z` are not currently uniform across every helper surface.
+
+| Surface | `phase` | `iqp` | `iqp-z` |
+|--------|---------|-------|---------|
+| `QdpEngine(..., backend="cuda").encode(...)` | ✅ | ✅ | ✅ |
+| CUDA tensor fast path | ❌ | ✅ | ✅ |
+| `QdpEngine(..., backend="amd")` | ❌ | ❌ | ❌ |
+| `qumat_qdp.torch_ref.encode(..., encoding_method=...)` | ❌ | ✅ | ❌ |
+
+Notes:
+- `phase` is implemented on the CUDA encode path and covered by binding tests, but it is not part of the CUDA tensor direct-input fast path.
+- The AMD Triton route currently implements `amplitude`, `angle`, and `basis` only.
+- The pure-PyTorch reference helper exposes `iqp` directly. For Z-only reference behavior, use `iqp_encode(..., enable_zz=False)`.
 
 **`create_synthetic_loader(total_batches, batch_size=64, num_qubits=16, encoding_method="amplitude", seed=None)`**
 
@@ -86,6 +103,8 @@ Builder; chain methods then call `run_throughput()` or `run_latency()`.
 | `batches(total, size=64)` | Total batches and batch size. |
 | `prefetch(n)` | No-op (API compatibility). |
 | `warmup(n)` | Warmup batch count. |
+
+The benchmark helpers remain primarily amplitude/angle/basis oriented. The PyTorch reference backend also supports `iqp`; `phase` and `iqp-z` should be treated as direct-encode methods rather than benchmark-helper features.
 
 **`run_throughput() -> ThroughputResult`**
 
@@ -151,6 +170,8 @@ Builder for a synthetic-data loader. Calling `iter(loader)` (or `for qt in loade
 | `batches(total, size=64)` | Total batches and batch size. |
 | `source_synthetic(total_batches=None)` | Synthetic data (default); optional override for total batches. |
 | `seed(s)` | RNG seed for reproducibility. |
+
+The documented loader surface is amplitude/angle/basis first. The PyTorch reference backend has explicit `iqp` coverage in tests; `phase` and `iqp-z` are not first-class loader methods today.
 
 **Iteration:** `for qt in loader:` yields `QuantumTensor` of shape `[batch_size, 2^num_qubits]`. Consume once per tensor, e.g. `torch.from_dlpack(qt)`.
 
