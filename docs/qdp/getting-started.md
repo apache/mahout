@@ -13,6 +13,11 @@ QDP (Quantum Data Plane) is a GPU-accelerated library for encoding classical dat
   - NVIDIA GPU with a CUDA-compatible PyTorch build (verify with `python -c "import torch; print(torch.cuda.is_available())"`)
   - AMD GPU with a ROCm-compatible PyTorch build (verify with `python -c "import torch; print(torch.version.hip)"`) plus Triton with HIP support
 
+For NVIDIA CUDA builds, QDP selects CUDA kernel architecture targets from the
+local `nvcc` supported target list and includes a PTX target when available.
+Set `QDP_CUDA_ARCH_LIST` to override the generated targets, for example
+`QDP_CUDA_ARCH_LIST="89,90,120+PTX"`.
+
 ## Installation
 
 ```bash
