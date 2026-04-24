@@ -13,6 +13,23 @@ QDP (Quantum Data Plane) is a GPU-accelerated library for encoding classical dat
   - NVIDIA GPU with a CUDA-compatible PyTorch build (verify with `python -c "import torch; print(torch.cuda.is_available())"`)
   - AMD GPU with a ROCm-compatible PyTorch build (verify with `python -c "import torch; print(torch.version.hip)"`) plus Triton with HIP support
 
+## Supported GPU Backends
+
+QDP currently supports the following GPU backends:
+
+- NVIDIA CUDA backend
+  - CUDA builds target NVIDIA GPUs supported by the installed CUDA toolkit.
+  - The current default CUDA architecture shortlist spans common NVIDIA
+    generations from Turing through Blackwell: `sm_75`, `sm_80`, `sm_86`,
+    `sm_89`, `sm_90`, `sm_100`, and `sm_120`.
+  - The final generated CUDA targets depend on the local `nvcc` supported
+    architectures.
+
+- AMD ROCm backend
+  - ROCm builds target AMD GPUs supported by the installed ROCm stack and the
+    Triton backend used by QDP.
+  - The final supported devices depend on the local ROCm environment.
+
 ## Installation
 
 ```bash
