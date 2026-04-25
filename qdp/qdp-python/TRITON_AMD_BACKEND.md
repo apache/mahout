@@ -65,9 +65,9 @@ Supported methods:
 - `amplitude`
 - `angle`
 - `basis`
-
-Not supported in the AMD route yet:
-- `iqp` (currently CUDA backend only)
+- `iqp` (full, with ZZ entanglement)
+- `iqp-z` (Z-only diagonal, no ZZ pairs)
+- `phase`
 
 ## Correctness tests
 
@@ -79,7 +79,8 @@ uv run --project qdp/qdp-python pytest -m rocm qdp/qdp-python/tests -q
 ```
 
 Tests include:
-- parity against Torch reference outputs (amplitude/angle/basis)
+- parity against Torch reference outputs (amplitude/angle/basis/iqp)
+- structural checks for `phase` (output is a unit-norm product state)
 - optional parity against CUDA backend reference (when NVIDIA CUDA path is present)
 
 ## Baseline benchmark
