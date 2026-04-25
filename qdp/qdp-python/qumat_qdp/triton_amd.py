@@ -18,6 +18,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from importlib import import_module
 from typing import Any
@@ -56,7 +57,7 @@ def is_triton_amd_available() -> bool:
 
 @dataclass
 class TritonAmdEngine:
-    """AMD backend implementing amplitude/angle/basis encoders."""
+    """AMD backend implementing amplitude/angle/basis/iqp/iqp-z/phase encoders."""
 
     device_id: int = 0
     precision: str = "float32"
@@ -195,6 +196,85 @@ class TritonAmdEngine:
         )
         return out
 
+    def encode_iqp(
+        self,
+        data: Any,
+        num_qubits: int,
+        *,
+        enable_zz: bool = True,
+    ) -> Any:
+        torch_mod = self._require_torch()
+        real_dtype = self._real_dtype()
+        params = self._to_2d(data, dtype=real_dtype)
+        batch, width = params.shape
+
+        n = num_qubits
+        expected = n + n * (n - 1) // 2 if enable_zz else n
+        if width != expected:
+            variant = "ZZ" if enable_zz else "Z-only"
+            raise ValueError(
+                f"IQP encoding ({variant}) expects {expected} parameters for {n} qubits, got {width}."
+            )
+
+        state_len = 1 << n
+        device = params.device
+
+        # θ(x) = Σ_i x_i * data[i]  (+ Σ_{i<j} x_i x_j data[n + pair_idx] if ZZ)
+        x_idx = torch_mod.arange(state_len, device=device, dtype=torch_mod.int64)
+        x_bits = ((x_idx.unsqueeze(1) >> torch_mod.arange(n, device=device)) & 1).to(
+            real_dtype
+        )
+        z_params = params[:, :n]
+        phase = torch_mod.matmul(z_params, x_bits.T)
+
+        if enable_zz and n >= 2:
+            zz_params = params[:, n:]
+            pairs = torch_mod.combinations(torch_mod.arange(n, device=device), r=2)
+            pair_matrix = x_bits[:, pairs[:, 0]] * x_bits[:, pairs[:, 1]]
+            phase = phase + torch_mod.matmul(zz_params, pair_matrix.T)
+
+        # f[x] = exp(i·θ(x)), then n-stage Walsh-Hadamard butterfly, then 1/2^n.
+        complex_dtype = self._complex_dtype()
+        f = torch_mod.complex(torch_mod.cos(phase), torch_mod.sin(phase)).to(
+            complex_dtype
+        )
+        for s in range(n):
+            stride = 1 << s
+            block = 1 << (s + 1)
+            f = f.view(batch, state_len // block, block)
+            lo = f[:, :, :stride]
+            hi = f[:, :, stride:]
+            f = torch_mod.cat([lo + hi, lo - hi], dim=2)
+        f = f.reshape(batch, state_len)
+
+        norm_factor = 1.0 / float(state_len)
+        return f * norm_factor
+
+    def encode_phase(self, data: Any, num_qubits: int) -> Any:
+        torch_mod = self._require_torch()
+        real_dtype = self._real_dtype()
+        phases = self._to_2d(data, dtype=real_dtype)
+        batch, width = phases.shape
+        if width != num_qubits:
+            raise ValueError(
+                f"Phase encoding expects sample size {num_qubits} (=num_qubits), got {width}."
+            )
+
+        state_len = 1 << num_qubits
+        device = phases.device
+
+        # φ(b) = Σ_k phases[k] · b_k   →   state[b] = (1/√2^n) · exp(i·φ(b))
+        b_idx = torch_mod.arange(state_len, device=device, dtype=torch_mod.int64)
+        bits = (
+            (b_idx.unsqueeze(1) >> torch_mod.arange(num_qubits, device=device)) & 1
+        ).to(real_dtype)
+        phi = torch_mod.matmul(phases, bits.T)
+
+        norm = math.pow(math.sqrt(0.5), num_qubits)
+        re = torch_mod.cos(phi) * norm
+        im = torch_mod.sin(phi) * norm
+        return torch_mod.complex(re, im).to(self._complex_dtype())
+
     def encode(
         self,
         data: Any,
@@ -210,6 +290,13 @@ class TritonAmdEngine:
             return self.encode_angle(data, num_qubits)
         if method == "basis":
             return self.encode_basis(data, num_qubits)
+        if method == "iqp":
+            return self.encode_iqp(data, num_qubits, enable_zz=True)
+        if method == "iqp-z":
+            return self.encode_iqp(data, num_qubits, enable_zz=False)
+        if method == "phase":
+            return self.encode_phase(data, num_qubits)
         raise ValueError(
-            f"Unsupported encoding '{encoding_method}'. triton_amd supports amplitude, angle, basis."
+            f"Unsupported encoding '{encoding_method}'. "
+            "triton_amd supports amplitude, angle, basis, iqp, iqp-z, phase."
         )
