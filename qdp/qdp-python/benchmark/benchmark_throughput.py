@@ -39,6 +39,11 @@ Frameworks:
                          import to avoid a deadlock with the older
                          libhsa-runtime Ubuntu 24.04 ships at
                          /lib/x86_64-linux-gnu.
+* ``pytorch-ref``      — Pure-PyTorch reference implementation
+                         (:func:`qumat_qdp.torch_ref.amplitude_encode`).
+                         Same workload, no engine wrapper — useful as a
+                         "what naive PyTorch on the same hardware can do"
+                         ceiling for the AMD comparison.
 * ``qiskit``           — Qiskit Aer ``statevector`` simulator (CPU).
 
 Run from qdp-python directory (qumat_qdp must be importable, e.g. via uv):
@@ -93,6 +98,7 @@ FRAMEWORK_CHOICES = (
     "mahout",
     "mahout-amd",
     "pennylane-amdgpu",
+    "pytorch-ref",
 )
 
 try:
@@ -256,6 +262,55 @@ def run_mahout_amd(num_qubits: int, total_batches: int, batch_size: int, prefetc
     return duration, throughput
 
 
+def run_pytorch_ref(
+    num_qubits: int, total_batches: int, batch_size: int, prefetch: int
+):
+    """Run the project's PyTorch-only reference implementation.
+
+    Same amplitude-encoding workload as `mahout-amd`, but goes through
+    `qumat_qdp.torch_ref.amplitude_encode` (a pure PyTorch op chain:
+    L2 normalize, zero-pad to 2**num_qubits, complex view) with no
+    engine wrapper. Useful as a ceiling for "what naive PyTorch on the
+    same hardware can do" — gaps between this and `mahout-amd` quantify
+    the per-call overhead in the AMD engine adapter.
+    """
+    try:
+        from qumat_qdp.torch_ref import amplitude_encode
+    except ImportError as exc:
+        print(f"[PyTorch-ref] qumat_qdp.torch_ref unavailable: {exc}")
+        return 0.0, 0.0
+
+    cuda_available = torch.cuda.is_available()
+    target_device = "cuda" if cuda_available else "cpu"
+
+    # Warmup: amortize first kernel launches.
+    for warmup_batch in prefetched_batches(
+        WARMUP_BATCHES, batch_size, 1 << num_qubits, prefetch
+    ):
+        wb = torch.tensor(warmup_batch, dtype=torch.float32, device=target_device)
+        _ = amplitude_encode(wb, num_qubits)
+    if cuda_available:
+        torch.cuda.synchronize()
+
+    start = time.perf_counter()
+    processed = 0
+
+    for batch in prefetched_batches(
+        total_batches, batch_size, 1 << num_qubits, prefetch
+    ):
+        batch_t = torch.tensor(batch, dtype=torch.float32, device=target_device)
+        state = amplitude_encode(batch_t, num_qubits)
+        _ = state.abs().sum()
+        processed += len(batch)
+
+    if cuda_available:
+        torch.cuda.synchronize()
+    duration = time.perf_counter() - start
+    throughput = processed / duration if duration > 0 else 0.0
+    print(f"  Total Time: {duration:.4f} s ({throughput:.1f} vectors/sec)")
+    return duration, throughput
+
+
 def run_pennylane_amdgpu(
     num_qubits: int, total_batches: int, batch_size: int, prefetch: int
 ):
@@ -402,7 +457,7 @@ def main() -> None:
         default="all",
         help=(
             "Comma-separated list of frameworks to run "
-            "(pennylane, pennylane-amdgpu, qiskit, mahout, mahout-amd) "
+            "(pennylane, pennylane-amdgpu, pytorch-ref, qiskit, mahout, mahout-amd) "
             "or 'all'."
         ),
     )
@@ -465,6 +520,7 @@ def main() -> None:
 
     t_pl = th_pl = t_qiskit = th_qiskit = t_mahout = th_mahout = 0.0
     t_pl_amd = th_pl_amd = t_mahout_amd = th_mahout_amd = 0.0
+    t_pt_ref = th_pt_ref = 0.0
 
     if "pennylane" in frameworks:
         print()
@@ -477,6 +533,13 @@ def main() -> None:
         print()
         print("[PennyLane-AMDGPU] Full Pipeline (lightning.amdgpu, per-sample)...")
         t_pl_amd, th_pl_amd = run_pennylane_amdgpu(
+            args.qubits, args.batches, args.batch_size, args.prefetch
+        )
+
+    if "pytorch-ref" in frameworks:
+        print()
+        print("[PyTorch-ref] Full Pipeline (qumat_qdp.torch_ref.amplitude_encode)...")
+        t_pt_ref, th_pt_ref = run_pytorch_ref(
             args.qubits, args.batches, args.batch_size, args.prefetch
         )
 
@@ -516,6 +579,8 @@ def main() -> None:
         throughput_results.append(("PennyLane", th_pl))
     if th_pl_amd > 0:
         throughput_results.append(("PennyLane-AMDGPU", th_pl_amd))
+    if th_pt_ref > 0:
+        throughput_results.append(("PyTorch-ref", th_pt_ref))
     if th_qiskit > 0:
         throughput_results.append(("Qiskit", th_qiskit))
     if th_mahout > 0:
@@ -539,6 +604,10 @@ def main() -> None:
         if t_pl_amd > 0:
             print(
                 f"Speedup {ref_name} vs PennyLane-AMDGPU: {ref_th / th_pl_amd:10.2f}x"
+            )
+        if t_pt_ref > 0:
+            print(
+                f"Speedup {ref_name} vs PyTorch-ref:      {ref_th / th_pt_ref:10.2f}x"
             )
         if t_qiskit > 0:
             print(
