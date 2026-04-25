@@ -114,20 +114,21 @@ def encode_via_qdp(
     X_norm: np.ndarray,
     batch_size: int,  # kept for CLI symmetry; not used here
     device_id: int = 0,
+    qdp_backend: str = "cuda",
     data_dir: str | None = None,
     filename: str = "iris_4d.npy",
 ) -> torch.Tensor:
     """QDP: use QdpEngine.encode on 4-D vectors (amplitude), return encoded (n, 4) on GPU.
 
     Uses in-memory encoding via QdpEngine instead of writing/reading .npy files. The returned
-    tensor stays on the selected CUDA device and can be fed directly to qml.StatePrep.
+    tensor stays on the selected GPU device and can be fed directly to qml.StatePrep.
     """
     n, dim = X_norm.shape
     if dim != STATE_DIM:
         raise ValueError(
             f"X_norm must have {STATE_DIM} features for 2 qubits, got {dim}"
         )
-    engine = QdpEngine(device_id=device_id, precision="float32")
+    engine = QdpEngine(device_id=device_id, precision="float32", backend=qdp_backend)
     qt = engine.encode(
         X_norm.astype(np.float64),
         num_qubits=NUM_QUBITS,
@@ -448,6 +449,12 @@ def main() -> None:
         "--device-id", type=int, default=0, help="QDP device (default: 0)"
     )
     parser.add_argument(
+        "--qdp-backend",
+        choices=("cuda", "amd"),
+        default="cuda",
+        help="QDP backend for direct state preparation (default: cuda)",
+    )
+    parser.add_argument(
         "--data-dir", type=str, default=None, help="Dir for .npy files (default: temp)"
     )
     args = parser.parse_args()
@@ -476,6 +483,7 @@ def main() -> None:
         X_train_4d,
         batch_size=args.batch_size,
         device_id=args.device_id,
+        qdp_backend=args.qdp_backend,
         data_dir=args.data_dir,
         filename="iris_4d_train.npy",
     )
@@ -483,6 +491,7 @@ def main() -> None:
         X_test_4d,
         batch_size=args.batch_size,
         device_id=args.device_id,
+        qdp_backend=args.qdp_backend,
         data_dir=args.data_dir,
         filename="iris_4d_test.npy",
     )
@@ -490,7 +499,8 @@ def main() -> None:
     print("Iris amplitude (QDP encoding) — 2-class variational classifier")
     print(f"  Data: {data_src} → QDP amplitude  (n={n}; 2-class Iris = 100 samples)")
     print(
-        f"  Iters: {args.iters}, batch_size: {args.batch_size}, layers: {args.layers}, lr: {args.lr}, optimizer: {args.optimizer}"
+        f"  Iters: {args.iters}, batch_size: {args.batch_size}, layers: {args.layers}, "
+        f"lr: {args.lr}, optimizer: {args.optimizer}, qdp_backend: {args.qdp_backend}"
     )
 
     results: list[dict[str, Any]] = []

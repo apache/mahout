@@ -4,7 +4,7 @@ This directory is used to **compare a pure PennyLane baseline with a QDP pipelin
 Both scripts use the same dataset and the same variational model; **only the encoding step is different**.
 
 - **`pennylane_baseline/`**: pure PennyLane (sklearn / official Iris file → encoding → variational classifier).
-- **`qdp_pipeline/`**: same data and model, but encoding is done via the QDP `QuantumDataLoader` (amplitude).
+- **`qdp_pipeline/`**: same data and model, but encoding is done via QDP direct state preparation.
 
 Run all commands from the `qdp-python` directory:
 
@@ -15,11 +15,14 @@ cd qdp/qdp-python
 ## Environment (one-time setup)
 
 ```bash
-uv sync --group benchmark        # install PennyLane, torch(+CUDA), scikit-learn, etc.
+uv sync --group benchmark        # install PennyLane, torch, scikit-learn, etc.
 uv run maturin develop           # build QDP Python extension (qumat_qdp)
 ```
 
-If your CUDA driver is not 12.6, adjust the PyTorch index URL in `pyproject.toml` according to the comments there.
+Install the GPU runtime for your platform first. CUDA users need a CUDA-compatible
+PyTorch stack; AMD users need a ROCm-compatible PyTorch/Triton stack. If your
+CUDA driver is not 12.6, adjust the PyTorch index URL in `pyproject.toml`
+according to the comments there.
 
 ## Iris amplitude baseline (pure PennyLane)
 
@@ -49,7 +52,7 @@ uv run python benchmark/encoding_benchmarks/pennylane_baseline/iris_amplitude.py
 ## Iris amplitude (QDP pipeline)
 
 Pipeline is identical to the baseline except for encoding:
-4-D vectors → QDP `QuantumDataLoader` (amplitude) → `StatePrep(state_vector)` → same variational classifier.
+4-D vectors → QDP `QdpEngine.encode` (amplitude) → `StatePrep(state_vector)` → same variational classifier.
 
 ```bash
 uv run python benchmark/encoding_benchmarks/qdp_pipeline/iris_amplitude.py
@@ -59,6 +62,7 @@ The CLI mirrors the baseline, plus:
 
 - **QDP-specific flags**
   - `--device-id`: QDP device id (default: 0)
+  - `--qdp-backend`: QDP backend, `cuda` or `amd` (default: `cuda`)
   - `--data-dir`: directory for temporary `.npy` files (default: system temp directory)
 
 Example (same settings as the baseline example, but with QDP encoding):
@@ -67,6 +71,15 @@ Example (same settings as the baseline example, but with QDP encoding):
 uv run python benchmark/encoding_benchmarks/qdp_pipeline/iris_amplitude.py \
   --data-file benchmark/encoding_benchmarks/pennylane_baseline/data/iris_classes1and2_scaled.txt \
   --optimizer nesterov --lr 0.01 --layers 6 --trials 3 --iters 80 --early-stop 0
+```
+
+Example using the AMD backend:
+
+```bash
+uv run python benchmark/encoding_benchmarks/qdp_pipeline/iris_amplitude.py \
+  --data-file benchmark/encoding_benchmarks/pennylane_baseline/data/iris_classes1and2_scaled.txt \
+  --optimizer nesterov --lr 0.01 --layers 6 --trials 3 --iters 80 --early-stop 0 \
+  --qdp-backend amd
 ```
 
 ## MNIST amplitude baseline (pure PennyLane)
@@ -108,6 +121,7 @@ The CLI mirrors the baseline, plus:
 
 - **QDP-specific flags**
   - `--device-id`: QDP device id (default: 0)
+  - `--qdp-backend`: QDP backend, `cuda` or `amd` (default: `cuda`)
   - `--data-dir`: directory for temporary `.npy` files (default: system temp directory)
 
 Example (same settings as the baseline example, but with QDP encoding):
@@ -115,6 +129,34 @@ Example (same settings as the baseline example, but with QDP encoding):
 ```bash
 uv run python benchmark/encoding_benchmarks/qdp_pipeline/mnist_amplitude.py \
   --digits "3,6" --n-samples 100 --trials 3 --iters 500 --early-stop 0
+```
+
+Example using the AMD backend:
+
+```bash
+uv run python benchmark/encoding_benchmarks/qdp_pipeline/mnist_amplitude.py \
+  --digits "3,6" --n-samples 100 --trials 3 --iters 500 --early-stop 0 \
+  --qdp-backend amd
+```
+
+## SVHN kernel amplitude (QDP pipeline)
+
+Pipeline: SVHN digit 1 vs 7 → standardize → QDP `QdpEngine.encode` (amplitude, 12 qubits) → precomputed squared inner-product quantum kernel → sklearn SVM.
+
+```bash
+uv run python benchmark/encoding_benchmarks/qdp_pipeline/svhn_kernel_amplitude.py
+```
+
+QDP-specific flags:
+
+- `--device-id`: QDP device id (default: 0)
+- `--qdp-backend`: QDP backend, `cuda` or `amd` (default: `cuda`)
+
+Example using the AMD backend:
+
+```bash
+uv run python benchmark/encoding_benchmarks/qdp_pipeline/svhn_kernel_amplitude.py \
+  --n-samples 500 --folds 3 --qdp-backend amd
 ```
 
 ## SVHN IQP baseline (pure PennyLane)
@@ -157,6 +199,7 @@ uv run python benchmark/encoding_benchmarks/qdp_pipeline/svhn_iqp.py
 The CLI mirrors the baseline, plus:
 
 > **Note:** The QDP pipeline always performs the encoding step on a CUDA GPU via QDP. A CUDA-capable device is required even when you select `--backend cpu` for the training backend.
+> AMD is not supported for this benchmark yet because the AMD backend currently supports `amplitude`, `angle`, and `basis`, but not `iqp`.
 
 - **QDP-specific flags**
   - `--device-id`: CUDA device id (default: 0)
@@ -182,5 +225,6 @@ uv run python benchmark/encoding_benchmarks/pennylane_baseline/mnist_amplitude.p
 uv run python benchmark/encoding_benchmarks/pennylane_baseline/svhn_iqp.py --help
 uv run python benchmark/encoding_benchmarks/qdp_pipeline/iris_amplitude.py --help
 uv run python benchmark/encoding_benchmarks/qdp_pipeline/mnist_amplitude.py --help
+uv run python benchmark/encoding_benchmarks/qdp_pipeline/svhn_kernel_amplitude.py --help
 uv run python benchmark/encoding_benchmarks/qdp_pipeline/svhn_iqp.py --help
 ```

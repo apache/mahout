@@ -131,13 +131,14 @@ def encode_via_qdp(
     num_qubits: int,
     batch_size: int = 10,  # kept for CLI symmetry; not used here
     device_id: int = 0,
+    qdp_backend: str = "cuda",
     data_dir: str | None = None,
     filename: str = "mnist_nd.npy",
 ) -> torch.Tensor:
     """QDP: use QdpEngine.encode on PCA-reduced vectors (amplitude), return encoded tensor on GPU.
 
     Uses in-memory encoding via QdpEngine instead of writing/reading .npy files. The returned
-    tensor stays on the selected CUDA device and can be fed directly to qml.StatePrep.
+    tensor stays on the selected GPU device and can be fed directly to qml.StatePrep.
     """
     n, dim = X_norm.shape
     state_dim = 2**num_qubits
@@ -145,7 +146,7 @@ def encode_via_qdp(
         raise ValueError(
             f"X_norm must have {state_dim} features for {num_qubits} qubits, got {dim}"
         )
-    engine = QdpEngine(device_id=device_id, precision="float32")
+    engine = QdpEngine(device_id=device_id, precision="float32", backend=qdp_backend)
     qt = engine.encode(
         X_norm.astype(np.float64),
         num_qubits=num_qubits,
@@ -326,6 +327,12 @@ def main() -> None:
         "--device-id", type=int, default=0, help="QDP device (default: 0)"
     )
     parser.add_argument(
+        "--qdp-backend",
+        choices=("cuda", "amd"),
+        default="cuda",
+        help="QDP backend for direct state preparation (default: cuda)",
+    )
+    parser.add_argument(
         "--data-dir", type=str, default=None, help="Dir for .npy files (default: temp)"
     )
     args = parser.parse_args()
@@ -356,6 +363,7 @@ def main() -> None:
         num_qubits=args.qubits,
         batch_size=args.batch_size,
         device_id=args.device_id,
+        qdp_backend=args.qdp_backend,
         data_dir=args.data_dir,
         filename="mnist_nd_train.npy",
     )
@@ -364,6 +372,7 @@ def main() -> None:
         num_qubits=args.qubits,
         batch_size=args.batch_size,
         device_id=args.device_id,
+        qdp_backend=args.qdp_backend,
         data_dir=args.data_dir,
         filename="mnist_nd_test.npy",
     )
@@ -376,7 +385,7 @@ def main() -> None:
     )
     print(
         f"  Qubits: {args.qubits}, iters: {args.iters}, batch_size: {args.batch_size}, "
-        f"layers: {args.layers}, lr: {args.lr}"
+        f"layers: {args.layers}, lr: {args.lr}, qdp_backend: {args.qdp_backend}"
     )
     print(
         f"  QDP encode:  {encode_sec:.4f} s  (train + test, {n_train} + {n - n_train} samples)"
