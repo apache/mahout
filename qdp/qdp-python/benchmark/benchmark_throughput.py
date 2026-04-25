@@ -71,10 +71,11 @@ def _preload_rocm_libs_at_import(lib_dir: str | None = None) -> None:
                 pass
 
 
-# Auto-preload only when the user opts in via env (avoids surprising other
-# benchmarks that import this module). Pass MAHOUT_PRELOAD_ROCM=1 to enable,
-# or set ROCM_LIB_DIR=/path/to/lib to point at the right ROCm install.
-if os.environ.get("MAHOUT_PRELOAD_ROCM") == "1" or os.environ.get("ROCM_LIB_DIR"):
+# Auto-preload only when the user explicitly opts in via env. Tightened to
+# MAHOUT_PRELOAD_ROCM=1 only (NOT ROCM_LIB_DIR alone) so a stale exported
+# ROCM_LIB_DIR doesn't auto-trigger global symbol injection in unrelated
+# processes that import this module.
+if os.environ.get("MAHOUT_PRELOAD_ROCM") == "1":
     _preload_rocm_libs_at_import()
 
 
@@ -130,6 +131,9 @@ def parse_frameworks(raw: str) -> list[str]:
     return selected if selected else list(FRAMEWORK_CHOICES)
 
 
+WARMUP_BATCHES = 3
+
+
 def run_mahout(
     num_qubits: int,
     total_batches: int,
@@ -145,6 +149,7 @@ def run_mahout(
             .encoding(encoding_method)
             .batches(total_batches, size=batch_size)
             .prefetch(prefetch)
+            .warmup(WARMUP_BATCHES)
             .run_throughput()
         )
     except Exception as exc:
@@ -165,6 +170,8 @@ def run_pennylane(num_qubits: int, total_batches: int, batch_size: int, prefetch
         return 0.0, 0.0
 
     dev = qml.device("default.qubit", wires=num_qubits)
+    cuda_available = torch.cuda.is_available()
+    target_device = "cuda" if cuda_available else "cpu"
 
     @qml.qnode(dev, interface="torch")
     def circuit(inputs):
@@ -173,23 +180,32 @@ def run_pennylane(num_qubits: int, total_batches: int, batch_size: int, prefetch
         )
         return qml.state()
 
-    torch.cuda.synchronize()
+    # Warmup: amortize QNode tracing, default.qubit JIT caches, and the first
+    # CUDA stream kernel launch outside the timer so the headline number
+    # reflects steady-state throughput, not first-batch initialization.
+    for warmup_batch in prefetched_batches(
+        WARMUP_BATCHES, batch_size, 1 << num_qubits, prefetch
+    ):
+        wb = torch.tensor(warmup_batch, dtype=torch.float32, device=target_device)
+        _ = circuit(wb)
+    if cuda_available:
+        torch.cuda.synchronize()
+
     start = time.perf_counter()
     processed = 0
 
     for batch in prefetched_batches(
         total_batches, batch_size, 1 << num_qubits, prefetch
     ):
-        batch_cpu = torch.tensor(batch, dtype=torch.float64)
-        try:
-            state_cpu = circuit(batch_cpu)
-        except Exception:
-            state_cpu = torch.stack([circuit(x) for x in batch_cpu])
-        state_gpu = state_cpu.to("cuda", dtype=torch.float32)
-        _ = state_gpu.abs().sum()
-        processed += len(batch_cpu)
+        # float32 input keeps every framework on the same precision.  Returned
+        # state is complex64 on the same device — no lossy cast back to float.
+        batch_t = torch.tensor(batch, dtype=torch.float32, device=target_device)
+        state = circuit(batch_t)
+        _ = state.abs().sum()
+        processed += len(batch)
 
-    torch.cuda.synchronize()
+    if cuda_available:
+        torch.cuda.synchronize()
     duration = time.perf_counter() - start
     throughput = processed / duration if duration > 0 else 0.0
     print(f"  Total Time: {duration:.4f} s ({throughput:.1f} vectors/sec)")
@@ -214,7 +230,14 @@ def run_mahout_amd(num_qubits: int, total_batches: int, batch_size: int, prefetc
         print(f"[Mahout-AMD] Init failed: {exc}")
         return 0.0, 0.0
 
+    # Warmup: first encode triggers Triton AMD JIT autotune (~100s of ms).
+    for warmup_batch in prefetched_batches(
+        WARMUP_BATCHES, batch_size, 1 << num_qubits, prefetch
+    ):
+        wb = torch.tensor(warmup_batch, dtype=torch.float32, device="cuda")
+        _ = engine.encode(wb, num_qubits, "amplitude")
     torch.cuda.synchronize()
+
     start = time.perf_counter()
     processed = 0
 
@@ -236,7 +259,15 @@ def run_mahout_amd(num_qubits: int, total_batches: int, batch_size: int, prefetc
 def run_pennylane_amdgpu(
     num_qubits: int, total_batches: int, batch_size: int, prefetch: int
 ):
-    """Run PennyLane lightning.amdgpu (native ROCm Kokkos+HIP simulator, per-sample)."""
+    """Run PennyLane lightning.amdgpu (native ROCm Kokkos+HIP simulator).
+
+    Note: lightning.amdgpu is the official PennyLane ROCm simulator but does
+    not broadcast over the batch dimension for AmplitudeEmbedding, so this
+    runner uses a per-sample loop. The throughput reflects what a user gets
+    from the public API today; the gap to Mahout-AMD is dominated by
+    PennyLane QNode dispatch overhead per sample, not by the underlying
+    Kokkos+HIP kernel.
+    """
     if not HAS_PENNYLANE:
         print("[PennyLane-AMDGPU] PennyLane not installed, skipping.")
         return 0.0, 0.0
@@ -246,9 +277,9 @@ def run_pennylane_amdgpu(
     except Exception as exc:
         print(f"[PennyLane-AMDGPU] Device init failed: {exc}")
         print(
-            "  Hint: set ROCM_LIB_DIR=/opt/rocm-7.2.0/lib (or the dir containing\n"
-            "  libhsa-runtime64.so.1 + libamdhip64.so.7) BEFORE invoking python,\n"
-            "  e.g. ROCM_LIB_DIR=/opt/rocm-7.2.0/lib python -m benchmark.benchmark_throughput ..."
+            "  Hint: launch with MAHOUT_PRELOAD_ROCM=1 ROCM_LIB_DIR=/opt/rocm-X/lib "
+            "(or the dir containing libhsa-runtime64.so.1 + libamdhip64.so.7) so "
+            "the matching ROCm libs are RTLD_GLOBAL-preloaded at module top."
         )
         return 0.0, 0.0
 
@@ -259,7 +290,14 @@ def run_pennylane_amdgpu(
         )
         return qml.state()
 
+    # Warmup: amortize Kokkos device init + first-call QNode tracing.
+    for warmup_batch in prefetched_batches(
+        WARMUP_BATCHES, batch_size, 1 << num_qubits, prefetch
+    ):
+        for vec in warmup_batch:
+            _ = circuit(np.asarray(vec, dtype=np.float32))
     torch.cuda.synchronize()
+
     start = time.perf_counter()
     processed = 0
 
@@ -268,7 +306,9 @@ def run_pennylane_amdgpu(
     ):
         states = []
         for vec in batch:
-            states.append(circuit(np.asarray(vec, dtype=np.float64)))
+            # float32 input matches Mahout-AMD precision.  lightning.amdgpu
+            # casts internally to whatever the simulator was configured for.
+            states.append(circuit(np.asarray(vec, dtype=np.float32)))
             processed += 1
         gpu_tensor = torch.tensor(
             np.array(states), device="cuda", dtype=torch.complex64
@@ -288,7 +328,22 @@ def run_qiskit(num_qubits: int, total_batches: int, batch_size: int, prefetch: i
         return 0.0, 0.0
 
     backend = AerSimulator(method="statevector")
-    torch.cuda.synchronize()
+    cuda_available = torch.cuda.is_available()
+
+    # Warmup: amortize Qiskit transpile-cache + AerSimulator first-call cost.
+    for warmup_batch in prefetched_batches(
+        WARMUP_BATCHES, batch_size, 1 << num_qubits, prefetch
+    ):
+        normalized = normalize_batch(warmup_batch)
+        for vec in normalized:
+            qc = QuantumCircuit(num_qubits)
+            qc.initialize(vec, range(num_qubits))
+            qc.save_statevector()
+            t_qc = transpile(qc, backend)
+            backend.run(t_qc).result()
+    if cuda_available:
+        torch.cuda.synchronize()
+
     start = time.perf_counter()
     processed = 0
 
@@ -298,7 +353,7 @@ def run_qiskit(num_qubits: int, total_batches: int, batch_size: int, prefetch: i
         normalized = normalize_batch(batch)
 
         batch_states = []
-        for vec_idx, vec in enumerate(normalized):
+        for vec in normalized:
             qc = QuantumCircuit(num_qubits)
             qc.initialize(vec, range(num_qubits))
             qc.save_statevector()
@@ -307,12 +362,17 @@ def run_qiskit(num_qubits: int, total_batches: int, batch_size: int, prefetch: i
             batch_states.append(state)
             processed += 1
 
-        gpu_tensor = torch.tensor(
-            np.array(batch_states), device="cuda", dtype=torch.complex64
-        )
-        _ = gpu_tensor.abs().sum()
+        if cuda_available:
+            gpu_tensor = torch.tensor(
+                np.array(batch_states), device="cuda", dtype=torch.complex64
+            )
+            _ = gpu_tensor.abs().sum()
+        else:
+            cpu_tensor = torch.tensor(np.array(batch_states), dtype=torch.complex64)
+            _ = cpu_tensor.abs().sum()
 
-    torch.cuda.synchronize()
+    if cuda_available:
+        torch.cuda.synchronize()
     duration = time.perf_counter() - start
     throughput = processed / duration if duration > 0 else 0.0
     print(f"\n  Total Time: {duration:.4f} s ({throughput:.1f} vectors/sec)")
