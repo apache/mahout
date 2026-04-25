@@ -139,6 +139,11 @@ uv run python benchmark/encoding_benchmarks/qdp_pipeline/mnist_amplitude.py \
   --qdp-backend amd
 ```
 
+> **Note:** With `--qdp-backend amd`, encoding runs on the AMD GPU but the
+> variational training falls back to PennyLane's `default.qubit` simulator on
+> CPU because `lightning.gpu` is CUDA-only. Expect training to be much slower
+> than the CUDA path.
+
 ## SVHN kernel amplitude (QDP pipeline)
 
 Pipeline: SVHN digit 1 vs 7 → standardize → QDP `QdpEngine.encode` (amplitude, 12 qubits) → precomputed squared inner-product quantum kernel → sklearn SVM.

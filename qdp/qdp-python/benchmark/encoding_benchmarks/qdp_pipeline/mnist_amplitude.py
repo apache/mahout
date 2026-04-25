@@ -172,12 +172,21 @@ def run_training(
     early_stop_target: float | None = None,
 ) -> dict[str, Any]:
     """Train variational classifier: StatePrep(encoded) + Rot layers + bias, square loss, batched.
-    Uses lightning.gpu + torch interface + adjoint diff. Data stays on GPU.
-    Optional early stop when test acc >= target."""
+    Prefers lightning.gpu (CUDA-only); falls back to default.qubit on CPU when unavailable
+    (e.g. AMD/ROCm host). Optional early stop when test acc >= target."""
     n_train = len(Y_train)
     rng = np.random.default_rng(seed)
 
     wires = tuple(range(num_qubits))
+    qml_device_name = "cuda"
+    try:
+        dev_qml = qml.device("lightning.gpu", wires=num_qubits)
+    except Exception:
+        dev_qml = qml.device("default.qubit", wires=num_qubits)
+        qml_device_name = "cpu"
+        encoded_train = encoded_train.cpu()
+        encoded_test = encoded_test.cpu()
+
     device = encoded_train.device
     # Encoded data may be complex (from QDP); use real dtype for weights and labels.
     real_dtype = (
@@ -185,8 +194,6 @@ def run_training(
     )
     Y_train_t = torch.tensor(Y_train, dtype=real_dtype, device=device)
     Y_test_t = torch.tensor(Y_test, dtype=real_dtype, device=device)
-
-    dev_qml = qml.device("lightning.gpu", wires=num_qubits)
 
     @qml.qnode(dev_qml, interface="torch", diff_method="adjoint")
     def circuit(weights, state_vector):
@@ -263,7 +270,7 @@ def run_training(
         "samples_per_sec": (steps_done * batch_size) / train_sec
         if train_sec > 0
         else 0.0,
-        "qml_device": "cuda",
+        "qml_device": qml_device_name,
     }
 
 

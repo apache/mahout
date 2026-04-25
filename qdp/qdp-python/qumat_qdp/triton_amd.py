@@ -115,15 +115,20 @@ class TritonAmdEngine:
     def encode_amplitude(self, data: Any, num_qubits: int) -> Any:
         torch_mod = self._require_torch()
         x = self._to_2d(data, dtype=self._real_dtype())
-        _, sample_size = x.shape
+        batch, sample_size = x.shape
         state_len = 1 << num_qubits
-        if sample_size != state_len:
+        if sample_size > state_len:
             raise ValueError(
-                f"Amplitude encoding expects sample size {state_len} (=2^num_qubits), got {sample_size}."
+                f"Amplitude encoding expects sample size <= {state_len} (=2^num_qubits), got {sample_size}."
             )
 
         norms = torch_mod.linalg.vector_norm(x, dim=1, keepdim=True).clamp_min(1e-12)
         amp = x / norms
+        if sample_size < state_len:
+            pad = torch_mod.zeros(
+                (batch, state_len - sample_size), device=amp.device, dtype=amp.dtype
+            )
+            amp = torch_mod.cat([amp, pad], dim=1)
         return torch_mod.complex(amp, torch_mod.zeros_like(amp)).to(
             self._complex_dtype()
         )
