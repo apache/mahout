@@ -71,6 +71,7 @@ tensor = torch.from_dlpack(qtensor)
 
 Notes:
 - `phase`, `iqp`, and `iqp-z` are currently CUDA-route features. The AMD Triton route supports `amplitude`, `angle`, and `basis`.
+- On the AMD Triton route, `amplitude` currently requires each sample to have length exactly `2^num_qubits`; the generic `≤ 2^num_qubits` constraint in the table above does not apply there.
 - For detailed input contracts and route-specific support, see the [API Reference](./api/) and [Python API](./python-api/).
 
 ## File Inputs
