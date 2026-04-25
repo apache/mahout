@@ -54,7 +54,8 @@ data = [0.5, 0.5, 0.5, 0.5]
 qtensor = engine.encode(data, num_qubits=2, encoding_method="amplitude")
 
 # Zero-copy hand-off to PyTorch via DLPack.
-# A QuantumTensor can be consumed only once — pass it to a single consumer.
+# On CUDA the result is a native QuantumTensor whose DLPack export is
+# single-use, so pass it to only one consumer.
 tensor = torch.from_dlpack(qtensor)
 ```
 
@@ -70,7 +71,7 @@ tensor = torch.from_dlpack(qtensor)
 
 | Method | Constraint | Example |
 |--------|-----------|---------|
-| `amplitude` | up to `2^num_qubits` values per sample | `engine.encode([0.5, 0.5, 0.5, 0.5], num_qubits=2, encoding_method="amplitude")` |
+| `amplitude` | CUDA: up to `2^num_qubits` values per sample (zero-padded). AMD: exactly `2^num_qubits` values per sample | `engine.encode([0.5, 0.5, 0.5, 0.5], num_qubits=2, encoding_method="amplitude")` |
 | `angle` | one angle per qubit (`num_qubits` values per sample) | `engine.encode([0.1, 0.2, 0.3, 0.4], num_qubits=4, encoding_method="angle")` |
 | `basis` | one integer index per sample, `0 ≤ index < 2^num_qubits` | `engine.encode([13], num_qubits=4, encoding_method="basis")` (encodes basis state 13) |
 | `iqp`, `iqp-z` | data length matches the IQP parameter shape for `num_qubits` | `engine.encode([0.1, 0.2, 0.3], num_qubits=2, encoding_method="iqp")` |
@@ -79,11 +80,13 @@ tensor = torch.from_dlpack(qtensor)
 
 ## File Inputs
 
-`engine.encode(...)` accepts a path or `pathlib.Path` for supported file formats:
+File and remote-URL inputs are handled by the CUDA route. The AMD route's `encode()` accepts only array-like data (`list`, `numpy.ndarray`, `torch.Tensor`); load files into memory first, or use the CUDA route for the loader/streaming features.
+
+On CUDA, `engine.encode(...)` accepts a path or `pathlib.Path` for supported file formats:
 
 ```python
 engine.encode("data.parquet", num_qubits=10, encoding_method="amplitude")
-# Other supported formats: .arrow, .npy, .pt, .pb
+# Other supported formats: .arrow, .feather, .npy, .pt, .pth, .pb
 ```
 
 Remote object storage URLs are accepted when QDP is built with the `remote-io` feature:
