@@ -319,22 +319,18 @@ def test_triton_amd_phase_float64_precision_contract() -> None:
 
 
 @pytest.mark.skipif(
-    not torch.cuda.is_available() or getattr(torch.version, "cuda", None) is None,
-    reason="NVIDIA CUDA reference not available",
+    not is_triton_amd_available(), reason="Triton AMD backend unavailable"
 )
 @pytest.mark.rocm
-def test_triton_amd_iqp_cuda_reference_optional() -> None:
-    _qdp = pytest.importorskip("_qdp")
-    if not is_triton_amd_available():
-        pytest.skip("Triton AMD backend unavailable")
-
-    engine_triton = TritonAmdEngine(device_id=0, precision="float64")
-    engine_cuda = _qdp.QdpEngine(0, precision="float64")
-    n = 3
-    data = torch.randn(2, n + n * (n - 1) // 2, device="cuda", dtype=torch.float64)
-    got = _as_torch(engine_triton.encode(data, n, "iqp"))
-    ref = torch.from_dlpack(engine_cuda.encode(data, n, "iqp"))
-    assert torch.allclose(got, ref, atol=1e-6, rtol=1e-6)
+def test_triton_amd_iqp_float64_precision_contract() -> None:
+    """Float64 IQP matches torch_ref bit-close (covers the dtype contract)."""
+    engine = TritonAmdEngine(device_id=0, precision="float64")
+    n = 4
+    data = torch.randn(3, n + n * (n - 1) // 2, device="cuda", dtype=torch.float64)
+    got = _as_torch(engine.encode(data, n, "iqp"))
+    ref = _torch_ref_iqp(data, n, enable_zz=True).to(torch.complex128)
+    assert got.dtype == torch.complex128
+    assert torch.allclose(got, ref, atol=1e-12, rtol=1e-12)
 
 
 @pytest.mark.skipif(
