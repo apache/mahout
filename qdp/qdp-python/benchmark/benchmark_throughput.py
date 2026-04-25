@@ -54,6 +54,7 @@ import ctypes
 import os
 import time
 
+
 # IMPORTANT: preload system ROCm 7.x libs *before* importing torch / pennylane.
 # Once torch's HIP runtime maps the older libhsa-runtime from
 # /lib/x86_64-linux-gnu (Ubuntu 24.04 ships ROCm 5.7), a later RTLD_GLOBAL of
@@ -77,11 +78,11 @@ if os.environ.get("MAHOUT_PRELOAD_ROCM") == "1" or os.environ.get("ROCM_LIB_DIR"
     _preload_rocm_libs_at_import()
 
 
-import numpy as np  # noqa: E402
-import torch  # noqa: E402
-from qumat_qdp import QdpBenchmark  # noqa: E402
+import numpy as np
+import torch
+from qumat_qdp import QdpBenchmark
 
-from benchmark.utils import normalize_batch, prefetched_batches  # noqa: E402
+from benchmark.utils import normalize_batch, prefetched_batches
 
 BAR = "=" * 70
 SEP = "-" * 70
@@ -107,8 +108,6 @@ try:
     HAS_QISKIT = True
 except ImportError:
     HAS_QISKIT = False
-
-
 
 
 def parse_frameworks(raw: str) -> list[str]:
@@ -197,9 +196,7 @@ def run_pennylane(num_qubits: int, total_batches: int, batch_size: int, prefetch
     return duration, throughput
 
 
-def run_mahout_amd(
-    num_qubits: int, total_batches: int, batch_size: int, prefetch: int
-):
+def run_mahout_amd(num_qubits: int, total_batches: int, batch_size: int, prefetch: int):
     """Run Mahout AMD path (TritonAmdEngine) end-to-end through the prefetch pipeline."""
     try:
         from qumat_qdp import QdpEngine, is_triton_amd_available
@@ -474,15 +471,23 @@ def main() -> None:
     if t_mahout > 0 or t_mahout_amd > 0:
         print(SEP)
         # Prefer the available Mahout reference for ratio reporting.
-        ref_name, ref_th = ("Mahout", th_mahout) if t_mahout > 0 else ("Mahout-AMD", th_mahout_amd)
+        ref_name, ref_th = (
+            ("Mahout", th_mahout) if t_mahout > 0 else ("Mahout-AMD", th_mahout_amd)
+        )
         if t_pl > 0:
             print(f"Speedup {ref_name} vs PennyLane:        {ref_th / th_pl:10.2f}x")
         if t_pl_amd > 0:
-            print(f"Speedup {ref_name} vs PennyLane-AMDGPU: {ref_th / th_pl_amd:10.2f}x")
+            print(
+                f"Speedup {ref_name} vs PennyLane-AMDGPU: {ref_th / th_pl_amd:10.2f}x"
+            )
         if t_qiskit > 0:
-            print(f"Speedup {ref_name} vs Qiskit:           {ref_th / th_qiskit:10.2f}x")
+            print(
+                f"Speedup {ref_name} vs Qiskit:           {ref_th / th_qiskit:10.2f}x"
+            )
         if t_mahout > 0 and t_mahout_amd > 0:
-            print(f"Mahout (CUDA) vs Mahout-AMD:           {th_mahout / th_mahout_amd:10.2f}x")
+            print(
+                f"Mahout (CUDA) vs Mahout-AMD:           {th_mahout / th_mahout_amd:10.2f}x"
+            )
 
 
 if __name__ == "__main__":
