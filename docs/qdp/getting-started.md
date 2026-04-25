@@ -74,9 +74,10 @@ tensor = torch.from_dlpack(qtensor)
 | `amplitude` | CUDA: up to `2^num_qubits` values per sample (zero-padded). AMD: exactly `2^num_qubits` values per sample | `engine.encode([0.5, 0.5, 0.5, 0.5], num_qubits=2, encoding_method="amplitude")` |
 | `angle` | one angle per qubit (`num_qubits` values per sample) | `engine.encode([0.1, 0.2, 0.3, 0.4], num_qubits=4, encoding_method="angle")` |
 | `basis` | one integer index per sample, `0 ≤ index < 2^num_qubits` | `engine.encode([13], num_qubits=4, encoding_method="basis")` (encodes basis state 13) |
-| `iqp`, `iqp-z` | data length matches the IQP parameter shape for `num_qubits` | `engine.encode([0.1, 0.2, 0.3], num_qubits=2, encoding_method="iqp")` |
+| `phase` | one phase angle per qubit (`num_qubits` values per sample) | `engine.encode([0.0, 1.57], num_qubits=2, encoding_method="phase")` |
+| `iqp`, `iqp-z` | data length matches the IQP parameter shape for `num_qubits` (`iqp-z`: `n`; `iqp`: `n + n*(n-1)/2`) | `engine.encode([0.1, 0.2, 0.3], num_qubits=2, encoding_method="iqp")` |
 
-> Backend support: `amplitude`, `angle`, and `basis` work on both CUDA and AMD. `iqp` and `iqp-z` are CUDA-only today. See [Concepts](./concepts/) for the IQP parameter layout and method semantics.
+> Backend support: `amplitude`, `angle`, and `basis` work on both CUDA and AMD. `phase`, `iqp`, and `iqp-z` are CUDA-only today. See [Concepts](./concepts/) for IQP parameter layout, phase encoding semantics, and method details.
 
 ## File Inputs
 

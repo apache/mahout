@@ -87,7 +87,7 @@ Unified encoding facade.
 
 `QdpEngine(device_id=0, precision="float32", backend="cuda")`
 
-- `device_id` (int): target device index
+- `device_id` (int): GPU device ordinal. Maps to a CUDA device for `backend="cuda"` and to the ROCm/PyTorch device for `backend="amd"`.
 - `precision` (str): `"float32"` or `"float64"`
 - `backend` (str): `"cuda"` or `"amd"`
 
@@ -124,6 +124,8 @@ engine = TritonAmdEngine(device_id=0, precision="float32")
 ```
 
 Use `is_triton_amd_available()` to check whether the Triton AMD runtime is available before selecting that route.
+
+A pure-PyTorch reference encoder is also available at `qumat_qdp.torch_ref.encode`. It supports `amplitude`, `angle`, `basis`, and `iqp` (call `iqp_encode(..., enable_zz=False)` directly for Z-only behavior). It does not implement `phase` or `iqp-z`, and runs entirely in PyTorch — useful for cross-checking the Rust pipeline.
 
 ### QdpTensor and QuantumTensor
 

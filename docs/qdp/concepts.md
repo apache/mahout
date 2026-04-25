@@ -61,7 +61,7 @@ Note: $n=30$ is already very large—just the output state for a single sample i
 
 ---
 
-## 4. Encoding methods (amplitude, basis, angle)
+## 4. Encoding methods (amplitude, basis, angle, phase, IQP)
 
 ### 4.1 Amplitude encoding
 
@@ -131,6 +131,49 @@ When to use it:
 Trade-offs:
 
 - Only $n$ real numbers per sample, so input is compact. Output is still $2^n$ complex amplitudes. Does not by itself create entanglement (product state).
+
+### 4.4 Phase encoding
+
+**Goal**: map one phase angle per qubit to a product state with uniform magnitudes and basis-dependent phases.
+
+For phase angles $x_0, \ldots, x_{n-1}$:
+
+$$
+\vert\psi(x)\rangle = \bigotimes_{k=0}^{n-1} \frac{1}{\sqrt{2}}\left(\vert 0\rangle + e^{i x_k}\vert 1\rangle\right)
+$$
+
+Key properties in QDP:
+
+- **Input shape**: exactly one phase angle per qubit.
+- **Validation**: all phase angles must be finite.
+- **State structure**: all computational-basis amplitudes have equal magnitude $1/\sqrt{2^n}$; the data changes the phases, not the magnitudes.
+- **Route support**: phase encoding is available on the CUDA encode path. It is not currently part of the AMD route or the CUDA tensor direct-input fast path.
+
+When to use it:
+
+- You want a product-state embedding where classical information is carried in phases instead of amplitude magnitudes.
+
+### 4.5 IQP and IQP-Z encoding
+
+**Goal**: build diagonal-phase embeddings in the IQP family.
+
+QDP supports two related methods:
+
+- **`iqp-z`**: Z-only diagonal phases with `n` parameters for `n` qubits.
+- **`iqp`**: Z + ZZ diagonal phases with `n + n(n-1)/2` parameters.
+
+Key properties in QDP:
+
+- **Input shape**:
+  - `iqp-z`: exactly `n` parameters
+  - `iqp`: exactly `n + n(n-1)/2` parameters
+- **Validation**: all parameters must be finite.
+- **State structure**: unlike `angle` and `phase`, these methods can encode entangling structure through the diagonal phase construction.
+- **Route support**: `iqp` and `iqp-z` are supported on the CUDA encode path. The AMD route does not currently implement them.
+
+When to use them:
+
+- You want an IQP-style feature map and need either the full Z+ZZ form (`iqp`) or the Z-only variant (`iqp-z`).
 
 ---
 
