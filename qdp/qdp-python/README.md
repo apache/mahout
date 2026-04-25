@@ -79,6 +79,11 @@ See `qdp/qdp-python/TRITON_AMD_BACKEND.md` for Triton AMD setup and validation d
 
 Backend support boundary:
 - CUDA (`QdpEngine`): `amplitude`, `angle`, `basis`, `iqp`, `iqp-z`, `phase`
+  - `phase` is currently only reachable on the CUDA path via host inputs
+    (Python list / NumPy / file / CPU torch tensor). The Python extension's
+    CUDA-tensor validation does not yet allowlist `phase`; cuda-resident
+    torch tensors must use `.cpu()` first when targeting `phase`. Tracked as
+    a follow-up.
 - AMD (`QdpEngine(..., backend="amd")`): `amplitude`, `angle`, `basis`, `iqp`, `iqp-z`, `phase`
 
 ## Input Sources
