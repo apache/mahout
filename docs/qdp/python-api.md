@@ -41,7 +41,7 @@ GPU encoder. Constructor and main methods:
 
 **`QdpEngine(device_id=0, precision="float32", backend="cuda")`**
 
-- `device_id` (int): CUDA device ID.
+- `device_id` (int): GPU device ordinal. Maps to a CUDA device for `backend="cuda"` and to the ROCm/PyTorch device for `backend="amd"`.
 - `precision` (str): `"float32"` or `"float64"`.
 - `backend` (str): `"cuda"` for the Rust/CUDA route or `"amd"` for the Triton AMD route.
 - Raises `RuntimeError` on init failure or unsupported precision.
