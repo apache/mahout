@@ -52,7 +52,12 @@ Key exports:
 - `Backend.NONE`: no auto-detected backend is available
 - `Backend.PYTORCH`: only when selected explicitly before import-time evaluation
 
-PyTorch is not used as an automatic fallback. To use the PyTorch reference path, select it explicitly with `force_backend(...)` or with `.backend("pytorch")` on `QdpBenchmark` / `QuantumDataLoader`. If you need the current override state after import time, call `get_backend()` from `qumat_qdp._backend` rather than relying on the exported `BACKEND` constant.
+PyTorch is not used as an automatic fallback. The two backend-selection surfaces are independent:
+
+- `force_backend(backend: Backend | None)` only affects what `get_backend()` returns (and, transitively, the cached `BACKEND` snapshot at import time). Pass `None` to restore auto-detection. It does **not** switch which implementation `QdpBenchmark` or `QuantumDataLoader` use, and it does **not** change the availability of `RustQdpEngine` / `NativeQuantumTensor` (those depend on whether `_qdp` could be imported).
+- To run the PyTorch reference pipeline through the builders, call `.backend("pytorch")` on `QdpBenchmark` or `QuantumDataLoader` explicitly.
+
+If you need the current override state after import time, call `get_backend()` from `qumat_qdp._backend` rather than relying on the exported `BACKEND` constant.
 
 ## Backend Model
 
@@ -100,6 +105,8 @@ Route support summary:
 |--------|-------------------|
 | `QdpEngine(..., backend="cuda")` | `amplitude`, `angle`, `basis`, `phase`, `iqp`, `iqp-z` |
 | `QdpEngine(..., backend="amd")` | `amplitude`, `angle`, `basis` |
+
+**CUDA tensor-input caveat:** when `data` is provided as a zero-copy CUDA `torch.Tensor`, supported encoding methods are currently limited to `amplitude`, `angle`, `basis`, `iqp`, and `iqp-z`. In that input path, `phase` is not currently supported — pass a CPU tensor, NumPy array, or Python list to use `phase` on the CUDA route.
 
 Result type notes:
 
@@ -241,7 +248,7 @@ Iteration behavior depends on backend:
 
 | Loader backend | Iteration yields |
 |--------|------------------|
-| `"rust"` | `QuantumTensor` |
+| `"rust"` | `NativeQuantumTensor` / `_qdp.QuantumTensor` (the native Rust extension type, not the `QuantumTensor` facade alias) |
 | `"pytorch"` | `torch.Tensor` |
 
 Encoding support summary:
@@ -297,7 +304,7 @@ for qt in loader:
 
 Signature:
 
-`run_throughput_pipeline_py(device_id=0, num_qubits=16, batch_size=64, total_batches=100, encoding_method="amplitude", warmup_batches=0, seed=None)`
+`run_throughput_pipeline_py(device_id=0, num_qubits=16, batch_size=64, total_batches=100, encoding_method="amplitude", warmup_batches=0, seed=None, float32_pipeline=False)`
 
 Returns a tuple:
 
