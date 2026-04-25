@@ -22,7 +22,7 @@ Pipeline:
   SVHN (32×32×3) → Flatten (3072) → QdpEngine.encode(amplitude) on GPU (4096, 12 qubits)
     → Quantum Kernel K[i,j] = (encoded[i] · encoded[j])² → sklearn SVM
 
-Encoding: QdpEngine (GPU) — data stays on CUDA for kernel matmul, then moves to CPU for SVM.
+Encoding: QdpEngine (GPU) — data stays on GPU for kernel matmul, then moves to CPU for SVM.
 Kernel:   Precomputed squared inner product (GPU torch.mm).
 Classifier: sklearn.svm.SVC(kernel='precomputed').
 
@@ -124,9 +124,11 @@ def _filter_binary(X, Y):
     return X[mask], np.where(Y[mask] == CLASS_POS, 1, -1)
 
 
-def encode_qdp(X: np.ndarray, device_id: int = 0) -> torch.Tensor:
-    """QdpEngine amplitude encode → CUDA float64 tensor (n, 4096)."""
-    engine = QdpEngine(device_id=device_id, precision="float64")
+def encode_qdp(
+    X: np.ndarray, device_id: int = 0, qdp_backend: str = "cuda"
+) -> torch.Tensor:
+    """QdpEngine amplitude encode → GPU float64 tensor (n, 4096)."""
+    engine = QdpEngine(device_id=device_id, precision="float64", backend=qdp_backend)
     qt = engine.encode(
         X.astype(np.float64),
         num_qubits=NUM_QUBITS,
@@ -171,7 +173,13 @@ def main() -> None:
         help="SVM regularisation C (default: 100.0)",
     )
     parser.add_argument(
-        "--device-id", type=int, default=0, help="CUDA device (default: 0)"
+        "--device-id", type=int, default=0, help="QDP device (default: 0)"
+    )
+    parser.add_argument(
+        "--qdp-backend",
+        choices=("cuda", "amd"),
+        default="cuda",
+        help="QDP backend for direct state preparation (default: cuda)",
     )
     parser.add_argument("--data-home", type=str, default=None, help="Data cache dir")
     args = parser.parse_args()
@@ -181,7 +189,10 @@ def main() -> None:
         f"  {NUM_QUBITS} qubits, {STATE_DIM}-dim state, binary: digit {CLASS_POS} vs {CLASS_NEG}"
     )
     print(f"  n_samples={args.n_samples}, {args.folds}-fold CV, C={args.svm_c}")
-    print(f"  CUDA: {torch.cuda.is_available()}, device_id: {args.device_id}")
+    print(
+        f"  GPU available: {torch.cuda.is_available()}, device_id: {args.device_id}, "
+        f"qdp_backend: {args.qdp_backend}"
+    )
     print()
 
     # Load & filter
@@ -205,7 +216,7 @@ def main() -> None:
     t0 = time.perf_counter()
     scaler = StandardScaler().fit(X_bin)
     X_scaled = scaler.transform(X_bin)
-    X_encoded = encode_qdp(X_scaled, args.device_id)
+    X_encoded = encode_qdp(X_scaled, args.device_id, args.qdp_backend)
     torch.cuda.synchronize()
     encode_sec = time.perf_counter() - t0
     print(

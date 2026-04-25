@@ -81,6 +81,35 @@ def test_triton_amd_amplitude_parity() -> None:
     not is_triton_amd_available(), reason="Triton AMD backend unavailable"
 )
 @pytest.mark.rocm
+def test_triton_amd_amplitude_pad_parity() -> None:
+    """Sample sizes < 2**num_qubits zero-pad to the state length, matching the CUDA path."""
+    engine = TritonAmdEngine(device_id=0, precision="float32")
+    x = torch.randn(4, 6, device="cuda", dtype=torch.float32)
+    got = _as_torch(engine.encode(x, 3, "amplitude"))
+    assert got.shape == (4, 8)
+    assert got.dtype == torch.complex64
+    norms = torch.linalg.vector_norm(x, dim=1, keepdim=True).clamp_min(1e-12)
+    expected_real = torch.cat([x / norms, torch.zeros((4, 2), device=x.device)], dim=1)
+    assert torch.allclose(got.real, expected_real, atol=1e-5, rtol=1e-5)
+    assert torch.allclose(got.imag, torch.zeros_like(got.imag), atol=0.0)
+
+
+@pytest.mark.skipif(
+    not is_triton_amd_available(), reason="Triton AMD backend unavailable"
+)
+@pytest.mark.rocm
+def test_triton_amd_amplitude_oversize_rejected() -> None:
+    """Sample sizes > 2**num_qubits remain a hard error (matches CUDA contract)."""
+    engine = TritonAmdEngine(device_id=0, precision="float32")
+    x = torch.randn(2, 9, device="cuda", dtype=torch.float32)
+    with pytest.raises(ValueError, match="<= 8"):
+        engine.encode(x, 3, "amplitude")
+
+
+@pytest.mark.skipif(
+    not is_triton_amd_available(), reason="Triton AMD backend unavailable"
+)
+@pytest.mark.rocm
 def test_triton_amd_angle_parity() -> None:
     engine = TritonAmdEngine(device_id=0, precision="float32")
     angles = torch.randn(3, 5, device="cuda", dtype=torch.float32)

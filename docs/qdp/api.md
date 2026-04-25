@@ -24,7 +24,7 @@ import qumat.qdp as qdp
 Create a GPU encoder instance.
 
 **Parameters**
-- `device_id` (int): CUDA device ID, default `0`.
+- `device_id` (int): GPU device ordinal, default `0` (CUDA ordinal when `backend="cuda"`; ROCm/PyTorch device index when `backend="amd"`).
 - `precision` (str): `"float32"` or `"float64"`.
 - `backend` (str): Public Python route selector. `qumat.qdp` uses `"cuda"` for the Rust/CUDA path and `"amd"` for the Triton AMD route.
 
@@ -39,7 +39,8 @@ Encode classical input into a quantum state and return a DLPack tensor on GPU.
 - `data`: Supported inputs
   - `list[float]`
   - `numpy.ndarray` (1D/2D, dtype=float64, C-contiguous)
-  - `torch.Tensor` (CPU, float64, contiguous)
+  - `torch.Tensor` (CPU): float64, contiguous
+  - `torch.Tensor` (CUDA, direct-input fast path): float32 or float64, contiguous, on the same device as the engine. Limited to `amplitude`, `angle`, `basis`, `iqp`, and `iqp-z` (see Advanced Encoding Support Matrix). For `phase`, pass a CPU tensor, NumPy array, or list instead.
   - `str` / `pathlib.Path` file path
     - `.parquet`, `.arrow` / `.feather`, `.npy`, `.pt` / `.pth`, `.pb`
     - remote URL (`s3://bucket/key`, `gs://bucket/key`) when built with `remote-io`
@@ -140,9 +141,8 @@ Return `(device_type, device_id)`; CUDA devices report `(2, gpu_id)`.
 
 - `num_qubits` out of range.
 - Input length exceeds `2^num_qubits`.
-- Non-`float64` NumPy/Torch inputs.
-- Torch tensors not on CPU or not contiguous.
-- `phase` used through a CUDA tensor direct-input path.
+- CPU NumPy / Torch inputs that are not contiguous `float64`.
+- CUDA Torch tensors used with unsupported encoding methods (e.g. `phase`), or CUDA tensors that are not contiguous / not on the same device as the engine.
 - DLPack capsule consumed more than once.
 
 ## Requirements & Deprecation
