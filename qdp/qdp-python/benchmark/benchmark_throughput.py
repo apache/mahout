@@ -23,22 +23,75 @@ The workload mirrors the `qdp-core/examples/dataloader_throughput.rs` pipeline:
 - Prefetch on the CPU side to keep the GPU fed.
 - Encode vectors into amplitude states on GPU and run a tiny consumer op.
 
+Frameworks:
+
+* ``mahout``           — QDP Rust+CUDA via :class:`qumat_qdp.QdpBenchmark`.
+* ``mahout-amd``       — QDP AMD path via :class:`qumat_qdp.QdpEngine` with
+                         ``backend="amd"`` (TritonAmdEngine on ROCm).
+* ``pennylane``        — PennyLane ``default.qubit`` (uses CUDA torch tensors
+                         when available, otherwise CPU).
+* ``pennylane-amdgpu`` — PennyLane ``lightning.amdgpu``, the official ROCm
+                         simulator. Requires ``pennylane-lightning-amdgpu``
+                         and a system ROCm 7.x install. Set the
+                         ``ROCM_LIB_DIR`` env var BEFORE invoking python so
+                         the matching HSA/HIP libs are preloaded — the
+                         ctypes preload must happen before torch/pennylane
+                         import to avoid a deadlock with the older
+                         libhsa-runtime Ubuntu 24.04 ships at
+                         /lib/x86_64-linux-gnu.
+* ``qiskit``           — Qiskit Aer ``statevector`` simulator (CPU).
+
 Run from qdp-python directory (qumat_qdp must be importable, e.g. via uv):
     uv run python benchmark/benchmark_throughput.py --qubits 16 --batches 200 --batch-size 64
+
+    # AMD multi-framework comparison:
+    ROCM_LIB_DIR=/opt/rocm-7.2.0/lib uv run python benchmark/benchmark_throughput.py \\
+        --frameworks mahout-amd,pennylane,pennylane-amdgpu --qubits 12
 """
 
 import argparse
+import ctypes
+import os
 import time
 
-import numpy as np
-import torch
-from qumat_qdp import QdpBenchmark
+# IMPORTANT: preload system ROCm 7.x libs *before* importing torch / pennylane.
+# Once torch's HIP runtime maps the older libhsa-runtime from
+# /lib/x86_64-linux-gnu (Ubuntu 24.04 ships ROCm 5.7), a later RTLD_GLOBAL of
+# the newer libhsa deadlocks. Doing the preload at module top is the only
+# reliable option short of relying on LD_LIBRARY_PATH being set externally.
+def _preload_rocm_libs_at_import(lib_dir: str | None = None) -> None:
+    candidate = lib_dir or os.environ.get("ROCM_LIB_DIR") or "/opt/rocm/lib"
+    for name in ("libhsa-runtime64.so.1", "libamdhip64.so.7"):
+        path = os.path.join(candidate, name)
+        if os.path.exists(path):
+            try:
+                ctypes.CDLL(path, mode=ctypes.RTLD_GLOBAL)
+            except OSError:
+                pass
 
-from benchmark.utils import normalize_batch, prefetched_batches
+
+# Auto-preload only when the user opts in via env (avoids surprising other
+# benchmarks that import this module). Pass MAHOUT_PRELOAD_ROCM=1 to enable,
+# or set ROCM_LIB_DIR=/path/to/lib to point at the right ROCm install.
+if os.environ.get("MAHOUT_PRELOAD_ROCM") == "1" or os.environ.get("ROCM_LIB_DIR"):
+    _preload_rocm_libs_at_import()
+
+
+import numpy as np  # noqa: E402
+import torch  # noqa: E402
+from qumat_qdp import QdpBenchmark  # noqa: E402
+
+from benchmark.utils import normalize_batch, prefetched_batches  # noqa: E402
 
 BAR = "=" * 70
 SEP = "-" * 70
-FRAMEWORK_CHOICES = ("pennylane", "qiskit", "mahout")
+FRAMEWORK_CHOICES = (
+    "pennylane",
+    "qiskit",
+    "mahout",
+    "mahout-amd",
+    "pennylane-amdgpu",
+)
 
 try:
     import pennylane as qml
@@ -54,6 +107,8 @@ try:
     HAS_QISKIT = True
 except ImportError:
     HAS_QISKIT = False
+
+
 
 
 def parse_frameworks(raw: str) -> list[str]:
@@ -142,6 +197,94 @@ def run_pennylane(num_qubits: int, total_batches: int, batch_size: int, prefetch
     return duration, throughput
 
 
+def run_mahout_amd(
+    num_qubits: int, total_batches: int, batch_size: int, prefetch: int
+):
+    """Run Mahout AMD path (TritonAmdEngine) end-to-end through the prefetch pipeline."""
+    try:
+        from qumat_qdp import QdpEngine, is_triton_amd_available
+    except ImportError as exc:
+        print(f"[Mahout-AMD] qumat_qdp unavailable: {exc}")
+        return 0.0, 0.0
+
+    if not is_triton_amd_available():
+        print("[Mahout-AMD] Triton AMD backend unavailable on this host, skipping.")
+        return 0.0, 0.0
+
+    try:
+        engine = QdpEngine(device_id=0, precision="float32", backend="amd")
+    except Exception as exc:
+        print(f"[Mahout-AMD] Init failed: {exc}")
+        return 0.0, 0.0
+
+    torch.cuda.synchronize()
+    start = time.perf_counter()
+    processed = 0
+
+    for batch in prefetched_batches(
+        total_batches, batch_size, 1 << num_qubits, prefetch
+    ):
+        batch_t = torch.tensor(batch, dtype=torch.float32, device="cuda")
+        state = engine.encode(batch_t, num_qubits, "amplitude")
+        _ = state.abs().sum()
+        processed += len(batch)
+
+    torch.cuda.synchronize()
+    duration = time.perf_counter() - start
+    throughput = processed / duration if duration > 0 else 0.0
+    print(f"  Total Time: {duration:.4f} s ({throughput:.1f} vectors/sec)")
+    return duration, throughput
+
+
+def run_pennylane_amdgpu(
+    num_qubits: int, total_batches: int, batch_size: int, prefetch: int
+):
+    """Run PennyLane lightning.amdgpu (native ROCm Kokkos+HIP simulator, per-sample)."""
+    if not HAS_PENNYLANE:
+        print("[PennyLane-AMDGPU] PennyLane not installed, skipping.")
+        return 0.0, 0.0
+
+    try:
+        dev = qml.device("lightning.amdgpu", wires=num_qubits)
+    except Exception as exc:
+        print(f"[PennyLane-AMDGPU] Device init failed: {exc}")
+        print(
+            "  Hint: set ROCM_LIB_DIR=/opt/rocm-7.2.0/lib (or the dir containing\n"
+            "  libhsa-runtime64.so.1 + libamdhip64.so.7) BEFORE invoking python,\n"
+            "  e.g. ROCM_LIB_DIR=/opt/rocm-7.2.0/lib python -m benchmark.benchmark_throughput ..."
+        )
+        return 0.0, 0.0
+
+    @qml.qnode(dev)
+    def circuit(inputs):
+        qml.AmplitudeEmbedding(
+            features=inputs, wires=range(num_qubits), normalize=True, pad_with=0.0
+        )
+        return qml.state()
+
+    torch.cuda.synchronize()
+    start = time.perf_counter()
+    processed = 0
+
+    for batch in prefetched_batches(
+        total_batches, batch_size, 1 << num_qubits, prefetch
+    ):
+        states = []
+        for vec in batch:
+            states.append(circuit(np.asarray(vec, dtype=np.float64)))
+            processed += 1
+        gpu_tensor = torch.tensor(
+            np.array(states), device="cuda", dtype=torch.complex64
+        )
+        _ = gpu_tensor.abs().sum()
+
+    torch.cuda.synchronize()
+    duration = time.perf_counter() - start
+    throughput = processed / duration if duration > 0 else 0.0
+    print(f"  Total Time: {duration:.4f} s ({throughput:.1f} vectors/sec)")
+    return duration, throughput
+
+
 def run_qiskit(num_qubits: int, total_batches: int, batch_size: int, prefetch: int):
     if not HAS_QISKIT:
         print("[Qiskit] Not installed, skipping.")
@@ -202,7 +345,8 @@ def main() -> None:
         default="all",
         help=(
             "Comma-separated list of frameworks to run "
-            "(pennylane,qiskit,mahout) or 'all'."
+            "(pennylane, pennylane-amdgpu, qiskit, mahout, mahout-amd) "
+            "or 'all'."
         ),
     )
     parser.add_argument(
@@ -212,7 +356,26 @@ def main() -> None:
         choices=["amplitude", "angle", "basis"],
         help="Encoding method to use for Mahout (amplitude, angle, or basis).",
     )
+    parser.add_argument(
+        "--rocm-lib-dir",
+        type=str,
+        default=None,
+        help=(
+            "DEPRECATED: set ROCM_LIB_DIR env var BEFORE invoking the script "
+            "(or LD_LIBRARY_PATH=/opt/rocm-7.2.0/lib python -m ...). The "
+            "ctypes preload must happen before torch/pennylane import to be "
+            "effective; passing the dir on the CLI runs after imports and "
+            "deadlocks. This flag prints a hint and otherwise does nothing."
+        ),
+    )
     args = parser.parse_args()
+
+    if args.rocm_lib_dir and os.environ.get("ROCM_LIB_DIR") != args.rocm_lib_dir:
+        print(
+            f"NOTE: --rocm-lib-dir={args.rocm_lib_dir} ignored at this stage; "
+            "set it via ROCM_LIB_DIR env var before launching python.\n"
+            f"  Try: ROCM_LIB_DIR={args.rocm_lib_dir} python -m benchmark.benchmark_throughput ..."
+        )
 
     try:
         frameworks = parse_frameworks(args.frameworks)
@@ -244,11 +407,19 @@ def main() -> None:
     print(BAR)
 
     t_pl = th_pl = t_qiskit = th_qiskit = t_mahout = th_mahout = 0.0
+    t_pl_amd = th_pl_amd = t_mahout_amd = th_mahout_amd = 0.0
 
     if "pennylane" in frameworks:
         print()
         print("[PennyLane] Full Pipeline (DataLoader -> GPU)...")
         t_pl, th_pl = run_pennylane(
+            args.qubits, args.batches, args.batch_size, args.prefetch
+        )
+
+    if "pennylane-amdgpu" in frameworks:
+        print()
+        print("[PennyLane-AMDGPU] Full Pipeline (lightning.amdgpu, per-sample)...")
+        t_pl_amd, th_pl_amd = run_pennylane_amdgpu(
             args.qubits, args.batches, args.batch_size, args.prefetch
         )
 
@@ -270,6 +441,13 @@ def main() -> None:
             args.encoding_method,
         )
 
+    if "mahout-amd" in frameworks:
+        print()
+        print("[Mahout-AMD] Full Pipeline (TritonAmdEngine, ROCm)...")
+        t_mahout_amd, th_mahout_amd = run_mahout_amd(
+            args.qubits, args.batches, args.batch_size, args.prefetch
+        )
+
     print()
     print(BAR)
     print("THROUGHPUT (Higher is Better)")
@@ -279,22 +457,32 @@ def main() -> None:
     throughput_results = []
     if th_pl > 0:
         throughput_results.append(("PennyLane", th_pl))
+    if th_pl_amd > 0:
+        throughput_results.append(("PennyLane-AMDGPU", th_pl_amd))
     if th_qiskit > 0:
         throughput_results.append(("Qiskit", th_qiskit))
     if th_mahout > 0:
         throughput_results.append(("Mahout", th_mahout))
+    if th_mahout_amd > 0:
+        throughput_results.append(("Mahout-AMD", th_mahout_amd))
 
     throughput_results.sort(key=lambda x: x[1], reverse=True)
 
     for name, tput in throughput_results:
-        print(f"{name:12s} {tput:10.1f} vectors/sec")
+        print(f"{name:18s} {tput:10.1f} vectors/sec")
 
-    if t_mahout > 0:
+    if t_mahout > 0 or t_mahout_amd > 0:
         print(SEP)
+        # Prefer the available Mahout reference for ratio reporting.
+        ref_name, ref_th = ("Mahout", th_mahout) if t_mahout > 0 else ("Mahout-AMD", th_mahout_amd)
         if t_pl > 0:
-            print(f"Speedup vs PennyLane: {th_mahout / th_pl:10.2f}x")
+            print(f"Speedup {ref_name} vs PennyLane:        {ref_th / th_pl:10.2f}x")
+        if t_pl_amd > 0:
+            print(f"Speedup {ref_name} vs PennyLane-AMDGPU: {ref_th / th_pl_amd:10.2f}x")
         if t_qiskit > 0:
-            print(f"Speedup vs Qiskit:    {th_mahout / th_qiskit:10.2f}x")
+            print(f"Speedup {ref_name} vs Qiskit:           {ref_th / th_qiskit:10.2f}x")
+        if t_mahout > 0 and t_mahout_amd > 0:
+            print(f"Mahout (CUDA) vs Mahout-AMD:           {th_mahout / th_mahout_amd:10.2f}x")
 
 
 if __name__ == "__main__":
