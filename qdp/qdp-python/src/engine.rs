@@ -125,10 +125,11 @@ impl QdpEngine {
     ///         - String path: .parquet, .arrow, .feather, .npy, .pt, .pth, .pb file
     ///         - pathlib.Path: Path object (converted via os.fspath())
     ///     num_qubits: Number of qubits for encoding
-    ///     encoding_method: Encoding strategy ("amplitude" default, "angle", or "basis")
-    ///         CUDA tensor note:
-    ///         - amplitude accepts float64 and float32
-    ///         - angle accepts float64 generally, plus float32 for 1D single-sample tensors
+    ///     encoding_method: Encoding strategy ("amplitude" default, "angle", "basis",
+    ///         "iqp", or "iqp-z"). CUDA tensor notes:
+    ///         - amplitude and angle accept float64 and float32
+    ///         - basis requires int64
+    ///         - iqp and iqp-z require float64
     ///
     /// Returns:
     ///     QuantumTensor: DLPack-compatible tensor for zero-copy PyTorch integration
@@ -687,20 +688,39 @@ impl QdpEngine {
                     let data_ptr = data_ptr_u64 as *const f32;
 
                     let ptr = unsafe {
-                        self.core_engine()?
-                            .encode_batch_from_gpu_ptr_f32_with_stream(
-                                data_ptr,
-                                num_samples,
-                                sample_size,
-                                num_qubits,
-                                stream_ptr,
-                            )
-                            .map_err(|e| {
-                                PyRuntimeError::new_err(format!(
-                                    "Encoding failed (float32 amplitude batch): {}",
-                                    e
-                                ))
-                            })?
+                        match method.as_str() {
+                            "amplitude" => self
+                                .core_engine()?
+                                .encode_batch_from_gpu_ptr_f32_with_stream(
+                                    data_ptr,
+                                    num_samples,
+                                    sample_size,
+                                    num_qubits,
+                                    stream_ptr,
+                                )
+                                .map_err(|e| {
+                                    PyRuntimeError::new_err(format!(
+                                        "Encoding failed (float32 amplitude batch): {}",
+                                        e
+                                    ))
+                                })?,
+                            "angle" => self
+                                .core_engine()?
+                                .encode_angle_batch_from_gpu_ptr_f32_with_stream(
+                                    data_ptr,
+                                    num_samples,
+                                    sample_size,
+                                    num_qubits,
+                                    stream_ptr,
+                                )
+                                .map_err(|e| {
+                                    PyRuntimeError::new_err(format!(
+                                        "Encoding failed (float32 angle batch): {}",
+                                        e
+                                    ))
+                                })?,
+                            _ => unreachable!("unreachable: unhandled f32 batch encoding method"),
+                        }
                     };
 
                     Ok(QuantumTensor {
