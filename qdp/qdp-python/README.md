@@ -73,11 +73,18 @@ See `qdp/qdp-python/TRITON_AMD_BACKEND.md` for Triton AMD setup and validation d
 | `amplitude` | Normalize input as quantum amplitudes |
 | `angle` | Map values to rotation angles (one per qubit) |
 | `basis` | Encode integer as computational basis state |
-| `iqp` | IQP-style encoding with entanglement |
+| `iqp` | IQP-style encoding with full ZZ entanglement |
+| `iqp-z` | IQP encoding with Z-only diagonal (no ZZ pairs) |
+| `phase` | Per-qubit phase product state via H⊗P(x_k) |
 
 Backend support boundary:
-- CUDA (`QdpEngine`): `amplitude`, `angle`, `basis`, `iqp`
-- AMD (`QdpEngine(..., backend="amd")`): `amplitude`, `angle`, `basis` (no `iqp` yet)
+- CUDA (`QdpEngine`): `amplitude`, `angle`, `basis`, `iqp`, `iqp-z`, `phase`
+  - `phase` is currently only reachable on the CUDA path via host inputs
+    (Python list / NumPy / file / CPU torch tensor). The Python extension's
+    CUDA-tensor validation does not yet allowlist `phase`; cuda-resident
+    torch tensors must use `.cpu()` first when targeting `phase`. Tracked as
+    a follow-up.
+- AMD (`QdpEngine(..., backend="amd")`): `amplitude`, `angle`, `basis`, `iqp`, `iqp-z`, `phase`
 
 ## Input Sources
 
