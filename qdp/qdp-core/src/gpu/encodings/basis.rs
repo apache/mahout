@@ -180,6 +180,7 @@ impl QuantumEncoder for BasisEncoder {
                     num_samples * std::mem::size_of::<usize>(),
                     "basis indices upload",
                     Some(num_qubits),
+                    Some(device.ordinal()),
                     e,
                 )
             })?
