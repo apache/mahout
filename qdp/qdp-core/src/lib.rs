@@ -36,6 +36,11 @@ mod profiling;
 
 pub use error::{MahoutError, Result, cuda_error_to_string};
 pub use gpu::memory::Precision;
+pub use gpu::{
+    DeviceMesh, DistributedAmplitudePlan, DistributedStateLayout, DistributedStateVector,
+    DistributionMode, GpuTopology, LinkKind, PlacementPlan, PlacementPlanner, PlacementRequest,
+    PreparedDistributedAmplitudeEncode, ShardPlacement, ShardPolicy,
+};
 pub use reader::{NullHandling, handle_float64_nulls};
 
 // Throughput/latency pipeline runner: single path using QdpEngine and encode_batch in Rust.
@@ -52,6 +57,8 @@ use std::ffi::c_void;
 use std::sync::Arc;
 
 use crate::dlpack::DLManagedTensor;
+use crate::gpu::HostCommunicator;
+use crate::gpu::distributed::runtime;
 use crate::gpu::get_encoder;
 use cudarc::driver::CudaDevice;
 
@@ -136,6 +143,85 @@ impl QdpEngine {
             device, // CudaDevice::new already returns Arc<CudaDevice> in cudarc 0.11
             precision,
         })
+    }
+
+    /// Build a validated multi-GPU mesh for future distributed encoding paths.
+    ///
+    /// PR1 exposes mesh construction without changing the single-device engine shape.
+    pub fn new_distributed_mesh(device_ids: Vec<usize>) -> Result<DeviceMesh> {
+        DeviceMesh::new(device_ids)
+    }
+
+    /// Prepare a distributed amplitude encode on a validated multi-GPU mesh.
+    ///
+    /// This stage performs input validation, shard planning, and host-coordinated
+    /// global norm reduction, then returns metadata for the future distributed
+    /// state layout. It does not yet allocate per-shard buffers or launch
+    /// multi-GPU kernels.
+    #[doc(hidden)]
+    pub fn prepare_distributed_amplitude(
+        device_ids: Vec<usize>,
+        data: &[f64],
+        num_qubits: usize,
+        precision: Precision,
+        request: Option<PlacementRequest>,
+    ) -> Result<PreparedDistributedAmplitudeEncode> {
+        let request = Self::resolve_distributed_request(num_qubits, request)?;
+        runtime::validate_distributed_input(data, &request)?;
+        let mesh = Self::new_distributed_mesh(device_ids)?;
+        let communicator = HostCommunicator;
+        let (plan, inv_norm, layout) =
+            runtime::prepare_distributed_encode(&mesh, data, precision, request, &communicator)?;
+
+        Ok(PreparedDistributedAmplitudeEncode {
+            mesh,
+            plan,
+            inv_norm,
+            layout,
+        })
+    }
+
+    /// Encode amplitude data into real per-device shard buffers for a distributed
+    /// state vector on a single host.
+    ///
+    /// This is the first executable distributed path: it returns a sharded state
+    /// object with one GPU buffer per shard. It does not expose DLPack or gather
+    /// semantics yet.
+    #[doc(hidden)]
+    pub fn encode_distributed_amplitude_to_shards(
+        device_ids: Vec<usize>,
+        data: &[f64],
+        num_qubits: usize,
+        precision: Precision,
+        request: Option<PlacementRequest>,
+    ) -> Result<DistributedStateVector> {
+        let request = Self::resolve_distributed_request(num_qubits, request)?;
+        runtime::validate_distributed_input(data, &request)?;
+        let mesh = Self::new_distributed_mesh(device_ids)?;
+        let communicator = HostCommunicator;
+        runtime::encode_distributed_to_shards(&mesh, data, precision, request, &communicator)
+    }
+
+    fn resolve_distributed_request(
+        num_qubits: usize,
+        request: Option<PlacementRequest>,
+    ) -> Result<PlacementRequest> {
+        match request {
+            Some(request) => {
+                if request.num_qubits != num_qubits {
+                    return Err(MahoutError::InvalidInput(format!(
+                        "Distributed request qubit mismatch: argument specifies {} qubits but request specifies {}",
+                        num_qubits, request.num_qubits
+                    )));
+                }
+                Ok(request)
+            }
+            None => Ok(PlacementRequest::new(
+                num_qubits,
+                DistributionMode::ShardedCapacity,
+                ShardPolicy::Equal,
+            )),
+        }
     }
 
     /// Encode classical data into quantum state
