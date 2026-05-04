@@ -57,7 +57,13 @@ impl QuantumEncoder for AngleEncoder {
             let angles_gpu = {
                 crate::profile_scope!("GPU::H2D_Angles");
                 device.htod_sync_copy(data).map_err(|e| {
-                    map_allocation_error(input_bytes, "angle input upload", Some(num_qubits), e)
+                    map_allocation_error(
+                        input_bytes,
+                        "angle input upload",
+                        Some(num_qubits),
+                        Some(device.ordinal()),
+                        e,
+                    )
                 })?
             };
 
@@ -175,7 +181,13 @@ impl QuantumEncoder for AngleEncoder {
         let angles_gpu = {
             crate::profile_scope!("GPU::H2D_BatchAngles");
             device.htod_sync_copy(batch_data).map_err(|e| {
-                map_allocation_error(input_bytes, "angle batch upload", Some(num_qubits), e)
+                map_allocation_error(
+                    input_bytes,
+                    "angle batch upload",
+                    Some(num_qubits),
+                    Some(device.ordinal()),
+                    e,
+                )
             })?
         };
 
@@ -435,7 +447,13 @@ impl QuantumEncoder for AngleEncoder {
         let angles_gpu = {
             crate::profile_scope!("GPU::H2D_BatchAnglesF32");
             device.htod_sync_copy(batch_data).map_err(|e| {
-                map_allocation_error(input_bytes, "angle batch upload", Some(num_qubits), e)
+                map_allocation_error(
+                    input_bytes,
+                    "angle batch upload",
+                    Some(num_qubits),
+                    Some(device.ordinal()),
+                    e,
+                )
             })?
         };
 

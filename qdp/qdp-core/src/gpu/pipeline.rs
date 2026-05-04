@@ -379,12 +379,23 @@ where
         crate::profile_scope!("GPU::ChunkProcess");
 
         let chunk_bytes = std::mem::size_of_val(chunk);
-        ensure_device_memory_available(chunk_bytes, "pipeline chunk buffer allocation", None)?;
+        ensure_device_memory_available(
+            chunk_bytes,
+            "pipeline chunk buffer allocation",
+            None,
+            Some(device.ordinal()),
+        )?;
 
         // Allocate temporary device buffer for this chunk
         #[allow(clippy::collapsible_if, clippy::manual_is_multiple_of)]
         let input_chunk_dev = unsafe { device.alloc::<f64>(chunk.len()) }.map_err(|e| {
-            map_allocation_error(chunk_bytes, "pipeline chunk buffer allocation", None, e)
+            map_allocation_error(
+                chunk_bytes,
+                "pipeline chunk buffer allocation",
+                None,
+                Some(device.ordinal()),
+                e,
+            )
         })?;
 
         // Acquire pinned staging buffer and populate it with the current chunk

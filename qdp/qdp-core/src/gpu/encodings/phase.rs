@@ -80,7 +80,13 @@ impl QuantumEncoder for PhaseEncoder {
             let phases_gpu = {
                 crate::profile_scope!("GPU::H2D_Phases");
                 device.htod_sync_copy(data).map_err(|e| {
-                    map_allocation_error(input_bytes, "phase input upload", Some(num_qubits), e)
+                    map_allocation_error(
+                        input_bytes,
+                        "phase input upload",
+                        Some(num_qubits),
+                        Some(device.ordinal()),
+                        e,
+                    )
                 })?
             };
 
@@ -199,7 +205,13 @@ impl QuantumEncoder for PhaseEncoder {
         let phases_gpu = {
             crate::profile_scope!("GPU::H2D_BatchPhases");
             device.htod_sync_copy(batch_data).map_err(|e| {
-                map_allocation_error(input_bytes, "phase batch upload", Some(num_qubits), e)
+                map_allocation_error(
+                    input_bytes,
+                    "phase batch upload",
+                    Some(num_qubits),
+                    Some(device.ordinal()),
+                    e,
+                )
             })?
         };
 

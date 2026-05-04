@@ -86,6 +86,7 @@ impl QuantumEncoder for AmplitudeEncoder {
                     input_bytes,
                     "input staging buffer",
                     Some(num_qubits),
+                    Some(_device.ordinal()),
                 )?;
 
                 let input_slice = {
@@ -95,6 +96,7 @@ impl QuantumEncoder for AmplitudeEncoder {
                             input_bytes,
                             "input staging buffer",
                             Some(num_qubits),
+                            Some(_device.ordinal()),
                             e,
                         )
                     })?
@@ -693,6 +695,29 @@ impl QuantumEncoder for AmplitudeEncoder {
 }
 
 impl AmplitudeEncoder {
+    #[cfg(target_os = "linux")]
+    fn async_chunk_state_len(
+        state_len: usize,
+        chunk_offset: usize,
+        chunk_len: usize,
+    ) -> Result<usize> {
+        let remaining = state_len.checked_sub(chunk_offset).ok_or_else(|| {
+            MahoutError::InvalidInput(format!(
+                "Async amplitude chunk offset {} exceeds state length {}",
+                chunk_offset, state_len
+            ))
+        })?;
+
+        if chunk_len > remaining {
+            return Err(MahoutError::InvalidInput(format!(
+                "Async amplitude chunk length {} at offset {} exceeds remaining state length {}",
+                chunk_len, chunk_offset, remaining
+            )));
+        }
+
+        Ok(chunk_len)
+    }
+
     /// Async pipeline encoding for large data
     ///
     /// Uses the generic dual-stream pipeline infrastructure to overlap
@@ -720,6 +745,8 @@ impl AmplitudeEncoder {
             device,
             host_data,
             |stream, input_ptr, chunk_offset, chunk_len| {
+                let chunk_state_len =
+                    Self::async_chunk_state_len(state_len, chunk_offset, chunk_len)?;
                 // Calculate offset pointer for state vector (type-safe pointer arithmetic)
                 // Offset is in complex numbers (CuDoubleComplex), not f64 elements
                 let state_ptr_offset = unsafe {
@@ -735,7 +762,7 @@ impl AmplitudeEncoder {
                         input_ptr,
                         state_ptr_offset,
                         chunk_len,
-                        state_len,
+                        chunk_state_len,
                         inv_norm,
                         stream.stream as *mut c_void,
                     )
@@ -1091,5 +1118,64 @@ impl AmplitudeEncoder {
             &state_vector,
         )?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::AmplitudeEncoder;
+    #[cfg(target_os = "linux")]
+    use crate::gpu::QuantumEncoder;
+    #[cfg(target_os = "linux")]
+    use cudarc::driver::CudaDevice;
+
+    #[test]
+    #[cfg(target_os = "linux")]
+    fn async_chunk_state_len_uses_chunk_local_extent() {
+        assert_eq!(
+            AmplitudeEncoder::async_chunk_state_len(1024, 256, 128).unwrap(),
+            128
+        );
+    }
+
+    #[test]
+    #[cfg(target_os = "linux")]
+    fn async_chunk_state_len_rejects_overrun() {
+        let err = AmplitudeEncoder::async_chunk_state_len(1024, 1000, 64).unwrap_err();
+        assert!(matches!(err, crate::error::MahoutError::InvalidInput(_)));
+    }
+
+    #[test]
+    #[cfg(target_os = "linux")]
+    fn async_pipeline_large_encode_q22_matches_reference_slices() {
+        let device = match CudaDevice::new(0) {
+            Ok(device) => device,
+            Err(_) => return,
+        };
+
+        let num_qubits = 22usize;
+        let state_len = 1usize << num_qubits;
+        let mut input = vec![0.0f64; state_len];
+        for (idx, value) in input.iter_mut().enumerate() {
+            *value = ((idx % 1024) as f64) + 1.0;
+        }
+
+        let encoder = AmplitudeEncoder;
+        let state = encoder.encode(&device, &input, num_qubits).unwrap();
+        let host = state.copy_to_host_f64(&device).unwrap();
+        let norm = input.iter().map(|value| value * value).sum::<f64>().sqrt();
+
+        for idx in [0usize, 1, 1024, state_len / 2, state_len - 1] {
+            let expected = input[idx] / norm;
+            let actual = host[idx].x;
+            assert!(
+                (actual - expected).abs() < 1e-12,
+                "Mismatch at amplitude {}: actual={} expected={}",
+                idx,
+                actual,
+                expected
+            );
+            assert_eq!(host[idx].y, 0.0);
+        }
     }
 }
