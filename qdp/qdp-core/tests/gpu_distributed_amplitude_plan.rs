@@ -1,3 +1,19 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one or more
+// contributor license agreements.  See the NOTICE file distributed with
+// this work for additional information regarding copyright ownership.
+// The ASF licenses this file to You under the Apache License, Version 2.0
+// (the "License"); you may not use this file except in compliance with
+// the License.  You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 use qdp_core::{
     DeviceMesh, DistributedAmplitudePlan, DistributedStateLayout, DistributionMode, GpuTopology,
     PlacementRequest, Precision, ShardPolicy,
@@ -48,19 +64,29 @@ fn distributed_amplitude_plan_allows_extra_global_qubit_when_shards_fit() {
 }
 
 #[test]
-fn distributed_amplitude_plan_rejects_global_qubits_when_local_shard_exceeds_single_gpu_limit() {
-    let topology = GpuTopology::placeholder(1);
+fn distributed_amplitude_plan_supports_q34_with_balanced_six_gpu_shards() {
+    let topology = GpuTopology::placeholder(6);
     let mesh = DeviceMesh {
-        device_ids: vec![0],
+        device_ids: vec![0, 1, 2, 3, 4, 5],
         devices: Vec::new(),
         topology,
     };
-    let request = PlacementRequest::new(31, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
-    let err = DistributedAmplitudePlan::for_request(&mesh, request).unwrap_err();
-    assert!(matches!(
-        err,
-        qdp_core::MahoutError::InvalidInput(msg) if msg.contains("per-device capacity")
-    ));
+    let request = PlacementRequest::new(
+        34,
+        DistributionMode::ShardedCapacity,
+        ShardPolicy::BalancedUneven,
+    );
+    let plan = DistributedAmplitudePlan::for_request(&mesh, request).unwrap();
+
+    assert_eq!(plan.global_len, 1usize << 34);
+    assert_eq!(plan.num_devices, 6);
+    assert_eq!(plan.shard_bits, None);
+    assert_eq!(plan.uniform_shard_len, None);
+    assert_eq!(plan.shard_range(0).unwrap(), (0, 2_863_311_531));
+    assert_eq!(
+        plan.shard_range(5).unwrap(),
+        (14_316_557_654, 17_179_869_184)
+    );
 }
 
 #[test]
