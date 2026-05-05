@@ -1,5 +1,21 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one or more
+// contributor license agreements.  See the NOTICE file distributed with
+// this work for additional information regarding copyright ownership.
+// The ASF licenses this file to You under the Apache License, Version 2.0
+// (the "License"); you may not use this file except in compliance with
+// the License.  You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 use qdp_core::gpu::QuantumEncoder;
-use qdp_core::{Precision, QdpEngine};
+use qdp_core::{HostCommunicator, Precision, QdpEngine};
 
 mod common;
 
@@ -26,6 +42,30 @@ fn prepare_distributed_amplitude_returns_expected_metadata() {
 
     let expected = 1.0 / 14.0f64.sqrt();
     assert!((prepared.inv_norm - expected).abs() < 1e-12);
+}
+
+#[test]
+fn prepare_distributed_amplitude_with_explicit_communicator_returns_expected_metadata() {
+    #[cfg(target_os = "linux")]
+    if cudarc::driver::CudaDevice::new(1).is_err() {
+        return;
+    }
+
+    let communicator = HostCommunicator;
+    let prepared = QdpEngine::prepare_distributed_amplitude_with_communicator(
+        vec![0, 1],
+        &[1.0, 2.0, 3.0],
+        2,
+        Precision::Float32,
+        None,
+        &communicator,
+    )
+    .unwrap();
+
+    assert_eq!(prepared.mesh.num_devices(), 2);
+    assert_eq!(prepared.plan.uniform_shard_len, Some(2));
+    assert_eq!(prepared.layout.num_shards(), 2);
+    assert_eq!(prepared.layout.global_len, 4);
 }
 
 #[test]
