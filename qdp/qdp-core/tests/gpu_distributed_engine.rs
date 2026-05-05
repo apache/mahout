@@ -14,8 +14,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use qdp_core::gpu::QuantumEncoder;
-use qdp_core::{HostCommunicator, Precision, QdpEngine};
+use qdp_core::gpu::{
+    DeviceMesh, DistributedAmplitudePlan, DistributedExecutionContext, DistributedStateLayout,
+    DistributionMode, GpuTopology, LinkKind, LocalCollectiveCommunicator, PlacementRequest,
+    QuantumEncoder, ShardPolicy,
+};
+use qdp_core::{Precision, QdpEngine};
 
 mod common;
 
@@ -45,20 +49,20 @@ fn prepare_distributed_amplitude_returns_expected_metadata() {
 }
 
 #[test]
-fn prepare_distributed_amplitude_with_explicit_communicator_returns_expected_metadata() {
+fn prepare_distributed_amplitude_on_execution_context_returns_expected_metadata() {
     #[cfg(target_os = "linux")]
     if cudarc::driver::CudaDevice::new(1).is_err() {
         return;
     }
 
-    let communicator = HostCommunicator;
-    let prepared = QdpEngine::prepare_distributed_amplitude_with_communicator(
-        vec![0, 1],
+    let collectives = LocalCollectiveCommunicator;
+    let execution = DistributedExecutionContext::single_process(vec![0, 1], &collectives).unwrap();
+    let prepared = QdpEngine::prepare_distributed_amplitude_on(
+        &execution,
         &[1.0, 2.0, 3.0],
         2,
         Precision::Float32,
         None,
-        &communicator,
     )
     .unwrap();
 
@@ -66,6 +70,106 @@ fn prepare_distributed_amplitude_with_explicit_communicator_returns_expected_met
     assert_eq!(prepared.plan.uniform_shard_len, Some(2));
     assert_eq!(prepared.layout.num_shards(), 2);
     assert_eq!(prepared.layout.global_len, 4);
+}
+
+#[cfg(target_os = "linux")]
+fn reordered_three_device_mesh() -> Option<DeviceMesh> {
+    let device0 = cudarc::driver::CudaDevice::new(0).ok()?;
+    let device1 = cudarc::driver::CudaDevice::new(1).ok()?;
+    let device2 = cudarc::driver::CudaDevice::new(2).ok()?;
+    let topology = GpuTopology {
+        peer_access: vec![
+            vec![true, true, false],
+            vec![true, true, true],
+            vec![false, true, true],
+        ],
+        links: vec![
+            vec![LinkKind::SameDevice, LinkKind::Pix, LinkKind::Unknown],
+            vec![LinkKind::Pix, LinkKind::SameDevice, LinkKind::Node],
+            vec![LinkKind::Unknown, LinkKind::Node, LinkKind::SameDevice],
+        ],
+    };
+
+    DeviceMesh::from_parts(vec![0, 1, 2], vec![device0, device1, device2], topology).ok()
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn distributed_layout_uses_device_handles_for_reordered_placements() {
+    let Some(mesh) = reordered_three_device_mesh() else {
+        return;
+    };
+
+    let request = PlacementRequest::new(
+        2,
+        DistributionMode::ShardedCapacity,
+        ShardPolicy::BalancedUneven,
+    );
+    let plan = DistributedAmplitudePlan::for_request(&mesh, request).unwrap();
+    assert_eq!(plan.placement.placements[0].device_id, 1);
+
+    let layout = DistributedStateLayout::new(&mesh, &plan, Precision::Float32).unwrap();
+    assert_eq!(layout.shards[0].device_id, 1);
+    assert_eq!(layout.shards[0].device.ordinal(), 1);
+    assert_eq!(layout.shards[1].device_id, 0);
+    assert_eq!(layout.shards[1].device.ordinal(), 0);
+    assert_eq!(layout.shards[2].device_id, 2);
+    assert_eq!(layout.shards[2].device.ordinal(), 2);
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn distributed_encoding_uses_device_handles_for_reordered_placements() {
+    let Some(mesh) = reordered_three_device_mesh() else {
+        return;
+    };
+    let device0 = mesh.device_for_id(0).unwrap();
+
+    let collectives = LocalCollectiveCommunicator;
+    let execution = DistributedExecutionContext::new(mesh, &collectives);
+    let input = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+    let single_state = qdp_core::gpu::AmplitudeEncoder
+        .encode(&device0, &input, 3)
+        .unwrap();
+    let single_host = single_state
+        .copy_to_host_f64(&device0)
+        .unwrap()
+        .into_iter()
+        .map(|value| value.x)
+        .collect::<Vec<_>>();
+
+    let state = QdpEngine::encode_distributed_amplitude_to_shards_on(
+        &execution,
+        &input,
+        3,
+        Precision::Float64,
+        Some(PlacementRequest::new(
+            3,
+            DistributionMode::ShardedCapacity,
+            ShardPolicy::BalancedUneven,
+        )),
+    )
+    .unwrap();
+
+    assert_eq!(state.shards[0].device_id, 1);
+    assert_eq!(state.shards[0].device.ordinal(), 1);
+    assert_eq!(state.shards[1].device_id, 0);
+    assert_eq!(state.shards[1].device.ordinal(), 0);
+    assert_eq!(state.shards[2].device_id, 2);
+    assert_eq!(state.shards[2].device.ordinal(), 2);
+
+    let mut distributed_host = Vec::new();
+    for shard_id in 0..state.num_shards() {
+        distributed_host.extend(
+            state
+                .copy_shard_to_host_f64(shard_id)
+                .unwrap()
+                .into_iter()
+                .map(|value| value.x),
+        );
+    }
+
+    assert_eq!(distributed_host, single_host);
 }
 
 #[test]

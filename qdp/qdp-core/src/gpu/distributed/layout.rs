@@ -36,7 +36,8 @@ pub struct StateShardLayout {
     pub local_len: usize,
 }
 
-/// Metadata and placement plan for a future multi-GPU state vector.
+/// Metadata describing how one distributed state is mapped onto one execution
+/// context.
 #[derive(Clone)]
 pub struct DistributedStateLayout {
     pub num_qubits: usize,
@@ -98,10 +99,10 @@ impl DistributedStateLayout {
         }
 
         let mut shards = Vec::with_capacity(mesh.num_devices());
-        for (placement, device) in plan.placement.placements.iter().zip(mesh.devices.iter()) {
+        for placement in &plan.placement.placements {
             let (start_idx, end_idx) = (placement.start_idx, placement.end_idx);
             shards.push(StateShardLayout {
-                device: Arc::clone(device),
+                device: mesh.device_for_id(placement.device_id)?,
                 device_id: placement.device_id,
                 shard_id: placement.shard_id,
                 start_idx,
