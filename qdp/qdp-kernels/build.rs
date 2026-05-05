@@ -86,18 +86,20 @@ fn main() {
         // SM 75 = Turing (T4, RTX 2000 series)
         // SM 80 = Ampere (A100, RTX 3000 series)
         // SM 86 = Ampere (RTX 3090, A40)
-        // SM 89 = Ada Lovelace (RTX 4000 series)
+        // SM 89 = Ada Lovelace (RTX 4090 / RTX 4000 series)
         // SM 90 = Hopper (H100)
-        // Support both Turing (sm_75) and Ampere+ architectures
+        // SM 120 = Blackwell workstation parts
+        // Support the GPU generations currently present in the QDP test host.
         .flag("-gencode")
         .flag("arch=compute_75,code=sm_75")
         .flag("-gencode")
         .flag("arch=compute_80,code=sm_80")
         .flag("-gencode")
         .flag("arch=compute_86,code=sm_86")
-        // Optional: Add more architectures for production
-        // .flag("-gencode")
-        // .flag("arch=compute_89,code=sm_89")
+        .flag("-gencode")
+        .flag("arch=compute_89,code=sm_89")
+        .flag("-gencode")
+        .flag("arch=compute_120,code=sm_120")
         .file("src/amplitude.cu")
         .file("src/basis.cu")
         .file("src/angle.cu")

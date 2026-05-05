@@ -1,4 +1,4 @@
-use qdp_core::{
+use qdp_core::gpu::{
     DeviceMesh, DistributionMode, GpuTopology, LinkKind, PlacementPlanner, PlacementRequest,
     ShardPolicy,
 };
@@ -86,7 +86,10 @@ fn single_mode_uses_only_first_device() {
     assert_eq!(plan.placements.len(), 1);
     assert_eq!(plan.gather_device_id, Some(4));
     assert_eq!(plan.placements[0].device_id, 4);
-    assert_eq!((plan.placements[0].start_idx, plan.placements[0].end_idx), (0, 8));
+    assert_eq!(
+        (plan.placements[0].start_idx, plan.placements[0].end_idx),
+        (0, 8)
+    );
 }
 
 #[test]

@@ -16,8 +16,11 @@
 
 use std::time::Instant;
 
-use qdp_core::{DistributionMode, MahoutError};
-use qdp_core::{HostCommunicator, PlacementRequest, Precision, QdpEngine, ShardPolicy};
+use qdp_core::gpu::LocalCollectiveCommunicator;
+use qdp_core::{
+    DistributedExecutionContext, DistributionMode, MahoutError, PlacementRequest, Precision,
+    QdpEngine, ShardPolicy,
+};
 
 fn gib(bytes: usize) -> f64 {
     bytes as f64 / (1024.0 * 1024.0 * 1024.0)
@@ -65,22 +68,23 @@ fn main() -> Result<(), MahoutError> {
     let device_ids = parse_device_ids()?;
     let request =
         PlacementRequest::new(num_qubits, DistributionMode::ShardedCapacity, shard_policy);
-    let communicator = HostCommunicator;
     let host_data = vec![1.0f64; host_len];
 
     println!(
-        "Starting MPI-shaped distributed amplitude probe: qubits={}, host_len={}, gpus={:?}, precision={:?}, shard_policy={:?}, communicator=host-loopback",
+        "Starting distributed amplitude probe: qubits={}, host_len={}, gpus={:?}, precision={:?}, shard_policy={:?}, collectives=in-process",
         num_qubits, host_len, device_ids, precision, shard_policy
     );
 
+    let collectives = LocalCollectiveCommunicator;
+    let execution = DistributedExecutionContext::single_process(device_ids.clone(), &collectives)?;
+
     let prepare_start = Instant::now();
-    let prepared = QdpEngine::prepare_distributed_amplitude_with_communicator(
-        device_ids.clone(),
+    let prepared = QdpEngine::prepare_distributed_amplitude_on(
+        &execution,
         &host_data,
         num_qubits,
         precision,
         Some(request.clone()),
-        &communicator,
     )?;
     let prepare_elapsed = prepare_start.elapsed();
 
@@ -111,13 +115,12 @@ fn main() -> Result<(), MahoutError> {
     }
 
     let encode_start = Instant::now();
-    let state = QdpEngine::encode_distributed_amplitude_to_shards_with_communicator(
-        device_ids,
+    let state = QdpEngine::encode_distributed_amplitude_to_shards_on(
+        &execution,
         &host_data,
         num_qubits,
         precision,
         Some(request),
-        &communicator,
     )?;
     let encode_elapsed = encode_start.elapsed();
 

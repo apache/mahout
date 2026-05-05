@@ -25,7 +25,7 @@ use crate::{
     gpu::cuda_ffi::{CUDA_SUCCESS, cudaDeviceCanAccessPeer},
 };
 
-/// Coarse-grained GPU interconnect classification used for future placement policies.
+/// Coarse-grained GPU interconnect classification used by placement policies.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum LinkKind {
     SameDevice,
@@ -152,7 +152,7 @@ impl GpuTopology {
     }
 }
 
-/// A validated collection of CUDA devices that will eventually back distributed state vectors.
+/// A validated collection of CUDA devices that back one distributed execution context.
 #[derive(Clone)]
 pub struct DeviceMesh {
     pub device_ids: Vec<usize>,
@@ -161,11 +161,11 @@ pub struct DeviceMesh {
 }
 
 impl DeviceMesh {
-    /// Build a mesh from CUDA device IDs with a placeholder topology.
+    /// Build a mesh from CUDA device IDs.
     ///
-    /// This intentionally keeps PR1 lightweight: it validates shape and initializes
-    /// CUDA devices, while a later PR can replace placeholder topology discovery with
-    /// explicit peer-access probing and richer link metadata.
+    /// On Linux this probes peer-access reachability so placement policies can
+    /// prefer the most connected devices without changing the caller-provided
+    /// device set.
     pub fn new(device_ids: Vec<usize>) -> Result<Self> {
         Self::validate_device_ids(&device_ids)?;
 
@@ -192,7 +192,8 @@ impl DeviceMesh {
         })
     }
 
-    /// Build a mesh from explicit parts. Intended for tests and future topology injection.
+    /// Build a mesh from explicit parts. Intended for tests and injected
+    /// topology metadata.
     pub fn from_parts(
         device_ids: Vec<usize>,
         devices: Vec<Arc<CudaDevice>>,
@@ -270,6 +271,20 @@ impl DeviceMesh {
             .into_iter()
             .map(|idx| self.device_ids[idx])
             .collect()
+    }
+
+    pub fn device_for_id(&self, device_id: usize) -> Result<Arc<CudaDevice>> {
+        let index = self
+            .device_ids
+            .iter()
+            .position(|&candidate| candidate == device_id)
+            .ok_or_else(|| {
+                MahoutError::InvalidInput(format!(
+                    "Device mesh does not contain cuda:{}",
+                    device_id
+                ))
+            })?;
+        Ok(Arc::clone(&self.devices[index]))
     }
 
     fn validate_device_ids(device_ids: &[usize]) -> Result<()> {
