@@ -46,6 +46,8 @@ pub struct PreparedDistributedAmplitudeEncode {
 }
 
 impl DistributedAmplitudePlan {
+    /// Validate one distributed amplitude request and derive the shard math used
+    /// by later layout and materialization steps.
     pub fn for_request(mesh: &DeviceMesh, request: PlacementRequest) -> Result<Self> {
         if request.num_qubits == 0 {
             return Err(MahoutError::InvalidInput(
@@ -97,6 +99,7 @@ impl DistributedAmplitudePlan {
         })
     }
 
+    /// Logical half-open amplitude range covered by one shard ID.
     pub fn shard_range(&self, shard_id: usize) -> Result<(usize, usize)> {
         let placement = self.placement.placements.get(shard_id).ok_or_else(|| {
             MahoutError::InvalidInput(format!(
@@ -107,6 +110,7 @@ impl DistributedAmplitudePlan {
         Ok((placement.start_idx, placement.end_idx))
     }
 
+    /// Largest local shard length across the current placement.
     pub fn max_local_len(&self) -> usize {
         self.placement
             .placements
@@ -116,6 +120,7 @@ impl DistributedAmplitudePlan {
             .unwrap_or(0)
     }
 
+    /// Estimated bytes required by the largest local shard at one target precision.
     pub fn estimated_max_shard_bytes(&self, precision: Precision) -> Result<usize> {
         estimated_amplitude_bytes(self.max_local_len(), precision)
     }

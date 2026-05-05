@@ -45,6 +45,7 @@ pub struct PlacementRequest {
 }
 
 impl PlacementRequest {
+    /// Create one placement request for one logical distributed state.
     pub fn new(num_qubits: usize, mode: DistributionMode, shard_policy: ShardPolicy) -> Self {
         Self {
             num_qubits,
@@ -53,6 +54,7 @@ impl PlacementRequest {
         }
     }
 
+    /// Compute the global amplitude length implied by `num_qubits`.
     pub fn global_len(&self) -> Result<usize> {
         1usize.checked_shl(self.num_qubits as u32).ok_or_else(|| {
             MahoutError::InvalidInput(format!(
@@ -73,6 +75,7 @@ pub struct ShardPlacement {
 }
 
 impl ShardPlacement {
+    /// Number of amplitudes assigned to this shard.
     pub fn local_len(&self) -> usize {
         self.end_idx - self.start_idx
     }
@@ -89,10 +92,12 @@ pub struct PlacementPlan {
 }
 
 impl PlacementPlan {
+    /// Number of participating devices in this placement plan.
     pub fn num_devices(&self) -> usize {
         self.placements.len()
     }
 
+    /// Return the common shard length when every shard is evenly sized.
     pub fn shard_len(&self) -> Result<usize> {
         let Some(first) = self.placements.first() else {
             return Err(MahoutError::InvalidInput(
@@ -118,6 +123,7 @@ impl PlacementPlan {
 pub struct PlacementPlanner;
 
 impl PlacementPlanner {
+    /// Build one placement plan from one validated device mesh and request.
     pub fn plan(mesh: &DeviceMesh, request: &PlacementRequest) -> Result<PlacementPlan> {
         if mesh.num_devices() == 0 {
             return Err(MahoutError::InvalidInput(

@@ -22,6 +22,7 @@ use crate::error::{MahoutError, Result};
 /// MPI-backed implementation can provide the same interface while mapping the
 /// partial contributions to rank-local shards and performing a real all-reduce.
 pub trait CollectiveCommunicator: Send + Sync {
+    /// Sum one set of per-shard partial contributions into one global scalar.
     fn all_reduce_sum_f64(&self, values: &[f64]) -> Result<f64>;
 }
 
