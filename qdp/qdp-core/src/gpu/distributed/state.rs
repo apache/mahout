@@ -50,6 +50,7 @@ pub struct DistributedStateVector {
 }
 
 impl DistributedStateVector {
+    /// Device ID preferred for future gather-style readback operations.
     pub fn recommended_gather_device_id(&self) -> Option<usize> {
         shared::policy_device_ids(
             &self.topology,
@@ -58,6 +59,7 @@ impl DistributedStateVector {
         .0
     }
 
+    /// Preferred device ordering derived from the current topology metadata.
     pub fn recommended_placement_device_ids(&self) -> Vec<usize> {
         shared::policy_device_ids(
             &self.topology,
@@ -66,11 +68,13 @@ impl DistributedStateVector {
         .1
     }
 
+    /// Number of materialized shards in this distributed state.
     pub fn num_shards(&self) -> usize {
         self.shards.len()
     }
 
     #[cfg(target_os = "linux")]
+    /// Copy one float64 shard back to host memory for validation or inspection.
     pub fn copy_shard_to_host_f64(&self, shard_id: usize) -> Result<Vec<CuDoubleComplex>> {
         let shard = self.shards.get(shard_id).ok_or_else(|| {
             MahoutError::InvalidInput(format!(
@@ -94,6 +98,7 @@ impl DistributedStateVector {
     }
 
     #[cfg(target_os = "linux")]
+    /// Copy one float32 shard back to host memory for validation or inspection.
     pub fn copy_shard_to_host_f32(&self, shard_id: usize) -> Result<Vec<CuComplex>> {
         let shard = self.shards.get(shard_id).ok_or_else(|| {
             MahoutError::InvalidInput(format!(

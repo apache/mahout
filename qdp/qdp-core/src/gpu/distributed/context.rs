@@ -30,10 +30,14 @@ pub struct DistributedExecutionContext<'a> {
 }
 
 impl<'a> DistributedExecutionContext<'a> {
+    /// Build one distributed execution context from a validated device mesh and
+    /// one collective implementation.
     pub fn new(mesh: DeviceMesh, collectives: &'a dyn CollectiveCommunicator) -> Self {
         Self { mesh, collectives }
     }
 
+    /// Build the current single-process execution context from one caller-owned
+    /// device list.
     pub fn single_process(
         device_ids: Vec<usize>,
         collectives: &'a dyn CollectiveCommunicator,
@@ -41,6 +45,7 @@ impl<'a> DistributedExecutionContext<'a> {
         Ok(Self::new(DeviceMesh::new(device_ids)?, collectives))
     }
 
+    /// Access the device mesh that owns the distributed state shards.
     pub fn mesh(&self) -> &DeviceMesh {
         &self.mesh
     }

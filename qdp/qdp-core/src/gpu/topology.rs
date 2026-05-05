@@ -69,6 +69,7 @@ impl GpuTopology {
     }
 
     #[cfg(target_os = "linux")]
+    /// Probe peer-access reachability for one caller-provided device list.
     pub fn probe(device_ids: &[usize]) -> Result<Self> {
         let num_devices = device_ids.len();
         let mut topology = Self::placeholder(num_devices);
@@ -105,6 +106,7 @@ impl GpuTopology {
         Ok(topology)
     }
 
+    /// Choose the most connected device index as the preferred gather root.
     pub fn preferred_gather_index(&self) -> Option<usize> {
         if self.peer_access.is_empty() {
             return None;
@@ -132,6 +134,7 @@ impl GpuTopology {
         Some(best_idx)
     }
 
+    /// Rank device indices by how favorable they are for distributed placement.
     pub fn recommended_placement_order(&self) -> Vec<usize> {
         let Some(root_idx) = self.preferred_gather_index() else {
             return Vec::new();
@@ -244,10 +247,12 @@ impl DeviceMesh {
         })
     }
 
+    /// Number of devices represented by this mesh.
     pub fn num_devices(&self) -> usize {
         self.device_ids.len()
     }
 
+    /// Enforce a power-of-two device count for policies that require equal shards.
     pub fn validate_power_of_two(&self) -> Result<()> {
         let num_devices = self.num_devices();
         if !num_devices.is_power_of_two() {
@@ -259,12 +264,14 @@ impl DeviceMesh {
         Ok(())
     }
 
+    /// Recommended gather device ID derived from the current topology metadata.
     pub fn recommended_gather_device_id(&self) -> Option<usize> {
         self.topology
             .preferred_gather_index()
             .map(|idx| self.device_ids[idx])
     }
 
+    /// Preferred device IDs for placement in topology-aware order.
     pub fn recommended_placement_device_ids(&self) -> Vec<usize> {
         self.topology
             .recommended_placement_order()
@@ -273,6 +280,7 @@ impl DeviceMesh {
             .collect()
     }
 
+    /// Resolve one CUDA device handle by declared device ID.
     pub fn device_for_id(&self, device_id: usize) -> Result<Arc<CudaDevice>> {
         let index = self
             .device_ids
