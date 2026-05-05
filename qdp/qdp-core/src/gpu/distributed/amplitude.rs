@@ -19,7 +19,7 @@ use crate::gpu::distributed::{
     DistributionMode, PlacementPlan, PlacementPlanner, PlacementRequest, ShardPlacement,
     ShardPolicy,
 };
-use crate::gpu::encodings::MAX_QUBITS;
+use crate::gpu::memory::Precision;
 use crate::gpu::topology::DeviceMesh;
 
 /// Shared planning math for amplitude-sharded state construction.
@@ -68,7 +68,7 @@ impl DistributedAmplitudePlan {
 
         let num_devices = mesh.num_devices();
         let placement = PlacementPlanner::plan(mesh, &request)?;
-        Self::validate_local_shard_capacity(request.num_qubits, &placement)?;
+        Self::validate_local_shard_shape(request.num_qubits, &placement)?;
         let global_len = placement.global_len;
         let num_qubits = request.num_qubits;
         let (shard_bits, uniform_shard_len) = match request.shard_policy {
@@ -107,8 +107,20 @@ impl DistributedAmplitudePlan {
         Ok((placement.start_idx, placement.end_idx))
     }
 
-    fn validate_local_shard_capacity(num_qubits: usize, placement: &PlacementPlan) -> Result<()> {
-        let max_local_len = 1usize << MAX_QUBITS;
+    pub fn max_local_len(&self) -> usize {
+        self.placement
+            .placements
+            .iter()
+            .map(ShardPlacement::local_len)
+            .max()
+            .unwrap_or(0)
+    }
+
+    pub fn estimated_max_shard_bytes(&self, precision: Precision) -> Result<usize> {
+        estimated_amplitude_bytes(self.max_local_len(), precision)
+    }
+
+    fn validate_local_shard_shape(num_qubits: usize, placement: &PlacementPlan) -> Result<()> {
         let required_local_len = placement
             .placements
             .iter()
@@ -120,13 +132,32 @@ impl DistributedAmplitudePlan {
                 )
             })?;
 
-        if required_local_len > max_local_len {
+        if required_local_len == 0 {
             return Err(MahoutError::InvalidInput(format!(
-                "Distributed amplitude request for {} qubits still exceeds per-device capacity: largest shard has {} amplitudes, limit is 2^{} = {}. Add more GPUs or reduce qubits.",
-                num_qubits, required_local_len, MAX_QUBITS, max_local_len
+                "Distributed amplitude request for {} qubits produced an empty local shard",
+                num_qubits
             )));
         }
 
+        let _ = estimated_amplitude_bytes(required_local_len, Precision::Float32)?;
+        let _ = estimated_amplitude_bytes(required_local_len, Precision::Float64)?;
+
         Ok(())
     }
+}
+
+fn estimated_amplitude_bytes(local_len: usize, precision: Precision) -> Result<usize> {
+    let bytes_per_amplitude = match precision {
+        Precision::Float32 => 8usize,
+        Precision::Float64 => 16usize,
+    };
+
+    local_len
+        .checked_mul(bytes_per_amplitude)
+        .ok_or_else(|| {
+            MahoutError::InvalidInput(format!(
+                "Distributed amplitude shard byte estimate overflowed for local_len={} and precision={:?}",
+                local_len, precision
+            ))
+        })
 }
