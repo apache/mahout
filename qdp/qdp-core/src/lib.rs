@@ -37,10 +37,9 @@ mod profiling;
 pub use error::{MahoutError, Result, cuda_error_to_string};
 pub use gpu::memory::Precision;
 pub use gpu::{
-    Communicator, DeviceMesh, DistributedAmplitudePlan, DistributedStateLayout,
-    DistributedStateVector, DistributionMode, GpuTopology, HostCommunicator, LinkKind,
-    PlacementPlan, PlacementPlanner, PlacementRequest, PreparedDistributedAmplitudeEncode,
-    ShardPlacement, ShardPolicy,
+    DeviceMesh, DistributedAmplitudePlan, DistributedExecutionContext, DistributedStateVector,
+    DistributionMode, GpuTopology, LinkKind, PlacementRequest, PreparedDistributedAmplitudeEncode,
+    ShardPolicy,
 };
 pub use reader::{NullHandling, handle_float64_nulls};
 
@@ -145,19 +144,15 @@ impl QdpEngine {
         })
     }
 
-    /// Build a validated multi-GPU mesh for future distributed encoding paths.
-    ///
-    /// PR1 exposes mesh construction without changing the single-device engine shape.
+    /// Build a validated device mesh for one distributed execution context.
     pub fn new_distributed_mesh(device_ids: Vec<usize>) -> Result<DeviceMesh> {
         DeviceMesh::new(device_ids)
     }
 
-    /// Prepare a distributed amplitude encode on a validated multi-GPU mesh.
+    /// Prepare a distributed amplitude encode on a single-process device mesh.
     ///
-    /// This stage performs input validation, shard planning, and host-coordinated
-    /// global norm reduction, then returns metadata for the future distributed
-    /// state layout. It does not yet allocate per-shard buffers or launch
-    /// multi-GPU kernels.
+    /// This is a convenience wrapper over `prepare_distributed_amplitude_on`
+    /// using an in-process collective implementation.
     #[doc(hidden)]
     pub fn prepare_distributed_amplitude(
         device_ids: Vec<usize>,
@@ -166,50 +161,49 @@ impl QdpEngine {
         precision: Precision,
         request: Option<PlacementRequest>,
     ) -> Result<PreparedDistributedAmplitudeEncode> {
-        let communicator = HostCommunicator;
-        Self::prepare_distributed_amplitude_with_communicator(
-            device_ids,
+        let request = Self::resolve_distributed_request(num_qubits, request)?;
+        runtime::validate_distributed_input(data, &request)?;
+        let collectives = crate::gpu::LocalCollectiveCommunicator;
+        let execution = DistributedExecutionContext::single_process(device_ids, &collectives)?;
+        Self::prepare_distributed_amplitude_on(
+            &execution,
             data,
             num_qubits,
             precision,
-            request,
-            &communicator,
+            Some(request),
         )
     }
 
-    /// Prepare a distributed amplitude encode with an injected collective
-    /// implementation. This keeps the execution path compatible with future
-    /// MPI-backed or NCCL-backed coordination without hard-coding a specific
-    /// transport into the engine surface.
+    /// Prepare a distributed amplitude encode on an explicit execution context.
+    ///
+    /// The execution context owns the participating device mesh and the
+    /// collective implementation that coordinates those shards.
     #[doc(hidden)]
-    pub fn prepare_distributed_amplitude_with_communicator(
-        device_ids: Vec<usize>,
+    pub fn prepare_distributed_amplitude_on(
+        execution: &DistributedExecutionContext<'_>,
         data: &[f64],
         num_qubits: usize,
         precision: Precision,
         request: Option<PlacementRequest>,
-        communicator: &dyn Communicator,
     ) -> Result<PreparedDistributedAmplitudeEncode> {
         let request = Self::resolve_distributed_request(num_qubits, request)?;
         runtime::validate_distributed_input(data, &request)?;
-        let mesh = Self::new_distributed_mesh(device_ids)?;
         let (plan, inv_norm, layout) =
-            runtime::prepare_distributed_encode(&mesh, data, precision, request, communicator)?;
+            runtime::prepare_distributed_encode(execution, data, precision, request)?;
 
         Ok(PreparedDistributedAmplitudeEncode {
-            mesh,
+            mesh: execution.mesh().clone(),
             plan,
             inv_norm,
             layout,
         })
     }
 
-    /// Encode amplitude data into real per-device shard buffers for a distributed
-    /// state vector on a single host.
+    /// Encode amplitude data into real per-device shard buffers on a
+    /// single-process device mesh.
     ///
-    /// This is the first executable distributed path: it returns a sharded state
-    /// object with one GPU buffer per shard. It does not expose DLPack or gather
-    /// semantics yet.
+    /// This is a convenience wrapper over `encode_distributed_amplitude_to_shards_on`
+    /// using an in-process collective implementation.
     #[doc(hidden)]
     pub fn encode_distributed_amplitude_to_shards(
         device_ids: Vec<usize>,
@@ -218,33 +212,32 @@ impl QdpEngine {
         precision: Precision,
         request: Option<PlacementRequest>,
     ) -> Result<DistributedStateVector> {
-        let communicator = HostCommunicator;
-        Self::encode_distributed_amplitude_to_shards_with_communicator(
-            device_ids,
+        let request = Self::resolve_distributed_request(num_qubits, request)?;
+        runtime::validate_distributed_input(data, &request)?;
+        let collectives = crate::gpu::LocalCollectiveCommunicator;
+        let execution = DistributedExecutionContext::single_process(device_ids, &collectives)?;
+        Self::encode_distributed_amplitude_to_shards_on(
+            &execution,
             data,
             num_qubits,
             precision,
-            request,
-            &communicator,
+            Some(request),
         )
     }
 
-    /// Materialize a distributed amplitude state with an injected collective
-    /// implementation. This is the execution-oriented companion to
-    /// `prepare_distributed_amplitude_with_communicator`.
+    /// Materialize a distributed amplitude state on an explicit execution
+    /// context.
     #[doc(hidden)]
-    pub fn encode_distributed_amplitude_to_shards_with_communicator(
-        device_ids: Vec<usize>,
+    pub fn encode_distributed_amplitude_to_shards_on(
+        execution: &DistributedExecutionContext<'_>,
         data: &[f64],
         num_qubits: usize,
         precision: Precision,
         request: Option<PlacementRequest>,
-        communicator: &dyn Communicator,
     ) -> Result<DistributedStateVector> {
         let request = Self::resolve_distributed_request(num_qubits, request)?;
         runtime::validate_distributed_input(data, &request)?;
-        let mesh = Self::new_distributed_mesh(device_ids)?;
-        runtime::encode_distributed_to_shards(&mesh, data, precision, request, communicator)
+        runtime::encode_distributed_to_shards(execution, data, precision, request)
     }
 
     fn resolve_distributed_request(

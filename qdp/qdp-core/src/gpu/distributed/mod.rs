@@ -15,6 +15,7 @@
 // limitations under the License.
 
 mod amplitude;
+mod context;
 mod layout;
 mod planner;
 pub(crate) mod runtime;
@@ -22,6 +23,7 @@ mod shared;
 mod state;
 
 pub use amplitude::{DistributedAmplitudePlan, PreparedDistributedAmplitudeEncode};
+pub use context::DistributedExecutionContext;
 pub use layout::{DistributedStateLayout, StateShardLayout};
 pub use planner::{
     DistributionMode, PlacementPlan, PlacementPlanner, PlacementRequest, ShardPlacement,

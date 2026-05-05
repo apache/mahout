@@ -19,11 +19,12 @@ use std::sync::Arc;
 #[cfg(target_os = "linux")]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
-use crate::gpu::communicator::Communicator;
+#[cfg(target_os = "linux")]
+use crate::gpu::cuda_ffi::{CUDA_SUCCESS, cudaGetDevice, cudaSetDevice};
+use crate::gpu::distributed::DistributedExecutionContext;
 #[cfg(target_os = "linux")]
 use crate::gpu::memory::{BufferStorage, GpuBufferRaw};
 use crate::gpu::memory::{Precision, ensure_device_memory_available, map_allocation_error};
-use crate::gpu::topology::DeviceMesh;
 use crate::gpu::{
     DistributedAmplitudePlan, DistributedStateLayout, DistributedStateVector, PlacementRequest,
 };
@@ -35,6 +36,45 @@ use qdp_kernels::{
 };
 #[cfg(target_os = "linux")]
 use std::ffi::c_void;
+
+#[cfg(target_os = "linux")]
+struct DistributedDeviceContextGuard {
+    original_device: i32,
+}
+
+#[cfg(target_os = "linux")]
+impl DistributedDeviceContextGuard {
+    fn switch_to(device_id: usize) -> Result<Self> {
+        let mut original_device = 0i32;
+        let get_ret = unsafe { cudaGetDevice(&mut original_device as *mut i32) };
+        if get_ret != CUDA_SUCCESS {
+            return Err(MahoutError::Cuda(format!(
+                "cudaGetDevice failed before distributed shard launch: {} ({})",
+                get_ret,
+                cuda_error_to_string(get_ret)
+            )));
+        }
+
+        let set_ret = unsafe { cudaSetDevice(device_id as i32) };
+        if set_ret != CUDA_SUCCESS {
+            return Err(MahoutError::Cuda(format!(
+                "cudaSetDevice(cuda:{}) failed before distributed shard launch: {} ({})",
+                device_id,
+                set_ret,
+                cuda_error_to_string(set_ret)
+            )));
+        }
+
+        Ok(Self { original_device })
+    }
+}
+
+#[cfg(target_os = "linux")]
+impl Drop for DistributedDeviceContextGuard {
+    fn drop(&mut self) {
+        let _ = unsafe { cudaSetDevice(self.original_device) };
+    }
+}
 
 pub(crate) fn validate_distributed_input(
     host_data: &[f64],
@@ -65,12 +105,12 @@ pub(crate) fn validate_distributed_input(
 }
 
 pub(crate) fn plan_distributed_encode(
-    mesh: &DeviceMesh,
+    execution: &DistributedExecutionContext<'_>,
     host_data: &[f64],
     request: PlacementRequest,
 ) -> Result<DistributedAmplitudePlan> {
     validate_distributed_input(host_data, &request)?;
-    DistributedAmplitudePlan::for_request(mesh, request)
+    DistributedAmplitudePlan::for_request(execution.mesh(), request)
 }
 
 pub(crate) fn calculate_local_norm_sq(
@@ -105,7 +145,7 @@ pub(crate) fn calculate_local_norm_sq(
 pub(crate) fn calculate_inv_norm_distributed(
     plan: &DistributedAmplitudePlan,
     host_data: &[f64],
-    communicator: &dyn Communicator,
+    execution: &DistributedExecutionContext<'_>,
 ) -> Result<f64> {
     let mut partials = Vec::with_capacity(plan.num_devices);
     for shard_id in 0..plan.num_devices {
@@ -113,7 +153,7 @@ pub(crate) fn calculate_inv_norm_distributed(
         partials.push(calculate_local_norm_sq(host_data, start_idx, end_idx)?);
     }
 
-    let global_norm_sq = communicator.reduce_sum_f64(&partials)?;
+    let global_norm_sq = execution.collectives().all_reduce_sum_f64(&partials)?;
     if global_norm_sq <= 0.0 || !global_norm_sq.is_finite() {
         return Err(MahoutError::InvalidInput(
             "Input data has zero or non-finite norm (contains NaN, Inf, or all zeros)".to_string(),
@@ -124,33 +164,33 @@ pub(crate) fn calculate_inv_norm_distributed(
 }
 
 pub(crate) fn prepare_distributed_encode(
-    mesh: &DeviceMesh,
+    execution: &DistributedExecutionContext<'_>,
     host_data: &[f64],
     precision: Precision,
     request: PlacementRequest,
-    communicator: &dyn Communicator,
 ) -> Result<(DistributedAmplitudePlan, f64, DistributedStateLayout)> {
-    let plan = plan_distributed_encode(mesh, host_data, request)?;
-    let inv_norm = calculate_inv_norm_distributed(&plan, host_data, communicator)?;
-    let layout = DistributedStateLayout::new(mesh, &plan, precision)?;
+    let plan = plan_distributed_encode(execution, host_data, request)?;
+    let inv_norm = calculate_inv_norm_distributed(&plan, host_data, execution)?;
+    let layout = DistributedStateLayout::new(execution.mesh(), &plan, precision)?;
     Ok((plan, inv_norm, layout))
 }
 
 #[cfg(target_os = "linux")]
 pub(crate) fn encode_distributed_to_shards(
-    mesh: &DeviceMesh,
+    execution: &DistributedExecutionContext<'_>,
     host_data: &[f64],
     precision: Precision,
     request: PlacementRequest,
-    communicator: &dyn Communicator,
 ) -> Result<DistributedStateVector> {
     let (plan, inv_norm, layout) =
-        prepare_distributed_encode(mesh, host_data, precision, request, communicator)?;
+        prepare_distributed_encode(execution, host_data, precision, request)?;
     let num_qubits = plan.request.num_qubits;
 
     let mut buffers = Vec::with_capacity(plan.num_devices);
-    for (shard_id, device) in mesh.devices.iter().enumerate() {
-        let (start_idx, end_idx) = plan.shard_range(shard_id)?;
+    for placement in &plan.placement.placements {
+        let device = execution.mesh().device_for_id(placement.device_id)?;
+        let _device_guard = DistributedDeviceContextGuard::switch_to(placement.device_id)?;
+        let (start_idx, end_idx) = (placement.start_idx, placement.end_idx);
         let local_len = end_idx - start_idx;
         let slice_end = end_idx.min(host_data.len());
         let present_len = slice_end.saturating_sub(start_idx);
@@ -162,14 +202,14 @@ pub(crate) fn encode_distributed_to_shards(
                     requested_bytes,
                     "distributed amplitude shard allocation (f32)",
                     Some(num_qubits),
-                    Some(device.ordinal()),
+                    Some(placement.device_id),
                 )?;
                 let mut state_slice = device.alloc_zeros::<CuComplex>(local_len).map_err(|e| {
                     map_allocation_error(
                         requested_bytes,
                         "distributed amplitude shard allocation (f32)",
                         Some(num_qubits),
-                        Some(device.ordinal()),
+                        Some(placement.device_id),
                         e,
                     )
                 })?;
@@ -200,7 +240,7 @@ pub(crate) fn encode_distributed_to_shards(
                     if ret != 0 {
                         return Err(MahoutError::KernelLaunch(format!(
                             "Distributed amplitude shard kernel failed on cuda:{} with CUDA error code: {} ({})",
-                            device.ordinal(),
+                            placement.device_id,
                             ret,
                             cuda_error_to_string(ret)
                         )));
@@ -209,8 +249,7 @@ pub(crate) fn encode_distributed_to_shards(
                     device.synchronize().map_err(|e| {
                         MahoutError::Cuda(format!(
                             "Distributed amplitude shard synchronize failed on cuda:{}: {:?}",
-                            device.ordinal(),
-                            e
+                            placement.device_id, e
                         ))
                     })?;
                 }
@@ -223,7 +262,7 @@ pub(crate) fn encode_distributed_to_shards(
                     requested_bytes,
                     "distributed amplitude shard allocation",
                     Some(num_qubits),
-                    Some(device.ordinal()),
+                    Some(placement.device_id),
                 )?;
                 let mut state_slice =
                     device
@@ -233,7 +272,7 @@ pub(crate) fn encode_distributed_to_shards(
                                 requested_bytes,
                                 "distributed amplitude shard allocation",
                                 Some(num_qubits),
-                                Some(device.ordinal()),
+                                Some(placement.device_id),
                                 e,
                             )
                         })?;
@@ -262,7 +301,7 @@ pub(crate) fn encode_distributed_to_shards(
                     if ret != 0 {
                         return Err(MahoutError::KernelLaunch(format!(
                             "Distributed amplitude shard kernel failed on cuda:{} with CUDA error code: {} ({})",
-                            device.ordinal(),
+                            placement.device_id,
                             ret,
                             cuda_error_to_string(ret)
                         )));
@@ -271,8 +310,7 @@ pub(crate) fn encode_distributed_to_shards(
                     device.synchronize().map_err(|e| {
                         MahoutError::Cuda(format!(
                             "Distributed amplitude shard synchronize failed on cuda:{}: {:?}",
-                            device.ordinal(),
-                            e
+                            placement.device_id, e
                         ))
                     })?;
                 }

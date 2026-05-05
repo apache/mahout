@@ -65,16 +65,11 @@ fn prepare_distributed_amplitude_rejects_request_qubit_mismatch() {
 
 #[test]
 fn prepare_distributed_amplitude_rejects_empty_input() {
-    let err = match QdpEngine::prepare_distributed_amplitude(
-        vec![0],
-        &[],
-        1,
-        Precision::Float64,
-        None,
-    ) {
-        Ok(_) => panic!("expected empty input to be rejected"),
-        Err(err) => err,
-    };
+    let err =
+        match QdpEngine::prepare_distributed_amplitude(vec![0], &[], 1, Precision::Float64, None) {
+            Ok(_) => panic!("expected empty input to be rejected"),
+            Err(err) => err,
+        };
 
     assert!(matches!(
         err,

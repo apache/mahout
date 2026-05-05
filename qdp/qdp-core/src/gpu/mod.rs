@@ -34,11 +34,11 @@ pub(crate) mod cuda_ffi;
 
 #[cfg(target_os = "linux")]
 pub use buffer_pool::{PinnedBufferHandle, PinnedBufferPool};
-pub use communicator::{Communicator, HostCommunicator};
+pub use communicator::{CollectiveCommunicator, LocalCollectiveCommunicator};
 pub use distributed::{
-    DistributedAmplitudePlan, DistributedStateLayout, DistributedStateVector, DistributionMode,
-    PlacementPlan, PlacementPlanner, PlacementRequest, PreparedDistributedAmplitudeEncode,
-    ShardPlacement, ShardPolicy, StateShard, StateShardLayout,
+    DistributedAmplitudePlan, DistributedExecutionContext, DistributedStateLayout,
+    DistributedStateVector, DistributionMode, PlacementPlan, PlacementPlanner, PlacementRequest,
+    PreparedDistributedAmplitudeEncode, ShardPlacement, ShardPolicy, StateShard, StateShardLayout,
 };
 pub use encodings::{AmplitudeEncoder, AngleEncoder, BasisEncoder, QuantumEncoder, get_encoder};
 pub use memory::GpuStateVector;

@@ -17,7 +17,7 @@
 use crate::error::{MahoutError, Result};
 use crate::gpu::topology::DeviceMesh;
 
-/// Runtime distribution modes for future multi-GPU state construction.
+/// Runtime distribution modes for distributed state construction.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum DistributionMode {
     Single,
@@ -78,7 +78,8 @@ impl ShardPlacement {
     }
 }
 
-/// Planner output consumed by distributed encoders and future gather/export APIs.
+/// Planner output consumed by distributed encoders and by any later
+/// gather/export layer that needs stable shard ranges.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PlacementPlan {
     pub mode: DistributionMode,

@@ -16,21 +16,25 @@
 
 use crate::error::{MahoutError, Result};
 
-/// Abstracts cross-device coordination. PR1 provides a host-coordinated fallback;
-/// a later PR can add NCCL-backed implementations behind the same trait.
-pub trait Communicator: Send + Sync {
-    fn reduce_sum_f64(&self, values: &[f64]) -> Result<f64>;
+/// Abstracts cross-shard collective operations.
+///
+/// The current implementation executes collectives inside one process. A future
+/// MPI-backed implementation can provide the same interface while mapping the
+/// partial contributions to rank-local shards and performing a real all-reduce.
+pub trait CollectiveCommunicator: Send + Sync {
+    fn all_reduce_sum_f64(&self, values: &[f64]) -> Result<f64>;
 }
 
-/// Host-coordinated reduction placeholder used for early distributed amplitude prototypes.
+/// In-process collective implementation for the current single-process
+/// distributed path.
 #[derive(Default, Debug, Clone, Copy)]
-pub struct HostCommunicator;
+pub struct LocalCollectiveCommunicator;
 
-impl Communicator for HostCommunicator {
-    fn reduce_sum_f64(&self, values: &[f64]) -> Result<f64> {
+impl CollectiveCommunicator for LocalCollectiveCommunicator {
+    fn all_reduce_sum_f64(&self, values: &[f64]) -> Result<f64> {
         if values.is_empty() {
             return Err(MahoutError::InvalidInput(
-                "Host communicator requires at least one value for reduction".to_string(),
+                "Collective reduction requires at least one partial contribution".to_string(),
             ));
         }
 

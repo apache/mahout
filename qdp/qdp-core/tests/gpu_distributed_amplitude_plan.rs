@@ -14,9 +14,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use qdp_core::{
+use qdp_core::Precision;
+use qdp_core::gpu::{
     DeviceMesh, DistributedAmplitudePlan, DistributedStateLayout, DistributionMode, GpuTopology,
-    PlacementRequest, Precision, ShardPolicy,
+    PlacementRequest, ShardPolicy,
 };
 
 #[test]
