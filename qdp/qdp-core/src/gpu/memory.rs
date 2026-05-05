@@ -43,7 +43,9 @@ pub enum GpuDeviceType {
 }
 
 #[cfg(target_os = "linux")]
-use crate::gpu::cuda_ffi::{cudaFreeHost, cudaHostAlloc, cudaMemGetInfo};
+use crate::gpu::cuda_ffi::{
+    CUDA_SUCCESS, cudaFreeHost, cudaGetDevice, cudaHostAlloc, cudaMemGetInfo, cudaSetDevice,
+};
 
 #[cfg(target_os = "linux")]
 fn bytes_to_mib(bytes: usize) -> f64 {
@@ -51,7 +53,49 @@ fn bytes_to_mib(bytes: usize) -> f64 {
 }
 
 #[cfg(target_os = "linux")]
-fn query_cuda_mem_info() -> Result<(usize, usize)> {
+struct DeviceContextGuard {
+    original_device: i32,
+}
+
+#[cfg(target_os = "linux")]
+impl DeviceContextGuard {
+    fn switch_to(target_device: Option<usize>) -> Result<Self> {
+        let mut original_device = 0i32;
+        let get_ret = unsafe { cudaGetDevice(&mut original_device as *mut i32) };
+        if get_ret != CUDA_SUCCESS {
+            return Err(MahoutError::Cuda(format!(
+                "cudaGetDevice failed: {} ({})",
+                get_ret,
+                cuda_error_to_string(get_ret)
+            )));
+        }
+
+        if let Some(device_id) = target_device {
+            let set_ret = unsafe { cudaSetDevice(device_id as i32) };
+            if set_ret != CUDA_SUCCESS {
+                return Err(MahoutError::Cuda(format!(
+                    "cudaSetDevice(cuda:{}) failed: {} ({})",
+                    device_id,
+                    set_ret,
+                    cuda_error_to_string(set_ret)
+                )));
+            }
+        }
+
+        Ok(Self { original_device })
+    }
+}
+
+#[cfg(target_os = "linux")]
+impl Drop for DeviceContextGuard {
+    fn drop(&mut self) {
+        let _ = unsafe { cudaSetDevice(self.original_device) };
+    }
+}
+
+#[cfg(target_os = "linux")]
+fn query_cuda_mem_info(device_id: Option<usize>) -> Result<(usize, usize)> {
+    let _guard = DeviceContextGuard::switch_to(device_id)?;
     unsafe {
         let mut free_bytes: usize = 0;
         let mut total_bytes: usize = 0;
@@ -101,8 +145,9 @@ pub(crate) fn ensure_device_memory_available(
     requested_bytes: usize,
     context: &str,
     qubits: Option<usize>,
+    device_id: Option<usize>,
 ) -> Result<()> {
-    let (free, total) = query_cuda_mem_info()?;
+    let (free, total) = query_cuda_mem_info(device_id)?;
 
     if (requested_bytes as u64) > (free as u64) {
         return Err(MahoutError::MemoryAllocation(build_oom_message(
@@ -123,9 +168,10 @@ pub(crate) fn map_allocation_error(
     requested_bytes: usize,
     context: &str,
     qubits: Option<usize>,
+    device_id: Option<usize>,
     source: impl std::fmt::Debug,
 ) -> MahoutError {
-    match query_cuda_mem_info() {
+    match query_cuda_mem_info(device_id) {
         Ok((free, total)) => {
             if (requested_bytes as u64) > (free as u64) {
                 MahoutError::MemoryAllocation(build_oom_message(
@@ -175,28 +221,28 @@ pub enum BufferStorage {
 }
 
 impl BufferStorage {
-    fn precision(&self) -> Precision {
+    pub(crate) fn precision(&self) -> Precision {
         match self {
             BufferStorage::F32(_) => Precision::Float32,
             BufferStorage::F64(_) => Precision::Float64,
         }
     }
 
-    fn ptr_void(&self) -> *mut c_void {
+    pub(crate) fn ptr_void(&self) -> *mut c_void {
         match self {
             BufferStorage::F32(buf) => buf.ptr() as *mut c_void,
             BufferStorage::F64(buf) => buf.ptr() as *mut c_void,
         }
     }
 
-    fn ptr_f64(&self) -> Option<*mut CuDoubleComplex> {
+    pub(crate) fn ptr_f64(&self) -> Option<*mut CuDoubleComplex> {
         match self {
             BufferStorage::F64(buf) => Some(buf.ptr()),
             _ => None,
         }
     }
 
-    fn ptr_f32(&self) -> Option<*mut CuComplex> {
+    pub(crate) fn ptr_f32(&self) -> Option<*mut CuComplex> {
         match self {
             BufferStorage::F32(buf) => Some(buf.ptr()),
             _ => None,
@@ -250,6 +296,7 @@ impl GpuStateVector {
                     requested_bytes,
                     "state vector allocation (f32)",
                     Some(qubits),
+                    Some(_device.ordinal()),
                 )?;
 
                 let slice = unsafe { _device.alloc::<CuComplex>(_size_elements) }.map_err(|e| {
@@ -257,6 +304,7 @@ impl GpuStateVector {
                         requested_bytes,
                         "state vector allocation (f32)",
                         Some(qubits),
+                        Some(_device.ordinal()),
                         e,
                     )
                 })?;
@@ -277,6 +325,7 @@ impl GpuStateVector {
                     requested_bytes,
                     "state vector allocation",
                     Some(qubits),
+                    Some(_device.ordinal()),
                 )?;
 
                 let slice =
@@ -285,6 +334,7 @@ impl GpuStateVector {
                             requested_bytes,
                             "state vector allocation",
                             Some(qubits),
+                            Some(_device.ordinal()),
                             e,
                         )
                     })?;
@@ -339,6 +389,30 @@ impl GpuStateVector {
         self.num_qubits
     }
 
+    #[cfg(target_os = "linux")]
+    pub fn copy_to_host_f64(&self, device: &Arc<CudaDevice>) -> Result<Vec<CuDoubleComplex>> {
+        match self.buffer.as_ref() {
+            BufferStorage::F64(buf) => device.dtoh_sync_copy(&buf.slice).map_err(|e| {
+                MahoutError::Cuda(format!("Failed to copy float64 state to host: {:?}", e))
+            }),
+            BufferStorage::F32(_) => Err(MahoutError::InvalidInput(
+                "State vector stores float32 data, not float64".to_string(),
+            )),
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    pub fn copy_to_host_f32(&self, device: &Arc<CudaDevice>) -> Result<Vec<CuComplex>> {
+        match self.buffer.as_ref() {
+            BufferStorage::F32(buf) => device.dtoh_sync_copy(&buf.slice).map_err(|e| {
+                MahoutError::Cuda(format!("Failed to copy float32 state to host: {:?}", e))
+            }),
+            BufferStorage::F64(_) => Err(MahoutError::InvalidInput(
+                "State vector stores float64 data, not float32".to_string(),
+            )),
+        }
+    }
+
     /// Get the size in elements (2^n where n is number of qubits)
     pub fn size_elements(&self) -> usize {
         self.size_elements
@@ -374,11 +448,22 @@ impl GpuStateVector {
                         })?;
 
                     let context = "batch state vector allocation (f32)";
-                    ensure_device_memory_available(requested_bytes, context, Some(qubits))?;
+                    ensure_device_memory_available(
+                        requested_bytes,
+                        context,
+                        Some(qubits),
+                        Some(_device.ordinal()),
+                    )?;
 
                     let slice =
                         unsafe { _device.alloc::<CuComplex>(total_elements) }.map_err(|e| {
-                            map_allocation_error(requested_bytes, context, Some(qubits), e)
+                            map_allocation_error(
+                                requested_bytes,
+                                context,
+                                Some(qubits),
+                                Some(_device.ordinal()),
+                                e,
+                            )
                         })?;
 
                     BufferStorage::F32(GpuBufferRaw { slice })
@@ -394,11 +479,22 @@ impl GpuStateVector {
                         })?;
 
                     let context = "batch state vector allocation";
-                    ensure_device_memory_available(requested_bytes, context, Some(qubits))?;
+                    ensure_device_memory_available(
+                        requested_bytes,
+                        context,
+                        Some(qubits),
+                        Some(_device.ordinal()),
+                    )?;
 
                     let slice = unsafe { _device.alloc::<CuDoubleComplex>(total_elements) }
                         .map_err(|e| {
-                            map_allocation_error(requested_bytes, context, Some(qubits), e)
+                            map_allocation_error(
+                                requested_bytes,
+                                context,
+                                Some(qubits),
+                                Some(_device.ordinal()),
+                                e,
+                            )
                         })?;
 
                     BufferStorage::F64(GpuBufferRaw { slice })
@@ -450,6 +546,7 @@ impl GpuStateVector {
                         requested_bytes,
                         "state vector precision conversion",
                         Some(self.num_qubits),
+                        Some(device.ordinal()),
                     )?;
 
                     let slice = unsafe { device.alloc::<CuDoubleComplex>(self.size_elements) }
@@ -458,6 +555,7 @@ impl GpuStateVector {
                                 requested_bytes,
                                 "state vector precision conversion",
                                 Some(self.num_qubits),
+                                Some(device.ordinal()),
                                 e,
                             )
                         })?;
@@ -526,6 +624,7 @@ impl GpuStateVector {
                         requested_bytes,
                         "state vector precision conversion",
                         Some(self.num_qubits),
+                        Some(device.ordinal()),
                     )?;
 
                     let slice =
@@ -534,6 +633,7 @@ impl GpuStateVector {
                                 requested_bytes,
                                 "state vector precision conversion",
                                 Some(self.num_qubits),
+                                Some(device.ordinal()),
                                 e,
                             )
                         })?;

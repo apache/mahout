@@ -16,8 +16,10 @@
 
 #[cfg(target_os = "linux")]
 pub mod buffer_pool;
+pub mod communicator;
 #[cfg(target_os = "linux")]
 pub(crate) mod cuda_sync;
+pub mod distributed;
 pub mod encodings;
 pub mod memory;
 #[cfg(target_os = "linux")]
@@ -25,15 +27,23 @@ pub mod overlap_tracker;
 pub mod pipeline;
 #[cfg(target_os = "linux")]
 pub mod pool_metrics;
+pub mod topology;
 
 #[cfg(target_os = "linux")]
 pub(crate) mod cuda_ffi;
 
 #[cfg(target_os = "linux")]
 pub use buffer_pool::{PinnedBufferHandle, PinnedBufferPool};
+pub use communicator::{CollectiveCommunicator, LocalCollectiveCommunicator};
+pub use distributed::{
+    DistributedAmplitudePlan, DistributedExecutionContext, DistributedStateLayout,
+    DistributedStateVector, DistributionMode, PlacementPlan, PlacementPlanner, PlacementRequest,
+    PreparedDistributedAmplitudeEncode, ShardPlacement, ShardPolicy, StateShard, StateShardLayout,
+};
 pub use encodings::{AmplitudeEncoder, AngleEncoder, BasisEncoder, QuantumEncoder, get_encoder};
 pub use memory::GpuStateVector;
 pub use pipeline::run_dual_stream_pipeline;
+pub use topology::{DeviceMesh, GpuTopology, LinkKind};
 
 #[cfg(target_os = "linux")]
 pub use overlap_tracker::OverlapTracker;
