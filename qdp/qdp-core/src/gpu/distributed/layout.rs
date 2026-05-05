@@ -50,6 +50,7 @@ pub struct DistributedStateLayout {
 
 impl DistributedStateLayout {
     #[cfg(target_os = "linux")]
+    /// Device ID preferred for future gather-style readback operations.
     pub fn recommended_gather_device_id(&self) -> Option<usize> {
         shared::policy_device_ids(
             &self.topology,
@@ -59,6 +60,7 @@ impl DistributedStateLayout {
     }
 
     #[cfg(target_os = "linux")]
+    /// Preferred device ordering derived from the current topology metadata.
     pub fn recommended_placement_device_ids(&self) -> Vec<usize> {
         shared::policy_device_ids(
             &self.topology,
@@ -67,10 +69,13 @@ impl DistributedStateLayout {
         .1
     }
 
+    /// Number of logical shards described by this layout.
     pub fn num_shards(&self) -> usize {
         self.shards.len()
     }
 
+    /// Build one distributed state layout from one execution mesh and one
+    /// distributed amplitude plan.
     pub fn new(
         mesh: &DeviceMesh,
         plan: &DistributedAmplitudePlan,
