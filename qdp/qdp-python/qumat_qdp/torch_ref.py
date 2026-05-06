@@ -330,6 +330,8 @@ _ENCODERS = {
     "iqp": iqp_encode,
 }
 
+_SUPPORTED_ENCODINGS = tuple(sorted((*_ENCODERS.keys(), "iqp-z")))
+
 
 def encode(
     data: torch.Tensor,
@@ -361,6 +363,6 @@ def encode(
     if fn is None:
         raise ValueError(
             f"Unknown encoding method {encoding_method!r}. "
-            f"Supported: {', '.join(sorted(_ENCODERS))}"
+            f"Supported: {', '.join(_SUPPORTED_ENCODINGS)}"
         )
     return fn(data, num_qubits, device=device)
