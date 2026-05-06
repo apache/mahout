@@ -39,8 +39,8 @@ def build_sample(
 
     Args:
         seed: Seed value used to generate deterministic data.
-        vector_len: Length of the vector (2^num_qubits for amplitude, num_qubits for angle).
-        encoding_method: "amplitude", "angle", or "basis".
+        vector_len: Input length for the selected encoding.
+        encoding_method: "amplitude", "angle", "basis", "iqp", or "iqp-z".
 
     Returns:
         NumPy array containing the sample data.
@@ -50,21 +50,22 @@ def build_sample(
         mask = np.uint64(vector_len - 1)
         idx = np.uint64(seed) & mask
         return np.array([idx], dtype=np.float64)
-    if encoding_method == "angle":
-        # Angle encoding: one angle per qubit, scaled to [0, 2*pi)
+
+    if encoding_method in ("angle", "iqp", "iqp-z"):
+        # Angle/IQP-family encodings: deterministic phase parameters in [0, 2*pi)
         if vector_len == 0:
             return np.array([], dtype=np.float64)
         scale = (2.0 * np.pi) / vector_len
         idx = np.arange(vector_len, dtype=np.uint64)
         mixed = (idx + np.uint64(seed)) % np.uint64(vector_len)
         return mixed.astype(np.float64) * scale
-    else:
-        # Amplitude encoding: full vector
-        mask = np.uint64(vector_len - 1)
-        scale = 1.0 / vector_len
-        idx = np.arange(vector_len, dtype=np.uint64)
-        mixed = (idx + np.uint64(seed)) & mask
-        return mixed.astype(np.float64) * scale
+
+    # Amplitude encoding: full vector
+    mask = np.uint64(vector_len - 1)
+    scale = 1.0 / vector_len
+    idx = np.arange(vector_len, dtype=np.uint64)
+    mixed = (idx + np.uint64(seed)) & mask
+    return mixed.astype(np.float64) * scale
 
 
 def generate_batch_data(
@@ -78,8 +79,8 @@ def generate_batch_data(
 
     Args:
         n_samples: Number of samples to generate.
-        dim: Dimension of each sample (2^num_qubits for amplitude encoding).
-        encoding_method: "amplitude", "angle", or "basis".
+        dim: Input dimension for the selected encoding.
+        encoding_method: "amplitude", "angle", "basis", "iqp", or "iqp-z".
         seed: Random seed for reproducibility.
 
     Returns:
@@ -90,12 +91,13 @@ def generate_batch_data(
     if encoding_method == "basis":
         # Basis encoding: single index per sample
         return np.random.randint(0, dim, size=(n_samples, 1)).astype(np.float64)
-    if encoding_method == "angle":
-        # Angle encoding: per-qubit angles in [0, 2*pi)
+
+    if encoding_method in ("angle", "iqp", "iqp-z"):
+        # Angle/IQP-family encodings: phase parameters in [0, 2*pi)
         return (np.random.rand(n_samples, dim) * (2.0 * np.pi)).astype(np.float64)
-    else:
-        # Amplitude encoding: full vectors
-        return np.random.rand(n_samples, dim).astype(np.float64)
+
+    # Amplitude encoding: full vectors
+    return np.random.rand(n_samples, dim).astype(np.float64)
 
 
 def normalize_batch(
@@ -106,13 +108,13 @@ def normalize_batch(
 
     Args:
         batch: NumPy array of shape (batch_size, vector_len).
-        encoding_method: "amplitude", "angle", or "basis".
+        encoding_method: "amplitude", "angle", "basis", "iqp", or "iqp-z".
 
     Returns:
-        Normalized batch. For basis/angle encoding, returns the input unchanged.
+        Normalized batch. For basis/angle/IQP-family encodings, returns the input unchanged.
     """
-    if encoding_method in ("basis", "angle"):
-        # Basis/angle encodings don't need normalization
+    if encoding_method in ("basis", "angle", "iqp", "iqp-z"):
+        # Basis/angle/IQP-family encodings don't need normalization
         return batch
     # Amplitude encoding: normalize vectors
     norms = np.linalg.norm(batch, axis=1, keepdims=True)
@@ -128,13 +130,13 @@ def normalize_batch_torch(
 
     Args:
         batch: PyTorch tensor of shape (batch_size, vector_len).
-        encoding_method: "amplitude", "angle", or "basis".
+        encoding_method: "amplitude", "angle", "basis", "iqp", or "iqp-z".
 
     Returns:
-        Normalized batch. For basis/angle encoding, returns the input unchanged.
+        Normalized batch. For basis/angle/IQP-family encodings, returns the input unchanged.
     """
-    if encoding_method in ("basis", "angle"):
-        # Basis/angle encodings don't need normalization
+    if encoding_method in ("basis", "angle", "iqp", "iqp-z"):
+        # Basis/angle/IQP-family encodings don't need normalization
         return batch
     # Amplitude encoding: normalize vectors
     norms = torch.norm(batch, dim=1, keepdim=True)
@@ -157,9 +159,9 @@ def prefetched_batches(
     Args:
         total_batches: Total number of batches to generate.
         batch_size: Number of samples per batch.
-        vector_len: Length of each vector (2^num_qubits for amplitude, num_qubits for angle).
+        vector_len: Input length for the selected encoding.
         prefetch: Number of batches to prefetch.
-        encoding_method: "amplitude", "angle", or "basis".
+        encoding_method: "amplitude", "angle", "basis", "iqp", or "iqp-z".
 
     Yields:
         NumPy arrays of shape (batch_size, vector_len) or (batch_size, 1).
@@ -200,9 +202,9 @@ def prefetched_batches_torch(
     Args:
         total_batches: Total number of batches to generate.
         batch_size: Number of samples per batch.
-        vector_len: Length of each vector (2^num_qubits for amplitude, num_qubits for angle).
+        vector_len: Input length for the selected encoding.
         prefetch: Number of batches to prefetch.
-        encoding_method: "amplitude", "angle", or "basis".
+        encoding_method: "amplitude", "angle", "basis", "iqp", or "iqp-z".
 
     Yields:
         PyTorch tensors of shape (batch_size, vector_len) or (batch_size, 1).

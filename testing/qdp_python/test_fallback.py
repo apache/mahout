@@ -92,6 +92,17 @@ class TestBackendDetection:
 
 
 class TestLoaderPytorchBackend:
+    def test_loader_helpers_cover_iqp_family_edges(self):
+        from qumat_qdp.loader import _build_sample, _sample_dim
+
+        assert _sample_dim(3, "basis") == 1
+        assert _sample_dim(3, "angle") == 3
+        assert _sample_dim(3, "iqp-z") == 3
+        assert _sample_dim(3, "iqp") == 6
+        assert _sample_dim(3, "amplitude") == 8
+        assert _build_sample(4, 0, "iqp") == []
+        assert _build_sample(4, 0, "iqp-z") == []
+
     def test_no_qdp_without_explicit_backend_raises(self, monkeypatch):
         """Without _qdp and without .backend('pytorch'), iteration raises."""
         from qumat_qdp import loader as loader_mod
@@ -202,6 +213,21 @@ class TestLoaderPytorchBackend:
             .backend("pytorch")
             .qubits(3)
             .encoding("iqp")
+            .batches(2, size=4)
+            .source_synthetic()
+        )
+        batches = list(loader)
+        assert len(batches) == 2
+        assert batches[0].shape == (4, 8)
+
+    def test_synthetic_pytorch_iqp_z(self):
+        from qumat_qdp.loader import QuantumDataLoader
+
+        loader = (
+            QuantumDataLoader(device_id=0)
+            .backend("pytorch")
+            .qubits(3)
+            .encoding("iqp-z")
             .batches(2, size=4)
             .source_synthetic()
         )
@@ -322,3 +348,18 @@ class TestBenchmarkFallback:
         )
         assert result.duration_sec > 0
         assert result.latency_ms_per_vector > 0
+
+    @pytest.mark.parametrize("encoding_method", ["iqp", "iqp-z"])
+    def test_pytorch_iqp_family(self, encoding_method):
+        from qumat_qdp.api import QdpBenchmark
+
+        result = (
+            QdpBenchmark()
+            .backend("pytorch")
+            .qubits(3)
+            .encoding(encoding_method)
+            .batches(3, size=2)
+            .run_throughput()
+        )
+        assert result.duration_sec > 0
+        assert result.vectors_per_sec > 0

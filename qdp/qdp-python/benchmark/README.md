@@ -87,10 +87,12 @@ Notes:
 
 - `--frameworks` is a comma-separated list or `all`.
   Options: `mahout`, `pennylane`, `qiskit-init`, `qiskit-statevector`.
-- `--encoding-method` selects the encoding method: `amplitude` (default) or `basis`.
+- `--encoding-method` selects the encoding method: `amplitude` (default), `angle`, `basis`, `iqp`, or `iqp-z`.
 - The latency test reports average milliseconds per vector.
 - Flags:
-  - `--qubits`: controls vector length (`2^qubits`).
+  - `--qubits`: controls the input length together with `--encoding-method`.
+    Amplitude uses `2^qubits`, angle and `iqp-z` use `qubits`, basis uses one basis index,
+    and `iqp` uses `qubits + qubits*(qubits-1)/2`.
   - `--batches`: number of host-side batches to stream.
   - `--batch-size`: vectors per batch; raises total samples (`batches * batch-size`).
   - `--prefetch`: CPU queue depth; higher values help keep the pipeline fed.
@@ -115,7 +117,9 @@ Notes:
 
 - `--frameworks` is a comma-separated list or `all`.
   Options: `mahout`, `pennylane`, `qiskit`.
-- `--encoding-method` selects the encoding method: `amplitude` (default) or `basis`.
+- `--encoding-method` selects the encoding method: `amplitude` (default), `angle`, `basis`, `iqp`, or `iqp-z`.
+- For synthetic inputs, amplitude uses `2^qubits`, angle and `iqp-z` use `qubits`,
+  basis uses one basis index, and `iqp` uses `qubits + qubits*(qubits-1)/2`.
 - Throughput is reported in vectors/sec (higher is better).
 
 ## Dependency Notes

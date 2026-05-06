@@ -284,6 +284,10 @@ class TestDispatcher:
         with pytest.raises(ValueError, match="Unknown encoding method"):
             encode(torch.randn(1, 4), num_qubits=2, encoding_method="invalid")
 
+    def test_unknown_lists_iqp_z_as_supported(self):
+        with pytest.raises(ValueError, match=r"Supported: .*iqp-z"):
+            encode(torch.randn(1, 4), num_qubits=2, encoding_method="invalid")
+
 
 # ---------------------------------------------------------------------------
 # Device placement (CPU always; GPU if available)

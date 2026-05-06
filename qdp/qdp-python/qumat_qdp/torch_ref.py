@@ -330,6 +330,8 @@ _ENCODERS = {
     "iqp": iqp_encode,
 }
 
+_SUPPORTED_ENCODINGS = tuple(sorted((*_ENCODERS.keys(), "iqp-z")))
+
 
 def encode(
     data: torch.Tensor,
@@ -337,24 +339,30 @@ def encode(
     encoding_method: str = "amplitude",
     *,
     device: torch.device | str | None = None,
-    **kwargs: object,
+    enable_zz: bool = True,
 ) -> torch.Tensor:
     """Dispatch to the appropriate encoding function by method name.
 
     Args:
         data: Input tensor.
         num_qubits: Number of qubits.
-        encoding_method: One of ``"amplitude"``, ``"angle"``, ``"basis"``, ``"iqp"``.
+        encoding_method: One of ``"amplitude"``, ``"angle"``, ``"basis"``, ``"iqp"``, ``"iqp-z"``.
         device: Target device.
-        **kwargs: Extra arguments forwarded to the encoder (e.g. *enable_zz* for IQP).
+        enable_zz: Whether IQP encoding includes ZZ interaction terms. Ignored for
+            non-IQP encodings. ``"iqp-z"`` always forces this to ``False``.
 
     Returns:
         Complex tensor of shape ``(batch, 2**num_qubits)``.
     """
+    if encoding_method == "iqp-z":
+        return iqp_encode(data, num_qubits, device=device, enable_zz=False)
+    if encoding_method == "iqp":
+        return iqp_encode(data, num_qubits, device=device, enable_zz=enable_zz)
+
     fn = _ENCODERS.get(encoding_method)
     if fn is None:
         raise ValueError(
             f"Unknown encoding method {encoding_method!r}. "
-            f"Supported: {', '.join(sorted(_ENCODERS))}"
+            f"Supported: {', '.join(_SUPPORTED_ENCODINGS)}"
         )
-    return fn(data, num_qubits, device=device, **kwargs)
+    return fn(data, num_qubits, device=device)

@@ -59,7 +59,11 @@ def pytest_collection_modifyitems(config, items):
     )
 
     # Tests that work without _qdp (PyTorch reference backend tests).
-    _NO_QDP_OK = {"test_torch_ref.py", "test_fallback.py"}
+    _NO_QDP_OK = {
+        "test_torch_ref.py",
+        "test_fallback.py",
+        "test_benchmark_utils.py",
+    }
 
     for item in items:
         # Skip tests explicitly marked with @pytest.mark.gpu
