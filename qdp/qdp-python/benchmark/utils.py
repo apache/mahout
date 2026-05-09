@@ -31,6 +31,41 @@ import numpy as np
 import torch
 
 
+def validate_framework_selection(
+    frameworks: list[str],
+    encoding_method: str,
+    *,
+    allowed_non_amplitude_frameworks: tuple[str, ...] = ("mahout",),
+) -> list[str]:
+    """
+    Validate that the selected frameworks provide a fair benchmark comparison.
+
+    These benchmark CLIs currently support non-amplitude modes only on the
+    Mahout path. Cross-framework parity is therefore available only for
+    amplitude encoding.
+    """
+    if encoding_method == "amplitude":
+        return frameworks
+
+    unsupported = [
+        framework
+        for framework in frameworks
+        if framework not in allowed_non_amplitude_frameworks
+    ]
+    if unsupported:
+        allowed = ", ".join(allowed_non_amplitude_frameworks)
+        requested = ", ".join(frameworks)
+        raise ValueError(
+            "These benchmark CLIs currently support non-amplitude encodings "
+            "only on the Mahout path; cross-framework parity exists only for "
+            "amplitude encoding. "
+            f"For encoding_method={encoding_method!r}, use frameworks limited to: "
+            f"{allowed}. Requested: {requested}."
+        )
+
+    return frameworks
+
+
 def build_sample(
     seed: int, vector_len: int, encoding_method: str = "amplitude"
 ) -> np.ndarray:

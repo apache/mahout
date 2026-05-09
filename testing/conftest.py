@@ -63,6 +63,7 @@ def pytest_collection_modifyitems(config, items):
         "test_torch_ref.py",
         "test_fallback.py",
         "test_benchmark_utils.py",
+        "test_benchmark_cli_validation.py",
     }
 
     for item in items:

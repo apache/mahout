@@ -93,7 +93,10 @@ class TestBackendDetection:
 
 class TestLoaderPytorchBackend:
     def test_loader_helpers_cover_iqp_family_edges(self):
-        from qumat_qdp.loader import _build_sample, _sample_dim
+        from qumat_qdp import loader as loader_mod
+
+        _build_sample = getattr(loader_mod, "_build_sample")
+        _sample_dim = getattr(loader_mod, "_sample_dim")
 
         assert _sample_dim(3, "basis") == 1
         assert _sample_dim(3, "angle") == 3
