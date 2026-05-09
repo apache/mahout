@@ -64,18 +64,21 @@ benchmark_throughput = _load_module(
 
 
 @pytest.mark.parametrize(
-    ("module", "frameworks"),
+    ("module", "frameworks", "encoding_method"),
     [
-        (benchmark_latency, ["mahout", "pennylane"]),
-        (benchmark_latency, ["mahout", "qiskit-init"]),
-        (benchmark_throughput, ["mahout", "qiskit"]),
-        (benchmark_throughput, ["mahout", "mahout-amd"]),
-        (benchmark_throughput, ["mahout", "pytorch-ref"]),
+        (benchmark_latency, ["mahout", "pennylane"], "angle"),
+        (benchmark_latency, ["mahout", "qiskit-init"], "basis"),
+        (benchmark_latency, ["mahout", "qiskit-statevector"], "iqp"),
+        (benchmark_throughput, ["mahout", "qiskit"], "angle"),
+        (benchmark_throughput, ["mahout", "mahout-amd"], "basis"),
+        (benchmark_throughput, ["mahout", "pytorch-ref"], "iqp-z"),
     ],
 )
-def test_non_amplitude_cross_framework_combinations_are_rejected(module, frameworks):
+def test_non_amplitude_cross_framework_combinations_are_rejected(
+    module, frameworks, encoding_method
+):
     with pytest.raises(ValueError, match="currently support non-amplitude encodings"):
-        module.validate_framework_selection(frameworks, "angle")
+        module.validate_framework_selection(frameworks, encoding_method)
 
 
 @pytest.mark.parametrize("module", [benchmark_latency, benchmark_throughput])
@@ -140,6 +143,39 @@ def test_throughput_main_rejects_invalid_non_amplitude_cli_combo(monkeypatch, ca
             "--encoding-method",
             "basis",
         ],
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        benchmark_throughput.main()
+
+    assert exc_info.value.code == 2
+    assert "currently support non-amplitude encodings" in capsys.readouterr().err
+
+
+def test_latency_main_rejects_default_all_frameworks_for_non_amplitude(
+    monkeypatch, capsys
+):
+    monkeypatch.setattr(benchmark_latency.torch.cuda, "is_available", lambda: True)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["benchmark_latency.py", "--encoding-method", "iqp-z"],
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        benchmark_latency.main()
+
+    assert exc_info.value.code == 2
+    assert "currently support non-amplitude encodings" in capsys.readouterr().err
+
+
+def test_throughput_main_rejects_default_all_frameworks_for_non_amplitude(
+    monkeypatch, capsys
+):
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["benchmark_throughput.py", "--encoding-method", "basis"],
     )
 
     with pytest.raises(SystemExit) as exc_info:
