@@ -165,12 +165,6 @@ function transformLinks(content) {
       return match;
     }
 
-    // Handle .md file references
-    if (url.endsWith('.md')) {
-      // Remove .md extension for Docusaurus
-      url = url.slice(0, -3);
-    }
-
     return `[${text}](${url})`;
   });
 }

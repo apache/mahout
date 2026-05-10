@@ -21,7 +21,7 @@ to understand where the project is headed.
 
 Please keep discussions about Mahout on list so that everyone benefits.
 Emailing individual committers with questions about specific Mahout issues
-is discouraged.  See [http://people.apache.org/~hossman/#private_q](http://people.apache.org/~hossman/#private_q)
+is discouraged.  See [https://www.apache.org/theapacheway/](https://www.apache.org/theapacheway/)
 .  Apache  has a number of [email tips for contributors][1] as well.
 
 <a name="HowToContribute-WhattoWorkOn?"></a>
@@ -46,9 +46,7 @@ where people are working.
 Also, documentation is a great way to familiarize yourself with the code
 and is always a welcome addition to the codebase and this website. Feel free
 to contribute texts and tutorials! Committers will make sure they are added
-to this website, and we have a [guide for making website updates][2].
-We also have a [wide variety of books and slides][3] for learning more about
-machine learning algorithms.
+to this website.
 
 If you are interested in working towards being a committer, general guidelines are available in the [Apache Community documentation](https://community.apache.org/contributors/).
 
@@ -143,9 +141,7 @@ for improvement (more tests, better javadocs, etc...) then make the changes on y
 thumbs up, that's a good sign for committers when deciding if it's worth spending time to review it -- and if other people have already put in
 effort to improve the docs/tests for an issue, that helps even more.
 
-For more information see [Handling GitHub PRs](http://mahout.apache.org/documentation/developers/github).
+For more information see the [PR policy and review guidelines](https://github.com/apache/mahout/blob/main/docs/community/pr-policy-and-review-guidelines.md).
 
 
   [1]: http://www.apache.org/dev/contrib-email-tips
-  [2]: http://mahout.apache.org/documentation/developers/how-to-update-the-website.html
-  [3]: http://mahout.apache.org/general/books-tutorials-and-talks.html

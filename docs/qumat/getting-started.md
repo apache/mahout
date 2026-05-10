@@ -72,4 +72,4 @@ Refer to repository examples:
 
 - [Basic Gates](./basic-gates)
 - [API Reference](./api)
-- [QDP Getting Started](../qdp/getting-started)
+- [QDP Getting Started](../qdp/getting-started.md)

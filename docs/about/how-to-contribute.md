@@ -12,7 +12,7 @@ of ways to contribute!
 <a name="HowToContribute-BeInvolved"></a>
 ## Get Involved
 
-Discussions at Apache happen on the mailing list. To get involved, you should join the [Mahout mailing lists](../community/mailing-lists).  In particular:
+Discussions at Apache happen on the mailing list. To get involved, you should join the [Mahout mailing lists](../community/mailing-lists.md).  In particular:
 
 * The **user list** (to help others)
 * The **development list** (to join discussions of changes)  -- This is the best place
@@ -46,9 +46,7 @@ where people are working.
 Also, documentation is a great way to familiarize yourself with the code
 and is always a welcome addition to the codebase and this website. Feel free
 to contribute texts and tutorials! Committers will make sure they are added
-to this website, and we have a [guide for making website updates][2].
-We also have a [wide variety of books and slides][3] for learning more about
-machine learning algorithms.
+to this website.
 
 If you are interested in working towards being a committer, general guidelines are available in the [Apache Community documentation](https://community.apache.org/contributors/).
 
@@ -82,7 +80,7 @@ First of all, you need to get the Mahout source code from [GitHub](https://githu
 <a name="HowToContribute-MakingChanges"></a>
 ## Making Changes
 
-Before you start, you should send a message to the [Mahout developer mailing list](../community/mailing-lists)
+Before you start, you should send a message to the [Mahout developer mailing list](../community/mailing-lists.md)
 (note: you have to subscribe before you can post), or file a ticket in our [issue tracker](https://github.com/apache/mahout/issues).
 Describe your proposed changes and check that they fit in with what others are doing and have planned for the project.  Be patient, it may take folks a while to understand your requirements.
 
@@ -143,9 +141,7 @@ for improvement (more tests, better javadocs, etc...) then make the changes on y
 thumbs up, that's a good sign for committers when deciding if it's worth spending time to review it -- and if other people have already put in
 effort to improve the docs/tests for an issue, that helps even more.
 
-For more information see [Handling GitHub PRs](http://mahout.apache.org/documentation/developers/github).
+For more information see the [PR policy and review guidelines](../community/pr-policy-and-review-guidelines.md).
 
 
   [1]: http://www.apache.org/dev/contrib-email-tips
-  [2]: http://mahout.apache.org/documentation/developers/how-to-update-the-website.html
-  [3]: http://mahout.apache.org/general/books-tutorials-and-talks.html

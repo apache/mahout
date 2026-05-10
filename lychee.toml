@@ -4,7 +4,6 @@ exclude_path = [
     "./website/versioned*", # Focus on next version
     "./website/static/download/downloads.html", # Should we fix in the future?
     "./dev/rc-email-template.md", # Should we fix in the future?
-    "./docs/about/how-to-contribute.md", # TODO: fix the links in this file
     "./qdp/docs/readers/README.md", # TODO: fix the links in this file
 ]
 fallback_extensions = ["md"]
