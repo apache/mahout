@@ -36,7 +36,7 @@ authors: [mahout-team]
 * [#478 Post-processing](https://github.com/apache/mahout/issues/478)
 * [#475 Add open in colab button to Optimization Example](https://github.com/apache/mahout/issues/475) (to Andrew)
 * [#474 Add angle definitions to Optimization Example](https://github.com/apache/mahout/issues/474)
-* [New quantum computing primer](https://mahout.apache.org/quantum-computing-primer) on web site
+* [New quantum computing primer](https://mahout.apache.org/docs/learning/quantum-computing-primer/) on web site
 
 ### New Business
 * Word back from PyPi about qumat ownership, they are going to contact the owner of the current package  [#470 Add Qumat to PyPi](https://github.com/apache/mahout/issues/470)

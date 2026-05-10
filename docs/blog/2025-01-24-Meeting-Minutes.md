@@ -39,4 +39,4 @@ authors: [mahout-team]
 ### New Business
 * [#470 Add Qumat to PyPi](https://github.com/apache/mahout/issues/470)
 * Slides for FOSDEM
-* [New quantum computing primer](https://mahout.apache.org/quantum-computing-primer) on web site
+* [New quantum computing primer](https://mahout.apache.org/docs/learning/quantum-computing-primer/) on web site
