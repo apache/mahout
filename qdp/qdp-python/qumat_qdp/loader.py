@@ -30,6 +30,9 @@ Usage:
 from __future__ import annotations
 
 import math
+import os
+import sys
+import warnings
 from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
@@ -50,6 +53,81 @@ _VALID_ENCODINGS: frozenset[str] = frozenset(
 _TORCH_FILE_EXTS = frozenset({".pt", ".pth"})
 _NUMPY_FILE_EXTS = frozenset({".npy"})
 _FALLBACK_FILE_EXTS = _TORCH_FILE_EXTS | _NUMPY_FILE_EXTS
+
+# Streaming (Rust-backed) only supports columnar formats.
+_STREAMING_FILE_EXTS = frozenset({".parquet"})
+
+# All file extensions accepted as `.source_file()` inputs (Rust + fallback).
+_ARROW_FILE_EXTS = frozenset({".arrow", ".feather", ".ipc"})
+_PROTOBUF_FILE_EXTS = frozenset({".pb"})
+_SUPPORTED_FILE_EXTS = (
+    _STREAMING_FILE_EXTS
+    | _ARROW_FILE_EXTS
+    | _NUMPY_FILE_EXTS
+    | _TORCH_FILE_EXTS
+    | _PROTOBUF_FILE_EXTS
+)
+
+# Backend selection literals.
+_BACKEND_RUST = "rust"
+_BACKEND_PYTORCH = "pytorch"
+_BACKEND_AUTO = "auto"
+_VALID_BACKENDS = frozenset({_BACKEND_RUST, _BACKEND_PYTORCH, _BACKEND_AUTO})
+
+
+def _path_extension(path: str) -> str:
+    """Return the lowercase extension of `path` (handling remote URLs/queries)."""
+    is_remote = "://" in path
+    tail = path.split("?", 1)[0].rsplit("/", 1)[-1] if is_remote else path
+    return os.path.splitext(tail)[1].lower()
+
+
+def _platform_hint(reason: str) -> str:
+    """Return a user-facing hint when the Rust extension is unavailable on a
+    non-Linux platform; empty string on Linux."""
+    if sys.platform == "linux":
+        return ""
+    return f" Note: {reason} requires Linux with CUDA; you are on {sys.platform}."
+
+
+# Cached IterableDataset subclass — built on first call to `as_torch_dataset()` so
+# import-time cost is paid only when the user actually opts into the torch adapter.
+_torch_dataset_cls: type | None = None
+
+
+def _build_torch_dataset(loader: QuantumDataLoader):
+    """Return a ``torch.utils.data.IterableDataset`` wrapping ``loader``.
+
+    The dataset class is defined once (on first call) and reused thereafter.
+    """
+    global _torch_dataset_cls
+    if _torch_dataset_cls is None:
+        try:
+            import torch  # noqa: F401 — verifies torch is importable
+            from torch.utils.data import IterableDataset
+        except ImportError:
+            raise RuntimeError(
+                "as_torch_dataset() requires PyTorch. Install with: pip install torch"
+            ) from None
+
+        class _QdpDataset(IterableDataset):  # type: ignore[misc]
+            """IterableDataset wrapping a QuantumDataLoader."""
+
+            def __init__(self, source: QuantumDataLoader) -> None:
+                super().__init__()
+                self._source = source
+
+            def __iter__(self) -> Iterator[object]:
+                import torch as _torch
+
+                for batch in self._source:
+                    # DLPack capsule from the Rust backend -> torch.Tensor
+                    if not isinstance(batch, _torch.Tensor):
+                        batch = _torch.from_dlpack(batch)
+                    yield batch
+
+        _torch_dataset_cls = _QdpDataset
+    return _torch_dataset_cls(loader)
 
 
 def _validate_loader_args(
@@ -167,7 +245,7 @@ class QuantumDataLoader:
         self._synthetic_requested = False  # set True only by source_synthetic()
         self._file_requested = False
         self._null_handling: str | None = None
-        self._backend_name: str = "rust"
+        self._backend_name: str = _BACKEND_RUST
 
     def qubits(self, n: int) -> QuantumDataLoader:
         """Set number of qubits. Returns self for chaining."""
@@ -228,16 +306,14 @@ class QuantumDataLoader:
             raise ValueError(
                 "Remote URL query/fragment is not supported; use plain scheme://bucket/key path."
             )
-        import os
 
-        # Reject streaming=True for non-.parquet at builder time (not iteration time) so
-        # the error is immediate and the message is actionable before any data is read.
-        if streaming:
-            ext = os.path.splitext(path.split("?")[0].rsplit("/", 1)[-1])[1].lower()
-            if ext != ".parquet":
-                raise ValueError(
-                    "streaming=True supports only .parquet files; use streaming=False for other formats."
-                )
+        # Reject streaming=True for unsupported formats at builder time (not iteration
+        # time) so the error is immediate and actionable before any data is read.
+        if streaming and _path_extension(path) not in _STREAMING_FILE_EXTS:
+            raise ValueError(
+                f"streaming=True supports only {sorted(_STREAMING_FILE_EXTS)} files; "
+                "use streaming=False for other formats."
+            )
         self._file_path = path
         self._file_requested = True
         self._streaming_requested = streaming
@@ -275,9 +351,9 @@ class QuantumDataLoader:
         extension is missing.  ``'pytorch'`` always uses the pure-PyTorch path.
         Returns self for chaining.
         """
-        if name not in ("rust", "pytorch", "auto"):
+        if name not in _VALID_BACKENDS:
             raise ValueError(
-                f"backend must be 'rust', 'pytorch', or 'auto', got {name!r}"
+                f"backend must be one of {sorted(_VALID_BACKENDS)}, got {name!r}"
             )
         self._backend_name = name
         return self
@@ -296,32 +372,15 @@ class QuantumDataLoader:
         if (
             not use_synthetic
             and self._file_path is not None
-            and self._backend_name != "pytorch"
+            and self._backend_name != _BACKEND_PYTORCH
         ):
-            import os
-
-            _SUPPORTED_EXTS = {
-                ".parquet",
-                ".arrow",
-                ".feather",
-                ".ipc",
-                ".npy",
-                ".pt",
-                ".pth",
-                ".pb",
-            }
-            is_remote = "://" in self._file_path
-            check_path = (
-                self._file_path.split("?")[0].rsplit("/", 1)[-1]
-                if is_remote
-                else self._file_path
-            )
-            ext = os.path.splitext(check_path)[1].lower()
-            if ext not in _SUPPORTED_EXTS:
+            ext = _path_extension(self._file_path)
+            if ext not in _SUPPORTED_FILE_EXTS:
                 raise ValueError(
                     f"Unsupported file extension {ext!r}. "
-                    f"Supported: {', '.join(sorted(_SUPPORTED_EXTS))}"
+                    f"Supported: {', '.join(sorted(_SUPPORTED_FILE_EXTS))}"
                 )
+            is_remote = "://" in self._file_path
             if not is_remote and not os.path.exists(self._file_path):
                 raise FileNotFoundError(
                     f"File not found: {self._file_path!r}. Check the path and try again."
@@ -335,41 +394,27 @@ class QuantumDataLoader:
                 encoding_method=self._encoding_method,
                 seed=self._seed,
             )
-        if self._backend_name == "pytorch":
+        if self._backend_name == _BACKEND_PYTORCH:
             return self._create_pytorch_iterator(use_synthetic)
         # Rust backend (default) or auto-fallback.
         qdp = _get_qdp()
         QdpEngine = getattr(qdp, "QdpEngine", None) if qdp else None
         if QdpEngine is None:
-            if self._backend_name == "auto":
-                import sys
-                import warnings
-
-                platform_hint = (
-                    f" (running on {sys.platform}; Rust GPU extension requires Linux with CUDA)"
-                    if sys.platform != "linux"
-                    else ""
-                )
+            if self._backend_name == _BACKEND_AUTO:
                 warnings.warn(
-                    f"Rust extension (_qdp) is not available{platform_hint}; "
+                    "Rust extension (_qdp) is not available"
+                    f"{_platform_hint('the Rust GPU extension')}; "
                     "falling back to PyTorch reference backend. "
                     "Build with: maturin develop to enable GPU acceleration.",
                     RuntimeWarning,
                     stacklevel=3,
                 )
                 return self._create_pytorch_iterator(use_synthetic)
-            import sys
-
-            platform_hint = ""
-            if sys.platform != "linux":
-                platform_hint = (
-                    f" Note: the Rust GPU extension requires Linux with CUDA; "
-                    f"you are on {sys.platform}."
-                )
             raise RuntimeError(
                 "Rust extension (_qdp) is not available. "
                 "Build with: maturin develop, or explicitly select the PyTorch "
-                f"reference backend with .backend('pytorch').{platform_hint}"
+                f"reference backend with .backend({_BACKEND_PYTORCH!r})."
+                f"{_platform_hint('the Rust GPU extension')}"
             )
         return self._create_rust_iterator(QdpEngine, use_synthetic)
 
@@ -472,24 +517,15 @@ class QuantumDataLoader:
 
     def _pytorch_file_iter(self, torch, encode_fn, device: str) -> Iterator[object]:
         """Load file data and encode with PyTorch."""
-        import os
-
         path = self._file_path
         assert path is not None
-        ext = os.path.splitext(path)[1].lower()
+        ext = _path_extension(path)
 
         if self._streaming_requested:
-            import sys
-
-            platform_hint = ""
-            if sys.platform != "linux":
-                platform_hint = (
-                    f" Note: streaming requires Linux with CUDA; "
-                    f"you are on {sys.platform}."
-                )
             raise RuntimeError(
                 "Streaming file loading requires the _qdp Rust extension. "
-                f"Build with: maturin develop{platform_hint}"
+                "Build with: maturin develop"
+                f"{_platform_hint('streaming')}"
             )
 
         if ext not in _FALLBACK_FILE_EXTS:
@@ -553,29 +589,7 @@ class QuantumDataLoader:
         ``num_workers=0`` is required because the Rust backend holds GPU state that
         cannot be pickled for multi-process workers.
         """
-        try:
-            import torch  # noqa: F401 — ensure torch is available before building the class
-            from torch.utils.data import IterableDataset as _IterableDataset
-        except ImportError:
-            raise RuntimeError(
-                "as_torch_dataset() requires PyTorch. Install with: pip install torch"
-            ) from None
-
-        loader_ref = self
-
-        class _QdpDataset(_IterableDataset):  # type: ignore[misc]
-            """IterableDataset wrapping a QuantumDataLoader."""
-
-            def __iter__(self_) -> Iterator[object]:
-                import torch as _torch
-
-                for batch in loader_ref:
-                    # DLPack capsule from the Rust backend → tensor
-                    if not isinstance(batch, _torch.Tensor):
-                        batch = _torch.from_dlpack(batch)
-                    yield batch
-
-        return _QdpDataset()
+        return _build_torch_dataset(self)
 
     def __iter__(self) -> Iterator[object]:
         """Return iterator that yields one encoded batch per step.
