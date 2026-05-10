@@ -155,9 +155,8 @@ pub fn validate_cuda_tensor_for_encoding(
 ) -> PyResult<Encoding> {
     let encoding = Encoding::from_str_ci(encoding_method)
         .map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
-    let ndim: usize = tensor.call_method0("dim")?.extract()?;
 
-    // Phase has no CUDA tensor path yet.
+    // TODO: Phase has no CUDA tensor path; users must route through CPU tensors.
     if matches!(encoding, Encoding::Phase) {
         return Err(PyRuntimeError::new_err(format!(
             "CUDA tensor encoding currently only supports {} methods, got '{}'. \
@@ -171,24 +170,18 @@ pub fn validate_cuda_tensor_for_encoding(
     let dtype_str: String = dtype.str()?.extract()?;
     let dtype_str_lower = dtype_str.to_ascii_lowercase();
     match encoding {
-        Encoding::Amplitude => {
+        Encoding::Amplitude | Encoding::Angle => {
             if !(dtype_str_lower.contains("float64") || dtype_str_lower.contains("float32")) {
                 return Err(PyRuntimeError::new_err(format!(
-                    "CUDA tensor must have dtype float64 or float32 for amplitude encoding, got {}. \
+                    "CUDA tensor must have dtype float64 or float32 for {} encoding, got {}. \
                      Use tensor.to(torch.float64) or tensor.to(torch.float32)",
+                    encoding.as_str(),
                     dtype_str
                 )));
             }
         }
-        Encoding::Angle | Encoding::Iqp | Encoding::IqpZ => {
-            if encoding == Encoding::Angle && dtype_str_lower.contains("float32") {
-                if ndim != 1 {
-                    return Err(PyRuntimeError::new_err(
-                        "CUDA tensor float32 angle encoding currently supports only 1D single-sample tensors. \
-                         Use tensor.to(torch.float64) for batch angle encoding.",
-                    ));
-                }
-            } else if !dtype_str_lower.contains("float64") {
+        Encoding::Iqp | Encoding::IqpZ => {
+            if !dtype_str_lower.contains("float64") {
                 return Err(PyRuntimeError::new_err(format!(
                     "CUDA tensor must have dtype float64 for {} encoding, got {}. \
                      Use tensor.to(torch.float64)",

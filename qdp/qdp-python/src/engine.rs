@@ -492,11 +492,7 @@ impl QdpEngine {
         let ndim: usize = data.call_method0("dim")?.extract()?;
         let tensor_info = extract_cuda_tensor_info(data)?;
 
-        let f32_fast_path = is_f32
-            && matches!(
-                (encoding, ndim),
-                (Encoding::Amplitude, _) | (Encoding::Angle, 1)
-            );
+        let f32_fast_path = is_f32 && matches!(encoding, Encoding::Amplitude | Encoding::Angle);
         if f32_fast_path {
             match ndim {
                 1 => {
@@ -529,9 +525,7 @@ impl QdpEngine {
                                         e
                                     ))
                                 })?,
-                            _ => unreachable!(
-                                "f32_fast_path guard allows only Amplitude or Angle"
-                            ),
+                            _ => unreachable!("f32_fast_path guard allows only Amplitude or Angle"),
                         }
                     };
 
@@ -548,20 +542,39 @@ impl QdpEngine {
                     let data_ptr = data_ptr_u64 as *const f32;
 
                     let ptr = unsafe {
-                        self.engine
-                            .encode_batch_from_gpu_ptr_f32_with_stream(
-                                data_ptr,
-                                num_samples,
-                                sample_size,
-                                num_qubits,
-                                stream_ptr,
-                            )
-                            .map_err(|e| {
-                                PyRuntimeError::new_err(format!(
-                                    "Encoding failed (float32 amplitude batch): {}",
-                                    e
-                                ))
-                            })?
+                        match encoding {
+                            Encoding::Amplitude => self
+                                .engine
+                                .encode_batch_from_gpu_ptr_f32_with_stream(
+                                    data_ptr,
+                                    num_samples,
+                                    sample_size,
+                                    num_qubits,
+                                    stream_ptr,
+                                )
+                                .map_err(|e| {
+                                    PyRuntimeError::new_err(format!(
+                                        "Encoding failed (float32 amplitude batch): {}",
+                                        e
+                                    ))
+                                })?,
+                            Encoding::Angle => self
+                                .engine
+                                .encode_angle_batch_from_gpu_ptr_f32_with_stream(
+                                    data_ptr,
+                                    num_samples,
+                                    sample_size,
+                                    num_qubits,
+                                    stream_ptr,
+                                )
+                                .map_err(|e| {
+                                    PyRuntimeError::new_err(format!(
+                                        "Encoding failed (float32 angle batch): {}",
+                                        e
+                                    ))
+                                })?,
+                            _ => unreachable!("f32_fast_path guard allows only Amplitude or Angle"),
+                        }
                     };
 
                     Ok(QuantumTensor {
@@ -652,7 +665,7 @@ impl QdpEngine {
             total_batches,
             seed,
             nh,
-            true,
+            Dtype::Float32,
         )?;
         let iter = qdp_core::PipelineIterator::new_synthetic(self.engine.clone(), config).map_err(
             |e| PyRuntimeError::new_err(format!("create_synthetic_loader failed: {}", e)),
@@ -685,7 +698,7 @@ impl QdpEngine {
             0,
             None,
             nh,
-            true, // float32_pipeline
+            Dtype::Float32,
         )?;
         let engine = self.engine.clone();
         // Resolve remote URLs before detaching from GIL. The _resolved guard keeps the
@@ -734,7 +747,7 @@ impl QdpEngine {
             0,
             None,
             nh,
-            true, // float32_pipeline
+            Dtype::Float32,
         )?;
         let engine = self.engine.clone();
         // Resolve remote URLs before detaching from GIL. The _resolved guard keeps the

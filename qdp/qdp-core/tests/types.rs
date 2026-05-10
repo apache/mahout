@@ -56,6 +56,16 @@ fn static_encoder_same_instance_across_calls() {
 }
 
 #[test]
+fn supports_f32_amplitude_only() {
+    assert!(Encoding::Amplitude.supports_f32());
+    assert!(!Encoding::Angle.supports_f32());
+    assert!(!Encoding::Basis.supports_f32());
+    assert!(!Encoding::Iqp.supports_f32());
+    assert!(!Encoding::IqpZ.supports_f32());
+    assert!(!Encoding::Phase.supports_f32());
+}
+
+#[test]
 fn dtype_from_str_ci() {
     assert_eq!(Dtype::from_str_ci("f32").unwrap(), Dtype::Float32);
     assert_eq!(Dtype::from_str_ci("Float64").unwrap(), Dtype::Float64);

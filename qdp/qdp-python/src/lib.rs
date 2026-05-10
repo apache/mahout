@@ -31,7 +31,7 @@ use loader::PyQuantumLoader;
 
 #[cfg(target_os = "linux")]
 #[pyfunction]
-#[pyo3(signature = (device_id, num_qubits, batch_size, total_batches, encoding_method, warmup_batches=0, seed=None, float32_pipeline=false))]
+#[pyo3(signature = (device_id, num_qubits, batch_size, total_batches, encoding_method, warmup_batches=0, seed=None, dtype="f64"))]
 #[allow(clippy::too_many_arguments)]
 fn run_throughput_pipeline_py(
     py: Python<'_>,
@@ -42,7 +42,7 @@ fn run_throughput_pipeline_py(
     encoding_method: String,
     warmup_batches: usize,
     seed: Option<u64>,
-    float32_pipeline: bool,
+    dtype: &str,
 ) -> PyResult<(f64, f64, f64)> {
     let config = qdp_core::PipelineConfig {
         device_id,
@@ -54,11 +54,8 @@ fn run_throughput_pipeline_py(
         seed,
         warmup_batches,
         null_handling: qdp_core::NullHandling::default(),
-        dtype: if float32_pipeline {
-            qdp_core::Precision::Float32
-        } else {
-            qdp_core::Precision::Float64
-        },
+        dtype: qdp_core::Dtype::from_str_ci(dtype)
+            .map_err(|e| PyRuntimeError::new_err(format!("Invalid dtype: {e}")))?,
         prefetch_depth: 16,
     };
     let result = py

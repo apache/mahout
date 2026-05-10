@@ -161,7 +161,7 @@ class QdpBenchmark:
             encoding_method=self._encoding_method,
             warmup_batches=self._warmup_batches,
             seed=None,
-            float32_pipeline=True,
+            dtype="f32",
         )
         return ThroughputResult(
             duration_sec=duration_sec, vectors_per_sec=vectors_per_sec
@@ -177,7 +177,7 @@ class QdpBenchmark:
             encoding_method=self._encoding_method,
             warmup_batches=self._warmup_batches,
             seed=None,
-            float32_pipeline=True,
+            dtype="f32",
         )
         return LatencyResult(
             duration_sec=duration_sec,

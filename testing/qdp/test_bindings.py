@@ -398,9 +398,7 @@ def test_encode_cuda_tensor_angle_float16_rejected():
     engine = QdpEngine(0)
     data = torch.tensor([0.0, torch.pi / 2], dtype=torch.float16, device="cuda:0")
 
-    with pytest.raises(
-        RuntimeError, match="float64 for angle encoding|supports only 1D"
-    ):
+    with pytest.raises(RuntimeError, match="float64 or float32 for angle encoding"):
         engine.encode(data, 2, "angle")
 
 
@@ -537,7 +535,7 @@ def test_encode_cuda_tensor_invalid_encoding_method():
 
     with pytest.raises(
         RuntimeError,
-        match="only supports .*amplitude.*angle.*basis.*iqp.*iqp-z.*Use tensor.cpu",
+        match="Unknown encoding: unknown-encoding",
     ):
         engine.encode(data, 2, "unknown-encoding")
 

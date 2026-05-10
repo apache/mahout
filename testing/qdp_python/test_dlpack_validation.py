@@ -183,9 +183,7 @@ def test_cuda_float16_angle_rejected() -> None:
     engine = _engine()
     t = torch.tensor([0.0, torch.pi / 2], dtype=torch.float16, device="cuda")
 
-    with pytest.raises(
-        RuntimeError, match="float64 for angle encoding|supports only 1D"
-    ):
+    with pytest.raises(RuntimeError, match="float64 or float32 for angle encoding"):
         engine.encode(t, num_qubits=2, encoding_method="angle")
 
 
