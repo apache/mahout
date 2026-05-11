@@ -156,7 +156,8 @@ pub fn validate_cuda_tensor_for_encoding(
     let encoding = Encoding::from_str_ci(encoding_method)
         .map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
 
-    // TODO: Phase has no CUDA tensor path; users must route through CPU tensors.
+    // Phase encoding has no zero-copy CUDA tensor kernel yet; the user-facing
+    // error below tells callers to fall back to a CPU tensor.
     if matches!(encoding, Encoding::Phase) {
         return Err(PyRuntimeError::new_err(format!(
             "CUDA tensor encoding currently only supports {} methods, got '{}'. \
