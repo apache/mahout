@@ -31,9 +31,9 @@ pub mod overlap_tracker;
 pub mod pipeline;
 #[cfg(target_os = "linux")]
 pub mod pool_metrics;
+pub mod topology;
 #[cfg(target_os = "linux")]
 pub(crate) mod validation;
-pub mod topology;
 
 #[cfg(target_os = "linux")]
 pub(crate) mod cuda_ffi;
@@ -46,7 +46,7 @@ pub use distributed::{
     DistributedStateVector, DistributionMode, PlacementPlan, PlacementPlanner, PlacementRequest,
     PreparedDistributedAmplitudeEncode, ShardPlacement, ShardPolicy, StateShard, StateShardLayout,
 };
-pub use encodings::{AmplitudeEncoder, AngleEncoder, BasisEncoder, QuantumEncoder, get_encoder};
+pub use encodings::{AmplitudeEncoder, AngleEncoder, BasisEncoder, QuantumEncoder};
 pub use memory::GpuStateVector;
 #[cfg(target_os = "linux")]
 #[doc(hidden)]
