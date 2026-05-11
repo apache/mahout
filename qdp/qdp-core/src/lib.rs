@@ -60,7 +60,6 @@ use std::sync::Arc;
 
 use crate::dlpack::DLManagedTensor;
 use crate::gpu::distributed::runtime;
-use crate::gpu::get_encoder;
 use cudarc::driver::CudaDevice;
 
 #[cfg(target_os = "linux")]
