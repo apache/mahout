@@ -436,10 +436,7 @@ impl QdpEngine {
                     let input_len: usize = data.call_method0("numel")?.extract()?;
                     unsafe {
                         self.engine.encode_from_gpu_ptr_f32_with_stream(
-                            data_ptr,
-                            input_len,
-                            num_qubits,
-                            stream_ptr,
+                            data_ptr, input_len, num_qubits, stream_ptr,
                         )
                     }
                 }
@@ -460,10 +457,7 @@ impl QdpEngine {
                     let input_len: usize = data.call_method0("numel")?.extract()?;
                     unsafe {
                         self.engine.encode_angle_from_gpu_ptr_f32_with_stream(
-                            data_ptr,
-                            input_len,
-                            num_qubits,
-                            stream_ptr,
+                            data_ptr, input_len, num_qubits, stream_ptr,
                         )
                     }
                 }
@@ -481,11 +475,8 @@ impl QdpEngine {
                     }
                 }
                 (Encoding::Basis, 1) => unsafe {
-                    self.engine.encode_basis_from_gpu_ptr_f32_with_stream(
-                        data_ptr,
-                        num_qubits,
-                        stream_ptr,
-                    )
+                    self.engine
+                        .encode_basis_from_gpu_ptr_f32_with_stream(data_ptr, num_qubits, stream_ptr)
                 },
                 (Encoding::Basis, 2) => {
                     let num_samples = tensor_info.shape[0] as usize;

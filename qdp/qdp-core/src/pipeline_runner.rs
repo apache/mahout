@@ -1309,24 +1309,28 @@ mod tests {
     #[test]
     fn test_compute_optimal_prefetch_depth_bounds() {
         // Small qubit count → hits MAX_DEPTH cap (32)
-        let d = super::compute_optimal_prefetch_depth(4, 64, "amplitude", false);
+        let d =
+            super::compute_optimal_prefetch_depth(4, 64, Encoding::Amplitude, Precision::Float64);
         assert_eq!(d, 32, "4 qubits/amplitude should hit max depth");
 
         // angle/basis are tiny input → should also hit MAX_DEPTH
-        let d_angle = super::compute_optimal_prefetch_depth(16, 64, "angle", false);
+        let d_angle =
+            super::compute_optimal_prefetch_depth(16, 64, Encoding::Angle, Precision::Float64);
         assert_eq!(
             d_angle, 32,
             "angle encoding has small input, should hit max"
         );
 
-        let d_basis = super::compute_optimal_prefetch_depth(16, 64, "basis", false);
+        let d_basis =
+            super::compute_optimal_prefetch_depth(16, 64, Encoding::Basis, Precision::Float64);
         assert_eq!(
             d_basis, 32,
             "basis encoding has 1-element input, should hit max"
         );
 
         // Large qubit count amplitude → depth should be ≥ 1 and ≤ 32
-        let d_large = super::compute_optimal_prefetch_depth(20, 64, "amplitude", false);
+        let d_large =
+            super::compute_optimal_prefetch_depth(20, 64, Encoding::Amplitude, Precision::Float64);
         assert!(
             (1..=32).contains(&d_large),
             "20 qubits depth out of range: {d_large}"
@@ -1335,11 +1339,13 @@ mod tests {
         assert_eq!(d_large, 1);
 
         // 16 qubits f64, bs=64: 65536*64*8 = 32 MB → 256M/32M = 8
-        let d16 = super::compute_optimal_prefetch_depth(16, 64, "amplitude", false);
+        let d16 =
+            super::compute_optimal_prefetch_depth(16, 64, Encoding::Amplitude, Precision::Float64);
         assert_eq!(d16, 8);
 
         // 16 qubits f32, bs=64: 65536*64*4 = 16 MB → 256M/16M = 16
-        let d16_f32 = super::compute_optimal_prefetch_depth(16, 64, "amplitude", true);
+        let d16_f32 =
+            super::compute_optimal_prefetch_depth(16, 64, Encoding::Amplitude, Precision::Float32);
         assert_eq!(d16_f32, 16);
     }
 
@@ -1349,7 +1355,7 @@ mod tests {
         let mut config = PipelineConfig {
             num_qubits: 16,
             batch_size: 64,
-            encoding_method: "amplitude".to_string(),
+            encoding: Encoding::Amplitude,
             ..Default::default()
         };
         assert_eq!(config.prefetch_depth, 0, "default should be 0 (auto)");
