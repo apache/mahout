@@ -419,31 +419,32 @@ impl QdpEngine {
         let dtype_str: String = dtype.str()?.extract()?;
         let is_f32 = dtype_str.to_ascii_lowercase().contains("float32");
         let ndim: usize = data.call_method0("dim")?.extract()?;
+        validate_shape(ndim, "CUDA tensor")?;
         let tensor_info = extract_cuda_tensor_info(data)?;
+        let stream_ptr = get_torch_cuda_stream_ptr(data)?;
 
         let f32_fast_path = is_f32
             && matches!(
                 encoding,
                 Encoding::Amplitude | Encoding::Angle | Encoding::Basis
             );
-        if f32_fast_path {
-            let stream_ptr = get_torch_cuda_stream_ptr(data)?;
+        let ptr = if f32_fast_path {
             let data_ptr_u64: u64 = data.call_method0("data_ptr")?.extract()?;
             let data_ptr = data_ptr_u64 as *const f32;
+            let num_samples = tensor_info.shape[0] as usize;
+            let sample_size = if ndim == 2 {
+                tensor_info.shape[1] as usize
+            } else {
+                num_samples
+            };
+            let input_len = num_samples;
 
-            let ptr = match (encoding, ndim) {
-                (Encoding::Amplitude, 1) => {
-                    let input_len: usize = data.call_method0("numel")?.extract()?;
-                    unsafe {
-                        self.engine.encode_from_gpu_ptr_f32_with_stream(
-                            data_ptr, input_len, num_qubits, stream_ptr,
-                        )
-                    }
-                }
-                (Encoding::Amplitude, 2) => {
-                    let num_samples = tensor_info.shape[0] as usize;
-                    let sample_size = tensor_info.shape[1] as usize;
-                    unsafe {
+            unsafe {
+                match (encoding, ndim) {
+                    (Encoding::Amplitude, 1) => self.engine.encode_from_gpu_ptr_f32_with_stream(
+                        data_ptr, input_len, num_qubits, stream_ptr,
+                    ),
+                    (Encoding::Amplitude, 2) => {
                         self.engine.encode_batch_from_gpu_ptr_f32_with_stream(
                             data_ptr,
                             num_samples,
@@ -452,19 +453,10 @@ impl QdpEngine {
                             stream_ptr,
                         )
                     }
-                }
-                (Encoding::Angle, 1) => {
-                    let input_len: usize = data.call_method0("numel")?.extract()?;
-                    unsafe {
-                        self.engine.encode_angle_from_gpu_ptr_f32_with_stream(
-                            data_ptr, input_len, num_qubits, stream_ptr,
-                        )
-                    }
-                }
-                (Encoding::Angle, 2) => {
-                    let num_samples = tensor_info.shape[0] as usize;
-                    let sample_size = tensor_info.shape[1] as usize;
-                    unsafe {
+                    (Encoding::Angle, 1) => self.engine.encode_angle_from_gpu_ptr_f32_with_stream(
+                        data_ptr, input_len, num_qubits, stream_ptr,
+                    ),
+                    (Encoding::Angle, 2) => {
                         self.engine.encode_angle_batch_from_gpu_ptr_f32_with_stream(
                             data_ptr,
                             num_samples,
@@ -473,15 +465,10 @@ impl QdpEngine {
                             stream_ptr,
                         )
                     }
-                }
-                (Encoding::Basis, 1) => unsafe {
-                    self.engine
-                        .encode_basis_from_gpu_ptr_f32_with_stream(data_ptr, num_qubits, stream_ptr)
-                },
-                (Encoding::Basis, 2) => {
-                    let num_samples = tensor_info.shape[0] as usize;
-                    let sample_size = tensor_info.shape[1] as usize;
-                    unsafe {
+                    (Encoding::Basis, 1) => self.engine.encode_basis_from_gpu_ptr_f32_with_stream(
+                        data_ptr, num_qubits, stream_ptr,
+                    ),
+                    (Encoding::Basis, 2) => {
                         self.engine.encode_basis_batch_from_gpu_ptr_f32_with_stream(
                             data_ptr,
                             num_samples,
@@ -490,13 +477,9 @@ impl QdpEngine {
                             stream_ptr,
                         )
                     }
-                }
-                (_, other) => {
-                    return Err(PyRuntimeError::new_err(format!(
-                        "Unsupported CUDA tensor shape: {}D. Expected 1D tensor for single \
-                         sample encoding or 2D tensor (batch_size, features) for batch encoding.",
-                        other
-                    )));
+                    // (Encoding, ndim) outside (Amplitude|Angle|Basis, 1|2) is excluded by the
+                    // f32_fast_path guard above and by validate_shape().
+                    _ => unreachable!("f32 fast path matrix is exhaustive"),
                 }
             }
             .map_err(|e| {
@@ -505,65 +488,37 @@ impl QdpEngine {
                     encoding.as_str(),
                     e
                 ))
-            })?;
-
-            Ok(QuantumTensor {
-                ptr,
-                consumed: false,
-            })
+            })?
         } else {
-            let stream_ptr = get_torch_cuda_stream_ptr(data)?;
-
-            match ndim {
-                1 => {
-                    let input_len = tensor_info.shape[0] as usize;
-                    let ptr = unsafe {
-                        self.engine
-                            .encode_from_gpu_ptr_with_stream(
-                                tensor_info.data_ptr as *const std::ffi::c_void,
-                                input_len,
-                                num_qubits,
-                                encoding_method,
-                                stream_ptr,
-                            )
-                            .map_err(|e| {
-                                PyRuntimeError::new_err(format!("Encoding failed: {}", e))
-                            })?
-                    };
-                    Ok(QuantumTensor {
-                        ptr,
-                        consumed: false,
-                    })
+            let data_ptr = tensor_info.data_ptr as *const std::ffi::c_void;
+            unsafe {
+                match ndim {
+                    1 => self.engine.encode_from_gpu_ptr_with_stream(
+                        data_ptr,
+                        tensor_info.shape[0] as usize,
+                        num_qubits,
+                        encoding_method,
+                        stream_ptr,
+                    ),
+                    2 => self.engine.encode_batch_from_gpu_ptr_with_stream(
+                        data_ptr,
+                        tensor_info.shape[0] as usize,
+                        tensor_info.shape[1] as usize,
+                        num_qubits,
+                        encoding_method,
+                        stream_ptr,
+                    ),
+                    // ndim outside {1, 2} excluded by validate_shape() above.
+                    _ => unreachable!("validate_shape() guarantees ndim is 1 or 2"),
                 }
-                2 => {
-                    let num_samples = tensor_info.shape[0] as usize;
-                    let sample_size = tensor_info.shape[1] as usize;
-                    let ptr = unsafe {
-                        self.engine
-                            .encode_batch_from_gpu_ptr_with_stream(
-                                tensor_info.data_ptr as *const std::ffi::c_void,
-                                num_samples,
-                                sample_size,
-                                num_qubits,
-                                encoding_method,
-                                stream_ptr,
-                            )
-                            .map_err(|e| {
-                                PyRuntimeError::new_err(format!("Encoding failed: {}", e))
-                            })?
-                    };
-                    Ok(QuantumTensor {
-                        ptr,
-                        consumed: false,
-                    })
-                }
-                _ => Err(PyRuntimeError::new_err(format!(
-                    "Unsupported CUDA tensor shape: {}D. Expected 1D tensor for single \
-                     sample encoding or 2D tensor (batch_size, features) for batch encoding.",
-                    ndim
-                ))),
             }
-        }
+            .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?
+        };
+
+        Ok(QuantumTensor {
+            ptr,
+            consumed: false,
+        })
     }
 
     // --- Loader factory methods (Linux only) ---

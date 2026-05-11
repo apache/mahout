@@ -56,10 +56,12 @@ fn static_encoder_same_instance_across_calls() {
 }
 
 #[test]
-fn supports_f32_amplitude_only() {
+fn supports_f32_covers_amplitude_angle_basis() {
+    // Amplitude / Angle / Basis have wired host f32 prefetch + encode_batch_f32 paths.
+    // Iqp / IqpZ / Phase still normalize to Float64 until their batch f32 GPU paths exist.
     assert!(Encoding::Amplitude.supports_f32());
-    assert!(!Encoding::Angle.supports_f32());
-    assert!(!Encoding::Basis.supports_f32());
+    assert!(Encoding::Angle.supports_f32());
+    assert!(Encoding::Basis.supports_f32());
     assert!(!Encoding::Iqp.supports_f32());
     assert!(!Encoding::IqpZ.supports_f32());
     assert!(!Encoding::Phase.supports_f32());
