@@ -16,7 +16,7 @@
 
 //! Tests for [`qdp_core::Encoding`] and [`qdp_core::Dtype`].
 
-use qdp_core::{Dtype, Encoding};
+use qdp_core::{Backend, Dtype, Encoding};
 
 #[test]
 fn encoding_case_insensitive() {
@@ -72,4 +72,73 @@ fn dtype_from_str_ci() {
     assert_eq!(Dtype::from_str_ci("f32").unwrap(), Dtype::Float32);
     assert_eq!(Dtype::from_str_ci("Float64").unwrap(), Dtype::Float64);
     assert!(Dtype::from_str_ci("bf16").is_err());
+}
+
+// ---- `Backend` enum (PR 1.5) ----
+
+#[test]
+fn backend_case_insensitive_and_aliases() {
+    // Canonical names.
+    assert_eq!(
+        Backend::from_str_ci("cuda-nvidia").unwrap(),
+        Backend::CudaNvidia
+    );
+    assert_eq!(
+        Backend::from_str_ci("torch-ref").unwrap(),
+        Backend::TorchRef
+    );
+    // Aliases.
+    assert_eq!(Backend::from_str_ci("cuda").unwrap(), Backend::CudaNvidia);
+    assert_eq!(Backend::from_str_ci("nvidia").unwrap(), Backend::CudaNvidia);
+    assert_eq!(Backend::from_str_ci("CUDA").unwrap(), Backend::CudaNvidia);
+    assert_eq!(Backend::from_str_ci("torch").unwrap(), Backend::TorchRef);
+    assert_eq!(Backend::from_str_ci("torchref").unwrap(), Backend::TorchRef);
+    assert_eq!(Backend::from_str_ci("cpu").unwrap(), Backend::TorchRef);
+    // Whitespace tolerance.
+    assert_eq!(
+        Backend::from_str_ci("  cuda  ").unwrap(),
+        Backend::CudaNvidia
+    );
+}
+
+#[test]
+fn backend_amd_rejected_with_helpful_message() {
+    // AMD/Triton is the Python-side backend (#1158); the Rust core must reject
+    // it explicitly so users don't think the Rust path silently ignored the flag.
+    for name in ["amd", "AMD", "triton", "Triton", "triton-amd"] {
+        let err = Backend::from_str_ci(name)
+            .expect_err(&format!("backend '{}' should be rejected", name))
+            .to_string();
+        assert!(
+            err.contains("AMD") && err.contains("Python"),
+            "error for '{}' must mention AMD + the Python path, got: {}",
+            name,
+            err
+        );
+    }
+}
+
+#[test]
+fn backend_unknown_rejected() {
+    assert!(Backend::from_str_ci("metal").is_err());
+    assert!(Backend::from_str_ci("opencl").is_err());
+}
+
+#[test]
+fn backend_as_str_roundtrips() {
+    assert_eq!(Backend::CudaNvidia.as_str(), "cuda-nvidia");
+    assert_eq!(Backend::TorchRef.as_str(), "torch-ref");
+    // Round-trip through `as_str` -> `from_str_ci` for every variant.
+    for b in [Backend::CudaNvidia, Backend::TorchRef] {
+        assert_eq!(Backend::from_str_ci(b.as_str()).unwrap(), b);
+    }
+}
+
+#[test]
+fn backend_detect_is_platform_appropriate() {
+    let b = Backend::detect();
+    #[cfg(target_os = "linux")]
+    assert_eq!(b, Backend::CudaNvidia);
+    #[cfg(not(target_os = "linux"))]
+    assert_eq!(b, Backend::TorchRef);
 }
