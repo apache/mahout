@@ -541,6 +541,29 @@ impl QuantumEncoder for BasisEncoder {
         Ok(batch_state_vector)
     }
 
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_from_gpu_ptr_f32(
+        &self,
+        device: &Arc<CudaDevice>,
+        input_d: *const c_void,
+        input_len: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        // Delegate to the workhorse `_with_stream` fn (see angle.rs for rationale).
+        // `input_len` is unused — basis is always one index per sample — but kept on the
+        // signature to match the trait shape used by amplitude / angle.
+        let _ = input_len;
+        unsafe {
+            Self::encode_from_gpu_ptr_f32_with_stream(
+                device,
+                input_d as *const f32,
+                num_qubits,
+                stream,
+            )
+        }
+    }
+
     fn name(&self) -> &'static str {
         "basis"
     }
