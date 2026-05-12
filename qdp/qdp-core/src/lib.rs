@@ -610,71 +610,21 @@ impl QdpEngine {
     ) -> Result<*mut DLManagedTensor> {
         crate::profile_scope!("Mahout::EncodeFromGpuPtrF32");
 
-        if input_len == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Input data cannot be empty".into(),
-            ));
-        }
-
         validate_cuda_input_ptr(&self.device, input_d as *const c_void)?;
 
-        let state_len = 1usize << num_qubits;
-        if input_len > state_len {
-            return Err(MahoutError::InvalidInput(format!(
-                "Input size {} exceeds state vector size {} (2^{} qubits)",
-                input_len, state_len, num_qubits
-            )));
-        }
-
-        let state_vector = {
-            crate::profile_scope!("GPU::Alloc");
-            gpu::GpuStateVector::new(&self.device, num_qubits, Precision::Float32)?
+        // Delegate to `AmplitudeEncoder::encode_from_gpu_ptr_f32_with_stream` — the
+        // encoder-side workhorse. Keeping the kernel-launch + L2-norm sequence inside
+        // the encoder makes the trait surface symmetric (`QuantumEncoder::encode_from_gpu_ptr_f32`
+        // can override against it) and matches the angle / basis layout.
+        let state_vector = unsafe {
+            gpu::AmplitudeEncoder::encode_from_gpu_ptr_f32_with_stream(
+                &self.device,
+                input_d,
+                input_len,
+                num_qubits,
+                stream,
+            )?
         };
-
-        let inv_norm = {
-            crate::profile_scope!("GPU::NormFromPtr");
-            unsafe {
-                gpu::AmplitudeEncoder::calculate_inv_norm_gpu_f32_with_stream(
-                    &self.device,
-                    input_d,
-                    input_len,
-                    stream,
-                )?
-            }
-        };
-
-        let state_ptr = state_vector.ptr_f32().ok_or_else(|| {
-            MahoutError::InvalidInput(
-                "State vector precision mismatch (expected float32 buffer)".to_string(),
-            )
-        })?;
-
-        {
-            crate::profile_scope!("GPU::KernelLaunch");
-            let ret = unsafe {
-                qdp_kernels::launch_amplitude_encode_f32(
-                    input_d,
-                    state_ptr as *mut std::ffi::c_void,
-                    input_len,
-                    state_len,
-                    inv_norm,
-                    stream,
-                )
-            };
-
-            if ret != 0 {
-                return Err(MahoutError::KernelLaunch(format!(
-                    "Amplitude encode (f32) kernel failed with CUDA error code: {} ({})",
-                    ret,
-                    cuda_error_to_string(ret)
-                )));
-            }
-        }
-
-        {
-            crate::profile_scope!("GPU::Synchronize");
-            gpu::cuda_sync::sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
-        }
 
         let state_vector = state_vector.to_precision(&self.device, self.precision)?;
         Ok(state_vector.to_dlpack())

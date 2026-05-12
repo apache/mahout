@@ -1751,3 +1751,146 @@ fn test_encode_basis_from_gpu_ptr_f32_single_sample_success() {
     };
     unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 1, 8) };
 }
+
+// ---- Trait-method tests for `QuantumEncoder::encode_from_gpu_ptr_f32` (PR 1.5) ----
+//
+// The single-sample f32 method moved onto the `QuantumEncoder` trait in PR 1.5 so
+// future encoders only need a single override point instead of a standalone inherent
+// fn that the dispatcher must remember to call. These tests dispatch through
+// `Encoding::encoder()` to exercise the trait method, not the inherent helper.
+
+#[test]
+fn test_trait_encode_from_gpu_ptr_f32_amplitude() {
+    let Some(_engine) = engine_f32() else {
+        println!("SKIP: No GPU");
+        return;
+    };
+    let num_qubits = 3usize;
+    let state_len = 1usize << num_qubits;
+    let data = common::create_test_data_f32(state_len);
+    let Some((device, data_d)) = common::copy_f32_to_device(data.as_slice()) else {
+        println!("SKIP: No CUDA device");
+        return;
+    };
+    let encoder = qdp_core::Encoding::Amplitude.encoder();
+    let state_vector = unsafe {
+        encoder
+            .encode_from_gpu_ptr_f32(
+                &device,
+                *data_d.device_ptr() as *const std::ffi::c_void,
+                state_len,
+                num_qubits,
+                std::ptr::null_mut(),
+            )
+            .expect("trait method should succeed for amplitude")
+    };
+    // Use the engine's own precision conversion so we get a valid dlpack to free.
+    let state_vector = state_vector
+        .to_precision(&device, qdp_core::Precision::Float32)
+        .expect("to_precision");
+    unsafe {
+        let dlpack = state_vector.to_dlpack();
+        common::take_deleter_and_delete(dlpack);
+    }
+}
+
+#[test]
+fn test_trait_encode_from_gpu_ptr_f32_angle() {
+    let Some(_engine) = engine_f32() else {
+        println!("SKIP: No GPU");
+        return;
+    };
+    let num_qubits = 3usize;
+    let data = common::create_test_data_f32(num_qubits);
+    let Some((device, data_d)) = common::copy_f32_to_device(data.as_slice()) else {
+        println!("SKIP: No CUDA device");
+        return;
+    };
+    let encoder = qdp_core::Encoding::Angle.encoder();
+    let state_vector = unsafe {
+        encoder
+            .encode_from_gpu_ptr_f32(
+                &device,
+                *data_d.device_ptr() as *const std::ffi::c_void,
+                num_qubits,
+                num_qubits,
+                std::ptr::null_mut(),
+            )
+            .expect("trait method should succeed for angle")
+    };
+    let state_vector = state_vector
+        .to_precision(&device, qdp_core::Precision::Float32)
+        .expect("to_precision");
+    unsafe {
+        let dlpack = state_vector.to_dlpack();
+        common::take_deleter_and_delete(dlpack);
+    }
+}
+
+#[test]
+fn test_trait_encode_from_gpu_ptr_f32_basis() {
+    let Some(_engine) = engine_f32() else {
+        println!("SKIP: No GPU");
+        return;
+    };
+    let num_qubits = 3usize;
+    let Some((device, data_d)) = common::copy_f32_to_device(&[5.0_f32]) else {
+        println!("SKIP: No CUDA device");
+        return;
+    };
+    let encoder = qdp_core::Encoding::Basis.encoder();
+    let state_vector = unsafe {
+        encoder
+            .encode_from_gpu_ptr_f32(
+                &device,
+                *data_d.device_ptr() as *const std::ffi::c_void,
+                1,
+                num_qubits,
+                std::ptr::null_mut(),
+            )
+            .expect("trait method should succeed for basis")
+    };
+    let state_vector = state_vector
+        .to_precision(&device, qdp_core::Precision::Float32)
+        .expect("to_precision");
+    unsafe {
+        let dlpack = state_vector.to_dlpack();
+        common::take_deleter_and_delete(dlpack);
+    }
+}
+
+#[test]
+fn test_trait_encode_from_gpu_ptr_f32_default_not_implemented_for_phase() {
+    // The default body returns NotImplemented for encoders that don't override.
+    // Phase / IQP / IQP-Z don't currently have an f32 zero-copy path, so the
+    // trait method must fall through to the default rather than mis-dispatch.
+    let Some(_engine) = engine_f32() else {
+        println!("SKIP: No GPU");
+        return;
+    };
+    let num_qubits = 3usize;
+    let Some((device, data_d)) = common::copy_f32_to_device(&[0.1_f32, 0.2, 0.3]) else {
+        println!("SKIP: No CUDA device");
+        return;
+    };
+    let encoder = qdp_core::Encoding::Phase.encoder();
+    let result = unsafe {
+        encoder.encode_from_gpu_ptr_f32(
+            &device,
+            *data_d.device_ptr() as *const std::ffi::c_void,
+            num_qubits,
+            num_qubits,
+            std::ptr::null_mut(),
+        )
+    };
+    match result {
+        Err(qdp_core::MahoutError::NotImplemented(msg)) => {
+            assert!(
+                msg.contains("encode_from_gpu_ptr_f32") && msg.contains("phase"),
+                "unexpected NotImplemented message: {msg}"
+            );
+        }
+        Ok(_) => panic!("phase should not support encode_from_gpu_ptr_f32"),
+        Err(e) => panic!("expected NotImplemented, got {:?}", e),
+    }
+}
