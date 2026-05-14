@@ -31,7 +31,11 @@ import time
 import torch
 from qumat_qdp import QdpBenchmark
 
-from benchmark.utils import normalize_batch, prefetched_batches
+from benchmark.utils import (
+    normalize_batch,
+    prefetched_batches,
+    validate_framework_selection,
+)
 
 BAR = "=" * 70
 SEP = "-" * 70
@@ -267,16 +271,10 @@ def main() -> None:
     except ValueError as exc:
         parser.error(str(exc))
 
-    # TODO: fix this with #1252 in the future.
-    if args.encoding_method in {"iqp", "iqp-z"}:
-        unsupported = [name for name in frameworks if name != "mahout"]
-        if unsupported:
-            print(
-                "Warning: IQP benchmarks in this script currently support only "
-                "framework 'mahout'; skipping unsupported frameworks: "
-                f"{', '.join(unsupported)}."
-            )
-            frameworks = ["mahout"]
+    try:
+        frameworks = validate_framework_selection(frameworks, args.encoding_method)
+    except ValueError as exc:
+        parser.error(str(exc))
 
     total_vectors = args.batches * args.batch_size
     vector_len = _sample_dim(args.qubits, args.encoding_method)

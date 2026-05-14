@@ -80,7 +80,7 @@ Notes:
 ```bash
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_latency.py --qubits 16 --batches 200 --batch-size 64 --prefetch 16
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_latency.py --frameworks mahout,pennylane
-uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_latency.py --encoding-method basis
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_latency.py --frameworks mahout --encoding-method basis
 ```
 
 Notes:
@@ -88,6 +88,9 @@ Notes:
 - `--frameworks` is a comma-separated list or `all`.
   Options: `mahout`, `pennylane`, `qiskit-init`, `qiskit-statevector`.
 - `--encoding-method` selects the encoding method: `amplitude` (default), `angle`, `basis`, `iqp`, or `iqp-z`.
+- In these CLIs, non-`amplitude` benchmark modes are currently Mahout-only.
+  Cross-framework parity exists only for `amplitude`, so `angle`, `basis`,
+  `iqp`, and `iqp-z` must use `--frameworks mahout`.
 - The latency test reports average milliseconds per vector.
 - Flags:
   - `--qubits`: controls the input length together with `--encoding-method`.
@@ -110,14 +113,18 @@ output.
 ```bash
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_throughput.py --qubits 16 --batches 200 --batch-size 64 --prefetch 16
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_throughput.py --frameworks mahout,pennylane
-uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_throughput.py --encoding-method basis
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_throughput.py --frameworks mahout --encoding-method basis
 ```
 
 Notes:
 
 - `--frameworks` is a comma-separated list or `all`.
-  Options: `mahout`, `pennylane`, `qiskit`.
+  Options: `mahout`, `mahout-amd`, `pennylane`, `pennylane-amdgpu`,
+  `pytorch-ref`, `qiskit`.
 - `--encoding-method` selects the encoding method: `amplitude` (default), `angle`, `basis`, `iqp`, or `iqp-z`.
+- In these CLIs, non-`amplitude` benchmark modes are currently Mahout-only.
+  Cross-framework parity exists only for `amplitude`, so `angle`, `basis`,
+  `iqp`, and `iqp-z` must use `--frameworks mahout`.
 - For synthetic inputs, amplitude uses `2^qubits`, angle and `iqp-z` use `qubits`,
   basis uses one basis index, and `iqp` uses `qubits + qubits*(qubits-1)/2`.
 - Throughput is reported in vectors/sec (higher is better).
