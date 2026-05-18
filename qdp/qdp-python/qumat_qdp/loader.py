@@ -75,6 +75,49 @@ _BACKEND_AUTO = "auto"
 _VALID_BACKENDS = frozenset({_BACKEND_RUST, _BACKEND_PYTORCH, _BACKEND_AUTO})
 
 
+def _select_torch_device(torch, device_id: int) -> str:
+    """Pick a torch device the current PyTorch build can actually use.
+
+    ``torch.cuda.is_available()`` returns True whenever a usable driver and at
+    least one GPU are present, but does not check whether the GPU's compute
+    capability is in the PyTorch wheel's compiled arch list. Running on an
+    unsupported GPU surfaces as ``cudaErrorNoKernelImageForDevice`` the first
+    time a kernel launches -- a particularly opaque failure for users on
+    Pascal-and-earlier hardware where recent PyTorch wheels no longer ship
+    matching kernels.
+
+    Intersect the device's capability with ``torch.cuda.get_arch_list()`` and
+    fall back to CPU (with a warning) when they don't match. Raises
+    ``ValueError`` on an out-of-range ``device_id`` to preserve the prior
+    contract for callers that explicitly request a specific GPU.
+    """
+    if not torch.cuda.is_available():
+        return "cpu"
+
+    if device_id < 0 or device_id >= torch.cuda.device_count():
+        raise ValueError(
+            f"Invalid CUDA device_id {device_id}; "
+            f"{torch.cuda.device_count()} device(s) available."
+        )
+
+    arch_list = torch.cuda.get_arch_list()
+    if arch_list:
+        major, minor = torch.cuda.get_device_capability(device_id)
+        device_arch = f"sm_{major}{minor}"
+        if device_arch not in arch_list:
+            warnings.warn(
+                f"GPU {device_id} ({torch.cuda.get_device_name(device_id)}, "
+                f"{device_arch}) is not in this PyTorch build's supported "
+                f"arch list ({sorted(arch_list)}). Falling back to CPU. "
+                "Install a PyTorch wheel that targets this GPU, or set "
+                "CUDA_VISIBLE_DEVICES= to silence this warning.",
+                stacklevel=2,
+            )
+            return "cpu"
+
+    return f"cuda:{device_id}"
+
+
 def _path_extension(path: str) -> str:
     """Return the lowercase extension of `path` (handling remote URLs/queries)."""
     is_remote = "://" in path
@@ -478,15 +521,7 @@ class QuantumDataLoader:
 
         from qumat_qdp.torch_ref import encode
 
-        if torch.cuda.is_available():
-            if self._device_id < 0 or self._device_id >= torch.cuda.device_count():
-                raise ValueError(
-                    f"Invalid CUDA device_id {self._device_id}; "
-                    f"{torch.cuda.device_count()} device(s) available."
-                )
-            device = f"cuda:{self._device_id}"
-        else:
-            device = "cpu"
+        device = _select_torch_device(torch, self._device_id)
 
         if use_synthetic:
             return self._pytorch_synthetic_iter(torch, encode, device)
