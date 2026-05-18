@@ -16,8 +16,16 @@
 
 .PHONY: test_rust test_python tests pre-commit setup-test-python install-llvm-cov setup-benchmark
 
-# Detect NVIDIA GPU
+# Detect NVIDIA driver. Sufficient for `test_python` because `qdp-core` can
+# build against its CUDA-stub fallback when the toolkit is absent (the
+# Rust extension just won't be GPU-functional at runtime).
 HAS_NVIDIA := $(shell command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/dev/null 2>&1 && echo yes || echo no)
+
+# Detect CUDA Toolkit. Required for `test_rust` because the qdp-core
+# integration tests link against libcudart from the toolkit. PyTorch's
+# bundled cudart inside its wheel does *not* satisfy this; the toolkit
+# (apt: nvidia-cuda-toolkit, or NVIDIA's installer) must be on PATH.
+HAS_NVCC := $(shell command -v nvcc >/dev/null 2>&1 && echo yes || echo no)
 
 setup-test-python:
 	uv sync --group dev
@@ -26,11 +34,19 @@ install-llvm-cov:
 	@cargo llvm-cov --version >/dev/null 2>&1 || (echo "[INFO] Installing cargo-llvm-cov..." && cargo install cargo-llvm-cov)
 
 test_rust: install-llvm-cov
-ifeq ($(HAS_NVIDIA),yes)
+ifeq ($(HAS_NVCC),yes)
 	cd qdp && cargo llvm-cov test --workspace --exclude qdp-python --html --output-dir target/llvm-cov/html
 	cd qdp && cargo llvm-cov report --summary-only
 else
+ifeq ($(HAS_NVIDIA),yes)
+	@echo "[SKIP] NVIDIA driver detected but CUDA Toolkit (nvcc) is not on PATH."
+	@echo "       qdp-core integration tests link against libcudart and require"
+	@echo "       the toolkit. PyTorch's bundled cudart is not sufficient."
+	@echo "       Install via: apt install nvidia-cuda-toolkit"
+	@echo "       or from:     https://developer.nvidia.com/cuda-downloads"
+else
 	@echo "[SKIP] No NVIDIA GPU detected, skipping test_rust"
+endif
 endif
 
 test_python: setup-test-python
