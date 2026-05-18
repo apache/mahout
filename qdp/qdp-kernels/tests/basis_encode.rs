@@ -57,9 +57,9 @@ fn test_basis_encode_first_index() {
     let state_h = device.dtoh_sync_copy(&state_d).unwrap();
     assert!((state_h[0].x - 1.0).abs() < EPSILON, "state[0].re should be 1.0");
     assert!(state_h[0].y.abs() < EPSILON, "state[0].im should be 0");
-    for i in 1..state_len {
-        assert!(state_h[i].x.abs() < EPSILON, "state[{i}].re should be 0");
-        assert!(state_h[i].y.abs() < EPSILON, "state[{i}].im should be 0");
+    for (i, item) in state_h.iter().enumerate().skip(1) {
+        assert!(item.x.abs() < EPSILON, "state[{i}].re should be 0");
+        assert!(item.y.abs() < EPSILON, "state[{i}].im should be 0");
     }
 }
 
@@ -89,10 +89,10 @@ fn test_basis_encode_last_index() {
     assert_eq!(result, 0);
 
     let state_h = device.dtoh_sync_copy(&state_d).unwrap();
-    for i in 0..state_len {
+    for (i, item) in state_h.iter().enumerate() {
         let expected = if i == basis_index { 1.0 } else { 0.0 };
-        assert!((state_h[i].x - expected).abs() < EPSILON, "state[{i}].re mismatch");
-        assert!(state_h[i].y.abs() < EPSILON, "state[{i}].im should be 0");
+        assert!((item.x - expected).abs() < EPSILON, "state[{i}].re mismatch");
+        assert!(item.y.abs() < EPSILON, "state[{i}].im should be 0");
     }
 }
 
@@ -123,8 +123,8 @@ fn test_basis_encode_middle_index() {
 
     let state_h = device.dtoh_sync_copy(&state_d).unwrap();
     assert!((state_h[3].x - 1.0).abs() < EPSILON, "state[3].re should be 1.0");
-    for i in (0..state_len).filter(|&j| j != 3) {
-        assert!(state_h[i].x.abs() < EPSILON, "state[{i}].re should be 0");
+    for (i, item) in state_h.iter().enumerate().filter(|&(j, _)| j != 3) {
+        assert!(item.x.abs() < EPSILON, "state[{i}].re should be 0");
     }
 }
 
@@ -204,8 +204,8 @@ fn test_basis_encode_f32_basic() {
     let state_h = device.dtoh_sync_copy(&state_d).unwrap();
     assert!((state_h[2].x - 1.0f32).abs() < EPSILON_F32, "state[2].re should be 1.0");
     assert!(state_h[2].y.abs() < EPSILON_F32, "state[2].im should be 0");
-    for i in (0..state_len).filter(|&j| j != 2) {
-        assert!(state_h[i].x.abs() < EPSILON_F32, "state[{i}].re should be 0");
+    for (i, item) in state_h.iter().enumerate().filter(|&(j, _)| j != 2) {
+        assert!(item.x.abs() < EPSILON_F32, "state[{i}].re should be 0");
     }
 }
 
@@ -296,7 +296,7 @@ fn test_basis_encode_batch_rejects_zero_samples() {
         }
     };
 
-    let indices_d = device.alloc_zeros::<usize>(1).unwrap();
+    let indices_d = device.htod_copy(vec![0usize]).unwrap();
     let mut state_d = device.alloc_zeros::<CuDoubleComplex>(4).unwrap();
 
     let result = unsafe {
@@ -323,7 +323,7 @@ fn test_basis_encode_batch_rejects_zero_state_len() {
         }
     };
 
-    let indices_d = device.alloc_zeros::<usize>(1).unwrap();
+    let indices_d = device.htod_copy(vec![0usize]).unwrap();
     let mut state_d = device.alloc_zeros::<CuDoubleComplex>(1).unwrap();
 
     let result = unsafe {
@@ -397,7 +397,7 @@ fn test_basis_encode_batch_f32_rejects_zero_samples() {
         }
     };
 
-    let indices_d = device.alloc_zeros::<usize>(1).unwrap();
+    let indices_d = device.htod_copy(vec![0usize]).unwrap();
     let mut state_d = device.alloc_zeros::<CuComplex>(4).unwrap();
 
     let result = unsafe {
