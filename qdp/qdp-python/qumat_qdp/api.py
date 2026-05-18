@@ -189,17 +189,10 @@ class QdpBenchmark:
     def _run_throughput_pytorch(self) -> ThroughputResult:
         import torch
 
+        from qumat_qdp.loader import _select_torch_device
         from qumat_qdp.torch_ref import encode
 
-        if torch.cuda.is_available():
-            if self._device_id < 0 or self._device_id >= torch.cuda.device_count():
-                raise ValueError(
-                    f"Invalid CUDA device_id {self._device_id}; "
-                    f"{torch.cuda.device_count()} device(s) available."
-                )
-            device = f"cuda:{self._device_id}"
-        else:
-            device = "cpu"
+        device = _select_torch_device(torch, self._device_id)
         # _validate() guarantees these are not None.
         assert self._num_qubits is not None
         assert self._total_batches is not None

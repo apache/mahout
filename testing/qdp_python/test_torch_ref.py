@@ -36,6 +36,28 @@ from qumat_qdp.torch_ref import (
     iqp_encode,
 )
 
+
+def _torch_cuda_usable(device_id: int = 0) -> bool:
+    """True iff the current PyTorch build can launch kernels on ``device_id``.
+
+    ``torch.cuda.is_available()`` alone is not enough: on GPUs whose compute
+    capability isn't in the wheel's compiled arch list (e.g. Pascal sm_61
+    against a recent wheel that ships sm_70+), it returns True but every
+    kernel launch fails with ``cudaErrorNoKernelImageForDevice``. Mirror
+    ``qumat_qdp.loader._select_torch_device``'s capability check so the
+    GPU-only tests skip cleanly instead of erroring.
+    """
+    if not torch.cuda.is_available():
+        return False
+    if device_id < 0 or device_id >= torch.cuda.device_count():
+        return False
+    arch_list = torch.cuda.get_arch_list()
+    if not arch_list:
+        return True
+    major, minor = torch.cuda.get_device_capability(device_id)
+    return f"sm_{major}{minor}" in arch_list
+
+
 # ---------------------------------------------------------------------------
 # Amplitude encoding
 # ---------------------------------------------------------------------------
@@ -349,7 +371,10 @@ class TestDevicePlacement:
         result = amplitude_encode(data, num_qubits=2, device="cpu")
         assert result.device.type == "cpu"
 
-    @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
+    @pytest.mark.skipif(
+        not _torch_cuda_usable(),
+        reason="CUDA not available or GPU compute capability not supported by this PyTorch build",
+    )
     def test_gpu_output(self):
         data = torch.randn(2, 4, dtype=torch.float64)
         result = amplitude_encode(data, num_qubits=2, device="cuda:0")
@@ -369,7 +394,10 @@ class TestCrossValidation:
         pytest.importorskip("_qdp")
 
     @pytest.mark.gpu
-    @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
+    @pytest.mark.skipif(
+        not _torch_cuda_usable(),
+        reason="CUDA not available or GPU compute capability not supported by this PyTorch build",
+    )
     @pytest.mark.parametrize("encoding", ["amplitude", "angle", "basis", "iqp"])
     def test_encoding_matches_rust(self, encoding):
         import _qdp
