@@ -350,10 +350,10 @@ fn test_basis_encode_batch_f32_basic() {
         }
     };
 
-    let num_samples = 4usize;
-    let state_len = 4usize;
-    let num_qubits = 2u32;
-    let basis_indices: Vec<usize> = vec![0, 1, 2, 3];
+    let num_samples = 5usize;
+    let state_len = 8usize;
+    let num_qubits = 3u32;
+    let basis_indices: Vec<usize> = vec![0, 7, 3, 7, 0];
 
     let indices_d = device.htod_copy(basis_indices.clone()).unwrap();
     let mut state_d = device
