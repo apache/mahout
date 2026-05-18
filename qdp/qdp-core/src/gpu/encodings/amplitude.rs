@@ -482,12 +482,18 @@ impl QuantumEncoder for AmplitudeEncoder {
                 sample_size, state_len, num_qubits
             )));
         }
-        if batch_data.len() != num_samples * sample_size {
+        let expected_len = num_samples.checked_mul(sample_size).ok_or_else(|| {
+            MahoutError::InvalidInput(format!(
+                "Batch size overflow: num_samples {} * sample_size {}",
+                num_samples, sample_size
+            ))
+        })?;
+        if batch_data.len() != expected_len {
             return Err(MahoutError::InvalidInput(format!(
                 "batch_data length mismatch (expected {} * {} = {}, got {})",
                 num_samples,
                 sample_size,
-                num_samples * sample_size,
+                expected_len,
                 batch_data.len()
             )));
         }

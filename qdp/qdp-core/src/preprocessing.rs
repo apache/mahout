@@ -98,7 +98,13 @@ impl Preprocessor {
             ));
         }
 
-        if batch_data.len() != num_samples * sample_size {
+        let expected_len = num_samples.checked_mul(sample_size).ok_or_else(|| {
+            MahoutError::InvalidInput(format!(
+                "Batch size overflow: num_samples {} * sample_size {}",
+                num_samples, sample_size
+            ))
+        })?;
+        if batch_data.len() != expected_len {
             return Err(MahoutError::InvalidInput(format!(
                 "Batch data length {} doesn't match num_samples {} * sample_size {}",
                 batch_data.len(),
@@ -158,5 +164,27 @@ impl Preprocessor {
                 Ok(norm)
             })
             .collect()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn validate_batch_rejects_size_overflow() {
+        let data = [0.0_f64; 4];
+        let err = Preprocessor::validate_batch(&data, usize::MAX, 2, 1)
+            .expect_err("expected overflow error");
+        match err {
+            MahoutError::InvalidInput(msg) => {
+                assert!(
+                    msg.contains("overflow"),
+                    "unexpected error message: {}",
+                    msg
+                );
+            }
+            other => panic!("expected InvalidInput, got {:?}", other),
+        }
     }
 }
