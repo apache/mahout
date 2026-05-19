@@ -135,6 +135,34 @@ pub trait QuantumEncoder: Send + Sync + 'static {
         )))
     }
 
+    /// Encode a single sample from an existing GPU pointer (zero-copy) using an f32 input.
+    /// Default: not supported.
+    ///
+    /// This is the f32 counterpart of [`encode_from_gpu_ptr`](Self::encode_from_gpu_ptr). The
+    /// sibling batch variant is [`encode_batch_from_gpu_ptr_f32`](Self::encode_batch_from_gpu_ptr_f32).
+    /// Adding a new encoder with f32 zero-copy support should override **both** this method and
+    /// the batch variant; the previous arrangement (single-sample as a standalone `pub unsafe
+    /// fn` on each encoder type, batch on the trait) made the pattern accidentally divergent.
+    ///
+    /// # Safety
+    /// Caller must ensure `input_d` points to valid GPU memory with at least `input_len`
+    /// `f32` elements on the same device as `device`, and `stream` is either null or a valid
+    /// CUDA stream associated with `device`.
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_from_gpu_ptr_f32(
+        &self,
+        _device: &Arc<CudaDevice>,
+        _input_d: *const c_void,
+        _input_len: usize,
+        _num_qubits: usize,
+        _stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        Err(MahoutError::NotImplemented(format!(
+            "encode_from_gpu_ptr_f32 not supported for {}",
+            self.name()
+        )))
+    }
+
     /// Encode multiple samples in a single GPU allocation and kernel launch using f32 inputs.
     fn encode_batch_f32(
         &self,
