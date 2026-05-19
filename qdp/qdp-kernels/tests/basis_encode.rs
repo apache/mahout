@@ -22,9 +22,8 @@
 use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]
 use qdp_kernels::{
-    CuComplex, CuDoubleComplex,
-    launch_basis_encode, launch_basis_encode_batch,
-    launch_basis_encode_f32, launch_basis_encode_batch_f32,
+    CuComplex, CuDoubleComplex, launch_basis_encode, launch_basis_encode_batch,
+    launch_basis_encode_batch_f32, launch_basis_encode_f32,
 };
 
 const EPSILON: f64 = 1e-10;
@@ -55,7 +54,10 @@ fn test_basis_encode_first_index() {
     assert_eq!(result, 0, "Kernel launch should succeed");
 
     let state_h = device.dtoh_sync_copy(&state_d).unwrap();
-    assert!((state_h[0].x - 1.0).abs() < EPSILON, "state[0].re should be 1.0");
+    assert!(
+        (state_h[0].x - 1.0).abs() < EPSILON,
+        "state[0].re should be 1.0"
+    );
     assert!(state_h[0].y.abs() < EPSILON, "state[0].im should be 0");
     for (i, item) in state_h.iter().enumerate().skip(1) {
         assert!(item.x.abs() < EPSILON, "state[{i}].re should be 0");
@@ -91,7 +93,10 @@ fn test_basis_encode_last_index() {
     let state_h = device.dtoh_sync_copy(&state_d).unwrap();
     for (i, item) in state_h.iter().enumerate() {
         let expected = if i == basis_index { 1.0 } else { 0.0 };
-        assert!((item.x - expected).abs() < EPSILON, "state[{i}].re mismatch");
+        assert!(
+            (item.x - expected).abs() < EPSILON,
+            "state[{i}].re mismatch"
+        );
         assert!(item.y.abs() < EPSILON, "state[{i}].im should be 0");
     }
 }
@@ -122,7 +127,10 @@ fn test_basis_encode_middle_index() {
     assert_eq!(result, 0);
 
     let state_h = device.dtoh_sync_copy(&state_d).unwrap();
-    assert!((state_h[3].x - 1.0).abs() < EPSILON, "state[3].re should be 1.0");
+    assert!(
+        (state_h[3].x - 1.0).abs() < EPSILON,
+        "state[3].re should be 1.0"
+    );
     for (i, item) in state_h.iter().enumerate().filter(|&(j, _)| j != 3) {
         assert!(item.x.abs() < EPSILON, "state[{i}].re should be 0");
     }
@@ -202,7 +210,10 @@ fn test_basis_encode_f32_basic() {
     assert_eq!(result, 0);
 
     let state_h = device.dtoh_sync_copy(&state_d).unwrap();
-    assert!((state_h[2].x - 1.0f32).abs() < EPSILON_F32, "state[2].re should be 1.0");
+    assert!(
+        (state_h[2].x - 1.0f32).abs() < EPSILON_F32,
+        "state[2].re should be 1.0"
+    );
     assert!(state_h[2].y.abs() < EPSILON_F32, "state[2].im should be 0");
     for (i, item) in state_h.iter().enumerate().filter(|&(j, _)| j != 2) {
         assert!(item.x.abs() < EPSILON_F32, "state[{i}].re should be 0");
@@ -375,7 +386,11 @@ fn test_basis_encode_batch_f32_basic() {
     let state_h = device.dtoh_sync_copy(&state_d).unwrap();
     for (sample_idx, &basis_idx) in basis_indices.iter().enumerate() {
         for elem_idx in 0..state_len {
-            let expected = if elem_idx == basis_idx { 1.0f32 } else { 0.0f32 };
+            let expected = if elem_idx == basis_idx {
+                1.0f32
+            } else {
+                0.0f32
+            };
             let actual = state_h[sample_idx * state_len + elem_idx];
             assert!(
                 (actual.x - expected).abs() < EPSILON_F32,
@@ -417,12 +432,7 @@ fn test_basis_encode_batch_f32_rejects_zero_samples() {
 #[test]
 fn test_basis_encode_dummy_non_linux() {
     let result = unsafe {
-        qdp_kernels::launch_basis_encode(
-            0,
-            std::ptr::null_mut(),
-            0,
-            std::ptr::null_mut(),
-        )
+        qdp_kernels::launch_basis_encode(0, std::ptr::null_mut(), 0, std::ptr::null_mut())
     };
     assert_eq!(result, 999, "Non-Linux stub should return 999");
 }
