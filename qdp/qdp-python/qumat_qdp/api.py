@@ -38,7 +38,12 @@ from typing import Any
 
 @dataclass
 class ThroughputResult:
-    """Result of run_throughput(): duration and vectors per second."""
+    """Throughput benchmark measurement.
+
+    Returned by :meth:`QdpBenchmark.run_throughput`.  ``duration_sec`` is the
+    measured timed section after any configured warmup batches.  ``vectors_per_sec``
+    is computed over ``total_batches * batch_size`` encoded input vectors.
+    """
 
     duration_sec: float
     vectors_per_sec: float
@@ -46,7 +51,12 @@ class ThroughputResult:
 
 @dataclass
 class LatencyResult:
-    """Result of run_latency(): duration and ms per vector."""
+    """Latency benchmark measurement.
+
+    Returned by :meth:`QdpBenchmark.run_latency`.  ``duration_sec`` is the same
+    timed interval used for throughput, and ``latency_ms_per_vector`` is the
+    average milliseconds per encoded input vector across the measured batches.
+    """
 
     duration_sec: float
     latency_ms_per_vector: float
@@ -115,7 +125,15 @@ class QdpBenchmark:
         return self
 
     def prefetch(self, n: int) -> QdpBenchmark:
-        """No-op for API compatibility; Rust pipeline does not use prefetch from Python."""
+        """Accept a prefetch setting for fluent API compatibility.
+
+        The current Rust benchmark pipeline manages work internally and the
+        PyTorch reference path does not use a Python-side prefetch queue, so
+        ``n`` is intentionally ignored.
+
+        :param n: Requested prefetch depth; currently unused.
+        :returns: ``self`` for fluent builder chaining.
+        """
         return self
 
     def warmup(self, n: int) -> QdpBenchmark:
@@ -123,7 +141,17 @@ class QdpBenchmark:
         return self
 
     def backend(self, name: str) -> QdpBenchmark:
-        """Set benchmark backend: ``'rust'`` or ``'pytorch'``."""
+        """Select the benchmark execution backend.
+
+        ``"rust"`` (the default) uses the native optimized pipeline exposed by
+        the ``_qdp`` extension and raises at run time if that extension or entry
+        point is unavailable.  ``"pytorch"`` uses the pure-PyTorch reference
+        implementation on the selected CUDA device when usable, otherwise CPU.
+
+        :param name: Backend name, either ``"rust"`` or ``"pytorch"``.
+        :returns: ``self`` for fluent builder chaining.
+        :raises ValueError: If ``name`` is not a supported backend.
+        """
         if name not in ("rust", "pytorch"):
             raise ValueError(f"backend must be 'rust' or 'pytorch', got {name!r}")
         self._backend_name = name
@@ -136,14 +164,35 @@ class QdpBenchmark:
             )
 
     def run_throughput(self) -> ThroughputResult:
-        """Run throughput benchmark using the selected backend."""
+        """Run the configured throughput benchmark.
+
+        ``qubits()`` and ``batches()`` must be configured before calling this
+        method.  The default ``"rust"`` backend calls the native ``_qdp``
+        pipeline with any configured warmup batches; ``"pytorch"`` runs the
+        reference encoder loop and synchronizes CUDA timing when applicable.
+
+        :returns: A :class:`ThroughputResult` containing elapsed seconds and
+            encoded vectors per second.
+        :raises ValueError: If required benchmark parameters are missing.
+        :raises RuntimeError: If the Rust backend is selected but unavailable.
+        """
         self._validate()
         if self._backend_name == "pytorch":
             return self._run_throughput_pytorch()
         return self._run_throughput_rust()
 
     def run_latency(self) -> LatencyResult:
-        """Run latency benchmark using the selected backend."""
+        """Run the configured latency benchmark.
+
+        ``qubits()`` and ``batches()`` must be configured before calling this
+        method.  The Rust backend reports latency from the native pipeline; the
+        PyTorch backend derives average latency from its throughput run.
+
+        :returns: A :class:`LatencyResult` containing elapsed seconds and mean
+            milliseconds per encoded vector.
+        :raises ValueError: If required benchmark parameters are missing.
+        :raises RuntimeError: If the Rust backend is selected but unavailable.
+        """
         self._validate()
         if self._backend_name == "pytorch":
             return self._run_latency_pytorch()

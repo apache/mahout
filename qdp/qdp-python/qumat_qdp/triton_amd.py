@@ -123,7 +123,25 @@ _IQP_PAIR_MATRIX_MAX_N = 20
 
 @dataclass
 class TritonAmdEngine:
-    """AMD backend implementing amplitude/angle/basis/iqp/iqp-z/phase encoders."""
+    """ROCm/Triton implementation of the QDP encoder interface.
+
+    This engine targets AMD GPUs through a PyTorch ROCm runtime plus the Triton
+    Python package.  ``encode()`` accepts ``"amplitude"``, ``"angle"``,
+    ``"basis"``, ``"iqp"``, ``"iqp-z"``, and ``"phase"``.  The phase encoder
+    uses a fused Triton HIP kernel for ``float32`` and ``1 <= num_qubits <= 32``;
+    other supported cases fall back to vectorized PyTorch operations on the same
+    ROCm device.
+
+    ``precision`` accepts ``"float32"``/``"f32"``/``"float"`` and
+    ``"float64"``/``"f64"``/``"double"``.  Runtime availability is checked when
+    ``encode()`` is called and raises a descriptive ``RuntimeError`` if PyTorch
+    ROCm or Triton is unavailable.
+
+    :param device_id: ROCm device ordinal, addressed through PyTorch as
+        ``cuda:{device_id}``.
+    :param precision: Floating-point precision for real inputs and complex
+        outputs.
+    """
 
     device_id: int = 0
     precision: str = "float32"
