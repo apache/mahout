@@ -92,4 +92,14 @@ class QdpEngine:
         num_qubits: int,
         encoding_method: str = "amplitude",
     ) -> Any:
+        """Encode input samples with the configured backend.
+
+        :param data: Input samples accepted by the selected backend.
+        :param num_qubits: Number of qubits in the output state vector.
+        :param encoding_method: Encoding strategy, such as ``"amplitude"``,
+            ``"angle"``, ``"basis"``, ``"iqp"``, ``"iqp-z"``, or
+            ``"phase"`` when supported by the backend.
+        :returns: Backend-native encoded tensor or tensor-like result.
+        :raises ValueError: If the backend does not support ``encoding_method``.
+        """
         return self._engine_adapter.encode(data, num_qubits, encoding_method)

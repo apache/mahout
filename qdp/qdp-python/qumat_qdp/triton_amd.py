@@ -47,6 +47,11 @@ def _is_rocm_runtime() -> bool:
 
 
 def is_triton_amd_available() -> bool:
+    """Return whether the Triton AMD backend appears usable.
+
+    :returns: ``True`` when PyTorch reports a ROCm device, Triton imports, and
+        the active Triton target is HIP or cannot be queried reliably.
+    """
     if not _is_rocm_runtime() or triton_mod is None:
         return False
     try:
@@ -148,6 +153,10 @@ class TritonAmdEngine:
         )
 
     def check_runtime(self) -> None:
+        """Validate that the process can use the Triton AMD backend.
+
+        :raises RuntimeError: If PyTorch ROCm support or Triton is unavailable.
+        """
         if not _is_rocm_runtime():
             raise RuntimeError(
                 "Triton AMD backend unavailable: no PyTorch ROCm device detected."
@@ -230,6 +239,14 @@ class TritonAmdEngine:
         return pairs
 
     def encode_amplitude(self, data: Any, num_qubits: int) -> Any:
+        """Encode real-valued samples as normalized amplitudes.
+
+        :param data: One- or two-dimensional samples with width at most
+            ``2**num_qubits``.
+        :param num_qubits: Number of qubits in the encoded state.
+        :returns: Complex tensor of shape ``(batch, 2**num_qubits)``.
+        :raises ValueError: If the sample width exceeds the state length.
+        """
         torch_mod = self._require_torch()
         x = self._to_2d(data, dtype=self._real_dtype())
         batch, sample_size = x.shape
@@ -250,6 +267,14 @@ class TritonAmdEngine:
         return amp.to(self._complex_dtype())
 
     def encode_angle(self, data: Any, num_qubits: int) -> Any:
+        """Encode samples with product-state angle encoding.
+
+        :param data: One- or two-dimensional angle samples with exactly
+            ``num_qubits`` values per sample.
+        :param num_qubits: Number of qubits in the encoded state.
+        :returns: Complex tensor of shape ``(batch, 2**num_qubits)``.
+        :raises ValueError: If the sample width is not ``num_qubits``.
+        """
         torch_mod = self._require_torch()
         real_dtype = self._real_dtype()
         angles = self._to_2d(data, dtype=real_dtype)
@@ -273,6 +298,14 @@ class TritonAmdEngine:
         return amp.to(self._complex_dtype())
 
     def encode_basis(self, data: Any, num_qubits: int) -> Any:
+        """Encode integer basis-state indices as one-hot quantum states.
+
+        :param data: One-dimensional indices or a two-dimensional column of
+            indices in ``[0, 2**num_qubits - 1]``.
+        :param num_qubits: Number of qubits in the encoded state.
+        :returns: Complex one-hot tensor of shape ``(batch, 2**num_qubits)``.
+        :raises ValueError: If indices are empty, malformed, or out of range.
+        """
         torch_mod = self._require_torch()
         idx = torch_mod.as_tensor(data, device=self._device(), dtype=torch_mod.int64)
         if idx.ndim == 2:
@@ -352,6 +385,17 @@ class TritonAmdEngine:
         *,
         enable_zz: bool = True,
     ) -> Any:
+        """Encode samples with the IQP feature map.
+
+        :param data: IQP parameters. With ``enable_zz=True``, each sample must
+            contain ``num_qubits + num_qubits * (num_qubits - 1) // 2`` values;
+            otherwise each sample must contain ``num_qubits`` values.
+        :param num_qubits: Number of qubits in the encoded state.
+        :param enable_zz: Include pairwise ZZ interactions when ``True``.
+        :returns: Complex tensor of shape ``(batch, 2**num_qubits)``.
+        :raises ValueError: If the parameter width does not match the IQP
+            variant.
+        """
         torch_mod = self._require_torch()
         real_dtype = self._real_dtype()
         params = self._to_2d(data, dtype=real_dtype)
@@ -443,6 +487,14 @@ class TritonAmdEngine:
         return out
 
     def encode_phase(self, data: Any, num_qubits: int) -> Any:
+        """Encode samples as equal-magnitude states with data-dependent phase.
+
+        :param data: One- or two-dimensional phase samples with exactly
+            ``num_qubits`` values per sample.
+        :param num_qubits: Number of qubits in the encoded state.
+        :returns: Complex tensor of shape ``(batch, 2**num_qubits)``.
+        :raises ValueError: If the sample width is not ``num_qubits``.
+        """
         torch_mod = self._require_torch()
         real_dtype = self._real_dtype()
         phases = self._to_2d(data, dtype=real_dtype)
@@ -473,6 +525,17 @@ class TritonAmdEngine:
         num_qubits: int,
         encoding_method: str = "amplitude",
     ) -> Any:
+        """Encode input samples using a named Triton AMD encoding.
+
+        :param data: Input samples for the selected encoding method.
+        :param num_qubits: Number of qubits in the encoded state.
+        :param encoding_method: One of ``"amplitude"``, ``"angle"``,
+            ``"basis"``, ``"iqp"``, ``"iqp-z"``, or ``"phase"``.
+        :returns: Complex tensor of shape ``(batch, 2**num_qubits)``.
+        :raises RuntimeError: If the Triton AMD runtime is unavailable.
+        :raises ValueError: If ``encoding_method`` is unsupported or inputs are
+            invalid for the selected encoder.
+        """
         self.check_runtime()
 
         method = encoding_method.lower()
