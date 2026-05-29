@@ -193,7 +193,7 @@ impl TensorFlowReader {
 
     /// Convert `tensor_content` bytes to `Vec<f64>`.
     ///
-    /// Note: Even though `tensor_content` can be zero-copy, `DataReader` requires `Vec<f64>`,
+    /// Note: Even though `tensor_content` can be zero-copy, [`DataReader`] requires `Vec<f64>` today,
     /// so one copy is still needed. Uses memcpy (instead of element-wise `from_le_bytes`) for best performance.
     ///
     /// # Safety

@@ -49,6 +49,15 @@ use arrow::array::{Array, Float64Array};
 
 use crate::error::Result;
 
+/// Scalar element type for [`DataReader`] output (`f32` or `f64` only).
+///
+/// Keeps f32 file data as `Vec<f32>` end-to-end once readers implement
+/// `DataReader<f32>`; today most readers use the default `T = f64`.
+pub trait FloatElem: Copy + Send + Sync + 'static {}
+
+impl FloatElem for f32 {}
+impl FloatElem for f64 {}
+
 /// Policy for handling null values in Float64 arrays.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum NullHandling {
@@ -96,19 +105,16 @@ pub fn handle_float64_nulls(
 ///
 /// This interface enables zero-copy streaming where possible and maintains
 /// memory efficiency for large datasets.
-//
-// Structural debt: this trait hard-codes `Vec<f64>` in `read_batch`, so
-// `float32_pipeline=true` still forces every file-backed source to materialise
-// as f64 before casting. A future refactor should parameterise over the element
-// type (`T: FloatElem`) so f32 pipelines stay f32 end-to-end.
-pub trait DataReader {
+///
+/// Parameterised by [`FloatElem`] (`T` defaults to `f64` for existing readers).
+pub trait DataReader<T: FloatElem = f64> {
     /// Read all data from the source.
     ///
     /// Returns a tuple of:
-    /// - `Vec<f64>`: Flattened batch data (all samples concatenated)
+    /// - `Vec<T>`: Flattened batch data (all samples concatenated)
     /// - `usize`: Number of samples
     /// - `usize`: Sample size (elements per sample)
-    fn read_batch(&mut self) -> Result<(Vec<f64>, usize, usize)>;
+    fn read_batch(&mut self) -> Result<(Vec<T>, usize, usize)>;
 
     /// Get the sample size if known before reading.
     ///
@@ -130,7 +136,7 @@ pub trait DataReader {
 ///
 /// This trait enables chunk-by-chunk reading for datasets that don't fit
 /// in memory, maintaining constant memory usage regardless of file size.
-pub trait StreamingDataReader: DataReader {
+pub trait StreamingDataReader<T: FloatElem = f64>: DataReader<T> {
     /// Read a chunk of data into the provided buffer.
     ///
     /// Returns the number of elements written to the buffer.
@@ -138,7 +144,7 @@ pub trait StreamingDataReader: DataReader {
     ///
     /// The implementation should respect sample boundaries - only complete
     /// samples should be written to avoid splitting samples across chunks.
-    fn read_chunk(&mut self, buffer: &mut [f64]) -> Result<usize>;
+    fn read_chunk(&mut self, buffer: &mut [T]) -> Result<usize>;
 
     /// Get the total number of rows/samples in the data source.
     ///
