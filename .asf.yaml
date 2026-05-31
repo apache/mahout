@@ -59,6 +59,23 @@ github:
     main:
       required_linear_history: true
       required_signatures: false
+  environments:
+    pypi:
+      required_reviewers:
+        - id: andrewmusselman
+          type: User
+        - id: guan404ming
+          type: User
+        - id: 400Ping
+          type: User
+        - id: rawkintrevo
+          type: User
+      wait_timer: 5
+      deployment_branch_policy:
+        protected_branches: false
+        policies:
+          - name: "v*"
+            type: tag
 
 notifications:
   commits: commits@mahout.apache.org

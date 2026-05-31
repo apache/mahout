@@ -266,18 +266,42 @@ Once the vote passes:
 2.  Click **"Promote to Release"** (or **"Publish"**).
     -   This moves the signed source artifacts to the Apache release SVN at `https://dist.apache.org/repos/dist/release/mahout/`.
 
-### 3.2 Publish Final Version to PyPI
-After the PMC vote passes, publish the final version to PyPI. The artifacts must be built from the voted source in Apache SVN to ensure they match what the PMC approved.
+### 3.2 Publish Final Version to PyPI (Trusted Publishing)
 
-**Automated Process:**
-Set up a GitHub Actions workflow that:
--   Is triggered manually via "Workflow Dispatch" with the release version as input.
--   Downloads the approved source tarball from Apache SVN (`https://dist.apache.org/repos/dist/release/mahout/`).
--   Verifies GPG signatures and checksums.
--   Builds wheels from the verified source.
--   Uploads to PyPI using Trusted Publisher configuration.
+After the PMC vote passes, publish to PyPI by tagging the release:
 
-**Important:** The PyPI release is built from the exact source code stored in Apache SVN that the PMC voted on, ensuring consistency between the Apache release and PyPI.
+```bash
+# Tag the voted release on the stable branch
+git checkout v0.6-stable
+git tag -a v0.6.0 -m "Release 0.6.0"
+git push upstream v0.6.0
+```
+
+This triggers the `release.yml` GitHub Actions workflow which:
+
+1. Builds `qumat` (pure Python wheel + sdist)
+2. Builds `qumat-qdp` (Rust/maturin wheels for Python 3.10/3.11/3.12 + sdist)
+3. Waits for reviewer approval (any one of the configured reviewers)
+4. Publishes all artifacts to PyPI via Trusted Publishing (OIDC — no API tokens)
+
+**To approve the deploy:**
+
+1. Go to **GitHub Actions** → the release workflow run
+2. The publish job shows **"Waiting for review"**
+3. Click **"Review deployments"** → check **`pypi`** → **"Approve and deploy"**
+
+**Verify the release:**
+
+```bash
+pip install qumat==0.6.0
+pip install qumat-qdp==0.2.0
+python -c "import qumat; print(qumat.__version__)"
+```
+
+**Note:** The `release.yml` workflow uses [PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/) — no API tokens or `.pypirc` files needed. Authentication is handled via OIDC between GitHub Actions and PyPI. The trusted publishers are configured at:
+
+- https://pypi.org/manage/project/qumat/settings/publishing/
+- https://pypi.org/manage/project/qumat-qdp/settings/publishing/
 
 ### 3.3 Post-Release Actions
 -   **Tag the release** in Git:
