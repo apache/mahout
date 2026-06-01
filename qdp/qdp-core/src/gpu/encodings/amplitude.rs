@@ -689,6 +689,27 @@ impl QuantumEncoder for AmplitudeEncoder {
         Ok(batch_state_vector)
     }
 
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_from_gpu_ptr_f32(
+        &self,
+        device: &Arc<CudaDevice>,
+        input_d: *const c_void,
+        input_len: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        // Delegate to the workhorse `_with_stream` fn (see angle.rs for rationale).
+        unsafe {
+            Self::encode_from_gpu_ptr_f32_with_stream(
+                device,
+                input_d as *const f32,
+                input_len,
+                num_qubits,
+                stream,
+            )
+        }
+    }
+
     fn name(&self) -> &'static str {
         "amplitude"
     }
@@ -811,6 +832,88 @@ impl AmplitudeEncoder {
 }
 
 impl AmplitudeEncoder {
+    /// Encode a single sample directly from a GPU float32 pointer, returning a
+    /// `GpuStateVector` (the engine wraps it as DLPack at the public boundary).
+    ///
+    /// Symmetric with `AngleEncoder::encode_from_gpu_ptr_f32_with_stream` and
+    /// `BasisEncoder::encode_from_gpu_ptr_f32_with_stream`. The previous arrangement
+    /// (`QdpEngine::encode_from_gpu_ptr_f32_with_stream` did this inline in `lib.rs`)
+    /// made the trait surface asymmetric — only the batch variant had a real
+    /// `QuantumEncoder` override on amplitude.
+    ///
+    /// # Safety
+    /// Caller must ensure `input_d` points to at least `input_len` `f32` values in
+    /// GPU-accessible memory on the same device as `device`, and `stream` is either
+    /// null or a valid CUDA stream associated with `device`.
+    #[cfg(target_os = "linux")]
+    pub unsafe fn encode_from_gpu_ptr_f32_with_stream(
+        device: &Arc<CudaDevice>,
+        input_d: *const f32,
+        input_len: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        if input_len == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Input data cannot be empty".into(),
+            ));
+        }
+
+        let state_len = 1usize << num_qubits;
+        if input_len > state_len {
+            return Err(MahoutError::InvalidInput(format!(
+                "Input size {} exceeds state vector size {} (2^{} qubits)",
+                input_len, state_len, num_qubits
+            )));
+        }
+
+        let state_vector = {
+            crate::profile_scope!("GPU::Alloc");
+            GpuStateVector::new(device, num_qubits, Precision::Float32)?
+        };
+
+        let inv_norm = {
+            crate::profile_scope!("GPU::NormFromPtr");
+            unsafe {
+                Self::calculate_inv_norm_gpu_f32_with_stream(device, input_d, input_len, stream)?
+            }
+        };
+
+        let state_ptr = state_vector.ptr_f32().ok_or_else(|| {
+            MahoutError::InvalidInput(
+                "State vector precision mismatch (expected float32 buffer)".to_string(),
+            )
+        })?;
+
+        {
+            crate::profile_scope!("GPU::KernelLaunch");
+            let ret = unsafe {
+                qdp_kernels::launch_amplitude_encode_f32(
+                    input_d,
+                    state_ptr as *mut c_void,
+                    input_len,
+                    state_len,
+                    inv_norm,
+                    stream,
+                )
+            };
+            if ret != 0 {
+                return Err(MahoutError::KernelLaunch(format!(
+                    "Amplitude encode (f32) kernel failed with CUDA error code: {} ({})",
+                    ret,
+                    cuda_error_to_string(ret)
+                )));
+            }
+        }
+
+        {
+            crate::profile_scope!("GPU::Synchronize");
+            sync_cuda_stream(stream, "CUDA stream synchronize failed")?;
+        }
+
+        Ok(state_vector)
+    }
+
     /// Encode a batch directly from a GPU float32 pointer.
     ///
     /// # Safety

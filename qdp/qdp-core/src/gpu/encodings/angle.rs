@@ -595,6 +595,28 @@ impl QuantumEncoder for AngleEncoder {
         Ok(())
     }
 
+    #[cfg(target_os = "linux")]
+    unsafe fn encode_from_gpu_ptr_f32(
+        &self,
+        device: &Arc<CudaDevice>,
+        input_d: *const c_void,
+        input_len: usize,
+        num_qubits: usize,
+        stream: *mut c_void,
+    ) -> Result<GpuStateVector> {
+        // Delegate to the workhorse `_with_stream` fn (kept as the inherent impl so
+        // it can be called without a vtable on hot paths like `engine.rs`).
+        unsafe {
+            Self::encode_from_gpu_ptr_f32_with_stream(
+                device,
+                input_d as *const f32,
+                input_len,
+                num_qubits,
+                stream,
+            )
+        }
+    }
+
     fn name(&self) -> &'static str {
         "angle"
     }
