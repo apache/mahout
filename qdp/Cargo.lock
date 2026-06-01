@@ -2144,7 +2144,7 @@ dependencies = [
 
 [[package]]
 name = "qdp-core"
-version = "0.2.0"
+version = "0.3.0-dev"
 dependencies = [
  "approx",
  "arrow",
@@ -2171,7 +2171,7 @@ dependencies = [
 
 [[package]]
 name = "qdp-kernels"
-version = "0.2.0"
+version = "0.3.0-dev"
 dependencies = [
  "cc",
  "cudarc",
@@ -2179,7 +2179,7 @@ dependencies = [
 
 [[package]]
 name = "qdp-python"
-version = "0.2.0"
+version = "0.3.0-dev"
 dependencies = [
  "env_logger",
  "numpy",
