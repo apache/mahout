@@ -30,6 +30,14 @@ class QdpTensor:
     backend: str
 
     def __dlpack__(self, stream: int | None = None) -> Any:
+        """Return a DLPack capsule for the wrapped backend tensor.
+
+        :param stream: Optional consumer stream to pass through to the wrapped
+            tensor's ``__dlpack__`` implementation.
+        :returns: A DLPack capsule representing ``value``.
+        :raises RuntimeError: If the wrapped value does not implement
+            ``__dlpack__``.
+        """
         if not hasattr(self.value, "__dlpack__"):
             raise RuntimeError(
                 f"Backend '{self.backend}' returned object without __dlpack__ support: "
@@ -40,6 +48,12 @@ class QdpTensor:
         return self.value.__dlpack__(stream=stream)
 
     def __dlpack_device__(self) -> Any:
+        """Return the DLPack device descriptor for the wrapped tensor.
+
+        :returns: The ``(device_type, device_id)`` tuple reported by ``value``.
+        :raises RuntimeError: If the wrapped value does not implement
+            ``__dlpack_device__``.
+        """
         if not hasattr(self.value, "__dlpack_device__"):
             raise RuntimeError(
                 f"Backend '{self.backend}' returned object without __dlpack_device__ support: "
@@ -48,6 +62,11 @@ class QdpTensor:
         return self.value.__dlpack_device__()
 
     def to_torch(self) -> Any:
+        """Convert the wrapped tensor to a PyTorch tensor via DLPack.
+
+        :returns: A ``torch.Tensor`` sharing storage with the backend tensor
+            when the backend's DLPack producer supports zero-copy exchange.
+        """
         import torch
 
         return torch.from_dlpack(self)

@@ -102,14 +102,31 @@ class QdpBenchmark:
         self._backend_name: str = "rust"
 
     def qubits(self, n: int) -> QdpBenchmark:
+        """Set the number of qubits for benchmarked encodings.
+
+        :param n: Number of qubits in each encoded output state.
+        :returns: This builder for fluent chaining.
+        """
         self._num_qubits = n
         return self
 
     def encoding(self, method: str) -> QdpBenchmark:
+        """Set the encoding method to benchmark.
+
+        :param method: Encoding name, for example ``"amplitude"``,
+            ``"angle"``, ``"basis"``, ``"iqp"``, or ``"iqp-z"``.
+        :returns: This builder for fluent chaining.
+        """
         self._encoding_method = method
         return self
 
     def batches(self, total: int, size: int = 64) -> QdpBenchmark:
+        """Set the number and size of benchmark batches.
+
+        :param total: Number of timed batches to process.
+        :param size: Number of vectors in each batch.
+        :returns: This builder for fluent chaining.
+        """
         self._total_batches = total
         self._batch_size = size
         return self
@@ -119,6 +136,11 @@ class QdpBenchmark:
         return self
 
     def warmup(self, n: int) -> QdpBenchmark:
+        """Set the number of warmup batches run before timing.
+
+        :param n: Number of batches to execute before measurements begin.
+        :returns: This builder for fluent chaining.
+        """
         self._warmup_batches = n
         return self
 
