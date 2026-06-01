@@ -100,6 +100,7 @@ class QdpBenchmark:
         self._batch_size: int = 64
         self._warmup_batches: int = 0
         self._backend_name: str = "rust"
+        self._dtype: str = "f64"
 
     def qubits(self, n: int) -> QdpBenchmark:
         """Set the number of qubits for benchmarked encodings.
@@ -151,6 +152,18 @@ class QdpBenchmark:
         self._backend_name = name
         return self
 
+    def dtype(self, dtype: str) -> QdpBenchmark:
+        """Set pipeline element dtype: ``'f64'`` (default) or ``'f32'``.
+
+        ``'f32'`` activates the zero-copy float32 batch path where the encoding
+        supports it; encodings without an f32 kernel automatically fall back to
+        f64 inside the Rust pipeline.
+        """
+        if dtype not in ("f32", "f64"):
+            raise ValueError(f"dtype must be 'f32' or 'f64', got {dtype!r}")
+        self._dtype = dtype
+        return self
+
     def _validate(self) -> None:
         if self._num_qubits is None or self._total_batches is None:
             raise ValueError(
@@ -183,7 +196,7 @@ class QdpBenchmark:
             encoding_method=self._encoding_method,
             warmup_batches=self._warmup_batches,
             seed=None,
-            dtype="f32",
+            dtype=self._dtype,
         )
         return ThroughputResult(
             duration_sec=duration_sec, vectors_per_sec=vectors_per_sec
@@ -199,7 +212,7 @@ class QdpBenchmark:
             encoding_method=self._encoding_method,
             warmup_batches=self._warmup_batches,
             seed=None,
-            dtype="f32",
+            dtype=self._dtype,
         )
         return LatencyResult(
             duration_sec=duration_sec,
