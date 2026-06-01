@@ -13,9 +13,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+"""Experimental local neutrosophic reference layer for QuMat."""
 
-from . import qdp
-from . import neutrosophic
-from .qumat import QuMat
+from .reference import NeutroBit
 
-__all__: list[str] = ["QuMat", "neutrosophic", "qdp"]
+__all__: list[str] = ["NeutroBit"]
