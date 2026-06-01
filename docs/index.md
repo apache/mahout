@@ -27,6 +27,11 @@ anywhere.'
 - [Parameterized Quantum Circuits: Developer's Guide](./advanced/pqc) - In-depth guide to PQCs
 - [Qumat Gap Analysis for PQC](./advanced/gap-analysis) - Analysis of PQC capabilities
 
+### Research and RFC Notes
+- [Experimental Neutrosophic Operator Layer for QuMat](./rfcs/experimental-neutrosophic-operator-layer) - Phase-1 RFC for a conservative experimental operator-extension discussion
+- [Neutrosophic Operator Layer Bibliography](./academic/neutrosophic-operator-layer-bibliography) - Published sources used to ground the RFC
+- [Implementation to Citation Map](./academic/implementation-to-citation-map) - Citation gate for distinguishing source-backed items from local design extensions
+
 ### Qumat Components
 - [Qumat (Circuits)](./qumat) - Quantum circuit abstraction layer
 - [QDP (Quantum Data Plane)](./qdp) - GPU-accelerated data encoding
