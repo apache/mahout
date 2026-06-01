@@ -1,0 +1,116 @@
+name: Release
+on:
+  push:
+    tags:
+      - v*
+      - mahout-qumat-*
+
+jobs:
+  # ------------------------------------------------------------------
+  # qumat (pure Python — one wheel for all Python versions)
+  # ------------------------------------------------------------------
+  build-qumat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build qumat
+        run: |
+          pip install build
+          python -m build --sdist --wheel
+      - uses: actions/upload-artifact@v5
+        with:
+          name: qumat-dist
+          path: dist/
+
+  # ------------------------------------------------------------------
+  # qumat-qdp (Rust/CUDA via maturin)
+  # Builds with CUDA toolkit for real GPU kernel compilation.
+  # ------------------------------------------------------------------
+  build-qdp-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install CUDA toolkit
+        uses: Jimver/cuda-toolkit@3d45d157f327c09c04b50ee6ccdea2d9d017ec76
+        with:
+          cuda: "12.5.0"
+          method: "network"
+
+      - name: Install compatible GCC (nvcc requires gcc <= 13)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-13 g++-13
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 100
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 100
+          sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-13 100
+          sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-13 100
+          gcc --version
+
+      - uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
+        with:
+          toolchain: stable
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: |
+            3.10
+            3.11
+            3.12
+
+      - name: Install maturin and patchelf
+        run: pip install maturin patchelf
+
+      - name: Build qumat-qdp wheels
+        working-directory: qdp/qdp-python
+        run: |
+          maturin build --release --out dist \
+            -i python3.10 -i python3.11 -i python3.12 \
+            --features pyo3/extension-module \
+            --compatibility manylinux_2_34
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: qdp-dist-linux
+          path: qdp/qdp-python/dist/
+
+  build-qdp-sdist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build qumat-qdp sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          working-directory: qdp/qdp-python
+          command: sdist
+          args: --out dist
+      - uses: actions/upload-artifact@v5
+        with:
+          name: qdp-dist-sdist
+          path: qdp/qdp-python/dist/
+
+  # ------------------------------------------------------------------
+  # Publish all packages to PyPI
+  # ------------------------------------------------------------------
+  publish:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    needs: [build-qumat, build-qdp-linux, build-qdp-sdist]
+    environment:
+      name: pypi
+      url: https://pypi.org/p/qumat
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: "*-dist*"
+          merge-multiple: true
+          path: dist
+      - name: List distributions
+        run: ls -la dist/
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e
