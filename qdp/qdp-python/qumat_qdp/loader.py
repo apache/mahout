@@ -252,10 +252,14 @@ def _sample_dim(num_qubits: int, encoding_method: str) -> int:
 
 class QuantumDataLoader:
     """
-    Builder for a synthetic-data quantum encoding iterator.
+    Builder for batched QDP encoding iterators.
 
-    Yields one QuantumTensor (batch) per iteration. All encoding runs in Rust;
-    __iter__ returns the Rust-backed iterator from create_synthetic_loader.
+    ``QuantumDataLoader`` can generate synthetic input samples or read supported
+    file formats, then encode each batch with the selected backend.  The default
+    ``"rust"`` backend returns Rust-backed ``QuantumTensor`` batches, while the
+    explicit ``"pytorch"`` backend returns ``torch.Tensor`` batches.  The
+    ``"auto"`` backend tries the Rust extension first and falls back to PyTorch
+    when the native extension is unavailable.
     """
 
     def __init__(
@@ -291,14 +295,37 @@ class QuantumDataLoader:
         self._backend_name: str = _BACKEND_RUST
 
     def qubits(self, n: int) -> QuantumDataLoader:
-        """Set number of qubits. Returns self for chaining."""
+        """Set the number of qubits used by subsequent encodings.
+
+        ``n`` must be a positive integer.  The value controls the encoded state
+        size (for example, amplitude and phase-style encodings produce vectors
+        of length ``2**n``) and the expected input width for encodings such as
+        ``"angle"`` and ``"iqp-z"``.
+
+        :param n: Positive qubit count.
+        :returns: ``self`` for fluent builder chaining.
+        :raises ValueError: If ``n`` is not a positive integer.
+        """
         if not isinstance(n, int) or n < 1:
             raise ValueError(f"num_qubits must be a positive integer, got {n!r}")
         self._num_qubits = n
         return self
 
     def encoding(self, method: str) -> QuantumDataLoader:
-        """Set encoding method (e.g. 'amplitude', 'angle', 'basis'). Returns self."""
+        """Set the quantum feature encoding method.
+
+        Valid values are ``"amplitude"``, ``"angle"``, ``"basis"``,
+        ``"iqp"``, ``"iqp-z"``, and ``"phase"``.  Use these canonical
+        lowercase names because the selected backend receives the string exactly
+        as supplied.  The PyTorch reference backend supports the same methods as
+        :mod:`qumat_qdp.torch_ref`; use the native backend for methods that are
+        not available in the reference path.
+
+        :param method: Encoding method name.
+        :returns: ``self`` for fluent builder chaining.
+        :raises ValueError: If ``method`` is empty, not a string, or not a
+            supported encoding.
+        """
         if not method or not isinstance(method, str):
             raise ValueError(
                 f"encoding_method must be a non-empty string, got {method!r}"
@@ -312,7 +339,19 @@ class QuantumDataLoader:
         return self
 
     def batches(self, total: int, size: int = 64) -> QuantumDataLoader:
-        """Set total number of batches and batch size. Returns self."""
+        """Set the number of batches to produce and samples per batch.
+
+        Both ``total`` and ``size`` must be positive integers.  For synthetic
+        sources, ``total`` is the exact number of generated batches.  For file
+        sources handled by the PyTorch fallback, iteration stops at the smaller
+        of ``total`` and the number of complete/partial batches available from
+        the loaded file.
+
+        :param total: Positive maximum number of batches to emit.
+        :param size: Positive number of samples per encoded batch.
+        :returns: ``self`` for fluent builder chaining.
+        :raises ValueError: If either argument is not a positive integer.
+        """
         if not isinstance(total, int) or total < 1:
             raise ValueError(f"total_batches must be a positive integer, got {total!r}")
         if not isinstance(size, int) or size < 1:
@@ -325,7 +364,22 @@ class QuantumDataLoader:
         self,
         total_batches: int | None = None,
     ) -> QuantumDataLoader:
-        """Use synthetic data source (default). Optionally override total_batches. Returns self."""
+        """Select the synthetic data source.
+
+        Synthetic data is the default when no file source is configured, but
+        calling this method records the source choice explicitly.  Use
+        ``seed()`` to make generated samples reproducible where the selected
+        backend supports seeded generation.  If ``total_batches`` is provided,
+        it overrides the current batch count and must be a positive integer.
+        Selecting both ``source_synthetic()`` and ``source_file()`` on the same
+        loader is rejected when iteration starts.
+
+        :param total_batches: Optional positive replacement for the configured
+            number of batches.
+        :returns: ``self`` for fluent builder chaining.
+        :raises ValueError: If ``total_batches`` is provided but is not a
+            positive integer.
+        """
         self._synthetic_requested = True
         if total_batches is not None:
             if not isinstance(total_batches, int) or total_batches < 1:
@@ -336,12 +390,21 @@ class QuantumDataLoader:
         return self
 
     def source_file(self, path: str, streaming: bool = False) -> QuantumDataLoader:
-        """Use file data source. Path must point to a supported format. Returns self.
+        """Use a file data source.
 
-        For streaming=True (Phase 2b), only .parquet is supported; data is read in chunks to reduce memory.
-        For streaming=False, supports .parquet, .arrow, .feather, .ipc, .npy, .pt, .pth, .pb.
-        Remote paths (s3://, gs://) are supported when the remote-io feature is enabled.
-        Remote URL query/fragment (for example ?versionId=... or #...) is not supported.
+        Non-streaming native loading accepts ``.parquet``, ``.arrow``,
+        ``.feather``, ``.ipc``, ``.npy``, ``.pt``, ``.pth``, and ``.pb`` files.
+        The PyTorch fallback path supports only ``.npy``, ``.pt``, and ``.pth``
+        inputs because it loads the full tensor into memory before encoding.
+        Streaming mode is native-only and currently accepts ``.parquet`` files.
+        Remote ``s3://`` and ``gs://`` paths are accepted when the native remote
+        I/O feature is enabled; remote query strings and fragments are rejected.
+
+        :param path: Local or supported remote input path.
+        :param streaming: Whether to request native streaming file loading.
+        :returns: ``self`` for fluent builder chaining.
+        :raises ValueError: If ``path`` is empty, includes an unsupported remote
+            query/fragment, or requests streaming for an unsupported extension.
         """
         if not path or not isinstance(path, str):
             raise ValueError(f"path must be a non-empty string, got {path!r}")
@@ -363,7 +426,17 @@ class QuantumDataLoader:
         return self
 
     def seed(self, s: int | None = None) -> QuantumDataLoader:
-        """Set RNG seed for reproducible synthetic data (must fit Rust u64: 0 <= seed <= 2^64-1). Returns self."""
+        """Set or clear the synthetic data seed.
+
+        ``None`` leaves the loader unseeded for the native Rust path and maps to
+        the PyTorch reference path's default deterministic seed.  Integer seeds
+        must fit Rust ``u64`` so the same configuration can be passed to the
+        native backend.
+
+        :param s: ``None`` or an integer in ``[0, 2**64 - 1]``.
+        :returns: ``self`` for fluent builder chaining.
+        :raises ValueError: If ``s`` is not ``None`` or a valid Rust ``u64``.
+        """
         if s is not None:
             if not isinstance(s, int):
                 raise ValueError(
@@ -377,7 +450,19 @@ class QuantumDataLoader:
         return self
 
     def null_handling(self, policy: str) -> QuantumDataLoader:
-        """Set null handling policy ('fill_zero' or 'reject'). Returns self for chaining."""
+        """Set how nullable file inputs are handled by the native loader.
+
+        Valid policies are ``"fill_zero"`` (replace nulls with zero before
+        encoding) and ``"reject"`` (fail on null input).  The policy is passed
+        through to Rust file and synthetic loader creation when available.  The
+        PyTorch fallback loaders do not consume this setting because supported
+        ``.npy``/``.pt``/``.pth`` inputs are loaded as dense tensors.
+
+        :param policy: Null handling policy, either ``"fill_zero"`` or
+            ``"reject"``.
+        :returns: ``self`` for fluent builder chaining.
+        :raises ValueError: If ``policy`` is not supported.
+        """
         if policy not in ("fill_zero", "reject"):
             raise ValueError(
                 f"null_handling must be 'fill_zero' or 'reject', got {policy!r}"
@@ -618,7 +703,7 @@ class QuantumDataLoader:
                        .as_torch_dataset())
             loader = torch.utils.data.DataLoader(dataset, batch_size=None, num_workers=0)
             for batch in loader:
-                ...  # batch is torch.Tensor, shape (64, 2*2^16)
+                ...  # batch is torch.Tensor, shape (64, 2**16)
 
         Note: ``batch_size=None`` in DataLoader disables DataLoader's own batching;
         ``num_workers=0`` is required because the Rust backend holds GPU state that

@@ -24,7 +24,20 @@ from typing import Any
 
 @dataclass
 class QdpTensor:
-    """Thin DLPack facade over backend-native tensor producers."""
+    """DLPack-compatible wrapper for backend-native QDP tensor results.
+
+    The Rust/CUDA path and other native backends may return objects whose
+    concrete tensor type is backend-specific.  ``QdpTensor`` preserves that
+    object in ``value`` while exposing ``__dlpack__`` and ``__dlpack_device__``
+    so consumers such as PyTorch can import it without a copy.
+
+    :param value: Backend-native tensor-like object.  It must implement the
+        DLPack protocol when converted with ``to_torch()`` or
+        ``torch.from_dlpack``.
+    :param backend: Human-readable backend name used in error messages.
+    :raises RuntimeError: If ``value`` does not implement the required DLPack
+        methods when conversion is attempted.
+    """
 
     value: Any
     backend: str

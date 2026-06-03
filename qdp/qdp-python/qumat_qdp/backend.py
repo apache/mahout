@@ -70,7 +70,22 @@ def _select_engine_adapter(
 
 
 class QdpEngine:
-    """Unified Python facade over the CUDA and Triton engine routes."""
+    """Select and delegate to a native QDP encoding backend.
+
+    ``QdpEngine`` is the small public Python facade used by callers that want
+    explicit backend selection.  ``backend="cuda"`` routes to the Rust/CUDA
+    extension-backed engine.  ``backend="amd"`` and ``backend="triton_amd"``
+    route to the AMD/Triton implementation.  The selected backend is exposed as
+    ``self.backend`` (``"cuda"`` or ``"amd"``) and all ``encode()`` calls are
+    forwarded to that engine.
+
+    :param device_id: GPU device ordinal to use.
+    :param precision: Numeric precision requested from the backend, such as
+        ``"float32"`` or ``"float64"`` when supported by that backend.
+    :param backend: Backend selector.  Valid values are ``"cuda"``, ``"amd"``,
+        and ``"triton_amd"``.
+    :raises ValueError: If ``backend`` is not one of the supported selectors.
+    """
 
     def __init__(
         self,
