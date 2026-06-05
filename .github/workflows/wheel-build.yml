@@ -19,11 +19,28 @@ name: Wheel Build
 on:
   push:
     branches: [main]
+    paths:
+      - "qumat/**"
+      - "qdp/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/wheel-build.yml"
   pull_request:
+    paths:
+      - "qumat/**"
+      - "qdp/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/wheel-build.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
+
+# Cancel superseded runs on PR updates; let main/dispatch runs finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # Pure Python wheel (qumat)
@@ -41,18 +58,24 @@ jobs:
           pip install uv
           uv build
 
+      - name: Validate distributions
+        run: uvx twine check dist/*
+
+      - name: Smoke-test wheel
+        run: |
+          uv venv /tmp/qumat-smoke
+          VIRTUAL_ENV=/tmp/qumat-smoke uv pip install dist/*.whl
+          /tmp/qumat-smoke/bin/python -c "import qumat; print('qumat import OK')"
+
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: qumat
           path: dist/*
 
-  # CUDA extension wheels (qumat-qdp) for each Python version
+  # CUDA extension wheels (qumat-qdp) for all supported Python versions.
+  # Built in one job so the CUDA toolkit is installed only once.
   build-qdp:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
@@ -61,29 +84,39 @@ jobs:
           working-directory: qdp/qdp-python
           command: build
           target: x86_64
-          args: --release --out dist --interpreter python${{ matrix.python-version }}
+          args: --release --out dist -i python3.10 -i python3.11 -i python3.12
           manylinux: 2_28
           before-script-linux: |
+            CUDA_VER=12.5
+            CUDA_PKG_VER=12-5
             # Install gcc 13 (CUDA 12.5 requires gcc <= 13)
             dnf install -y gcc-toolset-13-gcc gcc-toolset-13-gcc-c++
             export CC=/opt/rh/gcc-toolset-13/root/usr/bin/gcc
             export CXX=/opt/rh/gcc-toolset-13/root/usr/bin/g++
-            # Try to install the CUDA 12.5 toolkit for kernel compilation.
-            # If the external NVIDIA repo is temporarily unavailable, fall back
-            # to a no-CUDA smoke build instead of failing the PR wheel job.
+            # Install the CUDA toolkit for kernel compilation. No fallback:
+            # a wheel that did not compile real CUDA kernels must never
+            # pass this job.
             dnf install -y 'dnf-command(config-manager)'
-            if dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo \
-              && dnf install -y cuda-nvcc-12-5 cuda-cudart-devel-12-5; then
-              export CUDA_PATH=/usr/local/cuda-12.5
-              export PATH=/usr/local/cuda-12.5/bin:$PATH
-              nvcc --version
-            else
-              echo "CUDA repo unavailable; continuing with QDP_NO_CUDA=1 smoke build."
-              export QDP_NO_CUDA=1
-            fi
+            dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
+            dnf install -y cuda-nvcc-${CUDA_PKG_VER} cuda-cudart-devel-${CUDA_PKG_VER}
+            export CUDA_PATH=/usr/local/cuda-${CUDA_VER}
+            export PATH=/usr/local/cuda-${CUDA_VER}/bin:$PATH
+            nvcc --version
           sccache: true
+
+      - name: Validate and smoke-test wheels
+        working-directory: qdp/qdp-python
+        run: |
+          pip install uv
+          uvx twine check dist/*.whl
+          for py in 3.10 3.11 3.12; do
+            tag="cp${py/./}"
+            uv venv --python "$py" "/tmp/qdp-smoke-$tag"
+            VIRTUAL_ENV="/tmp/qdp-smoke-$tag" uv pip install dist/*"$tag"*.whl
+            "/tmp/qdp-smoke-$tag/bin/python" -c "from qumat_qdp._backend import get_qdp; assert get_qdp() is not None, 'Rust extension failed to load'; print('$py: qumat_qdp import OK')"
+          done
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
-          name: qumat-qdp-cp${{ matrix.python-version }}
+          name: qumat-qdp-wheels
           path: qdp/qdp-python/dist/*.whl
