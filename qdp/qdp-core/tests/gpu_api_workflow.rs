@@ -18,9 +18,9 @@
 
 #[cfg(target_os = "linux")]
 use qdp_core::MahoutError;
-use qdp_core::QdpEngine;
 #[cfg(target_os = "linux")]
 use qdp_core::gpu::pipeline::run_dual_stream_pipeline_aligned;
+use qdp_core::{Precision, QdpEngine};
 
 mod common;
 
@@ -63,7 +63,6 @@ fn test_amplitude_encoding_workflow() {
     assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
     println!("PASS: Encoding succeeded, DLPack pointer valid");
 
-    // Simulate PyTorch behavior: manually call deleter to free GPU memory
     unsafe {
         println!("Calling deleter to free GPU memory");
         common::take_deleter_and_delete(dlpack_ptr);
@@ -81,7 +80,6 @@ fn test_amplitude_encoding_async_pipeline() {
         return;
     };
 
-    // Use 200000 elements to trigger async pipeline path (ASYNC_THRESHOLD = 131072)
     let data = common::create_test_data(200000);
     println!("Created test data: {} elements", data.len());
 
@@ -109,7 +107,7 @@ fn test_angle_encoding_async_pipeline() {
 
     let num_qubits = 4;
     let sample_size = num_qubits;
-    let num_samples = 32768; // 32768 * 4 = 131072 elements (>= 1MB threshold)
+    let num_samples = 32768;
     let batch_data = common::create_test_data(num_samples * sample_size);
 
     let result = engine.encode_batch(&batch_data, num_samples, sample_size, num_qubits, "angle");
@@ -162,7 +160,6 @@ fn test_batch_dlpack_2d_shape() {
         return;
     };
 
-    // Create batch data: 3 samples, each with 4 elements (2 qubits)
     let num_samples = 3;
     let num_qubits = 2;
     let sample_size = 4;
@@ -250,6 +247,54 @@ fn test_single_encode_dlpack_2d_shape() {
 
 #[test]
 #[cfg(target_os = "linux")]
+fn test_distributed_amplitude_two_gpu_smoke() {
+    println!("Testing distributed amplitude shard encode on two GPUs...");
+
+    if common::cuda_device().is_none() {
+        println!("SKIP: No GPU available");
+        return;
+    }
+
+    if cudarc::driver::CudaDevice::new(1).is_err() {
+        println!("SKIP: Second GPU unavailable");
+        return;
+    }
+
+    let data = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+    let distributed = QdpEngine::encode_distributed_amplitude_to_shards(
+        vec![0, 1],
+        &data,
+        3,
+        Precision::Float64,
+        None,
+    )
+    .expect("Distributed amplitude shard encode should succeed");
+
+    assert_eq!(distributed.num_shards(), 2, "Expected two shards");
+    assert_eq!(distributed.shards[0].device_id, 0);
+    assert_eq!(distributed.shards[1].device_id, 1);
+
+    let shard0 = distributed.copy_shard_to_host_f64(0).unwrap();
+    let shard1 = distributed.copy_shard_to_host_f64(1).unwrap();
+
+    assert_eq!(shard0.len(), 4);
+    assert_eq!(shard1.len(), 4);
+
+    let total_prob: f64 = shard0
+        .iter()
+        .chain(shard1.iter())
+        .map(|value| value.x * value.x + value.y * value.y)
+        .sum();
+    assert!(
+        (total_prob - 1.0).abs() < 1e-10,
+        "Distributed state should remain normalized"
+    );
+
+    println!("PASS: Distributed amplitude shard encode succeeded on two GPUs");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
 fn test_dlpack_device_id() {
     println!("Testing DLPack device_id propagation...");
 
@@ -269,13 +314,11 @@ fn test_dlpack_device_id() {
         let managed = &*dlpack_ptr;
         let tensor = &managed.dl_tensor;
 
-        // Verify device_id is correctly set (0 for device 0)
         assert_eq!(
             tensor.device.device_id, 0,
             "device_id should be 0 for device 0"
         );
 
-        // Verify device_type is CUDA (kDLCUDA = 2)
         use qdp_core::dlpack::DLDeviceType;
         match tensor.device.device_type {
             DLDeviceType::kDLCUDA => println!("PASS: Device type is CUDA"),
@@ -287,7 +330,6 @@ fn test_dlpack_device_id() {
             tensor.device.device_id
         );
 
-        // Free memory
         common::take_deleter_and_delete(dlpack_ptr);
     }
 }
