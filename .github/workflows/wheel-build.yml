@@ -24,6 +24,9 @@ on:
       - "qdp/**"
       - "pyproject.toml"
       - "uv.lock"
+      # README.md and LICENSE are packaged into the qumat distributions
+      - "README.md"
+      - "LICENSE"
       - ".github/workflows/wheel-build.yml"
   pull_request:
     paths:
@@ -31,6 +34,9 @@ on:
       - "qdp/**"
       - "pyproject.toml"
       - "uv.lock"
+      # README.md and LICENSE are packaged into the qumat distributions
+      - "README.md"
+      - "LICENSE"
       - ".github/workflows/wheel-build.yml"
   workflow_dispatch:
 
@@ -88,7 +94,7 @@ jobs:
           manylinux: 2_28
           before-script-linux: |
             CUDA_VER=12.5
-            CUDA_PKG_VER=12-5
+            CUDA_PKG_VER="${CUDA_VER//./-}"
             # Install gcc 13 (CUDA 12.5 requires gcc <= 13)
             dnf install -y gcc-toolset-13-gcc gcc-toolset-13-gcc-c++
             export CC=/opt/rh/gcc-toolset-13/root/usr/bin/gcc
