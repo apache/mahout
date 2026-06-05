@@ -24,7 +24,6 @@ on:
       - "qdp/**"
       - "pyproject.toml"
       - "uv.lock"
-      # README.md and LICENSE are packaged into the qumat distributions
       - "README.md"
       - "LICENSE"
       - ".github/workflows/wheel-build.yml"
@@ -34,7 +33,6 @@ on:
       - "qdp/**"
       - "pyproject.toml"
       - "uv.lock"
-      # README.md and LICENSE are packaged into the qumat distributions
       - "README.md"
       - "LICENSE"
       - ".github/workflows/wheel-build.yml"
@@ -43,7 +41,6 @@ on:
 permissions:
   contents: read
 
-# Cancel superseded runs on PR updates; let main/dispatch runs finish.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -78,12 +75,18 @@ jobs:
           name: qumat
           path: dist/*
 
-  # CUDA extension wheels (qumat-qdp) for all supported Python versions.
-  # Built in one job so the CUDA toolkit is installed only once.
+  # CUDA extension wheels (qumat-qdp) for all supported Python versions
   build-qdp:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: |
+            3.10
+            3.11
+            3.12
 
       - uses: PyO3/maturin-action@v1
         with:
@@ -99,9 +102,7 @@ jobs:
             dnf install -y gcc-toolset-13-gcc gcc-toolset-13-gcc-c++
             export CC=/opt/rh/gcc-toolset-13/root/usr/bin/gcc
             export CXX=/opt/rh/gcc-toolset-13/root/usr/bin/g++
-            # Install the CUDA toolkit for kernel compilation. No fallback:
-            # a wheel that did not compile real CUDA kernels must never
-            # pass this job.
+            # Install the CUDA toolkit for kernel compilation (no fallback)
             dnf install -y 'dnf-command(config-manager)'
             dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
             dnf install -y cuda-nvcc-${CUDA_PKG_VER} cuda-cudart-devel-${CUDA_PKG_VER}
