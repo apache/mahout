@@ -53,13 +53,15 @@ __global__ void phase_encode_kernel(
 
     // φ(idx) = Σ_k phases[k] * b_k,  b_k = (idx >> k) & 1
     double phi = 0.0;
+    double norm = 1.0 ;
     for (unsigned int bit = 0; bit < num_qubits; ++bit) {
         if ((idx >> bit) & 1U) {
             phi += phases[bit];
         }
+        
+        norm *= M_SQRT1_2;
     }
 
-    double norm = phase_norm(num_qubits);
     double re, im;
     sincos(phi, &im, &re);   // re = cos(φ), im = sin(φ)
 
