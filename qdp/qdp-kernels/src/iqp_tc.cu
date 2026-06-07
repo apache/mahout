@@ -26,6 +26,69 @@ __device__ double compute_phase_tc(
     return phase;
 }
 
+// PR3: Shared-memory FWT path (Operator Fusion)
+// Fuses Phase computation, Fast Walsh-Hadamard Transform, and Normalization
+// entirely within Shared Memory. This completely avoids DRAM roundtrips for N <= 12.
+__global__ void iqp_phase_fwt_normalize_tc_kernel(
+    const double* __restrict__ data_batch,
+    cuDoubleComplex* __restrict__ state_batch,
+    size_t num_samples,
+    size_t state_len,
+    unsigned int num_qubits,
+    unsigned int data_len,
+    int enable_zz,
+    double norm_factor
+) {
+    extern __shared__ cuDoubleComplex shared_state[];
+
+    size_t tid = threadIdx.x;
+    size_t sample_idx = blockIdx.x;
+
+    if (sample_idx >= num_samples) return;
+
+    const double* data = data_batch + sample_idx * data_len;
+    cuDoubleComplex* state = state_batch + sample_idx * state_len;
+
+    // 1. Phase calculation directly into Shared Memory
+    for (size_t i = tid; i < state_len; i += blockDim.x) {
+        double phase = compute_phase_tc(data, i, num_qubits, enable_zz);
+        double cos_phase, sin_phase;
+        sincos(phase, &sin_phase, &cos_phase);
+        shared_state[i] = make_cuDoubleComplex(cos_phase, sin_phase);
+    }
+    __syncthreads();
+
+    // 2. Perform Hadamard FWT in Shared Memory
+    for (unsigned int stage = 0; stage < num_qubits; ++stage) {
+        size_t stride = 1ULL << stage;
+        size_t block_size = stride << 1;
+        size_t num_pairs = state_len >> 1;
+
+        for (size_t pair_idx = tid; pair_idx < num_pairs; pair_idx += blockDim.x) {
+            size_t block_idx = pair_idx / stride;
+            size_t pair_offset = pair_idx % stride;
+            size_t i = block_idx * block_size + pair_offset;
+            size_t j = i + stride;
+
+            cuDoubleComplex a = shared_state[i];
+            cuDoubleComplex b = shared_state[j];
+
+            shared_state[i] = cuCadd(a, b);
+            shared_state[j] = cuCsub(a, b);
+        }
+        __syncthreads();
+    }
+
+    // 3. Normalize and write back to Global Memory
+    for (size_t i = tid; i < state_len; i += blockDim.x) {
+        cuDoubleComplex val = shared_state[i];
+        state[i] = make_cuDoubleComplex(
+            cuCreal(val) * norm_factor,
+            cuCimag(val) * norm_factor
+        );
+    }
+}
+
 // PR2: Pre-GEMM setup - Unroll Batch and compute initial Phase (split into pure real/imaginary parts)
 // This prepares the data layout for the Kronecker product decomposition in upcoming PRs.
 __global__ void iqp_phase_split_kernel(
@@ -122,28 +185,39 @@ extern "C" int launch_iqp_encode_tc(
     int           enable_zz,
     cudaStream_t  stream
 ) {
-    // Scaffold for batch layout manipulation
-    size_t total_elements = num_samples * state_len;
-    
-    double *d_state_real, *d_state_imag;
-    cudaMalloc(&d_state_real, total_elements * sizeof(double));
-    cudaMalloc(&d_state_imag, total_elements * sizeof(double));
-    
-    unsigned int data_len = num_qubits;
-    const size_t blocks = (total_elements + DEFAULT_BLOCK_SIZE - 1) / DEFAULT_BLOCK_SIZE;
-    
-    iqp_phase_split_kernel<<<blocks, DEFAULT_BLOCK_SIZE, 0, stream>>>(
-        data_batch_d, d_state_real, d_state_imag, num_samples, state_len, num_qubits, data_len, enable_zz
-    );
-    
-    // In future PRs, Kronecker Transpose and FWT will happen here.
-    
-    recombine_complex_kernel<<<blocks, DEFAULT_BLOCK_SIZE, 0, stream>>>(
-        d_state_real, d_state_imag, static_cast<cuDoubleComplex*>(state_batch_d), total_elements
-    );
-    
-    cudaFree(d_state_real);
-    cudaFree(d_state_imag);
+    if (num_qubits <= FWT_SHARED_MEM_THRESHOLD) {
+        // PR3: For N <= 12, use the fused Shared Memory FWT kernel
+        double norm_factor = 1.0 / (double)state_len;
+        unsigned int data_len = num_qubits;
+        // Request max dynamic shared memory for this kernel
+        cudaFuncSetAttribute(iqp_phase_fwt_normalize_tc_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, 65536);
+        iqp_phase_fwt_normalize_tc_kernel<<<num_samples, DEFAULT_BLOCK_SIZE, state_len * sizeof(cuDoubleComplex), stream>>>(
+            data_batch_d, static_cast<cuDoubleComplex*>(state_batch_d), num_samples, state_len, num_qubits, data_len, enable_zz, norm_factor
+        );
+    } else {
+        // Scaffold for batch layout manipulation
+        size_t total_elements = num_samples * state_len;
+        
+        double *d_state_real, *d_state_imag;
+        cudaMalloc(&d_state_real, total_elements * sizeof(double));
+        cudaMalloc(&d_state_imag, total_elements * sizeof(double));
+        
+        unsigned int data_len = num_qubits;
+        const size_t blocks = (total_elements + DEFAULT_BLOCK_SIZE - 1) / DEFAULT_BLOCK_SIZE;
+        
+        iqp_phase_split_kernel<<<blocks, DEFAULT_BLOCK_SIZE, 0, stream>>>(
+            data_batch_d, d_state_real, d_state_imag, num_samples, state_len, num_qubits, data_len, enable_zz
+        );
+        
+        // In future PRs, Kronecker Transpose and FWT will happen here.
+        
+        recombine_complex_kernel<<<blocks, DEFAULT_BLOCK_SIZE, 0, stream>>>(
+            d_state_real, d_state_imag, static_cast<cuDoubleComplex*>(state_batch_d), total_elements
+        );
+        
+        cudaFree(d_state_real);
+        cudaFree(d_state_imag);
+    }
     
     return (int)cudaSuccess;
 }
