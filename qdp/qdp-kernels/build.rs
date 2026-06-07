@@ -227,6 +227,7 @@ fn main() {
         .file("src/iqp.cu")
         .file("src/iqp_tc.cu")
         .file("src/ImplicitHadamardOzaki.cu")
+        .file("src/AdaptiveOzaki.cu")  // PR6: hook up general AdaptiveOzakiEngine for non-Hadamard graded-ring TC GEMM
         .file("src/phase.cu")
         .compile("kernels");
 }
