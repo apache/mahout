@@ -35,8 +35,7 @@ This starts a local development server at `http://localhost:3000` with hot reloa
 ├── community/                  # Community pages
 ├── about/                      # About pages
 ├── download/                   # Download pages
-├── api.md, basic-gates.md...   # API reference docs
-└── adr/                        # Architecture decisions
+└── api.md, basic-gates.md...   # API reference docs
 
 /website/docs/              ← BUILD ARTIFACT (auto-synced, don't edit!)
 ├── .gitignore                  # Only tracked file
