@@ -26,9 +26,9 @@
 use std::env;
 use std::process::Command;
 
-const DEFAULT_CUBIN_ARCHES: &[&str] = &["75", "80", "86", "89", "90", "100", "120"];
-const DEFAULT_PTX_CANDIDATES: &[&str] = &["120", "100", "90", "89", "86", "80", "75"];
-const LEGACY_FALLBACK_ARCHES: &[&str] = &["75", "80", "86"];
+const DEFAULT_CUBIN_ARCHES: &[&str] = &["80", "86", "89", "90", "100", "120"];
+const DEFAULT_PTX_CANDIDATES: &[&str] = &["120", "100", "90", "89", "86", "80"];
+const LEGACY_FALLBACK_ARCHES: &[&str] = &["80", "86"];
 
 fn add_sm_target(build: &mut cc::Build, arch: &str) {
     build.flag("-gencode");
@@ -226,6 +226,7 @@ fn main() {
         .file("src/validation.cu")
         .file("src/iqp.cu")
         .file("src/iqp_tc.cu")
+        .file("src/ImplicitHadamardOzaki.cu")
         .file("src/phase.cu")
         .compile("kernels");
 }
