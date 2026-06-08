@@ -418,7 +418,7 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
-    /// Launch general (non-Hadamard) GEMM using AdaptiveOzakiEngine (PR6)
+    /// Launch general (non-Hadamard) GEMM using AdaptiveOzakiEngine
     /// Provides mixed-precision graded-ring Tensor Core acceleration for arbitrary matrices.
     /// Complements launch_iqp_encode_tc which uses the specialized ImplicitHadamard path.
     /// Returns CUDA error code (0 = success)
@@ -771,7 +771,7 @@ pub extern "C" fn launch_phase_encode_batch(
     999
 }
 
-// PR6: non-CUDA / non-Linux stub for the general Adaptive Ozaki GEMM entry point.
+// non-CUDA / non-Linux stub for the general Adaptive Ozaki GEMM entry point.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
 pub extern "C" fn launch_adaptive_ozaki_gemm(
