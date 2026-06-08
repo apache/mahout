@@ -1795,3 +1795,54 @@ def test_phase_encode_shape(data_shape, expected_shape):
     torch_tensor = torch.from_dlpack(qtensor)
 
     assert torch_tensor.shape == expected_shape
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_phase_encode_batch_large():
+    """Test larger batch phase encoding (covers batch launch path)."""
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+    batch_size = 128
+    n = 8
+    data = torch.rand((batch_size, n), dtype=torch.float64) * 5.9 + 0.1
+    qtensor = engine.encode(data, n, "phase")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.shape == (batch_size, 1 << n)
+    for i in range(batch_size):
+        sample = torch_tensor[i]
+        norm_sq = torch.sum(torch.abs(sample) ** 2).item()
+        assert abs(norm_sq - 1.0) < 1e-8, f"Sample {i} norm {norm_sq}"
+        assert bool(torch.all(torch.isfinite(sample))), (
+            f"Non-finite values in sample {i}"
+        )
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_phase_encode_large_n_correctness():
+    """Test phase encoding at N=14 for correctness on large state vectors."""
+    pytest.importorskip("torch")
+    from _qdp import QdpEngine
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for QdpEngine")
+
+    engine = QdpEngine(0)
+    n = 14
+    phases = [0.1 * (k + 1) for k in range(n)]
+    qtensor = engine.encode(phases, n, "phase")
+    torch_tensor = torch.from_dlpack(qtensor)
+
+    assert torch_tensor.shape == (1, 1 << n)
+    norm_sq = torch.sum(torch.abs(torch_tensor) ** 2).item()
+    assert abs(norm_sq - 1.0) < 1e-9, f"Expected unit norm at N=14, got {norm_sq}"
+    assert bool(torch.all(torch.isfinite(torch_tensor))), (
+        "Non-finite values in large-N phase output"
+    )
