@@ -16,12 +16,16 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
 
 // Configuration
+const REPO_ROOT = path.resolve(__dirname, '../..');
 const SOURCE_DIR = path.resolve(__dirname, '../../docs');
 const DEST_DIR = path.resolve(__dirname, '../docs');
 const BLOG_SOURCE_DIR = path.resolve(__dirname, '../../docs/blog');
 const BLOG_DEST_DIR = path.resolve(__dirname, '../blog');
+const API_SOURCE_DIR = path.resolve(__dirname, '../../docs/api');
+const API_DEST_DIR = path.resolve(__dirname, '../docs/api');
 
 // Files that should be preserved during sync (not deleted)
 const PRESERVE_FILES = ['.gitignore'];
@@ -33,6 +37,7 @@ const EXCLUDE_PATTERNS = [
   /\.pyc$/,
   /^__pycache__$/,
   /^blog$/, // Blog is synced separately to website/blog
+  /^api$/, // API generator config is rendered separately into website/docs/api
 ];
 
 /**
@@ -198,6 +203,56 @@ function copyFile(srcPath, destPath) {
 }
 
 /**
+ * Run a repository-level command and inherit stdio by default.
+ */
+function runCommand(command, args, options = {}) {
+  return execFileSync(command, args, {
+    cwd: REPO_ROOT,
+    stdio: options.capture ? 'pipe' : 'inherit',
+    encoding: options.capture ? 'utf-8' : undefined,
+  });
+}
+
+/**
+ * Generate Python API reference docs with pydoc-markdown.
+ */
+function generateApiDocs() {
+  console.log('\nGenerating Python API reference...');
+
+  fs.rmSync(API_DEST_DIR, { recursive: true, force: true });
+  ensureDir(API_DEST_DIR);
+
+  copyFile(path.join(API_SOURCE_DIR, 'index.md'), path.join(API_DEST_DIR, 'index.md'));
+
+  const pages = [
+    {
+      header: 'qumat_header.md',
+      config: 'qumat.yml',
+      output: 'qumat.md',
+    },
+    {
+      header: 'qumat_qdp_header.md',
+      config: 'qumat_qdp.yml',
+      output: 'qumat_qdp.md',
+    },
+  ];
+
+  runCommand('uv', ['sync', '--group', 'dev']);
+
+  for (const page of pages) {
+    const outputPath = path.join(API_DEST_DIR, page.output);
+    copyFile(path.join(API_SOURCE_DIR, page.header), outputPath);
+
+    const generated = runCommand(
+      'uv',
+      ['run', '--group', 'dev', 'pydoc-markdown', path.join('docs/api', page.config)],
+      { capture: true },
+    );
+    fs.appendFileSync(outputPath, generated);
+  }
+}
+
+/**
  * Recursively sync a directory
  */
 function syncDirectory(srcDir, destDir, stats = { files: 0, dirs: 0 }) {
@@ -259,6 +314,8 @@ function main() {
 
   console.log('\nSyncing blog posts from /docs/blog...');
   const blogStats = syncDirectory(BLOG_SOURCE_DIR, BLOG_DEST_DIR);
+
+  generateApiDocs();
 
   console.log(`\nSync complete!`);
   console.log(`  Docs: ${docsStats.files} files, ${docsStats.dirs} directories`);
