@@ -26,7 +26,7 @@ __device__ double compute_phase_tc(
     return phase;
 }
 
-// PR2: Pre-GEMM setup - Unroll Batch and compute initial Phase (split into pure real/imaginary parts)
+// Pre-GEMM setup - Unroll Batch and compute initial Phase (split into pure real/imaginary parts)
 // This prepares the data layout for the Kronecker product decomposition in upcoming PRs.
 __global__ void iqp_phase_split_kernel(
     const double* __restrict__ data_batch,
@@ -61,7 +61,7 @@ __global__ void iqp_phase_split_kernel(
 #define TRANSPOSE_TILE_DIM 32
 #define TRANSPOSE_BLOCK_ROWS 8
 
-// PR2: Shared Memory Bank-Conflict-Free Batch Transpose
+// Shared Memory Bank-Conflict-Free Batch Transpose
 // Essential for reordering the data efficiently before/after Tensor Core FWT matrix multiplications.
 __global__ void iqp_tc_batch_transpose_kernel(const double* __restrict__ in, double* __restrict__ out, int B, int rows, int cols) {
     // TILE_DIM x (TILE_DIM+1) pad to avoid shared memory bank conflicts
@@ -99,7 +99,7 @@ void iqp_tc_launch_transpose(const double* d_in, double* d_out, int B, int rows,
     iqp_tc_batch_transpose_kernel<<<grid, block, 0, stream>>>(d_in, d_out, B, rows, cols);
 }
 
-// PR2: Recombine Real and Imaginary parts back into cuDoubleComplex
+// Recombine Real and Imaginary parts back into cuDoubleComplex
 // This restores the memory layout after Tensor Core matrix multiplications.
 __global__ void recombine_complex_kernel(
     const double* __restrict__ real_part,

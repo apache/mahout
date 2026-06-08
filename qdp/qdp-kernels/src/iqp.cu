@@ -43,8 +43,6 @@ __device__ double compute_phase(
 
     // Single-qubit Z terms: sum_i x_i * data[i]
     for (unsigned int i = 0; i < num_qubits; ++i) {
-        // PR1 Optimization: Use arithmetic multiplication instead of conditional branch
-        // (if x_i != 0) to eliminate warp divergence across threads.
         phase += data[i] * (double)((x >> i) & 1U);
     }
 
