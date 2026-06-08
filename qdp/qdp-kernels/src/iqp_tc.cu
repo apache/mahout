@@ -1,3 +1,19 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one or more
+// contributor license agreements.  See the NOTICE file distributed with
+// this work for additional information regarding copyright ownership.
+// The ASF licenses this file to You under the Apache License, Version 2.0
+// (the "License"); you may not use this file except in compliance with
+// the License.  You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 // iqp_tc.cu
 #include <cuda_runtime.h>
 #include <cuComplex.h>
@@ -26,7 +42,7 @@ __device__ double compute_phase_tc(
     return phase;
 }
 
-// PR3: Shared-memory FWT path (Operator Fusion)
+// Shared-memory FWT path (Operator Fusion)
 // Fuses Phase computation, Fast Walsh-Hadamard Transform, and Normalization
 // entirely within Shared Memory. This completely avoids DRAM roundtrips for N <= 12.
 __global__ void iqp_phase_fwt_normalize_tc_kernel(
@@ -162,7 +178,7 @@ void iqp_tc_launch_transpose(const double* d_in, double* d_out, int B, int rows,
     iqp_tc_batch_transpose_kernel<<<grid, block, 0, stream>>>(d_in, d_out, B, rows, cols);
 }
 
-// PR4: Naive Implicit Hadamard GEMM (Fallback before PR5/6 Tensor Core integration)
+// Naive Implicit Hadamard GEMM (Fallback before PR5/6 Tensor Core integration)
 // Computes Y = X * H_K where H_K is a KxK Hadamard matrix generated on-the-fly.
 __global__ void naive_implicit_hadamard_gemm_kernel(const double* __restrict__ X, double* __restrict__ Y, int B, int M, int K, double norm) {
     int k = blockIdx.x * blockDim.x + threadIdx.x;
@@ -185,7 +201,7 @@ void launch_naive_implicit_hadamard(const double* d_in, double* d_out, int B, in
     naive_implicit_hadamard_gemm_kernel<<<grid, block, 0, stream>>>(d_in, d_out, B, M, K, norm);
 }
 
-// PR2: Recombine Real and Imaginary parts back into cuDoubleComplex
+// Recombine Real and Imaginary parts back into cuDoubleComplex
 // This restores the memory layout after Tensor Core matrix multiplications.
 __global__ void recombine_complex_kernel(
     const double* __restrict__ real_part,
@@ -209,7 +225,7 @@ extern "C" int launch_iqp_encode_tc(
     cudaStream_t  stream
 ) {
     if (num_qubits <= FWT_SHARED_MEM_THRESHOLD) {
-        // PR3: For N <= 12, use the fused Shared Memory FWT kernel
+        // For N <= 12, use the fused Shared Memory FWT kernel
         double norm_factor = 1.0 / (double)state_len;
         unsigned int data_len = num_qubits;
         // Request max dynamic shared memory for this kernel
@@ -218,7 +234,7 @@ extern "C" int launch_iqp_encode_tc(
             data_batch_d, static_cast<cuDoubleComplex*>(state_batch_d), num_samples, state_len, num_qubits, data_len, enable_zz, norm_factor
         );
     } else {
-        // PR4: Blocked TC-FWT (Kronecker Product Decomposition)
+        // Blocked TC-FWT (Kronecker Product Decomposition)
         size_t m_samples = num_samples;
         size_t total_elements = m_samples * state_len;
 
@@ -236,18 +252,18 @@ extern "C" int launch_iqp_encode_tc(
         cudaMalloc(&d_out_imag, total_elements * sizeof(double));
         cudaMalloc(&d_temp_real, total_elements * sizeof(double));
         cudaMalloc(&d_temp_imag, total_elements * sizeof(double));
-        
+
         // 1. Initialize Phase (Split Real/Imag)
         unsigned int data_len = num_qubits;
         const size_t blocks = (total_elements + DEFAULT_BLOCK_SIZE - 1) / DEFAULT_BLOCK_SIZE;
         iqp_phase_split_kernel<<<blocks, DEFAULT_BLOCK_SIZE, 0, stream>>>(
             data_batch_d, d_state_real, d_state_imag, num_samples, state_len, num_qubits, data_len, enable_zz
         );
-        
+
         double norm_factor = 1.0 / (double)state_len;
 
         // 3. TC-FWT Step 1: Z = X * H_{n2} (X shape: B*dim1 x dim2)
-        // PR4: Uses Naive GEMM Placeholder. PR5/6 will replace this with Ozaki Implicit Engine.
+        // Uses Naive GEMM Placeholder. PR5/6 will replace this with Ozaki Implicit Engine.
         launch_naive_implicit_hadamard(d_state_real, d_out_real, num_samples * dim1, dim2, dim2, 1.0, stream);
         launch_naive_implicit_hadamard(d_state_imag, d_out_imag, num_samples * dim1, dim2, dim2, 1.0, stream);
 
@@ -262,12 +278,12 @@ extern "C" int launch_iqp_encode_tc(
         // 6. TC-FWT Step 4: Transpose back (B, dim2, dim1) -> (B, dim1, dim2)
         iqp_tc_launch_transpose(d_out_real, d_temp_real, num_samples, dim2, dim1, stream);
         iqp_tc_launch_transpose(d_out_imag, d_temp_imag, num_samples, dim2, dim1, stream);
-        
+
         // 7. Recombine and Write back
         recombine_complex_kernel<<<blocks, DEFAULT_BLOCK_SIZE, 0, stream>>>(
             d_temp_real, d_temp_imag, static_cast<cuDoubleComplex*>(state_batch_d), total_elements
         );
-        
+
         cudaFree(d_state_real);
         cudaFree(d_state_imag);
         cudaFree(d_out_real);
@@ -275,6 +291,6 @@ extern "C" int launch_iqp_encode_tc(
         cudaFree(d_temp_real);
         cudaFree(d_temp_imag);
     }
-    
+
     return (int)cudaSuccess;
 }
