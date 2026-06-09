@@ -45,7 +45,7 @@ Stevo Slavić            | sslavic@...       | Yes | @sslavic
 Suneel Marthi           | smarthi@...       | No  | (Emeritus PMC) @suneelmarthi
 Ted Dunning             | tdunning@...      | Yes |
 Tom Pierce              | tcp@...           | No  |
-Trevor Grant            | rawkintrevo@...   | Yes | @rawkintrevo
+Trevor Grant            | rawkintrevo@...   | Yes | (Emeritus PMC)
 
 <a name="WhoWeAre-EmeritusCommitters"></a>
 ## Emeritus Committers

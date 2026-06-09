@@ -48,8 +48,10 @@ __global__ void phase_encode_kernel(
 
     // φ(idx) = Σ_k phases[k] * b_k,  b_k = (idx >> k) & 1
     double phi = 0.0;
+    double norm = 1.0;
     for (unsigned int bit = 0; bit < num_qubits; ++bit) {
         phi += phases[bit] * (double)((idx >> bit) & 1U);
+        norm *= M_SQRT1_2;
     }
 
     double re, im;
