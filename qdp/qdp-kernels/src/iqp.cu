@@ -43,9 +43,7 @@ __device__ double compute_phase(
 
     // Single-qubit Z terms: sum_i x_i * data[i]
     for (unsigned int i = 0; i < num_qubits; ++i) {
-        if ((x >> i) & 1U) {
-            phase += data[i];
-        }
+        phase += data[i] * (double)((x >> i) & 1U);
     }
 
     // Two-qubit ZZ terms (if enabled): sum_{i<j} x_i * x_j * data[n + pair_index]
@@ -53,9 +51,7 @@ __device__ double compute_phase(
         unsigned int pair_idx = num_qubits;
         for (unsigned int i = 0; i < num_qubits; ++i) {
             for (unsigned int j = i + 1; j < num_qubits; ++j) {
-                if (((x >> i) & 1U) && ((x >> j) & 1U)) {
-                    phase += data[pair_idx];
-                }
+                phase += data[pair_idx] * (double)(((x >> i) & 1U) & ((x >> j) & 1U));
                 pair_idx++;
             }
         }
