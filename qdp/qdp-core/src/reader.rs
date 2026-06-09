@@ -45,7 +45,7 @@
 //! }
 //! ```
 
-use arrow::array::{Array, Float64Array};
+use arrow::array::{Array, Float32Array, Float64Array};
 
 use crate::error::Result;
 
@@ -53,7 +53,7 @@ use crate::error::Result;
 ///
 /// Keeps f32 file data as `Vec<f32>` end-to-end once readers implement
 /// `DataReader<f32>`; today most readers use the default `T = f64`.
-pub trait FloatElem: Copy + Send + Sync + 'static {}
+pub trait FloatElem: Copy + Default + Send + Sync + 'static {}
 
 impl FloatElem for f32 {}
 impl FloatElem for f64 {}
@@ -86,6 +86,34 @@ pub fn handle_float64_nulls(
             NullHandling::Reject => {
                 return Err(crate::error::MahoutError::InvalidInput(
                     "Null value encountered in Float64Array. \
+                     Use NullHandling::FillZero to replace nulls with 0.0, \
+                     or clean the data at the source."
+                        .to_string(),
+                ));
+            }
+        }
+    }
+    Ok(())
+}
+
+/// Append values from a `Float32Array` into `output`, applying the given null policy.
+///
+/// When there are no nulls the fast path copies the underlying buffer directly.
+pub fn handle_float32_nulls(
+    output: &mut Vec<f32>,
+    float_array: &Float32Array,
+    null_handling: NullHandling,
+) -> crate::error::Result<()> {
+    if float_array.null_count() == 0 {
+        output.extend_from_slice(float_array.values());
+    } else {
+        match null_handling {
+            NullHandling::FillZero => {
+                output.extend(float_array.iter().map(|opt| opt.unwrap_or(0.0)));
+            }
+            NullHandling::Reject => {
+                return Err(crate::error::MahoutError::InvalidInput(
+                    "Null value encountered in Float32Array. \
                      Use NullHandling::FillZero to replace nulls with 0.0, \
                      or clean the data at the source."
                         .to_string(),

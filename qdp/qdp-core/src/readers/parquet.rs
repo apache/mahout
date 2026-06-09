@@ -17,24 +17,180 @@
 //! Parquet format reader implementation.
 
 use std::fs::File;
+use std::marker::PhantomData;
 use std::path::Path;
 
-use arrow::array::{Array, FixedSizeListArray, Float64Array, ListArray};
+use arrow::array::{Array, FixedSizeListArray, Float32Array, Float64Array, ListArray};
+use arrow::compute;
 use arrow::datatypes::DataType;
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 
 use crate::error::{MahoutError, Result};
-use crate::reader::{DataReader, NullHandling, StreamingDataReader, handle_float64_nulls};
+use crate::reader::{
+    DataReader, FloatElem, NullHandling, StreamingDataReader, handle_float32_nulls,
+    handle_float64_nulls,
+};
 
-/// Reader for Parquet files containing List<Float64> or FixedSizeList<Float64> columns.
-pub struct ParquetReader {
+// ---------------------------------------------------------------------------
+// Internal sealed helper trait
+// ---------------------------------------------------------------------------
+
+/// Zero-copy or Arrow-cast extraction from an Arrow array into an output `Vec<Self>`.
+///
+/// Implemented for `f32` and `f64` only:
+/// - same dtype → `extend_from_slice` directly from the Arrow buffer (zero alloc)
+/// - cross dtype → `arrow::compute::cast` first, then `extend_from_slice`
+///   - f32 → f64: exact, NaN preserved
+///   - f64 → f32: values outside f32 range become ±Inf, NaN preserved
+pub(crate) trait ArrowPrimitive: FloatElem {
+    fn extend_from_arrow_array(
+        output: &mut Vec<Self>,
+        array: &dyn Array,
+        null_handling: NullHandling,
+    ) -> Result<()>;
+
+    fn collect_from_arrow_array(
+        array: &dyn Array,
+        null_handling: NullHandling,
+    ) -> Result<Vec<Self>> {
+        let mut out = Vec::new();
+        Self::extend_from_arrow_array(&mut out, array, null_handling)?;
+        Ok(out)
+    }
+}
+
+impl ArrowPrimitive for f64 {
+    fn extend_from_arrow_array(
+        output: &mut Vec<f64>,
+        array: &dyn Array,
+        null_handling: NullHandling,
+    ) -> Result<()> {
+        match array.data_type() {
+            DataType::Float64 => {
+                let arr = array
+                    .as_any()
+                    .downcast_ref::<Float64Array>()
+                    .ok_or_else(|| MahoutError::Io("Float64 downcast failed".to_string()))?;
+                handle_float64_nulls(output, arr, null_handling)?;
+            }
+            DataType::Float32 => {
+                let casted = compute::cast(array, &DataType::Float64)
+                    .map_err(|e| MahoutError::Io(format!("Arrow cast f32→f64: {e}")))?;
+                let arr = casted
+                    .as_any()
+                    .downcast_ref::<Float64Array>()
+                    .ok_or_else(|| MahoutError::Io("Cast to Float64 failed".to_string()))?;
+                handle_float64_nulls(output, arr, null_handling)?;
+            }
+            other => {
+                return Err(MahoutError::InvalidInput(format!(
+                    "Expected Float32 or Float64 values, got {other:?}"
+                )));
+            }
+        }
+        Ok(())
+    }
+}
+
+impl ArrowPrimitive for f32 {
+    fn extend_from_arrow_array(
+        output: &mut Vec<f32>,
+        array: &dyn Array,
+        null_handling: NullHandling,
+    ) -> Result<()> {
+        match array.data_type() {
+            DataType::Float32 => {
+                let arr = array
+                    .as_any()
+                    .downcast_ref::<Float32Array>()
+                    .ok_or_else(|| MahoutError::Io("Float32 downcast failed".to_string()))?;
+                handle_float32_nulls(output, arr, null_handling)?;
+            }
+            DataType::Float64 => {
+                // f64 → f32: values outside f32 range become ±Inf; NaN is preserved
+                let casted = compute::cast(array, &DataType::Float32)
+                    .map_err(|e| MahoutError::Io(format!("Arrow cast f64→f32: {e}")))?;
+                let arr = casted
+                    .as_any()
+                    .downcast_ref::<Float32Array>()
+                    .ok_or_else(|| MahoutError::Io("Cast to Float32 failed".to_string()))?;
+                handle_float32_nulls(output, arr, null_handling)?;
+            }
+            other => {
+                return Err(MahoutError::InvalidInput(format!(
+                    "Expected Float32 or Float64 values, got {other:?}"
+                )));
+            }
+        }
+        Ok(())
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Shared schema validator
+// ---------------------------------------------------------------------------
+
+fn validate_float_list_schema(field: &arrow::datatypes::Field) -> Result<()> {
+    match field.data_type() {
+        DataType::List(child_field) => {
+            if !matches!(
+                child_field.data_type(),
+                DataType::Float32 | DataType::Float64
+            ) {
+                return Err(MahoutError::InvalidInput(format!(
+                    "Expected List<Float32> or List<Float64> column, got List<{:?}>",
+                    child_field.data_type()
+                )));
+            }
+        }
+        DataType::FixedSizeList(child_field, _) => {
+            if !matches!(
+                child_field.data_type(),
+                DataType::Float32 | DataType::Float64
+            ) {
+                return Err(MahoutError::InvalidInput(format!(
+                    "Expected FixedSizeList<Float32> or FixedSizeList<Float64> column, got FixedSizeList<{:?}>",
+                    child_field.data_type()
+                )));
+            }
+        }
+        _ => {
+            return Err(MahoutError::InvalidInput(format!(
+                "Expected List<Float32/Float64> or FixedSizeList<Float32/Float64> column, got {:?}",
+                field.data_type()
+            )));
+        }
+    }
+    Ok(())
+}
+
+fn validate_float_list_or_scalar_schema(field: &arrow::datatypes::Field) -> Result<()> {
+    match field.data_type() {
+        DataType::Float32 | DataType::Float64 => Ok(()),
+        _ => validate_float_list_schema(field),
+    }
+}
+
+// ---------------------------------------------------------------------------
+// ParquetReader<T>
+// ---------------------------------------------------------------------------
+
+/// Reader for Parquet files containing `List<Float32/Float64>` or
+/// `FixedSizeList<Float32/Float64>` columns.
+///
+/// Generic over `T` (`f32` or `f64`):
+/// - same dtype as the file → zero-copy path via `extend_from_slice`
+/// - different dtype → `arrow::compute::cast` (f64→f32: overflow → ±Inf; NaN preserved)
+pub struct ParquetReader<T: FloatElem = f64> {
     reader: Option<parquet::arrow::arrow_reader::ParquetRecordBatchReader>,
     sample_size: Option<usize>,
     total_rows: usize,
     null_handling: NullHandling,
+    _phantom: PhantomData<T>,
 }
 
-impl ParquetReader {
+#[allow(private_bounds)]
+impl<T: FloatElem + ArrowPrimitive> ParquetReader<T> {
     /// Create a new Parquet reader.
     ///
     /// # Arguments
@@ -48,7 +204,6 @@ impl ParquetReader {
     ) -> Result<Self> {
         let path = path.as_ref();
 
-        // Verify file exists
         match path.try_exists() {
             Ok(false) => {
                 return Err(MahoutError::Io(format!(
@@ -85,31 +240,7 @@ impl ParquetReader {
             )));
         }
 
-        let field = &schema.fields()[0];
-        match field.data_type() {
-            DataType::List(child_field) => {
-                if !matches!(child_field.data_type(), DataType::Float64) {
-                    return Err(MahoutError::InvalidInput(format!(
-                        "Expected List<Float64> column, got List<{:?}>",
-                        child_field.data_type()
-                    )));
-                }
-            }
-            DataType::FixedSizeList(child_field, _) => {
-                if !matches!(child_field.data_type(), DataType::Float64) {
-                    return Err(MahoutError::InvalidInput(format!(
-                        "Expected FixedSizeList<Float64> column, got FixedSizeList<{:?}>",
-                        child_field.data_type()
-                    )));
-                }
-            }
-            _ => {
-                return Err(MahoutError::InvalidInput(format!(
-                    "Expected List<Float64> or FixedSizeList<Float64> column, got {:?}",
-                    field.data_type()
-                )));
-            }
-        }
+        validate_float_list_schema(&schema.fields()[0])?;
 
         let total_rows = builder.metadata().file_metadata().num_rows() as usize;
 
@@ -125,20 +256,21 @@ impl ParquetReader {
             sample_size: None,
             total_rows,
             null_handling,
+            _phantom: PhantomData,
         })
     }
 }
 
-impl DataReader for ParquetReader {
-    fn read_batch(&mut self) -> Result<(Vec<f64>, usize, usize)> {
+impl<T: FloatElem + ArrowPrimitive> DataReader<T> for ParquetReader<T> {
+    fn read_batch(&mut self) -> Result<(Vec<T>, usize, usize)> {
         let reader = self
             .reader
             .take()
             .ok_or_else(|| MahoutError::InvalidInput("Reader already consumed".to_string()))?;
 
-        let mut all_data = Vec::new();
+        let mut all_data: Vec<T> = Vec::new();
         let mut num_samples = 0;
-        let mut sample_size = None;
+        let mut sample_size: Option<usize> = None;
 
         for batch_result in reader {
             let batch = batch_result
@@ -159,14 +291,7 @@ impl DataReader for ParquetReader {
 
                     for i in 0..list_array.len() {
                         let value_array = list_array.value(i);
-                        let float_array = value_array
-                            .as_any()
-                            .downcast_ref::<Float64Array>()
-                            .ok_or_else(|| {
-                                MahoutError::Io("List values must be Float64".to_string())
-                            })?;
-
-                        let current_size = float_array.len();
+                        let current_size = value_array.len();
 
                         if let Some(expected_size) = sample_size {
                             if current_size != expected_size {
@@ -180,8 +305,11 @@ impl DataReader for ParquetReader {
                             all_data.reserve(current_size * self.total_rows);
                         }
 
-                        handle_float64_nulls(&mut all_data, float_array, self.null_handling)?;
-
+                        T::extend_from_arrow_array(
+                            &mut all_data,
+                            &*value_array,
+                            self.null_handling,
+                        )?;
                         num_samples += 1;
                     }
                 }
@@ -201,18 +329,12 @@ impl DataReader for ParquetReader {
                     }
 
                     let values = list_array.values();
-                    let float_array = values
-                        .as_any()
-                        .downcast_ref::<Float64Array>()
-                        .ok_or_else(|| MahoutError::Io("Values must be Float64".to_string()))?;
-
-                    handle_float64_nulls(&mut all_data, float_array, self.null_handling)?;
-
+                    T::extend_from_arrow_array(&mut all_data, values, self.null_handling)?;
                     num_samples += list_array.len();
                 }
                 _ => {
                     return Err(MahoutError::Io(format!(
-                        "Expected List<Float64> or FixedSizeList<Float64>, got {:?}",
+                        "Expected List<Float32/Float64> or FixedSizeList<Float32/Float64>, got {:?}",
                         column.data_type()
                     )));
                 }
@@ -236,20 +358,27 @@ impl DataReader for ParquetReader {
     }
 }
 
-/// Streaming Parquet reader for List<Float64> and FixedSizeList<Float64> columns.
+// ---------------------------------------------------------------------------
+// ParquetStreamingReader<T>
+// ---------------------------------------------------------------------------
+
+/// Streaming Parquet reader for `List<Float32/Float64>` and
+/// `FixedSizeList<Float32/Float64>` columns.
 ///
-/// Reads Parquet files in chunks without loading entire file into memory.
-/// Supports efficient streaming for large files via Producer-Consumer pattern.
-pub struct ParquetStreamingReader {
+/// Reads Parquet files in chunks without loading the entire file into memory.
+/// Supports efficient streaming for large files via the Producer-Consumer pattern.
+pub struct ParquetStreamingReader<T: FloatElem = f64> {
     reader: parquet::arrow::arrow_reader::ParquetRecordBatchReader,
     sample_size: Option<usize>,
-    leftover_data: Vec<f64>,
+    leftover_data: Vec<T>,
     leftover_cursor: usize,
     pub total_rows: usize,
     null_handling: NullHandling,
+    _phantom: PhantomData<T>,
 }
 
-impl ParquetStreamingReader {
+#[allow(private_bounds)]
+impl<T: FloatElem + ArrowPrimitive> ParquetStreamingReader<T> {
     /// Create a new streaming Parquet reader.
     ///
     /// # Arguments
@@ -263,7 +392,6 @@ impl ParquetStreamingReader {
     ) -> Result<Self> {
         let path = path.as_ref();
 
-        // Verify file exists
         match path.try_exists() {
             Ok(false) => {
                 return Err(MahoutError::Io(format!(
@@ -300,34 +428,7 @@ impl ParquetStreamingReader {
             )));
         }
 
-        let field = &schema.fields()[0];
-        match field.data_type() {
-            DataType::List(child_field) => {
-                if !matches!(child_field.data_type(), DataType::Float64) {
-                    return Err(MahoutError::InvalidInput(format!(
-                        "Expected List<Float64> column, got List<{:?}>",
-                        child_field.data_type()
-                    )));
-                }
-            }
-            DataType::FixedSizeList(child_field, _) => {
-                if !matches!(child_field.data_type(), DataType::Float64) {
-                    return Err(MahoutError::InvalidInput(format!(
-                        "Expected FixedSizeList<Float64> column, got FixedSizeList<{:?}>",
-                        child_field.data_type()
-                    )));
-                }
-            }
-            DataType::Float64 => {
-                // Scalar Float64 for basis encoding (one index per sample)
-            }
-            _ => {
-                return Err(MahoutError::InvalidInput(format!(
-                    "Expected Float64, List<Float64>, or FixedSizeList<Float64> column, got {:?}",
-                    field.data_type()
-                )));
-            }
-        }
+        validate_float_list_or_scalar_schema(&schema.fields()[0])?;
 
         let total_rows = builder.metadata().file_metadata().num_rows() as usize;
 
@@ -344,6 +445,7 @@ impl ParquetStreamingReader {
             leftover_cursor: 0,
             total_rows,
             null_handling,
+            _phantom: PhantomData,
         })
     }
 
@@ -353,13 +455,13 @@ impl ParquetStreamingReader {
     }
 }
 
-impl DataReader for ParquetStreamingReader {
-    fn read_batch(&mut self) -> Result<(Vec<f64>, usize, usize)> {
+impl<T: FloatElem + ArrowPrimitive> DataReader<T> for ParquetStreamingReader<T> {
+    fn read_batch(&mut self) -> Result<(Vec<T>, usize, usize)> {
         let mut all_data = Vec::new();
         let mut num_samples = 0;
 
         loop {
-            let mut buffer = vec![0.0; 1024 * 1024]; // 1M elements buffer
+            let mut buffer = vec![T::default(); 1024 * 1024];
             let written = self.read_chunk(&mut buffer)?;
             if written == 0 {
                 break;
@@ -384,8 +486,8 @@ impl DataReader for ParquetStreamingReader {
     }
 }
 
-impl StreamingDataReader for ParquetStreamingReader {
-    fn read_chunk(&mut self, buffer: &mut [f64]) -> Result<usize> {
+impl<T: FloatElem + ArrowPrimitive> StreamingDataReader<T> for ParquetStreamingReader<T> {
+    fn read_chunk(&mut self, buffer: &mut [T]) -> Result<usize> {
         let mut written = 0;
         let buf_cap = buffer.len();
         let calc_limit = |ss: usize| -> usize {
@@ -439,24 +541,16 @@ impl StreamingDataReader for ParquetStreamingReader {
                                 continue;
                             }
 
-                            let mut batch_values = Vec::new();
+                            let mut batch_values: Vec<T> = Vec::new();
                             let mut current_sample_size = None;
                             for i in 0..list_array.len() {
                                 let value_array = list_array.value(i);
-                                let float_array = value_array
-                                    .as_any()
-                                    .downcast_ref::<Float64Array>()
-                                    .ok_or_else(|| {
-                                        MahoutError::Io("List values must be Float64".to_string())
-                                    })?;
-
                                 if i == 0 {
-                                    current_sample_size = Some(float_array.len());
+                                    current_sample_size = Some(value_array.len());
                                 }
-
-                                handle_float64_nulls(
+                                T::extend_from_arrow_array(
                                     &mut batch_values,
-                                    float_array,
+                                    &*value_array,
                                     self.null_handling,
                                 )?;
                             }
@@ -482,55 +576,25 @@ impl StreamingDataReader for ParquetStreamingReader {
                             }
 
                             let current_sample_size = *size as usize;
-
                             let values = list_array.values();
-                            let float_array = values
-                                .as_any()
-                                .downcast_ref::<Float64Array>()
-                                .ok_or_else(|| {
-                                    MahoutError::Io(
-                                        "FixedSizeList values must be Float64".to_string(),
-                                    )
-                                })?;
-
-                            let mut batch_values = Vec::new();
-                            handle_float64_nulls(
-                                &mut batch_values,
-                                float_array,
-                                self.null_handling,
-                            )?;
+                            let batch_values =
+                                T::collect_from_arrow_array(values, self.null_handling)?;
 
                             (current_sample_size, batch_values)
                         }
-                        DataType::Float64 => {
-                            // Scalar Float64 for basis encoding (one index per sample)
-                            let float_array = column
-                                .as_any()
-                                .downcast_ref::<Float64Array>()
-                                .ok_or_else(|| {
-                                    MahoutError::Io(
-                                        "Failed to downcast to Float64Array".to_string(),
-                                    )
-                                })?;
-
-                            if float_array.is_empty() {
+                        DataType::Float32 | DataType::Float64 => {
+                            // Scalar float for basis encoding (one index per sample)
+                            if column.is_empty() {
                                 continue;
                             }
-
                             let current_sample_size = 1;
-
-                            let mut batch_values = Vec::new();
-                            handle_float64_nulls(
-                                &mut batch_values,
-                                float_array,
-                                self.null_handling,
-                            )?;
-
+                            let batch_values =
+                                T::collect_from_arrow_array(&**column, self.null_handling)?;
                             (current_sample_size, batch_values)
                         }
                         _ => {
                             return Err(MahoutError::Io(format!(
-                                "Expected Float64, List<Float64>, or FixedSizeList<Float64>, got {:?}",
+                                "Expected Float32/Float64, List<Float32/Float64>, or FixedSizeList<Float32/Float64>, got {:?}",
                                 column.data_type()
                             )));
                         }
@@ -581,6 +645,11 @@ impl StreamingDataReader for ParquetStreamingReader {
         self.total_rows
     }
 }
+
+// ---------------------------------------------------------------------------
+// Unit tests
+// ---------------------------------------------------------------------------
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -634,7 +703,7 @@ mod tests {
     #[test]
     fn test_parquet_reader_missing_file() {
         let path = std::env::temp_dir().join(format!("missing_{}.parquet", std::process::id()));
-        let result = ParquetReader::new(&path, None, NullHandling::FillZero);
+        let result = ParquetReader::<f64>::new(&path, None, NullHandling::FillZero);
         assert!(matches!(result, Err(MahoutError::Io(_))));
     }
 
@@ -644,13 +713,17 @@ mod tests {
         let array = Arc::new(Int32Array::from(vec![1, 2, 3])) as ArrayRef;
         let file = write_test_parquet(schema, vec![array]);
 
-        let result = ParquetReader::new(file.path(), None, NullHandling::FillZero);
+        let result = ParquetReader::<f64>::new(file.path(), None, NullHandling::FillZero);
         assert!(result.is_err());
         let err_msg = match result {
             Err(e) => e.to_string(),
             Ok(_) => panic!(),
         };
-        assert!(err_msg.contains("Expected List<Float64> or FixedSizeList<Float64> column"));
+        assert!(
+            err_msg.contains("Expected List")
+                || err_msg.contains("Expected FixedSizeList")
+                || err_msg.contains("Float32/Float64")
+        );
     }
 
     #[test]
@@ -663,7 +736,7 @@ mod tests {
         let arr2 = Arc::new(Int32Array::from(vec![1, 2, 3])) as ArrayRef;
         let file = write_test_parquet(schema, vec![arr1, arr2]);
 
-        let result = ParquetReader::new(file.path(), None, NullHandling::FillZero);
+        let result = ParquetReader::<f64>::new(file.path(), None, NullHandling::FillZero);
         assert!(result.is_err());
         let err_msg = match result {
             Err(e) => e.to_string(),
@@ -685,13 +758,13 @@ mod tests {
 
         let file = write_test_parquet(schema, vec![array]);
 
-        let result = ParquetReader::new(file.path(), None, NullHandling::FillZero);
+        let result = ParquetReader::<f64>::new(file.path(), None, NullHandling::FillZero);
         assert!(result.is_err());
         let err_msg = match result {
             Err(e) => e.to_string(),
             Ok(_) => panic!(),
         };
-        assert!(err_msg.contains("Expected List<Float64> column"));
+        assert!(err_msg.contains("Expected List<Float32> or List<Float64>"));
     }
 
     #[test]
@@ -709,7 +782,8 @@ mod tests {
 
         let file = write_test_parquet(schema, vec![array]);
 
-        let mut reader = ParquetReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        let mut reader =
+            ParquetReader::<f64>::new(file.path(), None, NullHandling::FillZero).unwrap();
         let (data, num_samples, sample_size) = reader.read_batch().unwrap();
         assert_eq!(data, vec![1.0, 2.0, 3.0, 4.0]);
         assert_eq!(num_samples, 2);
@@ -733,7 +807,8 @@ mod tests {
 
         let file = write_test_parquet(schema, vec![array]);
 
-        let mut reader = ParquetReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        let mut reader =
+            ParquetReader::<f64>::new(file.path(), None, NullHandling::FillZero).unwrap();
         let (data, num_samples, sample_size) = reader.read_batch().unwrap();
         assert_eq!(data, vec![5.0, 6.0, 7.0, 8.0]);
         assert_eq!(num_samples, 2);
@@ -755,7 +830,8 @@ mod tests {
 
         let file = write_test_parquet(schema, vec![array]);
 
-        let mut reader = ParquetReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        let mut reader =
+            ParquetReader::<f64>::new(file.path(), None, NullHandling::FillZero).unwrap();
         let result = reader.read_batch();
         assert!(result.is_err());
         let err_msg = match result {
@@ -767,6 +843,7 @@ mod tests {
 
     #[test]
     fn test_parquet_streaming_reader_scalar_f64() {
+        use arrow::array::Float64Builder;
         let schema = Arc::new(Schema::new(vec![Field::new(
             "data",
             DataType::Float64,
@@ -778,7 +855,7 @@ mod tests {
         let file = write_test_parquet(schema, vec![array]);
 
         let mut streaming_reader =
-            ParquetStreamingReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+            ParquetStreamingReader::<f64>::new(file.path(), None, NullHandling::FillZero).unwrap();
         assert_eq!(streaming_reader.total_rows(), 3);
         let mut buffer = vec![0.0; 2];
         let written1 = streaming_reader.read_chunk(&mut buffer).unwrap();
@@ -812,7 +889,8 @@ mod tests {
         let file = write_test_parquet(schema, vec![array]);
 
         let mut reader =
-            ParquetStreamingReader::new(file.path(), Some(1), NullHandling::FillZero).unwrap();
+            ParquetStreamingReader::<f64>::new(file.path(), Some(1), NullHandling::FillZero)
+                .unwrap();
         let (data, num_samples, sample_size) = reader.read_batch().unwrap();
         assert_eq!(data, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
         assert_eq!(num_samples, 3);
@@ -829,7 +907,8 @@ mod tests {
         let array = Arc::new(builder.finish()) as ArrayRef;
         let file = write_test_parquet(schema, vec![array]);
 
-        let mut reader = ParquetReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        let mut reader =
+            ParquetReader::<f64>::new(file.path(), None, NullHandling::FillZero).unwrap();
         let result = reader.read_batch();
         assert!(result.is_err());
         let err_msg = match result {
@@ -850,7 +929,7 @@ mod tests {
         let file = write_test_parquet(schema, vec![array]);
 
         let mut reader =
-            ParquetStreamingReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+            ParquetStreamingReader::<f64>::new(file.path(), None, NullHandling::FillZero).unwrap();
         let result = reader.read_batch();
         assert!(result.is_err());
         let err_msg = match result {
@@ -899,7 +978,8 @@ mod tests {
     #[test]
     fn test_parquet_reader_list_f64_null_fill_zero() {
         let file = write_list_parquet_with_nulls();
-        let mut reader = ParquetReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        let mut reader =
+            ParquetReader::<f64>::new(file.path(), None, NullHandling::FillZero).unwrap();
         let (data, num_samples, sample_size) = reader.read_batch().unwrap();
         assert_eq!(data, vec![1.0, 0.0, 3.0, 4.0]);
         assert_eq!(num_samples, 2);
@@ -909,7 +989,8 @@ mod tests {
     #[test]
     fn test_parquet_reader_list_f64_null_reject() {
         let file = write_list_parquet_with_nulls();
-        let mut reader = ParquetReader::new(file.path(), None, NullHandling::Reject).unwrap();
+        let mut reader =
+            ParquetReader::<f64>::new(file.path(), None, NullHandling::Reject).unwrap();
         let result = reader.read_batch();
         assert!(result.is_err());
         let err_msg = match result {
@@ -922,7 +1003,8 @@ mod tests {
     #[test]
     fn test_parquet_reader_fixed_size_list_null_fill_zero() {
         let file = write_fixed_size_list_parquet_with_nulls();
-        let mut reader = ParquetReader::new(file.path(), None, NullHandling::FillZero).unwrap();
+        let mut reader =
+            ParquetReader::<f64>::new(file.path(), None, NullHandling::FillZero).unwrap();
         let (data, num_samples, sample_size) = reader.read_batch().unwrap();
         assert_eq!(data, vec![1.0, 0.0, 3.0, 4.0]);
         assert_eq!(num_samples, 2);
@@ -932,7 +1014,8 @@ mod tests {
     #[test]
     fn test_parquet_reader_fixed_size_list_null_reject() {
         let file = write_fixed_size_list_parquet_with_nulls();
-        let mut reader = ParquetReader::new(file.path(), None, NullHandling::Reject).unwrap();
+        let mut reader =
+            ParquetReader::<f64>::new(file.path(), None, NullHandling::Reject).unwrap();
         let result = reader.read_batch();
         assert!(result.is_err());
         let err_msg = match result {
@@ -949,7 +1032,7 @@ mod tests {
         let file = TempTestFile::new();
         let path = file.path().to_path_buf();
         drop(file);
-        let result = ParquetStreamingReader::new(&path, None, NullHandling::FillZero);
+        let result = ParquetStreamingReader::<f64>::new(&path, None, NullHandling::FillZero);
         assert!(matches!(result, Err(MahoutError::Io(_))));
     }
 
@@ -959,7 +1042,7 @@ mod tests {
         let array = Arc::new(Int32Array::from(vec![1, 2, 3])) as ArrayRef;
         let file = write_test_parquet(schema, vec![array]);
 
-        let result = ParquetStreamingReader::new(file.path(), None, NullHandling::FillZero);
+        let result = ParquetStreamingReader::<f64>::new(file.path(), None, NullHandling::FillZero);
         assert!(result.is_err());
         let err_msg = match result {
             Err(e) => e.to_string(),
@@ -978,7 +1061,7 @@ mod tests {
         let arr2 = Arc::new(Int32Array::from(vec![1, 2, 3])) as ArrayRef;
         let file = write_test_parquet(schema, vec![arr1, arr2]);
 
-        let result = ParquetStreamingReader::new(file.path(), None, NullHandling::FillZero);
+        let result = ParquetStreamingReader::<f64>::new(file.path(), None, NullHandling::FillZero);
         assert!(result.is_err());
         let err_msg = match result {
             Err(e) => e.to_string(),
@@ -1000,12 +1083,12 @@ mod tests {
 
         let file = write_test_parquet(schema, vec![array]);
 
-        let result = ParquetStreamingReader::new(file.path(), None, NullHandling::FillZero);
+        let result = ParquetStreamingReader::<f64>::new(file.path(), None, NullHandling::FillZero);
         assert!(result.is_err());
         let err_msg = match result {
             Err(e) => e.to_string(),
             Ok(_) => panic!(),
         };
-        assert!(err_msg.contains("Expected List<Float64>"));
+        assert!(err_msg.contains("Expected List<Float32> or List<Float64>"));
     }
 }
