@@ -58,7 +58,6 @@ __global__ void phase_encode_kernel(
         if ((idx >> bit) & 1U) {
             phi += phases[bit];
         }
-        
         norm *= M_SQRT1_2;
     }
 
