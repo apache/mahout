@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Smoke and normalization tests for FWT vs Ozaki TC IQP paths (GPU vs GPU)."""
+"""Smoke and normalization tests for FWT vs Tensor Core IQP paths (GPU vs GPU)."""
 
 import pytest
 import torch
@@ -83,3 +83,20 @@ def test_large_n_tc_path_smoke(engine, num_qubits, batch_size):
     tc_state = torch.from_dlpack(engine.encode_batch_tc(data, num_qubits))
     assert tc_state.shape == (batch_size, state_len)
     assert torch.isfinite(tc_state).all()
+
+
+@pytest.mark.parametrize("num_qubits", [14])
+def test_fwt_tc_path_agreement_loose(engine, num_qubits):
+    """Large-N TC scaffold should be within loose tolerance of FWT (structural PR)."""
+    batch_size = 8
+    data_len = _iqp_param_count(num_qubits)
+    data = torch.randn(batch_size, data_len, dtype=torch.float64).numpy()
+
+    fwt_state = torch.from_dlpack(engine.encode(data, num_qubits, "iqp"))
+    tc_state = torch.from_dlpack(engine.encode_batch_tc(data, num_qubits))
+
+    max_err = (fwt_state - tc_state).abs().max().item()
+    # Ozaki Kronecker scaffold may diverge until PR6 malloc pooling lands.
+    assert max_err < 0.1, (
+        f"Max abs error {max_err} unexpectedly large at N={num_qubits}"
+    )

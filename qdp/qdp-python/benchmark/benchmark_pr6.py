@@ -1,60 +1,147 @@
+#!/usr/bin/env python3
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""IQP Tensor Core acceleration benchmark (PR6).
+
+GPU-vs-GPU timing only (no PyTorch reference). Compare paths via ``--path``:
+
+- ``fwt``  — ``engine.encode(..., "iqp")`` (standard FWT dispatch)
+- ``tc``   — ``engine.encode_batch_tc(...)`` (Tensor Core / Ozaki path)
+- ``both`` — run both and print speedup (FWT / TC)
+
+Run from repo root::
+
+    python qdp/qdp-python/benchmark/benchmark_pr6.py --path both --batch-size 1024
+"""
+
+from __future__ import annotations
+
+import argparse
+import time
 
 import numpy as np
-import time
-import os
-import sys
-
-# Add the current directory to sys.path to ensure we can import the locally built qumat_qdp
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
+import torch
 from qumat_qdp import QdpEngine
 
-def benchmark_iqp_tc():
-    print("=== IQP Tensor Core Acceleration Benchmark ===")
-    
-    # Test across different qubit counts
-    for num_qubits in [8, 10, 12, 14, 16]:
-        batch_size = 1024
-        num_params = num_qubits + num_qubits * (num_qubits - 1) // 2
-        
-        print(f"\nConfig: num_qubits={num_qubits}, batch_size={batch_size}")
-        
-        data = np.random.randn(batch_size, num_params).astype(np.float64)
-        
-        try:
-            engine = QdpEngine(0, precision="float64")
-        except Exception as e:
-            print(f"Failed to initialize QdpEngine: {e}")
-            return
+PATH_LABELS = {
+    "fwt": "IQP FWT (encode)",
+    "tc": "IQP Tensor Core (encode_batch_tc)",
+}
 
-        # Warmup
-        for _ in range(5):
-            _ = engine.encode(data, num_qubits, "iqp")
-            if hasattr(engine, "encode_batch_tc"):
-                _ = engine.encode_batch_tc(data, num_qubits)
-        
-        # Benchmark FWT (current encode_batch)
-        start = time.time()
-        iters = 50
-        for _ in range(iters):
-            _ = engine.encode(data, num_qubits, "iqp")
-        end = time.time()
-        fwt_time = (end - start) / iters
-        print(f"  FWT Avg Time:         {fwt_time*1000:8.3f} ms")
-        
-        # Benchmark TC
-        if hasattr(engine, "encode_batch_tc"):
-            start = time.time()
-            for _ in range(iters):
-                _ = engine.encode_batch_tc(data, num_qubits)
-            end = time.time()
-            tc_time = (end - start) / iters
-            print(f"  Tensor Core Avg Time: {tc_time*1000:8.3f} ms")
-            
-            speedup = fwt_time / tc_time
-            print(f"  Speedup:              {speedup:8.2f}x")
+
+def _iqp_param_count(num_qubits: int) -> int:
+    return num_qubits + num_qubits * (num_qubits - 1) // 2
+
+
+def benchmark_path(
+    engine: QdpEngine,
+    path: str,
+    num_qubits: int,
+    num_samples: int,
+    iters: int,
+) -> float:
+    """Return average batch latency in milliseconds."""
+    data_len = _iqp_param_count(num_qubits)
+    batch_data = np.random.randn(num_samples, data_len).astype(np.float64)
+
+    for _ in range(5):
+        if path == "fwt":
+            _ = engine.encode(batch_data, num_qubits, "iqp")
         else:
-            print("  Tensor Core (encode_batch_tc) not available in this build.")
+            _ = engine.encode_batch_tc(batch_data, num_qubits)
+    torch.cuda.synchronize()
+
+    start = time.perf_counter()
+    for _ in range(iters):
+        if path == "fwt":
+            _ = engine.encode(batch_data, num_qubits, "iqp")
+        else:
+            _ = engine.encode_batch_tc(batch_data, num_qubits)
+    torch.cuda.synchronize()
+    return (time.perf_counter() - start) / iters * 1000.0
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="IQP Tensor Core benchmark (PR6)")
+    parser.add_argument("--batch-size", type=int, default=1024)
+    parser.add_argument("--iterations", type=int, default=50)
+    parser.add_argument(
+        "--path",
+        choices=["fwt", "tc", "both"],
+        default="both",
+        help="Encoding path to benchmark (GPU vs GPU)",
+    )
+    parser.add_argument(
+        "--qubits",
+        type=int,
+        nargs="+",
+        default=[8, 10, 12, 14, 16],
+        help="Qubit counts to benchmark",
+    )
+    parser.add_argument(
+        "--label",
+        type=str,
+        default="",
+        help="Optional run label for before/after comparisons",
+    )
+    args = parser.parse_args()
+
+    if not torch.cuda.is_available():
+        raise SystemExit("CUDA not available. Cannot benchmark.")
+
+    device_name = torch.cuda.get_device_name(0)
+    print("=" * 72)
+    print("IQP Tensor Core acceleration benchmark (PR6)")
+    if args.label:
+        print(f"Label: {args.label}")
+    print(f"GPU: {device_name}")
+    print(
+        f"Config: batch_size={args.batch_size}, iterations={args.iterations}, "
+        f"path={args.path}"
+    )
+    print("=" * 72)
+
+    engine = QdpEngine(0, precision="float64")
+    if args.path in ("tc", "both") and not hasattr(engine, "encode_batch_tc"):
+        raise SystemExit("encode_batch_tc not available in this build.")
+
+    if args.path == "both":
+        print(
+            f"{'Qubits':<8} {'Dim':<10} {'FWT (ms)':>12} {'TC (ms)':>12} "
+            f"{'Speedup':>10}"
+        )
+        print("-" * 72)
+        for n in args.qubits:
+            dim = 1 << n
+            fwt_ms = benchmark_path(engine, "fwt", n, args.batch_size, args.iterations)
+            tc_ms = benchmark_path(engine, "tc", n, args.batch_size, args.iterations)
+            speedup = fwt_ms / tc_ms if tc_ms > 0 else float("inf")
+            print(f"{n:<8} {dim:<10} {fwt_ms:>12.3f} {tc_ms:>12.3f} {speedup:>9.2f}x")
+    else:
+        label = PATH_LABELS[args.path]
+        print(f"{'Qubits':<8} {'Dim':<10} {'Path':<36} {'Time (ms)':>12}")
+        print("-" * 72)
+        for n in args.qubits:
+            dim = 1 << n
+            latency_ms = benchmark_path(
+                engine, args.path, n, args.batch_size, args.iterations
+            )
+            print(f"{n:<8} {dim:<10} {label:<36} {latency_ms:>12.3f}")
+
 
 if __name__ == "__main__":
-    benchmark_iqp_tc()
+    main()
