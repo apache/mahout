@@ -81,14 +81,12 @@ __global__ void phase_encode_batch_kernel(
 
         double phi = 0.0;
         for (unsigned int bit = 0; bit < num_qubits; ++bit) {
-            // PR1 Optimization: Use cast & multiplication to eliminate warp divergence
             phi += phases[bit] * (double)((element_idx >> bit) & 1U);
         }
 
         double re, im;
         sincos(phi, &im, &re);
 
-        // PR1 Optimization: norm_factor is pre-calculated on the host (CPU)
         state_batch[global_idx] = make_cuDoubleComplex(norm_factor * re, norm_factor * im);
     }
 }
