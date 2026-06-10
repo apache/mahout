@@ -29,41 +29,35 @@
 #include <cuda_runtime.h>
 #include <cuComplex.h>
 #include <math.h>
-#include "kernel_config.h"
 
-// Precompute 1/√2^n as a compile-time-friendly inline.
-// For n qubits the norm factor is pow(M_SQRT1_2, n).
-__device__ __forceinline__ double phase_norm(unsigned int num_qubits) {
-    // M_SQRT1_2 = 1/√2 ≈ 0.7071067811865476
-    double factor = 1.0;
-    for (unsigned int k = 0; k < num_qubits; ++k) {
-        factor *= M_SQRT1_2;
-    }
-    return factor;
-}
+#ifndef M_SQRT1_2
+#define M_SQRT1_2 0.70710678118654752440
+#endif
+
+#include "kernel_config.h"
 
 __global__ void phase_encode_kernel(
     const double* __restrict__ phases,
     cuDoubleComplex* __restrict__ state,
     size_t state_len,
-    unsigned int num_qubits
+    unsigned int num_qubits,
+    double norm_factor
 ) {
     size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx >= state_len) return;
 
     // φ(idx) = Σ_k phases[k] * b_k,  b_k = (idx >> k) & 1
     double phi = 0.0;
+    double norm = 1.0;
     for (unsigned int bit = 0; bit < num_qubits; ++bit) {
-        if ((idx >> bit) & 1U) {
-            phi += phases[bit];
-        }
+        phi += phases[bit] * (double)((idx >> bit) & 1U);
+        norm *= M_SQRT1_2;
     }
 
-    double norm = phase_norm(num_qubits);
     double re, im;
     sincos(phi, &im, &re);   // re = cos(φ), im = sin(φ)
 
-    state[idx] = make_cuDoubleComplex(norm * re, norm * im);
+    state[idx] = make_cuDoubleComplex(norm_factor * re, norm_factor * im);
 }
 
 __global__ void phase_encode_batch_kernel(
@@ -71,7 +65,8 @@ __global__ void phase_encode_batch_kernel(
     cuDoubleComplex* __restrict__ state_batch,
     size_t num_samples,
     size_t state_len,
-    unsigned int num_qubits
+    unsigned int num_qubits,
+    double norm_factor
 ) {
     const size_t total_elements = num_samples * state_len;
     const size_t stride = gridDim.x * blockDim.x;
@@ -86,16 +81,13 @@ __global__ void phase_encode_batch_kernel(
 
         double phi = 0.0;
         for (unsigned int bit = 0; bit < num_qubits; ++bit) {
-            if ((element_idx >> bit) & 1U) {
-                phi += phases[bit];
-            }
+            phi += phases[bit] * (double)((element_idx >> bit) & 1U);
         }
 
-        double norm = phase_norm(num_qubits);
         double re, im;
         sincos(phi, &im, &re);
 
-        state_batch[global_idx] = make_cuDoubleComplex(norm * re, norm * im);
+        state_batch[global_idx] = make_cuDoubleComplex(norm_factor * re, norm_factor * im);
     }
 }
 
@@ -132,11 +124,17 @@ int launch_phase_encode(
     const int blockSize = DEFAULT_BLOCK_SIZE;
     const int gridSize = (state_len + blockSize - 1) / blockSize;
 
+    double norm_factor = 1.0;
+    for (unsigned int k = 0; k < num_qubits; ++k) {
+        norm_factor *= M_SQRT1_2;
+    }
+
     phase_encode_kernel<<<gridSize, blockSize, 0, stream>>>(
         phases_d,
         state_complex_d,
         state_len,
-        num_qubits
+        num_qubits,
+        norm_factor
     );
 
     return (int)cudaGetLastError();
@@ -174,12 +172,18 @@ int launch_phase_encode_batch(
     const size_t max_blocks = MAX_GRID_BLOCKS;
     const size_t gridSize = (blocks_needed < max_blocks) ? blocks_needed : max_blocks;
 
+    double norm_factor = 1.0;
+    for (unsigned int k = 0; k < num_qubits; ++k) {
+        norm_factor *= M_SQRT1_2;
+    }
+
     phase_encode_batch_kernel<<<gridSize, blockSize, 0, stream>>>(
         phases_batch_d,
         state_complex_d,
         num_samples,
         state_len,
-        num_qubits
+        num_qubits,
+        norm_factor
     );
 
     return (int)cudaGetLastError();

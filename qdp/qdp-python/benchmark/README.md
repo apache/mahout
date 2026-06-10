@@ -8,6 +8,7 @@ scripts:
 - `benchmark_throughput.py`: DataLoader-style throughput benchmark
   that measures vectors/sec across Mahout, PennyLane, and Qiskit.
 - `benchmark_latency.py`: Data-to-State latency benchmark (CPU RAM -> GPU VRAM).
+- `benchmark_phase.py`: GPU phase encoding latency benchmark (batch encode timing).
 
 ## Quick Start
 
@@ -32,6 +33,7 @@ To run individual benchmarks after setup:
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_e2e.py
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_latency.py
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_throughput.py
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_phase.py
 ```
 
 This keeps all benchmark dependencies in the unified repo root venv (`mahout/.venv`).
