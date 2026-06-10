@@ -60,55 +60,6 @@ __device__ double compute_phase(
     return phase;
 }
 
-// Compute the unnormalized amplitude for basis state |z> via a naive O(2^n) sum over x
-// (O(4^n) total work if amplitudes for all 2^n basis states z are computed):
-//   sum_x exp(i*theta(x)) * (-1)^popcount(x AND z)
-__device__ cuDoubleComplex compute_amplitude_naive(
-    const double* __restrict__ data,
-    size_t z,
-    size_t state_len,
-    unsigned int num_qubits,
-    int enable_zz
-) {
-    double real_sum = 0.0;
-    double imag_sum = 0.0;
-
-    for (size_t x = 0; x < state_len; ++x) {
-        double phase = compute_phase(data, x, num_qubits, enable_zz);
-        int parity = __popcll(x & z) & 1;
-        double sign = (parity == 0) ? 1.0 : -1.0;
-        double cos_phase, sin_phase;
-        sincos(phase, &sin_phase, &cos_phase);
-        real_sum += sign * cos_phase;
-        imag_sum += sign * sin_phase;
-    }
-
-    return make_cuDoubleComplex(real_sum, imag_sum);
-}
-
-// ============================================================================
-// Naive Implementation: O(2^n) per amplitude, O(4^n) for the full state
-// (kept as fallback for small n and verification)
-// ============================================================================
-
-__global__ void iqp_encode_kernel_naive(
-    const double* __restrict__ data,
-    cuDoubleComplex* __restrict__ state,
-    size_t state_len,
-    unsigned int num_qubits,
-    int enable_zz
-) {
-    size_t z = blockIdx.x * blockDim.x + threadIdx.x;
-    if (z >= state_len) return;
-
-    cuDoubleComplex amp = compute_amplitude_naive(data, z, state_len, num_qubits, enable_zz);
-
-    // Normalize by 1/2^n (state_len = 2^n)
-    double norm = 1.0 / (double)state_len;
-    state[z] = make_cuDoubleComplex(cuCreal(amp) * norm, cuCimag(amp) * norm);
-}
-
-
 // ============================================================================
 // FWT O(n * 2^n) Implementation
 // ============================================================================
@@ -260,39 +211,6 @@ __global__ void normalize_state_kernel(
 }
 
 // ============================================================================
-// Naive O(4^n) Batch Implementation (kept as fallback)
-// ============================================================================
-
-__global__ void iqp_encode_batch_kernel_naive(
-    const double* __restrict__ data_batch,
-    cuDoubleComplex* __restrict__ state_batch,
-    size_t num_samples,
-    size_t state_len,
-    unsigned int num_qubits,
-    unsigned int data_len,
-    int enable_zz
-) {
-    const size_t total_elements = num_samples * state_len;
-    const size_t stride = gridDim.x * blockDim.x;
-    const size_t state_mask = state_len - 1;
-    // Normalize by 1/2^n (state_len = 2^n) - hoisted outside the loop
-    const double norm = 1.0 / (double)state_len;
-
-    for (size_t global_idx = blockIdx.x * blockDim.x + threadIdx.x;
-         global_idx < total_elements;
-         global_idx += stride) {
-        const size_t sample_idx = global_idx >> num_qubits;
-        const size_t z = global_idx & state_mask;
-        const double* data = data_batch + sample_idx * data_len;
-
-        cuDoubleComplex amp = compute_amplitude_naive(data, z, state_len, num_qubits, enable_zz);
-
-        state_batch[global_idx] = make_cuDoubleComplex(cuCreal(amp) * norm, cuCimag(amp) * norm);
-    }
-}
-
-
-// ============================================================================
 // FWT O(n * 2^n) Batch Implementation
 // ============================================================================
 
@@ -431,20 +349,7 @@ int launch_iqp_encode(
     const int blockSize = DEFAULT_BLOCK_SIZE;
     const double norm_factor = 1.0 / (double)state_len;
 
-    // Use naive kernel for small n (FWT overhead not worth it)
-    if (num_qubits < FWT_MIN_QUBITS) {
-        const int gridSize = (state_len + blockSize - 1) / blockSize;
-        iqp_encode_kernel_naive<<<gridSize, blockSize, 0, stream>>>(
-            data_d,
-            state_complex_d,
-            state_len,
-            num_qubits,
-            enable_zz
-        );
-        return (int)cudaGetLastError();
-    }
-
-    // FWT-based implementation for larger n
+    // FWT-based implementation
     const size_t blocks_needed = (state_len + blockSize - 1) / blockSize;
     const int gridSize = (int)((blocks_needed < MAX_GRID_BLOCKS) ? blocks_needed : MAX_GRID_BLOCKS);
 
@@ -530,21 +435,7 @@ int launch_iqp_encode_batch(
     const size_t gridSize = (blocks_needed < MAX_GRID_BLOCKS) ? blocks_needed : MAX_GRID_BLOCKS;
     const double norm_factor = 1.0 / (double)state_len;
 
-    // Use naive kernel for small n (FWT overhead not worth it)
-    if (num_qubits < FWT_MIN_QUBITS) {
-        iqp_encode_batch_kernel_naive<<<gridSize, blockSize, 0, stream>>>(
-            data_batch_d,
-            state_complex_d,
-            num_samples,
-            state_len,
-            num_qubits,
-            data_len,
-            enable_zz
-        );
-        return (int)cudaGetLastError();
-    }
-
-    // FWT-based implementation for larger n
+    // FWT-based implementation
 
     // Step 1: Compute phase array f[x] = exp(i*theta(x)) for all samples
     iqp_phase_batch_kernel<<<gridSize, blockSize, 0, stream>>>(
