@@ -1,3 +1,19 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one or more
+// contributor license agreements.  See the NOTICE file distributed with
+// this work for additional information regarding copyright ownership.
+// The ASF licenses this file to You under the Apache License, Version 2.0
+// (the "License"); you may not use this file except in compliance with
+// the License.  You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 // iqp_tc.cu
 #include <cuda_runtime.h>
 #include <cuComplex.h>
@@ -124,26 +140,26 @@ extern "C" int launch_iqp_encode_tc(
 ) {
     // Scaffold for batch layout manipulation
     size_t total_elements = num_samples * state_len;
-    
+
     double *d_state_real, *d_state_imag;
     cudaMalloc(&d_state_real, total_elements * sizeof(double));
     cudaMalloc(&d_state_imag, total_elements * sizeof(double));
-    
+
     unsigned int data_len = num_qubits;
     const size_t blocks = (total_elements + DEFAULT_BLOCK_SIZE - 1) / DEFAULT_BLOCK_SIZE;
-    
+
     iqp_phase_split_kernel<<<blocks, DEFAULT_BLOCK_SIZE, 0, stream>>>(
         data_batch_d, d_state_real, d_state_imag, num_samples, state_len, num_qubits, data_len, enable_zz
     );
-    
+
     // In future PRs, Kronecker Transpose and FWT will happen here.
-    
+
     recombine_complex_kernel<<<blocks, DEFAULT_BLOCK_SIZE, 0, stream>>>(
         d_state_real, d_state_imag, static_cast<cuDoubleComplex*>(state_batch_d), total_elements
     );
-    
+
     cudaFree(d_state_real);
     cudaFree(d_state_imag);
-    
+
     return (int)cudaSuccess;
 }
