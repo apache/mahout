@@ -151,15 +151,19 @@ __device__ void implicit_ozaki_process_one_tile(
 
             for (int mt = 0; mt < 2; mt++) {
                 uint32_t af[4];
-                int row_a = wr * 32 + mt * 16 + (lane_id % 8);
-                int col_a = (lane_id / 8) * 8;
+                int row_a = wr * 32 + mt * 16 + (lane_id % 16);
+                int col_a = (lane_id / 16) * 16;
                 ldmatrix_x4_int8(af, &sA_p[row_a * 32 + col_a]);
+
+                uint32_t bf_all[4];
+                int row_b = (lane_id % 16);
+                int col_b = wc * 16;
+                ldmatrix_x4_int8(bf_all, &sB_p[row_b * 64 + col_b]);
 
                 for (int nt = 0; nt < 2; nt++) {
                     uint32_t bf[2];
-                    int col_b = wc * 16 + nt * 8 + (lane_id % 8);
-                    int row_b = (lane_id / 8) * 8;
-                    ldmatrix_x2_int8(bf, &sB_p[row_b * 64 + col_b]);
+                    bf[0] = bf_all[nt * 2];
+                    bf[1] = bf_all[nt * 2 + 1];
 
                     mma_m16n8k32_s8(
                         prime_acc[p][wr * 2 + mt][wc * 2 + nt], af, bf,
@@ -221,7 +225,7 @@ __global__ void implicit_hadamard_ozaki_grid_kernel_implicit(
     double norm_factor) {
 
     constexpr int kS8Bytes = 7 * 2048;
-    __shared__ int8_t shared_mem[2 * kS8Bytes];
+    __shared__ alignas(16) int8_t shared_mem[2 * kS8Bytes];
     int8_t* sA8 = &shared_mem[0];
     int8_t* sB8 = &shared_mem[kS8Bytes];
 

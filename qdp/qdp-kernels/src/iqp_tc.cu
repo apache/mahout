@@ -17,6 +17,7 @@
 // iqp_tc.cu
 #include <cuda_runtime.h>
 #include <cuComplex.h>
+#include <stdio.h>
 #include "kernel_config.h"
 
 // Phase computation (from iqp.cu)
@@ -42,7 +43,7 @@ __device__ double compute_phase_tc(
     return phase;
 }
 
-// Shared-memory FWT path (Operator Fusion)
+// PR3: Shared-memory FWT path (Operator Fusion)
 // Fuses Phase computation, Fast Walsh-Hadamard Transform, and Normalization
 // entirely within Shared Memory. This completely avoids DRAM roundtrips for N <= 12.
 __global__ void iqp_phase_fwt_normalize_tc_kernel(
@@ -181,7 +182,7 @@ void iqp_tc_launch_transpose(const double* d_in, double* d_out, int B, int rows,
 // Implicit Hadamard Engine for Tensor Core Blocked FWT
 #include "ImplicitHadamardOzaki.h"
 
-// Recombine real/imag GEMM outputs back into cuDoubleComplex.
+// GEMM 結果重新組合回 cuDoubleComplex
 // This restores the memory layout after Tensor Core matrix multiplications.
 __global__ void recombine_complex_kernel(
     const double* __restrict__ real_part,
@@ -204,12 +205,18 @@ extern "C" int launch_iqp_encode_tc(
     int           enable_zz,
     cudaStream_t  stream
 ) {
+    unsigned int data_len = num_qubits;
+    if (enable_zz) {
+        data_len = num_qubits + (num_qubits * (num_qubits - 1)) / 2;
+    }
+
     if (num_qubits <= FWT_SHARED_MEM_THRESHOLD) {
         // For N <= 12, use the fused Shared Memory FWT kernel
         double norm_factor = 1.0 / (double)state_len;
-        unsigned int data_len = num_qubits;
         // Request max dynamic shared memory for this kernel
-        cudaFuncSetAttribute(iqp_phase_fwt_normalize_tc_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, 65536);
+        cudaError_t res = cudaFuncSetAttribute(iqp_phase_fwt_normalize_tc_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, 65536);
+        if (res != cudaSuccess) return (int)res;
+
         iqp_phase_fwt_normalize_tc_kernel<<<num_samples, DEFAULT_BLOCK_SIZE, state_len * sizeof(cuDoubleComplex), stream>>>(
             data_batch_d, static_cast<cuDoubleComplex*>(state_batch_d), num_samples, state_len, num_qubits, data_len, enable_zz, norm_factor
         );
@@ -233,12 +240,13 @@ extern "C" int launch_iqp_encode_tc(
         cudaMalloc(&d_temp_real, total_elements * sizeof(double));
         cudaMalloc(&d_temp_imag, total_elements * sizeof(double));
 
-        // 1. Initialize Phase (Split Real/Imag)
-        unsigned int data_len = num_qubits;
+        // Initialize Phase (Split Real/Imag)
         const size_t blocks = (total_elements + DEFAULT_BLOCK_SIZE - 1) / DEFAULT_BLOCK_SIZE;
         iqp_phase_split_kernel<<<blocks, DEFAULT_BLOCK_SIZE, 0, stream>>>(
             data_batch_d, d_state_real, d_state_imag, num_samples, state_len, num_qubits, data_len, enable_zz
         );
+
+        // Implicit Hadamard Engine for Matrix-Free Hadamard Tensor Core execution
         ozaki::OzakiConfig config;
         ozaki::ImplicitHadamardOzakiEngine engine(config);
         double norm_factor = 1.0 / (double)state_len;
@@ -259,10 +267,14 @@ extern "C" int launch_iqp_encode_tc(
         iqp_tc_launch_transpose(d_out_real, d_temp_real, num_samples, dim2, dim1, stream);
         iqp_tc_launch_transpose(d_out_imag, d_temp_imag, num_samples, dim2, dim1, stream);
 
-        // 7. Recombine and Write back
+
+
+        // Recombine and Write back
         recombine_complex_kernel<<<blocks, DEFAULT_BLOCK_SIZE, 0, stream>>>(
             d_temp_real, d_temp_imag, static_cast<cuDoubleComplex*>(state_batch_d), total_elements
         );
+
+        cudaStreamSynchronize(stream);
 
         cudaFree(d_state_real);
         cudaFree(d_state_imag);
@@ -270,7 +282,8 @@ extern "C" int launch_iqp_encode_tc(
         cudaFree(d_out_imag);
         cudaFree(d_temp_real);
         cudaFree(d_temp_imag);
-    }
+        }
 
-    return (int)cudaSuccess;
-}
+        cudaError_t err = cudaGetLastError();
+        return (int)err;
+        }
