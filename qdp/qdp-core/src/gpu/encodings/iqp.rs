@@ -136,7 +136,7 @@ impl IqpEncoder {
                     state_len,
                     num_qubits as u32,
                     if self.enable_zz { 1 } else { 0 },
-                    std::ptr::null_mut(),
+                    (*device.cu_stream()) as *mut c_void,
                 )
             };
 

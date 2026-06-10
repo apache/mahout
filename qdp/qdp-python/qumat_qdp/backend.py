@@ -123,11 +123,12 @@ class QdpEngine:
         self,
         data: Any,
         num_qubits: int,
+        encoding_method: str = "iqp",
     ) -> Any:
-        """Encode a batch of IQP samples via the Ozaki Tensor Core path."""
+        """Encode a batch of IQP samples via the Tensor Core / Kronecker FWT path."""
         encode_tc = getattr(self._engine_adapter, "encode_batch_tc", None)
         if encode_tc is None:
             raise RuntimeError(
                 "encode_batch_tc is unavailable. Rebuild with CUDA on Linux/WSL."
             )
-        return encode_tc(data, num_qubits)
+        return encode_tc(data, num_qubits, encoding_method)

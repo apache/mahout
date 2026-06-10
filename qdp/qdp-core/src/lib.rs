@@ -212,7 +212,7 @@ impl QdpEngine {
         self.encode_batch_for_pipeline(batch_data, num_samples, sample_size, num_qubits, encoding)
     }
 
-    /// Encode a batch of IQP samples via the Ozaki Kronecker Tensor Core path.
+    /// Encode a batch of IQP samples via the Tensor Core / Kronecker FWT path.
     #[cfg(target_os = "linux")]
     pub fn encode_batch_tc(
         &self,
@@ -220,10 +220,21 @@ impl QdpEngine {
         num_samples: usize,
         sample_size: usize,
         num_qubits: usize,
+        encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
         crate::profile_scope!("Mahout::EncodeBatchTC");
 
-        let encoder = gpu::encodings::IqpEncoder::full();
+        let encoding = Encoding::from_str_ci(encoding_method)?;
+        let encoder = match encoding {
+            Encoding::Iqp => gpu::encodings::IqpEncoder::full(),
+            Encoding::IqpZ => gpu::encodings::IqpEncoder::z_only(),
+            _ => {
+                return Err(MahoutError::InvalidInput(format!(
+                    "encode_batch_tc supports iqp and iqp-z only, got {}",
+                    encoding_method
+                )));
+            }
+        };
         let state_vector = encoder.encode_batch_tc(
             &self.device,
             batch_data,

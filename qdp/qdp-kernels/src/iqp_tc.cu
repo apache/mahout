@@ -17,10 +17,11 @@
 // iqp_tc.cu
 #include <cuda_runtime.h>
 #include <cuComplex.h>
-#include <stdio.h>
+#include <iostream>
 #include "kernel_config.h"
+#include "ImplicitHadamardOzaki.h"
 
-// Phase computation (from iqp.cu)
+// Phase 計算副程式 (從 iqp.cu 中借用)
 __device__ double compute_phase_tc(
     const double* __restrict__ data,
     size_t x,
@@ -43,9 +44,7 @@ __device__ double compute_phase_tc(
     return phase;
 }
 
-// PR3: Shared-memory FWT path (Operator Fusion)
-// Fuses Phase computation, Fast Walsh-Hadamard Transform, and Normalization
-// entirely within Shared Memory. This completely avoids DRAM roundtrips for N <= 12.
+// PR-C: 算子融合 (Operator Fusion) - 將 Phase 計算, FWT, Normalize 融合在 Shared Memory
 __global__ void iqp_phase_fwt_normalize_tc_kernel(
     const double* __restrict__ data_batch,
     cuDoubleComplex* __restrict__ state_batch,
@@ -66,7 +65,7 @@ __global__ void iqp_phase_fwt_normalize_tc_kernel(
     const double* data = data_batch + sample_idx * data_len;
     cuDoubleComplex* state = state_batch + sample_idx * state_len;
 
-    // 1. Phase calculation directly into Shared Memory
+    // 1. Phase 計算直接寫入 Shared Memory
     for (size_t i = tid; i < state_len; i += blockDim.x) {
         double phase = compute_phase_tc(data, i, num_qubits, enable_zz);
         double cos_phase, sin_phase;
@@ -75,7 +74,7 @@ __global__ void iqp_phase_fwt_normalize_tc_kernel(
     }
     __syncthreads();
 
-    // 2. Perform Hadamard FWT in Shared Memory
+    // 2. 利用 Shared Memory 進行 Hadamard FWT 轉換
     for (unsigned int stage = 0; stage < num_qubits; ++stage) {
         size_t stride = 1ULL << stage;
         size_t block_size = stride << 1;
@@ -96,7 +95,7 @@ __global__ void iqp_phase_fwt_normalize_tc_kernel(
         __syncthreads();
     }
 
-    // 3. Normalize and write back to Global Memory
+    // 3. Normalize 並寫回 Global Memory
     for (size_t i = tid; i < state_len; i += blockDim.x) {
         cuDoubleComplex val = shared_state[i];
         state[i] = make_cuDoubleComplex(
@@ -106,8 +105,7 @@ __global__ void iqp_phase_fwt_normalize_tc_kernel(
     }
 }
 
-// PR2: Pre-GEMM setup - Unroll Batch and compute initial Phase (split into pure real/imaginary parts)
-// This prepares the data layout for the Kronecker product decomposition in upcoming PRs.
+// Phase 2: GEMM 準備 - 將 Batch 展開並計算初始 Phase (純實數/虛數分離)
 __global__ void iqp_phase_split_kernel(
     const double* __restrict__ data_batch,
     double* __restrict__ state_real,
@@ -141,8 +139,7 @@ __global__ void iqp_phase_split_kernel(
 #define TRANSPOSE_TILE_DIM 32
 #define TRANSPOSE_BLOCK_ROWS 8
 
-// PR2: Shared Memory Bank-Conflict-Free Batch Transpose
-// Essential for reordering the data efficiently before/after Tensor Core FWT matrix multiplications.
+// Shared Memory Bank-Conflict-Free Batch Transpose
 __global__ void iqp_tc_batch_transpose_kernel(const double* __restrict__ in, double* __restrict__ out, int B, int rows, int cols) {
     // TILE_DIM x (TILE_DIM+1) pad to avoid shared memory bank conflicts
     __shared__ double tile[TRANSPOSE_TILE_DIM][TRANSPOSE_TILE_DIM + 1];
@@ -179,11 +176,7 @@ void iqp_tc_launch_transpose(const double* d_in, double* d_out, int B, int rows,
     iqp_tc_batch_transpose_kernel<<<grid, block, 0, stream>>>(d_in, d_out, B, rows, cols);
 }
 
-// Implicit Hadamard Engine for Tensor Core Blocked FWT
-#include "ImplicitHadamardOzaki.h"
-
 // GEMM 結果重新組合回 cuDoubleComplex
-// This restores the memory layout after Tensor Core matrix multiplications.
 __global__ void recombine_complex_kernel(
     const double* __restrict__ real_part,
     const double* __restrict__ imag_part,
@@ -196,6 +189,16 @@ __global__ void recombine_complex_kernel(
     }
 }
 
+#define CHECK_CUDA_RETURN(call) do { \
+    cudaError_t _e = (call); \
+    if (_e != cudaSuccess) { \
+        cudaFree(d_state_real); cudaFree(d_state_imag); \
+        cudaFree(d_out_real);   cudaFree(d_out_imag); \
+        cudaFree(d_temp_real);  cudaFree(d_temp_imag); \
+        return (int)_e; \
+    } \
+} while(0)
+
 extern "C" int launch_iqp_encode_tc(
     const double* data_batch_d,
     void*         state_batch_d,
@@ -205,23 +208,19 @@ extern "C" int launch_iqp_encode_tc(
     int           enable_zz,
     cudaStream_t  stream
 ) {
-    unsigned int data_len = num_qubits;
-    if (enable_zz) {
-        data_len = num_qubits + (num_qubits * (num_qubits - 1)) / 2;
-    }
-
-    if (num_qubits <= FWT_SHARED_MEM_THRESHOLD) {
-        // For N <= 12, use the fused Shared Memory FWT kernel
+    // 判斷是否滿足 Shared Memory FWT 的條件
+    if (num_qubits <= 12) {
+        // 使用 PR-C 的融合算子
         double norm_factor = 1.0 / (double)state_len;
-        // Request max dynamic shared memory for this kernel
-        cudaError_t res = cudaFuncSetAttribute(iqp_phase_fwt_normalize_tc_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, 65536);
-        if (res != cudaSuccess) return (int)res;
-
+        unsigned int data_len = enable_zz
+            ? (unsigned int)(num_qubits + (unsigned int)num_qubits * (num_qubits - 1) / 2)
+            : num_qubits;
+        cudaFuncSetAttribute(iqp_phase_fwt_normalize_tc_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, 65536);
         iqp_phase_fwt_normalize_tc_kernel<<<num_samples, DEFAULT_BLOCK_SIZE, state_len * sizeof(cuDoubleComplex), stream>>>(
             data_batch_d, static_cast<cuDoubleComplex*>(state_batch_d), num_samples, state_len, num_qubits, data_len, enable_zz, norm_factor
         );
     } else {
-        // Blocked TC-FWT (Kronecker Product Decomposition)
+        // [Phase 5] Blocked TC-FWT (Kronecker Product Decomposition)
         size_t m_samples = num_samples;
         size_t total_elements = m_samples * state_len;
 
@@ -230,60 +229,58 @@ extern "C" int launch_iqp_encode_tc(
         int dim1 = 1 << n1;
         int dim2 = 1 << n2;
 
-        double *d_state_real, *d_state_imag;
-        double *d_out_real, *d_out_imag;
-        double *d_temp_real, *d_temp_imag;
-        cudaMalloc(&d_state_real, total_elements * sizeof(double));
-        cudaMalloc(&d_state_imag, total_elements * sizeof(double));
-        cudaMalloc(&d_out_real, total_elements * sizeof(double));
-        cudaMalloc(&d_out_imag, total_elements * sizeof(double));
-        cudaMalloc(&d_temp_real, total_elements * sizeof(double));
-        cudaMalloc(&d_temp_imag, total_elements * sizeof(double));
+        static double *d_state_real = nullptr, *d_state_imag = nullptr;
+        static double *d_out_real = nullptr, *d_out_imag = nullptr;
+        static double *d_temp_real = nullptr, *d_temp_imag = nullptr;
+        static size_t allocated_elements = 0;
 
-        // Initialize Phase (Split Real/Imag)
+        if (total_elements > allocated_elements) {
+            if (d_state_real) {
+                cudaFree(d_state_real); cudaFree(d_state_imag);
+                cudaFree(d_out_real);   cudaFree(d_out_imag);
+                cudaFree(d_temp_real);  cudaFree(d_temp_imag);
+            }
+            CHECK_CUDA_RETURN(cudaMalloc(&d_state_real, total_elements * sizeof(double)));
+            CHECK_CUDA_RETURN(cudaMalloc(&d_state_imag, total_elements * sizeof(double)));
+            CHECK_CUDA_RETURN(cudaMalloc(&d_out_real, total_elements * sizeof(double)));
+            CHECK_CUDA_RETURN(cudaMalloc(&d_out_imag, total_elements * sizeof(double)));
+            CHECK_CUDA_RETURN(cudaMalloc(&d_temp_real, total_elements * sizeof(double)));
+            CHECK_CUDA_RETURN(cudaMalloc(&d_temp_imag, total_elements * sizeof(double)));
+            allocated_elements = total_elements;
+        }
+
+        // 1. 初始化 Phase (拆分為 Real / Imag)
+        unsigned int data_len = enable_zz
+            ? (unsigned int)(num_qubits + (unsigned int)num_qubits * (num_qubits - 1) / 2)
+            : num_qubits;
+
         const size_t blocks = (total_elements + DEFAULT_BLOCK_SIZE - 1) / DEFAULT_BLOCK_SIZE;
         iqp_phase_split_kernel<<<blocks, DEFAULT_BLOCK_SIZE, 0, stream>>>(
             data_batch_d, d_state_real, d_state_imag, num_samples, state_len, num_qubits, data_len, enable_zz
         );
 
-        // Implicit Hadamard Engine for Matrix-Free Hadamard Tensor Core execution
+        // 2. 準備 Implicit Engine
         ozaki::OzakiConfig config;
         ozaki::ImplicitHadamardOzakiEngine engine(config);
         double norm_factor = 1.0 / (double)state_len;
 
-        // 3. TC-FWT Step 1: Z = X * H_{n2} (X shape: B*dim1 x dim2)
-        engine.execute_implicit_hadamard(d_state_real, d_out_real, num_samples * dim1, dim2, dim2, 1.0, stream);
-        engine.execute_implicit_hadamard(d_state_imag, d_out_imag, num_samples * dim1, dim2, dim2, 1.0, stream);
+        // [Phase 1: Unfused - High Performance Baseline using <64, 256, 4> universally]
+        // 3. TC-FWT Step 1: Z_T = Transpose(X * H_{n2})
+        engine.execute_implicit_hadamard(d_state_real, d_temp_real, num_samples * dim1, dim2, dim2, 1.0, stream, true, dim1);
+        engine.execute_implicit_hadamard(d_state_imag, d_temp_imag, num_samples * dim1, dim2, dim2, 1.0, stream, true, dim1);
 
-        // 4. TC-FWT Step 2: Transpose (B, dim1, dim2) -> (B, dim2, dim1)
-        iqp_tc_launch_transpose(d_out_real, d_temp_real, num_samples, dim1, dim2, stream);
-        iqp_tc_launch_transpose(d_out_imag, d_temp_imag, num_samples, dim1, dim2, stream);
+        // 4. TC-FWT Step 2: Y_T = Transpose(Z_T * H_{n1})
+        engine.execute_implicit_hadamard(d_temp_real, d_out_real, num_samples * dim2, dim1, dim1, norm_factor, stream, true, dim2);
+        engine.execute_implicit_hadamard(d_temp_imag, d_out_imag, num_samples * dim2, dim1, dim1, norm_factor, stream, true, dim2);
 
-        // 5. TC-FWT Step 3: Y_T = Z_T * H_{n1} (Z_T shape: B*dim2 x dim1)
-        engine.execute_implicit_hadamard(d_temp_real, d_out_real, num_samples * dim2, dim1, dim1, norm_factor, stream);
-        engine.execute_implicit_hadamard(d_temp_imag, d_out_imag, num_samples * dim2, dim1, dim1, norm_factor, stream);
-
-        // 6. TC-FWT Step 4: Transpose back (B, dim2, dim1) -> (B, dim1, dim2)
-        iqp_tc_launch_transpose(d_out_real, d_temp_real, num_samples, dim2, dim1, stream);
-        iqp_tc_launch_transpose(d_out_imag, d_temp_imag, num_samples, dim2, dim1, stream);
-
-
-
-        // Recombine and Write back
+        // 5. Recombine back to cuDoubleComplex
         recombine_complex_kernel<<<blocks, DEFAULT_BLOCK_SIZE, 0, stream>>>(
-            d_temp_real, d_temp_imag, static_cast<cuDoubleComplex*>(state_batch_d), total_elements
+            d_out_real, d_out_imag, static_cast<cuDoubleComplex*>(state_batch_d), total_elements
         );
 
-        cudaStreamSynchronize(stream);
+        cudaError_t last_err = cudaGetLastError();
+        return (int)last_err;
+    }
 
-        cudaFree(d_state_real);
-        cudaFree(d_state_imag);
-        cudaFree(d_out_real);
-        cudaFree(d_out_imag);
-        cudaFree(d_temp_real);
-        cudaFree(d_temp_imag);
-        }
-
-        cudaError_t err = cudaGetLastError();
-        return (int)err;
-        }
+    return (int)cudaGetLastError();
+}
