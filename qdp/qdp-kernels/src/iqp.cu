@@ -191,6 +191,65 @@ __global__ void iqp_phase_fwt_shared_normalize_kernel(
     }
 }
 
+// Fused phase + shared-memory FWT + normalization for one sample in a batch.
+// One CUDA block per sample; avoids intermediate global-memory traffic for N <= 12.
+__global__ void iqp_phase_fwt_shared_normalize_batch_kernel(
+    const double* __restrict__ data_batch,
+    cuDoubleComplex* __restrict__ state_batch,
+    size_t num_samples,
+    size_t state_len,
+    unsigned int num_qubits,
+    unsigned int data_len,
+    int enable_zz,
+    double norm_factor
+) {
+    extern __shared__ cuDoubleComplex shared_state[];
+
+    size_t tid = threadIdx.x;
+    size_t sample_idx = blockIdx.x;
+
+    if (sample_idx >= num_samples) return;
+
+    const double* data = data_batch + sample_idx * data_len;
+    cuDoubleComplex* state = state_batch + sample_idx * state_len;
+
+    for (size_t i = tid; i < state_len; i += blockDim.x) {
+        double phase = compute_phase(data, i, num_qubits, enable_zz);
+        double cos_phase, sin_phase;
+        sincos(phase, &sin_phase, &cos_phase);
+        shared_state[i] = make_cuDoubleComplex(cos_phase, sin_phase);
+    }
+    __syncthreads();
+
+    for (unsigned int stage = 0; stage < num_qubits; ++stage) {
+        size_t stride = 1ULL << stage;
+        size_t block_size = stride << 1;
+        size_t num_pairs = state_len >> 1;
+
+        for (size_t pair_idx = tid; pair_idx < num_pairs; pair_idx += blockDim.x) {
+            size_t block_idx = pair_idx / stride;
+            size_t pair_offset = pair_idx % stride;
+            size_t i = block_idx * block_size + pair_offset;
+            size_t j = i + stride;
+
+            cuDoubleComplex a = shared_state[i];
+            cuDoubleComplex b = shared_state[j];
+
+            shared_state[i] = cuCadd(a, b);
+            shared_state[j] = cuCsub(a, b);
+        }
+        __syncthreads();
+    }
+
+    for (size_t i = tid; i < state_len; i += blockDim.x) {
+        cuDoubleComplex val = shared_state[i];
+        state[i] = make_cuDoubleComplex(
+            cuCreal(val) * norm_factor,
+            cuCimag(val) * norm_factor
+        );
+    }
+}
+
 // Step 3: Normalize the state by 1/state_len (= 1/2^n)
 __global__ void normalize_state_kernel(
     cuDoubleComplex* __restrict__ state,
@@ -357,6 +416,11 @@ int launch_iqp_encode(
         // Shared-memory fast path: phase generation, full FWT, and normalization
         // happen in a single launch and touch global memory only once.
         size_t shared_mem_size = state_len * sizeof(cuDoubleComplex);
+        cudaFuncSetAttribute(
+            iqp_phase_fwt_shared_normalize_kernel,
+            cudaFuncAttributeMaxDynamicSharedMemorySize,
+            65536
+        );
         iqp_phase_fwt_shared_normalize_kernel<<<1, blockSize, shared_mem_size, stream>>>(
             data_d,
             state_complex_d,
@@ -435,35 +499,49 @@ int launch_iqp_encode_batch(
     const size_t gridSize = (blocks_needed < MAX_GRID_BLOCKS) ? blocks_needed : MAX_GRID_BLOCKS;
     const double norm_factor = 1.0 / (double)state_len;
 
-    // FWT-based implementation
-
-    // Step 1: Compute phase array f[x] = exp(i*theta(x)) for all samples
-    iqp_phase_batch_kernel<<<gridSize, blockSize, 0, stream>>>(
-        data_batch_d,
-        state_complex_d,
-        num_samples,
-        state_len,
-        num_qubits,
-        data_len,
-        enable_zz,
-        norm_factor
-    );
-
-    // Step 2: Apply FWT to all samples (global memory version for batch)
-    // For batch processing, we always use global memory FWT
-    // (shared memory would require processing samples one at a time)
-    const size_t total_pairs = num_samples * (state_len >> 1);
-    const size_t fwt_blocks_needed = (total_pairs + blockSize - 1) / blockSize;
-    const size_t fwt_grid_size = (fwt_blocks_needed < MAX_GRID_BLOCKS) ? fwt_blocks_needed : MAX_GRID_BLOCKS;
-
-    for (unsigned int stage = 0; stage < num_qubits; ++stage) {
-        fwt_butterfly_batch_kernel<<<fwt_grid_size, blockSize, 0, stream>>>(
+    if (num_qubits <= FWT_SHARED_MEM_THRESHOLD) {
+        size_t shared_mem_size = state_len * sizeof(cuDoubleComplex);
+        cudaFuncSetAttribute(
+            iqp_phase_fwt_shared_normalize_batch_kernel,
+            cudaFuncAttributeMaxDynamicSharedMemorySize,
+            65536
+        );
+        iqp_phase_fwt_shared_normalize_batch_kernel<<<num_samples, blockSize, shared_mem_size, stream>>>(
+            data_batch_d,
             state_complex_d,
             num_samples,
             state_len,
             num_qubits,
-            stage
+            data_len,
+            enable_zz,
+            norm_factor
         );
+    } else {
+        // Global-memory FWT for larger qubit counts.
+        iqp_phase_batch_kernel<<<gridSize, blockSize, 0, stream>>>(
+            data_batch_d,
+            state_complex_d,
+            num_samples,
+            state_len,
+            num_qubits,
+            data_len,
+            enable_zz,
+            norm_factor
+        );
+
+        const size_t total_pairs = num_samples * (state_len >> 1);
+        const size_t fwt_blocks_needed = (total_pairs + blockSize - 1) / blockSize;
+        const size_t fwt_grid_size = (fwt_blocks_needed < MAX_GRID_BLOCKS) ? fwt_blocks_needed : MAX_GRID_BLOCKS;
+
+        for (unsigned int stage = 0; stage < num_qubits; ++stage) {
+            fwt_butterfly_batch_kernel<<<fwt_grid_size, blockSize, 0, stream>>>(
+                state_complex_d,
+                num_samples,
+                state_len,
+                num_qubits,
+                stage
+            );
+        }
     }
 
     return (int)cudaGetLastError();
