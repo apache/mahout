@@ -60,9 +60,7 @@ __device__ double compute_phase(
     return phase;
 }
 
-// ============================================================================
-// FWT O(n * 2^n) Implementation
-// ============================================================================
+// FWT O(n * 2^n) path.
 
 // Step 1: Compute f[x] = exp(i*theta(x)) for all x.
 // Uses a grid-stride loop so large state vectors can reuse a fixed launch size.
@@ -269,9 +267,7 @@ __global__ void normalize_state_kernel(
     }
 }
 
-// ============================================================================
-// FWT O(n * 2^n) Batch Implementation
-// ============================================================================
+// FWT batch path.
 
 // Step 1: Compute the normalized phase vector for all samples in batch.
 __global__ void iqp_phase_batch_kernel(
