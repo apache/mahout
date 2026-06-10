@@ -20,11 +20,13 @@ use std::fs;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use arrow::array::{ArrayRef, Float32Builder, Float64Builder, ListBuilder, RecordBatch};
+use arrow::array::{
+    ArrayRef, FixedSizeListBuilder, Float32Builder, Float64Builder, ListBuilder, RecordBatch,
+};
 use arrow::datatypes::{DataType, Field, Schema};
 use parquet::arrow::ArrowWriter;
 use qdp_core::reader::{DataReader, NullHandling};
-use qdp_core::readers::parquet::ParquetReader;
+use qdp_core::readers::parquet::{ParquetReader, ParquetStreamingReader};
 
 static FILE_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
@@ -158,4 +160,138 @@ fn test_unsupported_column_type_returns_error_with_dtype() {
             "error message should contain the dtype, got: {msg}"
         );
     }
+}
+
+// ---------------------------------------------------------------------------
+// Acceptance test 4: FixedSizeList<f32> read as f32 (zero-copy path)
+// ---------------------------------------------------------------------------
+
+/// ParquetReader::<f32> on a FixedSizeList<Float32> file → values come back as
+/// Vec<f32> with no precision loss.
+#[test]
+fn test_fixed_size_list_f32_as_f32() {
+    let item_field = Arc::new(Field::new("item", DataType::Float32, true));
+    let list_field = Field::new("data", DataType::FixedSizeList(item_field, 3), true);
+    let schema = Arc::new(Schema::new(vec![list_field]));
+
+    let mut builder = FixedSizeListBuilder::new(Float32Builder::new(), 3);
+    builder.values().append_slice(&[1.0_f32, 2.0_f32, 3.0_f32]);
+    builder.append(true);
+    builder.values().append_slice(&[4.0_f32, 5.0_f32, 6.0_f32]);
+    builder.append(true);
+    let array = Arc::new(builder.finish()) as ArrayRef;
+
+    let tmp = write_list_parquet(schema, vec![array]);
+
+    let mut reader = ParquetReader::<f32>::new(tmp.path(), None, NullHandling::FillZero).unwrap();
+    let (data, num_samples, sample_size) = reader.read_batch().unwrap();
+
+    assert_eq!(num_samples, 2);
+    assert_eq!(sample_size, 3);
+    assert_eq!(data, vec![1.0_f32, 2.0, 3.0, 4.0, 5.0, 6.0]);
+}
+
+// ---------------------------------------------------------------------------
+// Acceptance test 5: FixedSizeList<f64> cast to f32
+// ---------------------------------------------------------------------------
+
+/// ParquetReader::<f32> on a FixedSizeList<Float64> file → Arrow cast applied.
+#[test]
+fn test_fixed_size_list_f64_cast_to_f32() {
+    let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+    let list_field = Field::new("data", DataType::FixedSizeList(item_field, 2), true);
+    let schema = Arc::new(Schema::new(vec![list_field]));
+
+    let mut builder = FixedSizeListBuilder::new(Float64Builder::new(), 2);
+    builder.values().append_slice(&[1.5_f64, -2.5_f64]);
+    builder.append(true);
+    builder
+        .values()
+        .append_slice(&[f64::from(f32::MAX) * 2.0, f64::NAN]);
+    builder.append(true);
+    let array = Arc::new(builder.finish()) as ArrayRef;
+
+    let tmp = write_list_parquet(schema, vec![array]);
+
+    let mut reader = ParquetReader::<f32>::new(tmp.path(), None, NullHandling::FillZero).unwrap();
+    let (data, num_samples, sample_size) = reader.read_batch().unwrap();
+
+    assert_eq!(num_samples, 2);
+    assert_eq!(sample_size, 2);
+    assert_eq!(data[0], 1.5_f32);
+    assert_eq!(data[1], -2.5_f32);
+    assert!(
+        data[2].is_infinite() && data[2] > 0.0,
+        "expected +Inf, got {}",
+        data[2]
+    );
+    assert!(data[3].is_nan(), "expected NaN, got {}", data[3]);
+}
+
+// ---------------------------------------------------------------------------
+// Acceptance test 6: ParquetStreamingReader<f32> on f32 column
+// ---------------------------------------------------------------------------
+
+/// ParquetStreamingReader::<f32> on a List<Float32> file → same values as
+/// ParquetReader::<f32>.
+#[test]
+fn test_streaming_reader_list_f32() {
+    let item_field = Arc::new(Field::new("item", DataType::Float32, true));
+    let list_field = Field::new("data", DataType::List(item_field), true);
+    let schema = Arc::new(Schema::new(vec![list_field]));
+
+    let mut builder = ListBuilder::new(Float32Builder::new());
+    builder.values().append_slice(&[1.0_f32, 2.5_f32, 3.75_f32]);
+    builder.append(true);
+    builder.values().append_slice(&[4.0_f32, 5.5_f32, 6.25_f32]);
+    builder.append(true);
+    let array = Arc::new(builder.finish()) as ArrayRef;
+
+    let tmp = write_list_parquet(schema, vec![array]);
+
+    let mut reader =
+        ParquetStreamingReader::<f32>::new(tmp.path(), None, NullHandling::FillZero).unwrap();
+    let (data, num_samples, sample_size) = reader.read_batch().unwrap();
+
+    assert_eq!(num_samples, 2);
+    assert_eq!(sample_size, 3);
+    assert_eq!(data, vec![1.0_f32, 2.5, 3.75, 4.0, 5.5, 6.25]);
+}
+
+// ---------------------------------------------------------------------------
+// Acceptance test 7: ParquetStreamingReader<f32> on f64 column (cast path)
+// ---------------------------------------------------------------------------
+
+/// ParquetStreamingReader::<f32> on a List<Float64> file → Arrow cast applied;
+/// overflow → ±Inf, NaN preserved.
+#[test]
+fn test_streaming_reader_list_f64_cast_to_f32() {
+    let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+    let list_field = Field::new("data", DataType::List(item_field), true);
+    let schema = Arc::new(Schema::new(vec![list_field]));
+
+    let mut builder = ListBuilder::new(Float64Builder::new());
+    builder.values().append_slice(&[1.0_f64, -2.0_f64]);
+    builder.append(true);
+    builder.values().append_value(f64::from(f32::MAX) * 2.0);
+    builder.values().append_value(f64::NAN);
+    builder.append(true);
+    let array = Arc::new(builder.finish()) as ArrayRef;
+
+    let tmp = write_list_parquet(schema, vec![array]);
+
+    let mut reader =
+        ParquetStreamingReader::<f32>::new(tmp.path(), None, NullHandling::FillZero).unwrap();
+    let (data, num_samples, sample_size) = reader.read_batch().unwrap();
+
+    assert_eq!(num_samples, 2);
+    assert_eq!(sample_size, 2);
+    assert_eq!(data[0], 1.0_f32);
+    assert_eq!(data[1], -2.0_f32);
+    assert!(
+        data[2].is_infinite() && data[2] > 0.0,
+        "expected +Inf, got {}",
+        data[2]
+    );
+    assert!(data[3].is_nan(), "expected NaN, got {}", data[3]);
 }

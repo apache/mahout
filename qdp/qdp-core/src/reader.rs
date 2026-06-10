@@ -45,20 +45,39 @@
 //! }
 //! ```
 
-use arrow::array::{Array, Float32Array, Float64Array};
+use arrow::array::{Array, Float32Array, Float64Array, PrimitiveArray};
+use arrow::datatypes::{ArrowPrimitiveType, Float32Type, Float64Type};
 
-use crate::error::Result;
+use crate::error::{MahoutError, Result};
+
+/// Maps a Rust float primitive to its Arrow array type.
+///
+/// `pub(crate)` seals `FloatElem`: external callers cannot implement `ArrowPrimitive`
+/// and therefore cannot implement `FloatElem` for new types.
+pub(crate) trait ArrowPrimitive {
+    type ArrowType: ArrowPrimitiveType<Native = Self>;
+}
+
+impl ArrowPrimitive for f32 {
+    type ArrowType = Float32Type;
+}
+
+impl ArrowPrimitive for f64 {
+    type ArrowType = Float64Type;
+}
 
 /// Scalar element type for [`DataReader`] output (`f32` or `f64` only).
 ///
-/// Keeps f32 file data as `Vec<f32>` end-to-end once readers implement
-/// `DataReader<f32>`; today most readers use the default `T = f64`.
-pub trait FloatElem: Copy + Default + Send + Sync + 'static {}
+/// Sealed by the `pub(crate) ArrowPrimitive` supertrait — no external implementations
+/// are possible. Keeps f32 file data as `Vec<f32>` end-to-end; today most readers
+/// use the default `T = f64`.
+#[allow(private_bounds)]
+pub trait FloatElem: ArrowPrimitive + Copy + Default + Send + Sync + 'static {}
 
 impl FloatElem for f32 {}
 impl FloatElem for f64 {}
 
-/// Policy for handling null values in Float64 arrays.
+/// Policy for handling null values in float arrays.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum NullHandling {
     /// Replace nulls with 0.0 (backward-compatible default).
@@ -68,6 +87,37 @@ pub enum NullHandling {
     Reject,
 }
 
+/// Append values from a primitive array into `output`, applying the given null policy.
+///
+/// When there are no nulls the fast path copies the underlying buffer directly.
+pub(crate) fn handle_primitive_nulls<P: ArrowPrimitiveType>(
+    output: &mut Vec<P::Native>,
+    array: &PrimitiveArray<P>,
+    null_handling: NullHandling,
+) -> Result<()>
+where
+    P::Native: Default,
+{
+    if array.null_count() == 0 {
+        output.extend_from_slice(array.values());
+    } else {
+        match null_handling {
+            NullHandling::FillZero => {
+                output.extend(array.iter().map(|opt| opt.unwrap_or_default()));
+            }
+            NullHandling::Reject => {
+                return Err(MahoutError::InvalidInput(format!(
+                    "Null value encountered in {:?} array. \
+                     Use NullHandling::FillZero to replace nulls with 0.0, \
+                     or clean the data at the source.",
+                    P::DATA_TYPE,
+                )));
+            }
+        }
+    }
+    Ok(())
+}
+
 /// Append values from a `Float64Array` into `output`, applying the given null policy.
 ///
 /// When there are no nulls the fast path copies the underlying buffer directly.
@@ -75,25 +125,8 @@ pub fn handle_float64_nulls(
     output: &mut Vec<f64>,
     float_array: &Float64Array,
     null_handling: NullHandling,
-) -> crate::error::Result<()> {
-    if float_array.null_count() == 0 {
-        output.extend_from_slice(float_array.values());
-    } else {
-        match null_handling {
-            NullHandling::FillZero => {
-                output.extend(float_array.iter().map(|opt| opt.unwrap_or(0.0)));
-            }
-            NullHandling::Reject => {
-                return Err(crate::error::MahoutError::InvalidInput(
-                    "Null value encountered in Float64Array. \
-                     Use NullHandling::FillZero to replace nulls with 0.0, \
-                     or clean the data at the source."
-                        .to_string(),
-                ));
-            }
-        }
-    }
-    Ok(())
+) -> Result<()> {
+    handle_primitive_nulls::<Float64Type>(output, float_array, null_handling)
 }
 
 /// Append values from a `Float32Array` into `output`, applying the given null policy.
@@ -103,25 +136,8 @@ pub fn handle_float32_nulls(
     output: &mut Vec<f32>,
     float_array: &Float32Array,
     null_handling: NullHandling,
-) -> crate::error::Result<()> {
-    if float_array.null_count() == 0 {
-        output.extend_from_slice(float_array.values());
-    } else {
-        match null_handling {
-            NullHandling::FillZero => {
-                output.extend(float_array.iter().map(|opt| opt.unwrap_or(0.0)));
-            }
-            NullHandling::Reject => {
-                return Err(crate::error::MahoutError::InvalidInput(
-                    "Null value encountered in Float32Array. \
-                     Use NullHandling::FillZero to replace nulls with 0.0, \
-                     or clean the data at the source."
-                        .to_string(),
-                ));
-            }
-        }
-    }
-    Ok(())
+) -> Result<()> {
+    handle_primitive_nulls::<Float32Type>(output, float_array, null_handling)
 }
 
 /// Generic data reader interface for batch quantum data.
