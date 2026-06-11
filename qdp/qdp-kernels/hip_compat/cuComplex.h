@@ -13,9 +13,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Copyright (c) 2026 Advanced Micro Devices, Inc.
-// Author: Jeff Daily <jeff.daily@amd.com>
 
 // HIP forwarding shim for <cuComplex.h> (HIP build path only; see
 // cuda_runtime.h in this directory for how it is selected). hipcc does not
