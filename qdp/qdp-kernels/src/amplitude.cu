@@ -13,6 +13,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// Portions Copyright (c) 2026 Advanced Micro Devices, Inc.
+// Author: Jeff Daily <jeff.daily@amd.com>
 
 // Amplitude Encoding CUDA Kernel
 
@@ -22,6 +25,7 @@
 #include <math.h>
 #include <stdint.h>
 #include "kernel_config.h"
+#include "kernel_compat.h"
 
 __global__ void amplitude_encode_kernel(
     const double* __restrict__ input,
@@ -99,7 +103,7 @@ __global__ void amplitude_encode_kernel_f32(
 // Warp-level reduction for sum using shuffle instructions
 __device__ __forceinline__ double warp_reduce_sum(double val) {
     for (int offset = warpSize / 2; offset > 0; offset >>= 1) {
-        val += __shfl_down_sync(0xffffffff, val, offset);
+        val += __shfl_down_sync(QDP_FULL_WARP_MASK, val, offset);
     }
     return val;
 }
@@ -107,7 +111,7 @@ __device__ __forceinline__ double warp_reduce_sum(double val) {
 // Warp-level reduction for sum using shuffle instructions (float32)
 __device__ __forceinline__ float warp_reduce_sum_f32(float val) {
     for (int offset = warpSize / 2; offset > 0; offset >>= 1) {
-        val += __shfl_down_sync(0xffffffff, val, offset);
+        val += __shfl_down_sync(QDP_FULL_WARP_MASK, val, offset);
     }
     return val;
 }
@@ -116,7 +120,10 @@ __device__ __forceinline__ float warp_reduce_sum_f32(float val) {
 __device__ __forceinline__ double block_reduce_sum(double val) {
     __shared__ double shared[32]; // supports up to 1024 threads (32 warps)
     int lane = threadIdx.x & (warpSize - 1);
-    int warp_id = threadIdx.x >> 5;
+    // warpSize is 32 on NVIDIA/RDNA and 64 on CDNA (gfx90a); derive the warp id
+    // from it rather than a hardcoded >> 5 so the per-warp partial lands in the
+    // slot the final reduction reads on every wave width.
+    int warp_id = threadIdx.x / warpSize;
 
     val = warp_reduce_sum(val);
     if (lane == 0) {
@@ -137,7 +144,10 @@ __device__ __forceinline__ double block_reduce_sum(double val) {
 __device__ __forceinline__ float block_reduce_sum_f32(float val) {
     __shared__ float shared[32]; // supports up to 1024 threads (32 warps)
     int lane = threadIdx.x & (warpSize - 1);
-    int warp_id = threadIdx.x >> 5;
+    // warpSize is 32 on NVIDIA/RDNA and 64 on CDNA (gfx90a); derive the warp id
+    // from it rather than a hardcoded >> 5 so the per-warp partial lands in the
+    // slot the final reduction reads on every wave width.
+    int warp_id = threadIdx.x / warpSize;
 
     val = warp_reduce_sum_f32(val);
     if (lane == 0) {

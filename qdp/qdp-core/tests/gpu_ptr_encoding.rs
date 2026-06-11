@@ -16,9 +16,9 @@
 
 // Unit and integration tests for encode_from_gpu_ptr and encode_batch_from_gpu_ptr.
 
-#![cfg(target_os = "linux")]
+#![cfg(qdp_gpu_platform)]
 
-use cudarc::driver::{DevicePtr, DeviceSlice};
+use qdp_core::gpu_rt::{DevicePtr, DeviceSlice};
 use qdp_core::{MahoutError, Precision, QdpEngine};
 use std::ffi::c_void;
 

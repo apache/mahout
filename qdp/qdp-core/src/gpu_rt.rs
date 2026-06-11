@@ -13,21 +13,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// Copyright (c) 2026 Advanced Micro Devices, Inc.
+// Author: Jeff Daily <jeff.daily@amd.com>
 
-#[cfg(not(qdp_gpu_platform))]
-mod fallback;
-#[cfg(qdp_gpu_platform)]
-mod linux;
-#[cfg(not(any(qdp_gpu_platform, target_os = "windows")))]
-mod other;
-// Windows non-GPU stub: used only on Windows without the hip feature.
-// When qdp_gpu_platform is set (Windows+hip), the linux module is used instead.
-#[cfg(all(target_os = "windows", not(qdp_gpu_platform)))]
-mod windows;
+//! Single import point for the device runtime types, vendor-selected at
+//! compile time. `cudarc` has no ROCm backend, so on the `hip` build these
+//! names resolve to the HIP shim in `qdp_kernels::device` instead of cudarc.
+//! Both expose the same type names and method signatures, so call sites and
+//! integration tests use `crate::gpu_rt::{...}` (or `qdp_core::gpu_rt::{...}`)
+//! and compile unchanged on either vendor.
 
-#[cfg(qdp_gpu_platform)]
-pub(crate) use linux::encode_from_parquet;
-#[cfg(not(any(qdp_gpu_platform, target_os = "windows")))]
-pub(crate) use other::encode_from_parquet;
-#[cfg(all(target_os = "windows", not(qdp_gpu_platform)))]
-pub(crate) use windows::encode_from_parquet;
+pub use qdp_kernels::device::{
+    CudaDevice, CudaSlice, CudaStream, DevicePtr, DevicePtrMut, DeviceRepr, DeviceSlice,
+    ValidAsZeroBits,
+};

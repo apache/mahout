@@ -20,7 +20,7 @@
 // tests inside encoding/angle.rs because they cannot be triggered via a Parquet
 // file.
 
-#![cfg(target_os = "linux")]
+#![cfg(qdp_gpu_platform)]
 
 use qdp_core::MahoutError;
 
