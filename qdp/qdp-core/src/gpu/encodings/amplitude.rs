@@ -689,7 +689,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         Ok(batch_state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_from_gpu_ptr_f32(
         &self,
         device: &Arc<CudaDevice>,
@@ -845,7 +845,7 @@ impl AmplitudeEncoder {
     /// Caller must ensure `input_d` points to at least `input_len` `f32` values in
     /// GPU-accessible memory on the same device as `device`, and `stream` is either
     /// null or a valid CUDA stream associated with `device`.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_from_gpu_ptr_f32_with_stream(
         device: &Arc<CudaDevice>,
         input_d: *const f32,

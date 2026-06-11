@@ -59,6 +59,8 @@ mod hip {
     const HIP_MEMCPY_DEVICE_TO_HOST: u32 = 2;
     // hipStreamNonBlocking: the new stream does not implicitly synchronize with
     // the NULL/default stream, matching cudarc's fork_default_stream.
+    // Used on Linux only; Windows uses a blocking stream (see fork_default_stream).
+    #[cfg(target_os = "linux")]
     const HIP_STREAM_NON_BLOCKING: u32 = 1;
 
     unsafe extern "C" {
@@ -69,7 +71,10 @@ mod hip {
         fn hipMemset(ptr: *mut c_void, value: i32, size: usize) -> hipError_t;
         fn hipMemcpy(dst: *mut c_void, src: *const c_void, size: usize, kind: u32) -> hipError_t;
         fn hipDeviceSynchronize() -> hipError_t;
+        #[cfg(target_os = "linux")]
         fn hipStreamCreateWithFlags(stream: *mut *mut c_void, flags: u32) -> hipError_t;
+        #[cfg(not(target_os = "linux"))]
+        fn hipStreamCreate(stream: *mut *mut c_void) -> hipError_t;
         fn hipStreamDestroy(stream: *mut c_void) -> hipError_t;
         fn hipStreamSynchronize(stream: *mut c_void) -> hipError_t;
     }
@@ -394,14 +399,24 @@ mod hip {
         pub fn fork_default_stream(self: &Arc<Self>) -> Result<CudaStream, DriverError> {
             self.bind()?;
             let mut stream: *mut c_void = std::ptr::null_mut();
-            // Non-blocking stream (matches cudarc): a default/blocking stream
-            // would serialize H2D copies against the NULL stream and defeat the
-            // dual-stream copy/compute overlap the pipeline depends on.
             unsafe {
+                // On Linux, use a non-blocking stream (HIP_STREAM_NON_BLOCKING=1) to
+                // match cudarc: a blocking stream serializes H2D copies against the NULL
+                // stream and defeats the dual-stream copy/compute overlap the pipeline
+                // relies on.
+                //
+                // On Windows (TheRock ROCm 7.14), non-blocking stream writes are not
+                // visible via hipMemcpy from the host after hipStreamSynchronize, due to
+                // a cache coherency gap in the Windows HIP runtime. Use a blocking stream
+                // to restore correct D2H readback semantics. The pipeline overlap
+                // optimization is not available on Windows ROCm.
+                #[cfg(target_os = "linux")]
                 check(hipStreamCreateWithFlags(
                     &mut stream,
                     HIP_STREAM_NON_BLOCKING,
                 ))?;
+                #[cfg(not(target_os = "linux"))]
+                check(hipStreamCreate(&mut stream))?;
             }
             Ok(CudaStream {
                 stream,

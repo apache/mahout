@@ -541,7 +541,7 @@ impl QuantumEncoder for BasisEncoder {
         Ok(batch_state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_from_gpu_ptr_f32(
         &self,
         device: &Arc<CudaDevice>,
