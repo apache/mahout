@@ -256,7 +256,7 @@ mod tests {
 
         // Verify it's a valid parquet that our reader can parse.
         use crate::reader::DataReader;
-        let mut reader = crate::readers::ParquetReader::new(
+        let mut reader = crate::readers::ParquetReader::<f64>::new(
             &resolved.path,
             None,
             crate::reader::NullHandling::FillZero,
