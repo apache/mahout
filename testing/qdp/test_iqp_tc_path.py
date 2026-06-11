@@ -68,7 +68,7 @@ def test_fwt_and_tc_paths_normalized(engine, num_qubits, batch_size):
     _assert_normalized(tc_state, num_qubits, "TC")
 
 
-@pytest.mark.parametrize("num_qubits", [14])
+@pytest.mark.parametrize("num_qubits", [14, 16])
 @pytest.mark.parametrize("batch_size", [4, 8])
 def test_large_n_tc_path_smoke(engine, num_qubits, batch_size):
     """Large-N TC Kronecker path runs; FWT remains normalized baseline."""
@@ -85,18 +85,17 @@ def test_large_n_tc_path_smoke(engine, num_qubits, batch_size):
     assert torch.isfinite(tc_state).all()
 
 
-@pytest.mark.parametrize("num_qubits", [14])
+@pytest.mark.parametrize("num_qubits", [14, 16, 17, 18])
 def test_fwt_tc_path_agreement_loose(engine, num_qubits):
-    """Large-N TC scaffold should be within loose tolerance of FWT (structural PR)."""
+    """Large-N Kronecker TC path should match FWT within Ozaki tolerance."""
     batch_size = 8
     data_len = _iqp_param_count(num_qubits)
     data = torch.randn(batch_size, data_len, dtype=torch.float64).numpy()
 
-    fwt_state = torch.from_dlpack(engine.encode(data, num_qubits, "iqp"))
-    tc_state = torch.from_dlpack(engine.encode_batch_tc(data, num_qubits))
+    fwt_state = torch.from_dlpack(engine.encode(data, num_qubits, "iqp")).clone()
+    tc_state = torch.from_dlpack(engine.encode_batch_tc(data, num_qubits)).clone()
 
     max_err = (fwt_state - tc_state).abs().max().item()
-    # Ozaki Kronecker scaffold may diverge until PR6 malloc pooling lands.
-    assert max_err < 0.1, (
+    assert max_err < 1e-5, (
         f"Max abs error {max_err} unexpectedly large at N={num_qubits}"
     )

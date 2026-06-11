@@ -308,7 +308,16 @@ __global__ void implicit_hadamard_ozaki_persistent_kernel_implicit(
 
 namespace ozaki {
 
-__global__ void naive_hadamard_ozaki_kernel(const double* A, double* C, int m, int n, int k, double norm_factor) {
+__global__ void naive_hadamard_ozaki_kernel(
+    const double* A,
+    double* C,
+    int m,
+    int n,
+    int k,
+    double norm_factor,
+    bool transpose_batch,
+    int batch_rows
+) {
     int r = blockIdx.y * blockDim.y + threadIdx.y;
     int c = blockIdx.x * blockDim.x + threadIdx.x;
     if (r < m && c < n) {
@@ -316,9 +325,17 @@ __global__ void naive_hadamard_ozaki_kernel(const double* A, double* C, int m, i
         for (int kk = 0; kk < k; ++kk) {
             int parity = __popcll(kk & c) & 1;
             double H_val = (parity == 0) ? 1.0 : -1.0;
-            sum += A[r * k + kk] * H_val;
+            sum += A[(size_t)r * k + kk] * H_val;
         }
-        C[r * n + c] = sum * norm_factor;
+        double val = sum * norm_factor;
+        if (transpose_batch && batch_rows > 0) {
+            int batch_idx = r / batch_rows;
+            int r_in_batch = r % batch_rows;
+            C[(size_t)batch_idx * ((size_t)k * batch_rows)
+              + (size_t)c * batch_rows + r_in_batch] = val;
+        } else {
+            C[(size_t)r * n + c] = val;
+        }
     }
 }
 
@@ -530,7 +547,10 @@ __global__ void __launch_bounds__(THREADS, 3) implicit_hadamard_ozaki_fused_batc
 }
 
 void ImplicitHadamardOzakiEngine::execute_implicit_hadamard(const double* d_A, double* d_C, int m, int n, int k, double norm_factor, cudaStream_t stream, bool transpose_batch, int batch_rows) {
-    if (transpose_batch && batch_rows > 0 && (n == 128 || n == 64)) {
+    // Tensor Core (INT8 MMA Ozaki): n in {64, 128} — fast and stable on WDDM.
+    // n >= 256 (N>=16 Kronecker leg): naive FP64 + transpose — faster & exact here.
+    if (transpose_batch && batch_rows > 0 && batch_rows <= n
+        && n >= 64 && n <= 128 && (n % 64) == 0) {
         dim3 block(256);
         dim3 grid((n + 63) / 64, (m + 63) / 64);
         implicit_hadamard_ozaki_fused_batch_kernel<64, 256, 4><<<grid, block, 0, stream>>>(d_A, d_C, k, 1.0, norm_factor, transpose_batch, batch_rows);
@@ -539,7 +559,7 @@ void ImplicitHadamardOzakiEngine::execute_implicit_hadamard(const double* d_A, d
 
     dim3 block(16, 16);
     dim3 grid((n + 15) / 16, (m + 15) / 16);
-    naive_hadamard_ozaki_kernel<<<grid, block, 0, stream>>>(d_A, d_C, m, n, k, norm_factor);
+    naive_hadamard_ozaki_kernel<<<grid, block, 0, stream>>>(d_A, d_C, m, n, k, norm_factor, transpose_batch, batch_rows);
 }
 
 void ImplicitHadamardOzakiEngine::execute_fused_kronecker_hadamard(const double* d_X, double* d_Z, double* d_Y, int batch_size, int dim, double norm_factor, cudaStream_t stream) {}

@@ -396,7 +396,7 @@ def run_mahout_arrow(engine, n_qubits, n_samples, encoding_method: str = "amplit
     print(f"  Arrow->GPU (IO+Encode): {arrow_encode_time:.4f} s")
 
     dlpack_start = time.perf_counter()
-    gpu_batched = torch.from_dlpack(qtensor)
+    gpu_batched = torch.from_dlpack(qtensor).clone()
     dlpack_time = time.perf_counter() - dlpack_start
     print(f"  DLPack conversion: {dlpack_time:.4f} s")
 
@@ -452,7 +452,7 @@ def run_mahout_arrow_tc(engine, n_qubits, n_samples, encoding_method: str = "iqp
     print(f"  encode_batch_tc: {encode_time:.4f} s")
 
     dlpack_start = time.perf_counter()
-    gpu_batched = torch.from_dlpack(qtensor)
+    gpu_batched = torch.from_dlpack(qtensor).clone()
     dlpack_time = time.perf_counter() - dlpack_start
     print(f"  DLPack conversion: {dlpack_time:.4f} s")
 

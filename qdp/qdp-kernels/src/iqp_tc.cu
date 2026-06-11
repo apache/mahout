@@ -249,6 +249,12 @@ extern "C" int launch_iqp_encode_tc(
             allocated_elements = total_elements;
         }
 
+        const size_t buf_bytes = total_elements * sizeof(double);
+        CHECK_CUDA_RETURN(cudaMemsetAsync(d_temp_real, 0, buf_bytes, stream));
+        CHECK_CUDA_RETURN(cudaMemsetAsync(d_temp_imag, 0, buf_bytes, stream));
+        CHECK_CUDA_RETURN(cudaMemsetAsync(d_out_real, 0, buf_bytes, stream));
+        CHECK_CUDA_RETURN(cudaMemsetAsync(d_out_imag, 0, buf_bytes, stream));
+
         // 1. 初始化 Phase (拆分為 Real / Imag)
         unsigned int data_len = enable_zz
             ? (unsigned int)(num_qubits + (unsigned int)num_qubits * (num_qubits - 1) / 2)
@@ -278,6 +284,7 @@ extern "C" int launch_iqp_encode_tc(
             d_out_real, d_out_imag, static_cast<cuDoubleComplex*>(state_batch_d), total_elements
         );
 
+        CHECK_CUDA_RETURN(cudaStreamSynchronize(stream));
         cudaError_t last_err = cudaGetLastError();
         return (int)last_err;
     }
