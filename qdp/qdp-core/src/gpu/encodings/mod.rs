@@ -148,7 +148,7 @@ pub trait QuantumEncoder: Send + Sync + 'static {
     /// Caller must ensure `input_d` points to valid GPU memory with at least `input_len`
     /// `f32` elements on the same device as `device`, and `stream` is either null or a valid
     /// CUDA stream associated with `device`.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_from_gpu_ptr_f32(
         &self,
         _device: &Arc<CudaDevice>,
