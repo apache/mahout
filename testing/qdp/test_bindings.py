@@ -149,10 +149,12 @@ def test_dlpack_device_id_non_zero():
     qtensor = engine.encode(data, 2, "amplitude")
 
     device_info = qtensor.__dlpack_device__()
+    # DLPack device_type: kDLCUDA=2 (NVIDIA), kDLROCM=10 (AMD HIP).
+    expected_device_type = 10 if getattr(torch.version, "hip", None) else 2
     assert device_info == (
-        2,
+        expected_device_type,
         device_id,
-    ), f"Expected (2, {device_id}) for CUDA device {device_id}"
+    ), f"Expected ({expected_device_type}, {device_id}) for device {device_id}"
 
     # Verify PyTorch integration works with non-zero device_id
     torch_tensor = torch.from_dlpack(qtensor)
