@@ -20,8 +20,8 @@ use std::sync::Arc;
 
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
-use crate::preprocessing::Preprocessor;
 use crate::gpu_rt::CudaDevice;
+use crate::preprocessing::Preprocessor;
 #[cfg(qdp_gpu_platform)]
 use std::ffi::c_void;
 

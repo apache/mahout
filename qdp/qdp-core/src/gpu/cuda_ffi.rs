@@ -197,8 +197,7 @@ mod hip_rt {
             is_managed: 0,
             allocation_flags: 0,
         };
-        let ret =
-            unsafe { hipPointerGetAttributes(&mut hip_attrs as *mut _ as *mut c_void, ptr) };
+        let ret = unsafe { hipPointerGetAttributes(&mut hip_attrs as *mut _ as *mut c_void, ptr) };
         if ret != 0 {
             return ret;
         }

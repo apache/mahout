@@ -228,8 +228,7 @@ fn build_hip() {
     build.flag("-std=c++17");
     build.flag("-x").flag("hip");
 
-    let arch_list =
-        env::var("QDP_HIP_ARCH_LIST").unwrap_or_else(|_| DEFAULT_HIP_ARCH.to_string());
+    let arch_list = env::var("QDP_HIP_ARCH_LIST").unwrap_or_else(|_| DEFAULT_HIP_ARCH.to_string());
     let mut saw_arch = false;
     for entry in arch_list.split(',') {
         let arch = entry.trim();
