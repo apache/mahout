@@ -4,10 +4,17 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-cudarc = { workspace = true }
+cudarc = { workspace = true, optional = true }
 
 [build-dependencies]
 cc = { workspace = true }
+
+[features]
+# Default build: NVIDIA CUDA via cudarc + nvcc-compiled kernels.
+default = ["cuda"]
+cuda = ["dep:cudarc"]
+# AMD build: hipcc-compiled kernels + the in-crate HIP device traits; no cudarc.
+hip = []
 
 [lib]
 name = "qdp_kernels"

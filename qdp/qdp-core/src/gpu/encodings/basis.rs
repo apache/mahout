@@ -21,18 +21,18 @@
 #![allow(unused_unsafe)]
 
 use super::{QuantumEncoder, validate_qubit_count};
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::{GpuStateVector, Precision};
-use cudarc::driver::CudaDevice;
+use crate::gpu_rt::CudaDevice;
 use std::sync::Arc;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::memory::map_allocation_error;
-#[cfg(target_os = "linux")]
-use cudarc::driver::DevicePtr;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
+use crate::gpu_rt::DevicePtr;
+#[cfg(qdp_gpu_platform)]
 use std::ffi::c_void;
 
 /// Basis encoding: maps an integer index to a computational basis state.
@@ -51,8 +51,8 @@ pub struct BasisEncoder;
 impl QuantumEncoder for BasisEncoder {
     fn encode(
         &self,
-        #[cfg(target_os = "linux")] device: &Arc<CudaDevice>,
-        #[cfg(not(target_os = "linux"))] _device: &Arc<CudaDevice>,
+        #[cfg(qdp_gpu_platform)] device: &Arc<CudaDevice>,
+        #[cfg(not(qdp_gpu_platform))] _device: &Arc<CudaDevice>,
         data: &[f64],
         num_qubits: usize,
     ) -> Result<GpuStateVector> {
@@ -69,7 +69,7 @@ impl QuantumEncoder for BasisEncoder {
 
         let state_len = 1 << num_qubits;
 
-        #[cfg(target_os = "linux")]
+        #[cfg(qdp_gpu_platform)]
         {
             // Convert and validate the basis index
             let basis_index = Self::validate_basis_index(data[0], state_len)?;
@@ -116,7 +116,7 @@ impl QuantumEncoder for BasisEncoder {
             Ok(state_vector)
         }
 
-        #[cfg(not(target_os = "linux"))]
+        #[cfg(not(qdp_gpu_platform))]
         {
             Err(MahoutError::Cuda(
                 "CUDA unavailable (non-Linux stub)".to_string(),
@@ -125,7 +125,7 @@ impl QuantumEncoder for BasisEncoder {
     }
 
     /// Encode multiple basis indices in a single GPU allocation and kernel launch
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     fn encode_batch(
         &self,
         device: &Arc<CudaDevice>,
@@ -225,7 +225,7 @@ impl QuantumEncoder for BasisEncoder {
         Ok(batch_state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_from_gpu_ptr(
         &self,
         device: &Arc<CudaDevice>,
@@ -291,7 +291,7 @@ impl QuantumEncoder for BasisEncoder {
         Ok(state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_batch_from_gpu_ptr(
         &self,
         device: &Arc<CudaDevice>,
@@ -374,7 +374,7 @@ impl QuantumEncoder for BasisEncoder {
         Ok(())
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     fn encode_batch_f32(
         &self,
         device: &Arc<CudaDevice>,
@@ -466,7 +466,7 @@ impl QuantumEncoder for BasisEncoder {
         Ok(batch_state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_batch_from_gpu_ptr_f32(
         &self,
         device: &Arc<CudaDevice>,
@@ -584,7 +584,7 @@ impl BasisEncoder {
     /// contiguous `f32` values in GPU-accessible memory and remains valid for the
     /// duration of this call. `stream` must be either null or a valid CUDA stream
     /// handle associated with `device`.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_batch_from_gpu_ptr_f32_with_stream(
         device: &Arc<CudaDevice>,
         input_batch_d: *const f32,
@@ -613,7 +613,7 @@ impl BasisEncoder {
     /// `input_d` must point to one valid `f32` in GPU-accessible memory on `device`,
     /// remain valid for the duration of this call, and `stream` must be either null
     /// or a valid CUDA stream handle associated with `device`.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_from_gpu_ptr_f32_with_stream(
         device: &Arc<CudaDevice>,
         input_d: *const f32,

@@ -23,27 +23,27 @@
 use std::sync::Arc;
 
 use super::QuantumEncoder;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::{GpuStateVector, Precision};
 use crate::gpu::pipeline::run_dual_stream_pipeline;
-use cudarc::driver::CudaDevice;
+use crate::gpu_rt::CudaDevice;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::cuda_ffi::cudaMemsetAsync;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::cuda_sync::sync_cuda_stream;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
-#[cfg(target_os = "linux")]
-use cudarc::driver::{DevicePtr, DevicePtrMut};
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
+use crate::gpu_rt::{DevicePtr, DevicePtrMut};
+#[cfg(qdp_gpu_platform)]
 use qdp_kernels::{
     launch_amplitude_encode, launch_amplitude_encode_batch, launch_amplitude_encode_batch_f32,
     launch_l2_norm, launch_l2_norm_batch, launch_l2_norm_batch_f32, launch_l2_norm_f32,
 };
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use std::ffi::c_void;
 
 use crate::preprocessing::Preprocessor;
@@ -65,7 +65,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         Preprocessor::validate_input(host_data, num_qubits)?;
         let state_len = 1 << num_qubits;
 
-        #[cfg(target_os = "linux")]
+        #[cfg(qdp_gpu_platform)]
         {
             // Allocate GPU state vector
             let state_vector = {
@@ -178,7 +178,7 @@ impl QuantumEncoder for AmplitudeEncoder {
             Ok(state_vector)
         }
 
-        #[cfg(not(target_os = "linux"))]
+        #[cfg(not(qdp_gpu_platform))]
         {
             Err(MahoutError::Cuda(
                 "CUDA unavailable (non-Linux stub)".to_string(),
@@ -187,7 +187,7 @@ impl QuantumEncoder for AmplitudeEncoder {
     }
 
     /// Encode multiple samples in a single GPU allocation and kernel launch
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     fn encode_batch(
         &self,
         device: &Arc<CudaDevice>,
@@ -299,7 +299,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         Ok(batch_state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_from_gpu_ptr(
         &self,
         device: &Arc<CudaDevice>,
@@ -361,7 +361,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         Ok(state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_batch_from_gpu_ptr(
         &self,
         device: &Arc<CudaDevice>,
@@ -390,7 +390,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         };
         let inv_norms_gpu = {
             crate::profile_scope!("GPU::BatchNormKernel");
-            use cudarc::driver::DevicePtrMut;
+            use crate::gpu_rt::DevicePtrMut;
             let mut buffer = device.alloc_zeros::<f64>(num_samples).map_err(|e| {
                 MahoutError::MemoryAllocation(format!("Failed to allocate norm buffer: {:?}", e))
             })?;
@@ -425,7 +425,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         }
         {
             crate::profile_scope!("GPU::BatchKernelLaunch");
-            use cudarc::driver::DevicePtr;
+            use crate::gpu_rt::DevicePtr;
             let state_ptr = batch_state_vector.ptr_f64().ok_or_else(|| {
                 MahoutError::InvalidInput(
                     "Batch state vector precision mismatch (expected float64 buffer)".to_string(),
@@ -458,7 +458,7 @@ impl QuantumEncoder for AmplitudeEncoder {
     }
 
     /// Encode multiple samples in a single GPU allocation and kernel launch for f32 inputs
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     fn encode_batch_f32(
         &self,
         device: &Arc<CudaDevice>,
@@ -514,7 +514,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         // Compute inverse norms on GPU using warp-reduced kernel
         let inv_norms_gpu = {
             crate::profile_scope!("GPU::BatchNormKernel_f32");
-            use cudarc::driver::DevicePtrMut;
+            use crate::gpu_rt::DevicePtrMut;
             let mut buffer = device.alloc_zeros::<f32>(num_samples).map_err(|e| {
                 MahoutError::MemoryAllocation(format!("Failed to allocate norm buffer: {:?}", e))
             })?;
@@ -556,7 +556,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         // Launch batch kernel
         {
             crate::profile_scope!("GPU::BatchKernelLaunch_f32");
-            use cudarc::driver::DevicePtr;
+            use crate::gpu_rt::DevicePtr;
             let state_ptr = batch_state_vector.ptr_f32().ok_or_else(|| {
                 MahoutError::InvalidInput(
                     "Batch state vector precision mismatch (expected float32 buffer)".to_string(),
@@ -593,7 +593,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         Ok(batch_state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_batch_from_gpu_ptr_f32(
         &self,
         device: &Arc<CudaDevice>,
@@ -622,7 +622,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         };
         let inv_norms_gpu = {
             crate::profile_scope!("GPU::BatchNormKernel_f32");
-            use cudarc::driver::DevicePtrMut;
+            use crate::gpu_rt::DevicePtrMut;
             let mut buffer = device.alloc_zeros::<f32>(num_samples).map_err(|e| {
                 MahoutError::MemoryAllocation(format!("Failed to allocate norm buffer: {:?}", e))
             })?;
@@ -657,7 +657,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         }
         {
             crate::profile_scope!("GPU::BatchKernelLaunch_f32");
-            use cudarc::driver::DevicePtr;
+            use crate::gpu_rt::DevicePtr;
             let state_ptr = batch_state_vector.ptr_f32().ok_or_else(|| {
                 MahoutError::InvalidInput(
                     "Batch state vector precision mismatch (expected float32 buffer)".to_string(),
@@ -726,7 +726,7 @@ impl AmplitudeEncoder {
     /// data transfer and computation. The pipeline handles all the
     /// streaming mechanics, while this method focuses on the amplitude
     /// encoding kernel logic.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub(crate) fn encode_async_pipeline(
         device: &Arc<CudaDevice>,
         host_data: &[f64],
@@ -919,7 +919,7 @@ impl AmplitudeEncoder {
     /// # Safety
     /// The caller must ensure `input_batch_d` points to valid GPU memory containing
     /// at least `num_samples * sample_size` f32 elements on the same device as `device`.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_batch_from_gpu_ptr_f32_with_stream(
         device: &Arc<CudaDevice>,
         input_batch_d: *const f32,
@@ -951,7 +951,7 @@ impl AmplitudeEncoder {
 
         let inv_norms_gpu = {
             crate::profile_scope!("GPU::BatchNormKernelF32");
-            use cudarc::driver::DevicePtrMut;
+            use crate::gpu_rt::DevicePtrMut;
 
             let mut buffer = device.alloc_zeros::<f32>(num_samples).map_err(|e| {
                 MahoutError::MemoryAllocation(format!(
@@ -992,7 +992,7 @@ impl AmplitudeEncoder {
 
         {
             crate::profile_scope!("GPU::BatchKernelLaunchF32");
-            use cudarc::driver::DevicePtr;
+            use crate::gpu_rt::DevicePtr;
 
             let state_ptr = batch_state_vector.ptr_f32().ok_or_else(|| {
                 MahoutError::InvalidInput(
@@ -1040,7 +1040,7 @@ impl AmplitudeEncoder {
     /// # Safety
     /// The caller must ensure `input_ptr` points to valid GPU memory containing
     /// at least `len` f64 elements on the same device as `device`.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub(crate) unsafe fn calculate_inv_norm_gpu(
         device: &Arc<CudaDevice>,
         input_ptr: *const f64,
@@ -1051,7 +1051,7 @@ impl AmplitudeEncoder {
         }
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub(crate) unsafe fn calculate_inv_norm_gpu_with_stream(
         device: &Arc<CudaDevice>,
         input_ptr: *const f64,
@@ -1111,7 +1111,7 @@ impl AmplitudeEncoder {
     /// # Safety
     /// The caller must ensure `input_ptr` points to valid GPU memory containing
     /// at least `len` f32 elements on the same device as `device`.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn calculate_inv_norm_gpu_f32(
         device: &Arc<CudaDevice>,
         input_ptr: *const f32,
@@ -1132,7 +1132,7 @@ impl AmplitudeEncoder {
     /// # Safety
     /// The caller must ensure `input_ptr` points to valid GPU memory containing
     /// at least `len` f32 elements on the same device as `device`.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn calculate_inv_norm_gpu_f32_with_stream(
         device: &Arc<CudaDevice>,
         input_ptr: *const f32,
@@ -1180,7 +1180,7 @@ impl AmplitudeEncoder {
     }
 
     /// Run dual-stream pipeline for amplitude encoding (exposed for Python / benchmark).
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub(crate) fn run_amplitude_dual_stream_pipeline(
         device: &Arc<CudaDevice>,
         host_data: &[f64],

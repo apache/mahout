@@ -114,6 +114,43 @@ cd ..
 The first command is what `maturin develop --release` runs on CI; the
 second verifies tests type-check in the CUDA build.
 
+### AMD GPU build (ROCm / HIP)
+
+The native engine also builds for AMD GPUs by compiling the same six `.cu`
+kernels with `hipcc` and binding the AMD HIP runtime instead of CUDA. This is
+opt-in behind the `hip` Cargo feature; the default build is the unchanged CUDA
+path, so nothing here affects an NVIDIA build.
+
+Prerequisites:
+
+- Linux or Windows + an AMD GPU (CDNA gfx90a or RDNA gfx11xx/gfx12xx)
+- ROCm with `hipcc` and the AMD HIP runtime (`amdhip64`); on Windows a
+  TheRock-based ROCm from the `rocm-sdk` pip wheels also works
+- a ROCm build of PyTorch in the venv for the DLPack interop tests
+
+Build the Rust core and kernels for AMD. `QDP_USE_HIP=1` selects the HIP branch
+in `build.rs`, and `QDP_HIP_ARCH_LIST` picks the target arch(es) (defaults to
+`gfx90a` only when unset; set it to your GPU, e.g. `gfx1100`):
+
+```bash
+cd qdp
+export QDP_USE_HIP=1 QDP_HIP_ARCH_LIST=gfx90a ROCM_PATH=/opt/rocm
+cargo build -p qdp-core -p qdp-kernels --no-default-features --features hip
+cargo test  -p qdp-core -p qdp-kernels --no-default-features --features hip -- --test-threads=1
+cd ..
+```
+
+Build the Python extension with the `hip` feature. Use `--profile dev` (the
+release `lto = "fat"` profile produces a bitcode-only cdylib under the HIP
+toolchain), and install only the extension so a working ROCm PyTorch in the venv
+is not replaced:
+
+```bash
+maturin build --features hip --profile dev \
+  --manifest-path qdp/qdp-python/Cargo.toml --out dist/
+pip install --no-deps --force-reinstall dist/qumat_qdp-*.whl
+```
+
 ## 4. Benchmarks
 
 From the repo root, set up and prepare benchmarks:

@@ -34,20 +34,20 @@
 #![allow(unused_unsafe)]
 
 use super::{QuantumEncoder, validate_qubit_count};
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::{GpuStateVector, Precision};
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::pipeline::run_dual_stream_pipeline_aligned;
-use cudarc::driver::CudaDevice;
+use crate::gpu_rt::CudaDevice;
 use std::sync::Arc;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::memory::map_allocation_error;
-#[cfg(target_os = "linux")]
-use cudarc::driver::DevicePtr;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
+use crate::gpu_rt::DevicePtr;
+#[cfg(qdp_gpu_platform)]
 use std::ffi::c_void;
 
 /// Phase encoding: per-qubit P(φ = x_k) gates applied to |+⟩^⊗N.
@@ -66,15 +66,15 @@ pub struct PhaseEncoder;
 impl QuantumEncoder for PhaseEncoder {
     fn encode(
         &self,
-        #[cfg(target_os = "linux")] device: &Arc<CudaDevice>,
-        #[cfg(not(target_os = "linux"))] _device: &Arc<CudaDevice>,
+        #[cfg(qdp_gpu_platform)] device: &Arc<CudaDevice>,
+        #[cfg(not(qdp_gpu_platform))] _device: &Arc<CudaDevice>,
         data: &[f64],
         num_qubits: usize,
     ) -> Result<GpuStateVector> {
         self.validate_input(data, num_qubits)?;
         let state_len = 1 << num_qubits;
 
-        #[cfg(target_os = "linux")]
+        #[cfg(qdp_gpu_platform)]
         {
             let input_bytes = std::mem::size_of_val(data);
             let phases_gpu = {
@@ -126,7 +126,7 @@ impl QuantumEncoder for PhaseEncoder {
             Ok(state_vector)
         }
 
-        #[cfg(not(target_os = "linux"))]
+        #[cfg(not(qdp_gpu_platform))]
         {
             Err(MahoutError::Cuda(
                 "CUDA unavailable (non-Linux stub)".to_string(),
@@ -135,7 +135,7 @@ impl QuantumEncoder for PhaseEncoder {
     }
 
     /// Encode multiple phase samples in a single GPU allocation and kernel launch.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     fn encode_batch(
         &self,
         device: &Arc<CudaDevice>,
@@ -241,7 +241,7 @@ impl QuantumEncoder for PhaseEncoder {
         Ok(batch_state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_from_gpu_ptr(
         &self,
         device: &Arc<CudaDevice>,
@@ -297,7 +297,7 @@ impl QuantumEncoder for PhaseEncoder {
         Ok(state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_batch_from_gpu_ptr(
         &self,
         device: &Arc<CudaDevice>,
@@ -325,7 +325,7 @@ impl QuantumEncoder for PhaseEncoder {
         // through the norm and is caught on the host side.
         let phase_validation_buffer = {
             crate::profile_scope!("GPU::PhaseFiniteCheckBatch");
-            use cudarc::driver::DevicePtrMut;
+            use crate::gpu_rt::DevicePtrMut;
             let mut buffer = device.alloc_zeros::<f64>(num_samples).map_err(|e| {
                 MahoutError::MemoryAllocation(format!(
                     "Failed to allocate phase validation buffer: {:?}",
@@ -437,7 +437,7 @@ impl QuantumEncoder for PhaseEncoder {
 }
 
 impl PhaseEncoder {
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     fn encode_batch_async_pipeline(
         device: &Arc<CudaDevice>,
         batch_data: &[f64],

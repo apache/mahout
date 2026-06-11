@@ -18,10 +18,10 @@
 // Tests for GPU-side f32 L2 norm helper in AmplitudeEncoder.
 //
 
-#![cfg(target_os = "linux")]
+#![cfg(qdp_gpu_platform)]
 
 use approx::assert_relative_eq;
-use cudarc::driver::DevicePtr;
+use qdp_core::gpu_rt::DevicePtr;
 use qdp_core::gpu::encodings::amplitude::AmplitudeEncoder;
 
 mod common;

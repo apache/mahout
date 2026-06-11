@@ -15,7 +15,7 @@
 // limitations under the License.
 
 // Loader bindings (Linux only; qdp-core pipeline types only built on Linux)
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 mod loader_impl {
     use crate::tensor::QuantumTensor;
     use pyo3::exceptions::PyRuntimeError;
@@ -120,5 +120,5 @@ mod loader_impl {
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub use loader_impl::{PyQuantumLoader, config_from_args, parse_null_handling, path_from_py};

@@ -21,20 +21,20 @@
 #![allow(unused_unsafe)]
 
 use super::{QuantumEncoder, validate_qubit_count};
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::{GpuStateVector, Precision};
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::pipeline::run_dual_stream_pipeline_aligned;
-use cudarc::driver::CudaDevice;
+use crate::gpu_rt::CudaDevice;
 use std::sync::Arc;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::memory::map_allocation_error;
-#[cfg(target_os = "linux")]
-use cudarc::driver::DevicePtr;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
+use crate::gpu_rt::DevicePtr;
+#[cfg(qdp_gpu_platform)]
 use std::ffi::c_void;
 
 /// Angle encoding: each qubit uses one rotation angle to form a product state.
@@ -43,15 +43,15 @@ pub struct AngleEncoder;
 impl QuantumEncoder for AngleEncoder {
     fn encode(
         &self,
-        #[cfg(target_os = "linux")] device: &Arc<CudaDevice>,
-        #[cfg(not(target_os = "linux"))] _device: &Arc<CudaDevice>,
+        #[cfg(qdp_gpu_platform)] device: &Arc<CudaDevice>,
+        #[cfg(not(qdp_gpu_platform))] _device: &Arc<CudaDevice>,
         data: &[f64],
         num_qubits: usize,
     ) -> Result<GpuStateVector> {
         self.validate_input(data, num_qubits)?;
         let state_len = 1 << num_qubits;
 
-        #[cfg(target_os = "linux")]
+        #[cfg(qdp_gpu_platform)]
         {
             let input_bytes = std::mem::size_of_val(data);
             let angles_gpu = {
@@ -103,7 +103,7 @@ impl QuantumEncoder for AngleEncoder {
             Ok(state_vector)
         }
 
-        #[cfg(not(target_os = "linux"))]
+        #[cfg(not(qdp_gpu_platform))]
         {
             Err(MahoutError::Cuda(
                 "CUDA unavailable (non-Linux stub)".to_string(),
@@ -112,7 +112,7 @@ impl QuantumEncoder for AngleEncoder {
     }
 
     /// Encode multiple angle samples in a single GPU allocation and kernel launch
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     fn encode_batch(
         &self,
         device: &Arc<CudaDevice>,
@@ -229,7 +229,7 @@ impl QuantumEncoder for AngleEncoder {
         Ok(batch_state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_from_gpu_ptr(
         &self,
         device: &Arc<CudaDevice>,
@@ -294,7 +294,7 @@ impl QuantumEncoder for AngleEncoder {
         Ok(state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_batch_from_gpu_ptr(
         &self,
         device: &Arc<CudaDevice>,
@@ -374,7 +374,7 @@ impl QuantumEncoder for AngleEncoder {
         Ok(batch_state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     fn encode_batch_f32(
         &self,
         device: &Arc<CudaDevice>,
@@ -494,7 +494,7 @@ impl QuantumEncoder for AngleEncoder {
         Ok(batch_state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_batch_from_gpu_ptr_f32(
         &self,
         device: &Arc<CudaDevice>,
@@ -636,7 +636,7 @@ impl AngleEncoder {
     /// The caller must also ensure that `stream` is either null or a valid CUDA stream handle
     /// associated with `device`, and that no concurrent use of these raw pointers violates Rust's
     /// aliasing or lifetime rules.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_from_gpu_ptr_f32_with_stream(
         device: &Arc<CudaDevice>,
         input_d: *const f32,
@@ -717,7 +717,7 @@ impl AngleEncoder {
     /// valid for the duration of this call. The caller must also ensure that `stream` is either
     /// null or a valid CUDA stream handle associated with `device`, and that the memory layout is
     /// row-major with exactly `sample_size` angles per sample.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_batch_from_gpu_ptr_f32_with_stream(
         device: &Arc<CudaDevice>,
         input_batch_d: *const f32,
@@ -738,7 +738,7 @@ impl AngleEncoder {
         }
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     fn encode_batch_async_pipeline(
         device: &Arc<CudaDevice>,
         batch_data: &[f64],
@@ -802,7 +802,7 @@ impl AngleEncoder {
         Ok(batch_state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     fn encode_batch_async_pipeline_f32(
         device: &Arc<CudaDevice>,
         batch_data: &[f32],

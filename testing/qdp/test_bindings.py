@@ -122,7 +122,14 @@ def test_dlpack_device():
     qtensor = engine.encode(data, 2, "amplitude")
 
     device_info = qtensor.__dlpack_device__()
-    assert device_info == (2, 0), "Expected (2, 0) for CUDA device 0"
+    # DLPack device_type: kDLCUDA=2 (NVIDIA), kDLROCM=10 (AMD HIP). The native
+    # engine tags exported tensors to match the backend it was built for, so a
+    # ROCm build must report kDLROCM (which a ROCm PyTorch's from_dlpack
+    # requires); a CUDA build reports kDLCUDA.
+    expected_device_type = 10 if getattr(torch.version, "hip", None) else 2
+    assert device_info == (expected_device_type, 0), (
+        f"Expected ({expected_device_type}, 0) for device 0"
+    )
 
 
 @requires_qdp
