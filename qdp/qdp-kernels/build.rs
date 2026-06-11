@@ -185,9 +185,11 @@ fn hip_requested() -> bool {
 ///
 /// QDP_USE_HIP=1 flips the KERNEL build to hipcc, while the HOST runtime is
 /// chosen by the `hip` Cargo feature (cudarc when off, the HIP shim when on).
-/// If only one of the two is set, a default `cargo build` would link AMD device
-/// code against the cudarc host (or vice versa) and fail or misbehave at
-/// runtime. Fail loudly so the inconsistency cannot slip through silently.
+/// Setting QDP_USE_HIP=1 with the `hip` feature OFF would build AMD device code
+/// (hipcc) against the cudarc host backend, which fails or misbehaves at runtime;
+/// reject that loudly. The reverse (the `hip` feature on, QDP_USE_HIP unset) is
+/// NOT a mismatch: `hip_requested()` already builds the kernels for HIP whenever
+/// the feature is on, so the host and kernels agree -- no panic there.
 fn check_hip_consistency() {
     let env_hip = qdp_use_hip_env();
     let feature_hip = env::var("CARGO_FEATURE_HIP").is_ok();
@@ -196,13 +198,6 @@ fn check_hip_consistency() {
             "QDP_USE_HIP is set but the `hip` Cargo feature is off: this would \
              build AMD kernels (hipcc) against the cudarc host backend. \
              Add `--features hip` (and `--no-default-features` to drop cudarc)."
-        );
-    }
-    if feature_hip && !env_hip {
-        panic!(
-            "The `hip` Cargo feature is on but QDP_USE_HIP is not set: the host \
-             backend is HIP but the kernels would build for CUDA. \
-             Set QDP_USE_HIP=1 (and QDP_HIP_ARCH_LIST=<arch>)."
         );
     }
 }
@@ -217,6 +212,26 @@ fn check_hip_consistency() {
 /// link library is amdhip64 instead of cudart. The CUDA path is untouched.
 fn build_hip() {
     let hipcc = env::var("QDP_HIPCC").unwrap_or_else(|_| "hipcc".to_string());
+
+    // Degrade gracefully when the ROCm toolchain is absent, mirroring the
+    // CUDA branch's nvcc-not-found path. This lets `cargo check`/`clippy`
+    // (including `--all-features`, which turns the `hip` feature on) succeed in
+    // a ROCm-less CI runner: emit the qdp_no_cuda stub cfg and skip compilation
+    // instead of letting hipcc fail the build.
+    let has_hipcc = Command::new(&hipcc).arg("--version").output().is_ok();
+    if !has_hipcc {
+        println!("cargo:rustc-cfg=qdp_no_cuda");
+        println!(
+            "cargo:warning=ROCm/hipcc not found ('{hipcc}' not runnable). Skipping kernel compilation."
+        );
+        println!(
+            "cargo:warning=This is expected in environments without the ROCm toolkit installed."
+        );
+        println!(
+            "cargo:warning=The project will build against host stubs, but GPU functionality will not be available."
+        );
+        return;
+    }
 
     let mut build = cc::Build::new();
     build.compiler(&hipcc);
