@@ -10,6 +10,9 @@ cudarc = { workspace = true, optional = true }
 cc = { workspace = true }
 
 [features]
+# `cuda` and `hip` are mutually exclusive; pick exactly one vendor backend.
+# If both end up enabled (e.g. via workspace feature unification), `hip` takes
+# precedence: kernels build for HIP and cudarc is compiled but unused.
 # Default build: NVIDIA CUDA via cudarc + nvcc-compiled kernels.
 default = ["cuda"]
 cuda = ["dep:cudarc"]
