@@ -171,13 +171,40 @@ fn apply_default_arch_targets(build: &mut cc::Build) {
     }
 }
 
-fn hip_requested() -> bool {
-    if cfg!(feature = "hip") {
-        return true;
-    }
+fn qdp_use_hip_env() -> bool {
     env::var("QDP_USE_HIP")
         .map(|v| v == "1" || v.eq_ignore_ascii_case("true") || v.eq_ignore_ascii_case("yes"))
         .unwrap_or(false)
+}
+
+fn hip_requested() -> bool {
+    cfg!(feature = "hip") || qdp_use_hip_env()
+}
+
+/// Reject a kernel/host backend mismatch before it produces a broken binary.
+///
+/// QDP_USE_HIP=1 flips the KERNEL build to hipcc, while the HOST runtime is
+/// chosen by the `hip` Cargo feature (cudarc when off, the HIP shim when on).
+/// If only one of the two is set, a default `cargo build` would link AMD device
+/// code against the cudarc host (or vice versa) and fail or misbehave at
+/// runtime. Fail loudly so the inconsistency cannot slip through silently.
+fn check_hip_consistency() {
+    let env_hip = qdp_use_hip_env();
+    let feature_hip = env::var("CARGO_FEATURE_HIP").is_ok();
+    if env_hip && !feature_hip {
+        panic!(
+            "QDP_USE_HIP is set but the `hip` Cargo feature is off: this would \
+             build AMD kernels (hipcc) against the cudarc host backend. \
+             Add `--features hip` (and `--no-default-features` to drop cudarc)."
+        );
+    }
+    if feature_hip && !env_hip {
+        panic!(
+            "The `hip` Cargo feature is on but QDP_USE_HIP is not set: the host \
+             backend is HIP but the kernels would build for CUDA. \
+             Set QDP_USE_HIP=1 (and QDP_HIP_ARCH_LIST=<arch>)."
+        );
+    }
 }
 
 /// Compile the kernels with hipcc for AMD GPUs.
@@ -235,6 +262,11 @@ fn main() {
     // Emit qdp_gpu_platform when building for a GPU-capable OS (Linux always;
     // Windows when the hip feature is on via QDP_USE_HIP=1 / TheRock ROCm).
     println!("cargo::rustc-check-cfg=cfg(qdp_gpu_platform)");
+
+    // Reject a kernel/host backend mismatch (QDP_USE_HIP vs the `hip` feature)
+    // before compiling anything.
+    check_hip_consistency();
+
     let is_linux = std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("linux");
     let hip_feature = std::env::var("CARGO_FEATURE_HIP").is_ok();
     let is_windows = std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows");

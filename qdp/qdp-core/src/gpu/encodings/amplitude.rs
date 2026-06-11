@@ -980,6 +980,13 @@ impl AmplitudeEncoder {
 
         {
             crate::profile_scope!("GPU::NormValidationF32");
+            // The norm kernel ran on the caller's stream, but dtoh_sync_copy
+            // reads back on the default stream. Synchronize the caller's stream
+            // first so the result is visible: with a non-blocking stream (which
+            // does not implicitly order against the default stream) the readback
+            // would otherwise race and observe the zero-initialized buffer. This
+            // mirrors the single-sample path (calculate_inv_norm_gpu_with_stream).
+            sync_cuda_stream(stream, "Norm stream synchronize failed (batch f32)")?;
             let host_inv_norms = device.dtoh_sync_copy(&inv_norms_gpu).map_err(|e| {
                 MahoutError::Cuda(format!("Failed to copy f32 norms to host: {:?}", e))
             })?;

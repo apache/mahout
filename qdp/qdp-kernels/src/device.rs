@@ -57,6 +57,9 @@ mod hip {
     const HIP_SUCCESS: hipError_t = 0;
     const HIP_MEMCPY_HOST_TO_DEVICE: u32 = 1;
     const HIP_MEMCPY_DEVICE_TO_HOST: u32 = 2;
+    // hipStreamNonBlocking: the new stream does not implicitly synchronize with
+    // the NULL/default stream, matching cudarc's fork_default_stream.
+    const HIP_STREAM_NON_BLOCKING: u32 = 1;
 
     unsafe extern "C" {
         fn hipSetDevice(device: i32) -> hipError_t;
@@ -67,7 +70,7 @@ mod hip {
         fn hipMemcpy(dst: *mut c_void, src: *const c_void, size: usize, kind: u32)
             -> hipError_t;
         fn hipDeviceSynchronize() -> hipError_t;
-        fn hipStreamCreate(stream: *mut *mut c_void) -> hipError_t;
+        fn hipStreamCreateWithFlags(stream: *mut *mut c_void, flags: u32) -> hipError_t;
         fn hipStreamDestroy(stream: *mut c_void) -> hipError_t;
         fn hipStreamSynchronize(stream: *mut c_void) -> hipError_t;
     }
@@ -201,6 +204,12 @@ mod hip {
     impl<T> Drop for CudaSlice<T> {
         fn drop(&mut self) {
             if self.ptr != 0 {
+                // hipFree releases on the calling thread's current device, so
+                // re-bind the owning device first (cudarc does the same in Drop):
+                // on multi-GPU a different device may be current, which would
+                // otherwise free against the wrong device. Best-effort -- Drop
+                // cannot report an error, so a failed bind is swallowed.
+                let _ = self._device.bind();
                 unsafe {
                     let _ = hipFree(self.raw_ptr());
                 }
@@ -383,8 +392,11 @@ mod hip {
         pub fn fork_default_stream(self: &Arc<Self>) -> Result<CudaStream, DriverError> {
             self.bind()?;
             let mut stream: *mut c_void = std::ptr::null_mut();
+            // Non-blocking stream (matches cudarc): a default/blocking stream
+            // would serialize H2D copies against the NULL stream and defeat the
+            // dual-stream copy/compute overlap the pipeline depends on.
             unsafe {
-                check(hipStreamCreate(&mut stream))?;
+                check(hipStreamCreateWithFlags(&mut stream, HIP_STREAM_NON_BLOCKING))?;
             }
             Ok(CudaStream {
                 stream,
