@@ -124,8 +124,11 @@ path, so nothing here affects an NVIDIA build.
 Prerequisites:
 
 - Linux or Windows + an AMD GPU (CDNA gfx90a or RDNA gfx11xx/gfx12xx)
-- ROCm with `hipcc` and the AMD HIP runtime (`amdhip64`); on Windows a
-  TheRock-based ROCm from the `rocm-sdk` pip wheels also works
+- ROCm >= 6.0 with `hipcc` and the AMD HIP runtime (`amdhip64`); on Windows a
+  TheRock-based ROCm from the `rocm-sdk` pip wheels also works. ROCm 6.0 is the
+  floor because the device-pointer check in `qdp-core/src/gpu/cuda_ffi.rs` uses
+  the ROCm 6+ `hipMemoryType` device convention (ROCm 5.x numbered Device=1 and
+  would reject valid device pointers); tested on ROCm 7.2.1
 - a ROCm build of PyTorch in the venv for the DLPack interop tests
 
 Build the Rust core and kernels for AMD. `QDP_USE_HIP=1` selects the HIP branch

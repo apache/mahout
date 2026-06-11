@@ -30,6 +30,9 @@ protoc-bin-vendored = { workspace = true }
 name = "qdp_core"
 
 [features]
+# `cuda` and `hip` are mutually exclusive; pick exactly one vendor backend.
+# If both end up enabled (e.g. via workspace feature unification), `hip` takes
+# precedence: kernels build for HIP and cudarc is compiled but unused.
 # NVIDIA CUDA via cudarc + nvcc kernels (default, unchanged behavior).
 default = ["cuda"]
 cuda = ["dep:cudarc", "qdp-kernels/cuda"]

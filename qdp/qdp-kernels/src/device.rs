@@ -30,6 +30,9 @@
 //! qdp-core) because qdp-kernels implements them on its complex structs and is
 //! the lowest crate in the workspace.
 
+#[cfg(not(any(feature = "cuda", feature = "hip")))]
+compile_error!("qdp-kernels requires exactly one of the `cuda` or `hip` features");
+
 #[cfg(all(feature = "cuda", not(feature = "hip")))]
 pub use cudarc::driver::{
     CudaDevice, CudaSlice, DevicePtr, DevicePtrMut, DeviceRepr, DeviceSlice, ValidAsZeroBits,
