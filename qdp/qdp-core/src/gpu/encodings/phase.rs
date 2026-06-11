@@ -353,6 +353,15 @@ impl QuantumEncoder for PhaseEncoder {
 
         {
             crate::profile_scope!("GPU::PhaseFiniteValidationHostCopy");
+            // The norm probe ran on the caller's stream, but dtoh_sync_copy reads
+            // back on the default stream. Synchronize the caller's stream first so
+            // the result is visible: with a non-blocking stream (which does not
+            // implicitly order against the default stream) the readback would
+            // otherwise race and observe the zero-initialized buffer.
+            crate::gpu::cuda_sync::sync_cuda_stream(
+                stream,
+                "Phase validation norm stream synchronize failed (batch)",
+            )?;
             let host_norms = device
                 .dtoh_sync_copy(&phase_validation_buffer)
                 .map_err(|e| {

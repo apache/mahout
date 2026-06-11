@@ -59,8 +59,6 @@ mod hip {
     const HIP_MEMCPY_DEVICE_TO_HOST: u32 = 2;
     // hipStreamNonBlocking: the new stream does not implicitly synchronize with
     // the NULL/default stream, matching cudarc's fork_default_stream.
-    // Used on Linux only; Windows uses a blocking stream (see fork_default_stream).
-    #[cfg(target_os = "linux")]
     const HIP_STREAM_NON_BLOCKING: u32 = 1;
 
     unsafe extern "C" {
@@ -71,10 +69,7 @@ mod hip {
         fn hipMemset(ptr: *mut c_void, value: i32, size: usize) -> hipError_t;
         fn hipMemcpy(dst: *mut c_void, src: *const c_void, size: usize, kind: u32) -> hipError_t;
         fn hipDeviceSynchronize() -> hipError_t;
-        #[cfg(target_os = "linux")]
         fn hipStreamCreateWithFlags(stream: *mut *mut c_void, flags: u32) -> hipError_t;
-        #[cfg(not(target_os = "linux"))]
-        fn hipStreamCreate(stream: *mut *mut c_void) -> hipError_t;
         fn hipStreamDestroy(stream: *mut c_void) -> hipError_t;
         fn hipStreamSynchronize(stream: *mut c_void) -> hipError_t;
     }
@@ -90,6 +85,24 @@ mod hip {
         } else {
             Err(DriverError(code))
         }
+    }
+
+    /// Synchronize the NULL/default stream so its prior work is ordered before any
+    /// other stream observes the affected buffers.
+    ///
+    /// The blocking shim copies (htod/alloc_zeros) issue hipMemcpy/hipMemset on the
+    /// default (NULL) stream. CUDA's legacy default stream is synchronizing, so on
+    /// NVIDIA that work is implicitly ordered before a kernel launched on a forked
+    /// non-blocking stream that reads the same buffer. HIP's default stream is NOT
+    /// synchronizing relative to a hipStreamNonBlocking stream, so without this an
+    /// encoder that sets up input/output on the default stream and then launches
+    /// the norm/encode kernels on the caller's forked stream would race the setup
+    /// (the kernel reads stale/zero data). A default-stream synchronize after the
+    /// blocking copy restores the CUDA-equivalent ordering while preserving the
+    /// dual-stream copy/compute overlap (which uses async copies on explicit
+    /// streams, not these blocking paths).
+    fn sync_default_stream() -> Result<(), DriverError> {
+        unsafe { check(hipStreamSynchronize(std::ptr::null_mut())) }
     }
 
     /// Marker: type is safe to byte-copy to/from the device. Mirrors
@@ -305,6 +318,7 @@ mod hip {
             if bytes > 0 {
                 unsafe {
                     check(hipMemset(slice.raw_ptr(), 0, bytes))?;
+                    sync_default_stream()?;
                 }
             }
             Ok(slice)
@@ -354,6 +368,7 @@ mod hip {
                         bytes,
                         HIP_MEMCPY_HOST_TO_DEVICE,
                     ))?;
+                    sync_default_stream()?;
                 }
             }
             Ok(())
@@ -400,23 +415,18 @@ mod hip {
             self.bind()?;
             let mut stream: *mut c_void = std::ptr::null_mut();
             unsafe {
-                // On Linux, use a non-blocking stream (HIP_STREAM_NON_BLOCKING=1) to
-                // match cudarc: a blocking stream serializes H2D copies against the NULL
-                // stream and defeats the dual-stream copy/compute overlap the pipeline
-                // relies on.
-                //
-                // On Windows (TheRock ROCm 7.14), non-blocking stream writes are not
-                // visible via hipMemcpy from the host after hipStreamSynchronize, due to
-                // a cache coherency gap in the Windows HIP runtime. Use a blocking stream
-                // to restore correct D2H readback semantics. The pipeline overlap
-                // optimization is not available on Windows ROCm.
-                #[cfg(target_os = "linux")]
+                // Non-blocking stream (matches cudarc on both Linux and Windows): a
+                // default/blocking stream would serialize H2D copies against the NULL
+                // stream and defeat the dual-stream copy/compute overlap the pipeline
+                // relies on. Because a non-blocking stream does not implicitly order
+                // against the default stream, any host-visible readback (a default/NULL
+                // stream dtoh copy) of results produced on this stream MUST first
+                // synchronize this stream (wait_for / sync_cuda_stream); the encoders
+                // already do so before every readback.
                 check(hipStreamCreateWithFlags(
                     &mut stream,
                     HIP_STREAM_NON_BLOCKING,
                 ))?;
-                #[cfg(not(target_os = "linux"))]
-                check(hipStreamCreate(&mut stream))?;
             }
             Ok(CudaStream {
                 stream,
