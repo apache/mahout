@@ -17,6 +17,11 @@
 // Allow unused_unsafe: CUDA FFI and kernel functions are unsafe in CUDA builds but safe stubs in no-CUDA builds.
 // The compiler can't statically determine which path is taken.
 #![allow(unused_unsafe)]
+// The `stream.stream as *mut c_void` casts at kernel-launch call sites are a
+// real conversion on the CUDA backend (cudarc's CUstream is a distinct pointer
+// type) but a no-op on HIP, where the stream field is already *mut c_void. Keep
+// the cast for backend-agnostic call sites and silence the HIP-only redundancy.
+#![cfg_attr(feature = "hip", allow(clippy::unnecessary_cast))]
 
 pub mod dlpack;
 #[cfg(qdp_gpu_platform)]

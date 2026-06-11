@@ -20,6 +20,10 @@
 // but in CUDA builds, the extern "C" functions require unsafe blocks.
 // The compiler can't statically determine which path is taken.
 #![allow(unused_unsafe)]
+// The `stream.stream as *mut c_void` cast is a real conversion on the CUDA
+// backend (cudarc's CUstream is a distinct pointer type) but a no-op on HIP,
+// where the stream field is already *mut c_void; silence the HIP-only redundancy.
+#![cfg_attr(feature = "hip", allow(clippy::unnecessary_cast))]
 
 #[cfg(qdp_gpu_platform)]
 use qdp_kernels::device::{CudaDevice, DevicePtr, DevicePtrMut};

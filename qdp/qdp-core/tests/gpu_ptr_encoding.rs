@@ -17,6 +17,10 @@
 // Unit and integration tests for encode_from_gpu_ptr and encode_batch_from_gpu_ptr.
 
 #![cfg(qdp_gpu_platform)]
+// The `stream.stream as *mut c_void` cast is a real conversion on the CUDA
+// backend (cudarc's CUstream is a distinct pointer type) but a no-op on HIP,
+// where the stream field is already *mut c_void; silence the HIP-only redundancy.
+#![cfg_attr(feature = "hip", allow(clippy::unnecessary_cast))]
 
 use qdp_core::gpu_rt::{DevicePtr, DeviceSlice};
 use qdp_core::{MahoutError, Precision, QdpEngine};
