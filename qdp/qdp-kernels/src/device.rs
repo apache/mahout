@@ -67,8 +67,7 @@ mod hip {
         fn hipMalloc(ptr: *mut *mut c_void, size: usize) -> hipError_t;
         fn hipFree(ptr: *mut c_void) -> hipError_t;
         fn hipMemset(ptr: *mut c_void, value: i32, size: usize) -> hipError_t;
-        fn hipMemcpy(dst: *mut c_void, src: *const c_void, size: usize, kind: u32)
-            -> hipError_t;
+        fn hipMemcpy(dst: *mut c_void, src: *const c_void, size: usize, kind: u32) -> hipError_t;
         fn hipDeviceSynchronize() -> hipError_t;
         fn hipStreamCreateWithFlags(stream: *mut *mut c_void, flags: u32) -> hipError_t;
         fn hipStreamDestroy(stream: *mut c_void) -> hipError_t;
@@ -152,7 +151,10 @@ mod hip {
         /// `cudarc::CudaSlice::slice_mut`; the returned view borrows this slice
         /// and is itself a `DevicePtrMut`/`DeviceSlice` copy target.
         pub fn slice_mut(&mut self, range: std::ops::Range<usize>) -> CudaViewMut<'_, T> {
-            assert!(range.start <= range.end && range.end <= self.len, "slice_mut out of bounds");
+            assert!(
+                range.start <= range.end && range.end <= self.len,
+                "slice_mut out of bounds"
+            );
             let offset_ptr = self.ptr + (range.start * std::mem::size_of::<T>()) as u64;
             CudaViewMut {
                 ptr: offset_ptr,
@@ -396,7 +398,10 @@ mod hip {
             // would serialize H2D copies against the NULL stream and defeat the
             // dual-stream copy/compute overlap the pipeline depends on.
             unsafe {
-                check(hipStreamCreateWithFlags(&mut stream, HIP_STREAM_NON_BLOCKING))?;
+                check(hipStreamCreateWithFlags(
+                    &mut stream,
+                    HIP_STREAM_NON_BLOCKING,
+                ))?;
             }
             Ok(CudaStream {
                 stream,

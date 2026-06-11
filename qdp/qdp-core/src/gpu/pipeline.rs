@@ -39,7 +39,7 @@ use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
 use crate::gpu::overlap_tracker::OverlapTracker;
 #[cfg(qdp_gpu_platform)]
 use crate::gpu::pool_metrics::PoolMetrics;
-use crate::gpu_rt::{CudaDevice, CudaSlice, DevicePtr, DeviceRepr, CudaStream};
+use crate::gpu_rt::{CudaDevice, CudaSlice, CudaStream, DevicePtr, DeviceRepr};
 use std::ffi::c_void;
 use std::sync::Arc;
 

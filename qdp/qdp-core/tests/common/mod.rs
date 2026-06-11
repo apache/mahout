@@ -24,9 +24,9 @@ use parquet::arrow::ArrowWriter;
 use parquet::file::properties::WriterProperties;
 
 #[cfg(qdp_gpu_platform)]
-use qdp_core::gpu_rt::{CudaDevice, CudaSlice};
-#[cfg(qdp_gpu_platform)]
 use qdp_core::dlpack::DLManagedTensor;
+#[cfg(qdp_gpu_platform)]
+use qdp_core::gpu_rt::{CudaDevice, CudaSlice};
 #[cfg(qdp_gpu_platform)]
 use qdp_core::{Precision, QdpEngine};
 

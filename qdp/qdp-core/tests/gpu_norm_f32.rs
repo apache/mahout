@@ -21,8 +21,8 @@
 #![cfg(qdp_gpu_platform)]
 
 use approx::assert_relative_eq;
-use qdp_core::gpu_rt::DevicePtr;
 use qdp_core::gpu::encodings::amplitude::AmplitudeEncoder;
+use qdp_core::gpu_rt::DevicePtr;
 
 mod common;
 
