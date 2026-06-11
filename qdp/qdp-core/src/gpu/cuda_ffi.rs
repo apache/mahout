@@ -129,12 +129,29 @@ pub(crate) use hip_rt::*;
 #[cfg(feature = "hip")]
 #[allow(non_snake_case)]
 mod hip_rt {
-    use super::CudaPointerAttributes;
+    use super::{CUDA_MEMORY_TYPE_DEVICE, CUDA_MEMORY_TYPE_MANAGED, CudaPointerAttributes};
     use std::ffi::c_void;
 
-    // hipPointerAttribute_t has the same first fields we read (memoryType,
-    // device, devicePointer, hostPointer); a #[repr(C)] alias suffices since we
-    // only read memory_type/device.
+    // hipMemoryType enum values are NOT guaranteed equal to CUDA's across ROCm
+    // releases (older HIP used Host=0/Device=1; the hip_runtime_api.h note flags
+    // this explicitly). So we read the real hipPointerAttribute_t and compare its
+    // `type` against the named hipMemoryType* constants rather than a magic
+    // number, then translate to the CUDA convention the caller expects.
+    const HIP_MEMORY_TYPE_DEVICE: i32 = 2; // hipMemoryTypeDevice
+    const HIP_MEMORY_TYPE_MANAGED: i32 = 3; // hipMemoryTypeManaged
+
+    // Mirror of hipPointerAttribute_t (ROCm hip_runtime_api.h): the leading
+    // `type` field is the hipMemoryType enum read by cudaPointerGetAttributes.
+    #[repr(C)]
+    struct HipPointerAttributes {
+        memory_type: i32,
+        device: i32,
+        device_pointer: *mut c_void,
+        host_pointer: *mut c_void,
+        is_managed: i32,
+        allocation_flags: u32,
+    }
+
     unsafe extern "C" {
         fn hipHostMalloc(ptr: *mut *mut c_void, size: usize, flags: u32) -> i32;
         fn hipHostFree(ptr: *mut c_void) -> i32;
@@ -172,9 +189,39 @@ mod hip_rt {
         attributes: *mut CudaPointerAttributes,
         ptr: *const c_void,
     ) -> i32 {
-        // hipPointerAttribute_t leads with the same memoryType/device/pointers
-        // fields we read; reinterpret the destination accordingly.
-        unsafe { hipPointerGetAttributes(attributes as *mut c_void, ptr) }
+        let mut hip_attrs = HipPointerAttributes {
+            memory_type: 0,
+            device: 0,
+            device_pointer: std::ptr::null_mut(),
+            host_pointer: std::ptr::null_mut(),
+            is_managed: 0,
+            allocation_flags: 0,
+        };
+        let ret =
+            unsafe { hipPointerGetAttributes(&mut hip_attrs as *mut _ as *mut c_void, ptr) };
+        if ret != 0 {
+            return ret;
+        }
+        // Translate the hipMemoryType enum to the CUDA convention the caller
+        // checks against, comparing the named hipMemoryType* values explicitly
+        // (do not assume the numeric enum equals CUDA's). Anything else stays
+        // verbatim so the caller's "not device memory" branch still fires.
+        let memory_type = match hip_attrs.memory_type {
+            HIP_MEMORY_TYPE_DEVICE => CUDA_MEMORY_TYPE_DEVICE,
+            HIP_MEMORY_TYPE_MANAGED => CUDA_MEMORY_TYPE_MANAGED,
+            other => other,
+        };
+        unsafe {
+            *attributes = CudaPointerAttributes {
+                memory_type,
+                device: hip_attrs.device,
+                device_pointer: hip_attrs.device_pointer,
+                host_pointer: hip_attrs.host_pointer,
+                is_managed: hip_attrs.is_managed,
+                allocation_flags: hip_attrs.allocation_flags,
+            };
+        }
+        0
     }
 
     pub(crate) unsafe fn cudaMemGetInfo(free: *mut usize, total: *mut usize) -> i32 {
