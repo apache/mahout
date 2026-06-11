@@ -13,9 +13,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Copyright (c) 2026 Advanced Micro Devices, Inc.
-// Author: Jeff Daily <jeff.daily@amd.com>
 
 // HIP forwarding shim for <vector_types.h> (HIP build path only). HIP defines
 // double2 / float2 etc. via <hip/hip_runtime.h>, which is already pulled in by
