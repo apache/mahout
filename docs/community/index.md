@@ -12,7 +12,7 @@ This page explains the official communication channels, how to participate, and 
 
 There are numerous ways to engage with the Mahout community, no matter your background or skill level. Some options include:
 
-## Biweekly Community Meeting
+## Monthly Community Meeting
 
 Apache Mahout holds a community meeting every two weeks. To get involved, subscribe to the Google Calendar to view and join the meeting.
 
