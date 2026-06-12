@@ -12,9 +12,9 @@ This page explains the official communication channels, how to participate, and 
 
 There are numerous ways to engage with the Mahout community, no matter your background or skill level. Some options include:
 
-## Monthly Community Meeting
+## Biweekly Community Meeting
 
-Apache Mahout holds a community meeting every month. To get involved, subscribe to the Google Calendar to view and join the meeting.
+Apache Mahout holds a community meeting every two weeks. To get involved, subscribe to the Google Calendar to view and join the meeting.
 
 [Subscribe](https://calendar.google.com/calendar/u/0/r?cid=ZGM4MWY4MTYxYjcyYTRkNGM4ZTVkYjU4MjI5MzYzZWUxMzkxZDllNWU5ZWI1NzUyNzliZTdmN2NhOGQ2ODUzMUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t)
 
