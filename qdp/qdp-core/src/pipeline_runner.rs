@@ -836,7 +836,7 @@ pub fn run_throughput_pipeline(config: &PipelineConfig) -> Result<PipelineRunRes
 
     let _ = producer_handle.join();
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     engine.synchronize()?;
 
     let duration_sec = start.elapsed().as_secs_f64().max(1e-9);

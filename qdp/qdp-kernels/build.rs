@@ -26,6 +26,20 @@
 use std::env;
 use std::process::Command;
 
+const KERNEL_SOURCES: &[&str] = &[
+    "src/amplitude.cu",
+    "src/basis.cu",
+    "src/angle.cu",
+    "src/validation.cu",
+    "src/iqp.cu",
+    "src/phase.cu",
+];
+
+/// Default AMD GPU target used only when QDP_HIP_ARCH_LIST is unset. Never hardcode
+/// this as the sole arch in a way that overrides the env list: other AMD targets
+/// (gfx1100, gfx1151) must build the same source by setting QDP_HIP_ARCH_LIST alone.
+const DEFAULT_HIP_ARCH: &str = "gfx90a";
+
 const DEFAULT_CUBIN_ARCHES: &[&str] = &["75", "80", "86", "89", "90", "100", "120"];
 const DEFAULT_PTX_CANDIDATES: &[&str] = &["120", "100", "90", "89", "86", "80", "75"];
 const LEGACY_FALLBACK_ARCHES: &[&str] = &["75", "80", "86"];
@@ -154,9 +168,122 @@ fn apply_default_arch_targets(build: &mut cc::Build) {
     }
 }
 
+fn qdp_use_hip_env() -> bool {
+    env::var("QDP_USE_HIP")
+        .map(|v| v == "1" || v.eq_ignore_ascii_case("true") || v.eq_ignore_ascii_case("yes"))
+        .unwrap_or(false)
+}
+
+fn hip_requested() -> bool {
+    cfg!(feature = "hip") || qdp_use_hip_env()
+}
+
+/// Reject a kernel/host backend mismatch before it produces a broken binary.
+///
+/// QDP_USE_HIP=1 flips the KERNEL build to hipcc, while the HOST runtime is
+/// chosen by the `hip` Cargo feature (cudarc when off, the HIP shim when on).
+/// Setting QDP_USE_HIP=1 with the `hip` feature OFF would build AMD device code
+/// (hipcc) against the cudarc host backend, which fails or misbehaves at runtime;
+/// reject that loudly. The reverse (the `hip` feature on, QDP_USE_HIP unset) is
+/// NOT a mismatch: `hip_requested()` already builds the kernels for HIP whenever
+/// the feature is on, so the host and kernels agree -- no panic there.
+fn check_hip_consistency() {
+    let env_hip = qdp_use_hip_env();
+    let feature_hip = env::var("CARGO_FEATURE_HIP").is_ok();
+    if env_hip && !feature_hip {
+        panic!(
+            "QDP_USE_HIP is set but the `hip` Cargo feature is off: this would \
+             build AMD kernels (hipcc) against the cudarc host backend. \
+             Add `--features hip` (and `--no-default-features` to drop cudarc)."
+        );
+    }
+}
+
+/// Compile the kernels with hipcc for AMD GPUs.
+///
+/// Mirrors the CUDA branch in spirit (same six .cu sources, same `src/` include
+/// for kernel_config.h) but: targets are AMD `--offload-arch` values from
+/// QDP_HIP_ARCH_LIST (default gfx90a only when unset), the hip_compat/ shim dir
+/// is added to the include path so the sources' `<cuda_runtime.h>` /
+/// `<cuComplex.h>` / `<vector_types.h>` resolve to HIP equivalents, and the
+/// link library is amdhip64 instead of cudart. The CUDA path is untouched.
+fn build_hip() {
+    let hipcc = env::var("QDP_HIPCC").unwrap_or_else(|_| "hipcc".to_string());
+
+    // Degrade gracefully when the ROCm toolchain is absent, mirroring the
+    // CUDA branch's nvcc-not-found path. This lets `cargo check`/`clippy`
+    // (including `--all-features`, which turns the `hip` feature on) succeed in
+    // a ROCm-less CI runner: emit the qdp_no_cuda stub cfg and skip compilation
+    // instead of letting hipcc fail the build.
+    let has_hipcc = Command::new(&hipcc).arg("--version").output().is_ok();
+    if !has_hipcc {
+        println!("cargo:rustc-cfg=qdp_no_cuda");
+        println!(
+            "cargo:warning=ROCm/hipcc not found ('{hipcc}' not runnable). Skipping kernel compilation."
+        );
+        println!(
+            "cargo:warning=This is expected in environments without the ROCm toolkit installed."
+        );
+        println!(
+            "cargo:warning=The project will build against host stubs, but GPU functionality will not be available."
+        );
+        return;
+    }
+
+    let mut build = cc::Build::new();
+    build.compiler(&hipcc);
+    build.cpp(true);
+    // hip_compat/ first so its cuda_runtime.h / cuComplex.h / vector_types.h win;
+    // src/ for kernel_config.h and kernel_compat.h.
+    build.include("hip_compat");
+    build.include("src");
+    build.flag("-std=c++17");
+    build.flag("-x").flag("hip");
+
+    let arch_list = env::var("QDP_HIP_ARCH_LIST").unwrap_or_else(|_| DEFAULT_HIP_ARCH.to_string());
+    let mut saw_arch = false;
+    for entry in arch_list.split(',') {
+        let arch = entry.trim();
+        if arch.is_empty() {
+            continue;
+        }
+        build.flag(format!("--offload-arch={arch}"));
+        saw_arch = true;
+    }
+    if !saw_arch {
+        build.flag(format!("--offload-arch={DEFAULT_HIP_ARCH}"));
+    }
+
+    for src in KERNEL_SOURCES {
+        build.file(src);
+    }
+    build.compile("kernels");
+
+    // Link the HIP runtime. Honor an explicit ROCM_PATH; otherwise rely on the
+    // default loader search path (hipcc-built objects pull libamdhip64 there).
+    if let Ok(rocm) = env::var("ROCM_PATH") {
+        println!("cargo:rustc-link-search=native={rocm}/lib");
+    }
+    println!("cargo:rustc-link-lib=amdhip64");
+}
+
 fn main() {
     // Let rustc know about our build-script-defined cfg flags (avoids `unexpected_cfgs` warnings).
     println!("cargo::rustc-check-cfg=cfg(qdp_no_cuda)");
+    // Emit qdp_gpu_platform when building for a GPU-capable OS (Linux always;
+    // Windows when the hip feature is on via QDP_USE_HIP=1 / TheRock ROCm).
+    println!("cargo::rustc-check-cfg=cfg(qdp_gpu_platform)");
+
+    // Reject a kernel/host backend mismatch (QDP_USE_HIP vs the `hip` feature)
+    // before compiling anything.
+    check_hip_consistency();
+
+    let is_linux = std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("linux");
+    let hip_feature = std::env::var("CARGO_FEATURE_HIP").is_ok();
+    let is_windows = std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows");
+    if is_linux || (is_windows && hip_feature) {
+        println!("cargo::rustc-cfg=qdp_gpu_platform");
+    }
 
     // Tell Cargo to rerun this script if the kernel sources change
     println!("cargo:rerun-if-changed=src/amplitude.cu");
@@ -167,7 +294,21 @@ fn main() {
     println!("cargo:rerun-if-changed=src/phase.cu");
     println!("cargo:rerun-if-env-changed=QDP_NO_CUDA");
     println!("cargo:rerun-if-env-changed=QDP_CUDA_ARCH_LIST");
+    println!("cargo:rerun-if-env-changed=QDP_USE_HIP");
+    println!("cargo:rerun-if-env-changed=QDP_HIP_ARCH_LIST");
+    println!("cargo:rerun-if-env-changed=QDP_HIPCC");
     println!("cargo:rerun-if-changed=src/kernel_config.h");
+    println!("cargo:rerun-if-changed=src/kernel_compat.h");
+    println!("cargo:rerun-if-changed=hip_compat/cuda_runtime.h");
+    println!("cargo:rerun-if-changed=hip_compat/cuComplex.h");
+    println!("cargo:rerun-if-changed=hip_compat/vector_types.h");
+
+    // AMD/HIP build path: compile the same .cu sources with hipcc. Gated by the
+    // `hip` Cargo feature or QDP_USE_HIP=1; the CUDA path below is unchanged when off.
+    if hip_requested() {
+        build_hip();
+        return;
+    }
 
     // Check if CUDA is available by looking for nvcc
     let force_no_cuda = env::var("QDP_NO_CUDA")
