@@ -127,6 +127,32 @@ impl QdpEngine {
         self.encode_from_list(data, num_qubits, encoding_method)
     }
 
+    /// Encode a batch of IQP samples using the Ozaki Kronecker Tensor Core path.
+    #[cfg(target_os = "linux")]
+    fn encode_batch_tc(
+        &self,
+        data: &Bound<'_, PyAny>,
+        num_qubits: usize,
+    ) -> PyResult<QuantumTensor> {
+        let array_2d = data.extract::<PyReadonlyArray2<f64>>().map_err(|_| {
+            PyRuntimeError::new_err("Failed to extract 2D NumPy array. Ensure dtype is float64.")
+        })?;
+        let shape = array_2d.shape();
+        let num_samples = shape[0];
+        let sample_size = shape[1];
+        let data_slice = array_2d
+            .as_slice()
+            .map_err(|_| PyRuntimeError::new_err("NumPy array must be contiguous (C-order)"))?;
+        let ptr = self
+            .engine
+            .encode_batch_tc(data_slice, num_samples, sample_size, num_qubits)
+            .map_err(|e| PyRuntimeError::new_err(format!("Encoding failed: {}", e)))?;
+        Ok(QuantumTensor {
+            ptr,
+            consumed: false,
+        })
+    }
+
     /// Encode from NumPy array (1D or 2D)
     fn encode_from_numpy(
         &self,
