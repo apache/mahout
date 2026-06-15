@@ -271,6 +271,16 @@ class QuantumDataLoader:
         encoding_method: str = "amplitude",
         seed: int | None = None,
     ) -> None:
+        """Create a loader builder with default synthetic batching settings.
+
+        :param device_id: GPU device ordinal used by native and PyTorch backends.
+        :param num_qubits: Number of qubits in each encoded output state.
+        :param batch_size: Number of samples per emitted batch.
+        :param total_batches: Maximum number of batches to emit.
+        :param encoding_method: Encoding method name.
+        :param seed: Optional synthetic data seed.
+        :raises ValueError: If any initial setting is invalid.
+        """
         _validate_loader_args(
             device_id=device_id,
             num_qubits=num_qubits,
