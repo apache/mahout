@@ -217,8 +217,6 @@ function runCommand(command, args, options = {}) {
  * Generate Python API reference docs with pydoc-markdown.
  */
 function generateApiDocs() {
-  console.log('\nGenerating Python API reference...');
-
   fs.rmSync(API_DEST_DIR, { recursive: true, force: true });
   ensureDir(API_DEST_DIR);
 
@@ -315,6 +313,7 @@ function main() {
   console.log('\nSyncing blog posts from /docs/blog...');
   const blogStats = syncDirectory(BLOG_SOURCE_DIR, BLOG_DEST_DIR);
 
+  console.log('\nGenerating Python API reference...');
   generateApiDocs();
 
   console.log(`\nSync complete!`);
