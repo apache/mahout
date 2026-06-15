@@ -609,8 +609,18 @@ impl<T: FloatElem> StreamingDataReader<T> for ParquetStreamingReader<T> {
                                 None => match self.sample_size {
                                     // All rows null but sample_size known from an earlier batch.
                                     Some(ss) => ss,
-                                    // All rows null and sample_size unknown: skip batch.
-                                    None => continue,
+                                    // All rows null and sample_size unknown.
+                                    None => {
+                                        if self.null_handling == NullHandling::Reject {
+                                            return Err(MahoutError::InvalidInput(
+                                                "Null outer row in List column. Use \
+                                                 NullHandling::FillZero to replace with \
+                                                 zeros, or clean the data at the source."
+                                                    .to_string(),
+                                            ));
+                                        }
+                                        continue;
+                                    }
                                 },
                             };
 
@@ -1339,6 +1349,32 @@ mod tests {
         assert_eq!(data, vec![1.0, 2.0, 3.0, 4.0]);
         assert_eq!(num_samples, 2);
         assert_eq!(sample_size, 2);
+    }
+
+    #[test]
+    fn test_parquet_streaming_reader_cross_batch_all_null_first_reject() {
+        // [null, null, [1,2], [3,4]] with batch_size=2, Reject:
+        //   batch 1 = [null, null] — sample_size unknown; must error, not silently skip
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::List(item_field.clone()), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = ListBuilder::new(Float64Builder::new());
+        builder.append(false);
+        builder.append(false);
+        builder.values().append_slice(&[1.0, 2.0]);
+        builder.append(true);
+        builder.values().append_slice(&[3.0, 4.0]);
+        builder.append(true);
+        let array = Arc::new(builder.finish()) as ArrayRef;
+
+        let file = write_test_parquet(schema, vec![array]);
+        let mut reader =
+            ParquetStreamingReader::<f64>::new(file.path(), Some(2), NullHandling::Reject).unwrap();
+        let mut buffer = vec![0.0_f64; 16];
+        let result = reader.read_chunk(&mut buffer);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("Null outer row"));
     }
 
     #[test]
