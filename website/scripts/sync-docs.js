@@ -237,7 +237,7 @@ function generateApiDocs() {
     },
   ];
 
-  runCommand('uv', ['sync', '--group', 'dev']);
+  runCommand('uv', ['sync', '--frozen', '--group', 'dev']);
 
   for (const page of pages) {
     const outputPath = path.join(API_DEST_DIR, page.output);
@@ -245,7 +245,7 @@ function generateApiDocs() {
 
     const generated = runCommand(
       'uv',
-      ['run', '--group', 'dev', 'pydoc-markdown', path.join('docs/api', page.config)],
+      ['run', '--frozen', '--group', 'dev', 'pydoc-markdown', path.join('docs/api', page.config)],
       { capture: true },
     );
     fs.appendFileSync(outputPath, generated);

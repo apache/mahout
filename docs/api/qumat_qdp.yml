@@ -25,22 +25,14 @@ loaders:
       - qumat_qdp.loader
       - qumat_qdp.triton_amd
 
-# TODO: Trim this filter once the Python package exposes a cleaner public
-# surface for documentation generation.
+# Generated QDP docs intentionally load implementation modules so pydoc-markdown
+# can render full class and method details. Source docstrings define the public
+# reference surface: documented public objects are rendered, undocumented fields
+# and internal helpers are omitted.
 processors:
   - type: filter
-    documented_only: false
+    documented_only: true
     skip_empty_modules: true
-    expression: >-
-      (not name.startswith('_') or name == '__init__')
-      and name not in (
-        'annotations', 'Mapping', 'import_module', 'ModuleType', 'Any',
-        'dataclass', 'time', 'math', 'os', 'sys', 'warnings', 'Iterator',
-        'TYPE_CHECKING', 'CudaBackendEngine', 'AmdBackendEngine', 'lru_cache',
-        'enum', 'field', 'torch_mod', 'triton_mod', 'triton_lang', 'get_qdp',
-        'get_torch', 'get_backend', 'require_backend'
-      )
-      and default()
   - type: smart
 
 renderer:
@@ -50,11 +42,9 @@ renderer:
   add_module_prefix: false
   add_method_class_prefix: false
   render_toc: false
+  render_module_header: false
   header_level_by_type:
-    Module: 2
     Class: 3
     Function: 3
     Variable: 3
     Method: 4
-  render_module_header_template: |
-    ## {module_name}
