@@ -63,6 +63,7 @@ dev = [
     "setuptools>=80.9.0",
     "tensorflow>=2.20",
     "pytest-cov>=7.0.0",
+    "pydoc-markdown>=4.8.2",
 ]
 
 [tool.uv]
