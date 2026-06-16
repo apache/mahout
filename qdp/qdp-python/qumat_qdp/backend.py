@@ -93,6 +93,14 @@ class QdpEngine:
         precision: str = "float32",
         backend: str = "cuda",
     ) -> None:
+        """Create a backend-selecting QDP engine facade.
+
+        :param device_id: GPU device ordinal to use.
+        :param precision: Numeric precision requested from the backend.
+        :param backend: Backend selector, either ``"cuda"``, ``"amd"``, or
+            ``"triton_amd"``.
+        :raises ValueError: If ``backend`` is not supported.
+        """
         self.device_id = device_id
         self.precision = precision
         self.backend, self._engine_adapter = _select_engine_adapter(
