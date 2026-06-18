@@ -26,7 +26,7 @@ use crate::dlpack::DLManagedTensor;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::Precision;
 use crate::io;
-use crate::reader::{NullHandling, StreamingDataReader};
+use crate::reader::{FloatElem, NullHandling, StreamingDataReader};
 use crate::readers::ParquetStreamingReader;
 use crate::types::Encoding;
 
@@ -114,6 +114,45 @@ pub struct PipelineRunResult {
 pub enum BatchData {
     F32(Vec<f32>),
     F64(Vec<f64>),
+}
+
+impl BatchData {
+    #[allow(clippy::len_without_is_empty)]
+    pub fn len(&self) -> usize {
+        match self {
+            Self::F32(v) => v.len(),
+            Self::F64(v) => v.len(),
+        }
+    }
+}
+
+pub(crate) trait ToBatchData: FloatElem {
+    fn wrap(v: Vec<Self>) -> BatchData;
+    fn from_recycled(b: BatchData) -> Option<Vec<Self>>;
+}
+
+impl ToBatchData for f32 {
+    fn wrap(v: Vec<f32>) -> BatchData {
+        BatchData::F32(v)
+    }
+    fn from_recycled(b: BatchData) -> Option<Vec<f32>> {
+        match b {
+            BatchData::F32(v) => Some(v),
+            _ => None,
+        }
+    }
+}
+
+impl ToBatchData for f64 {
+    fn wrap(v: Vec<f64>) -> BatchData {
+        BatchData::F64(v)
+    }
+    fn from_recycled(b: BatchData) -> Option<Vec<f64>> {
+        match b {
+            BatchData::F64(v) => Some(v),
+            _ => None,
+        }
+    }
 }
 
 pub struct PrefetchedBatch {
@@ -232,8 +271,8 @@ impl BatchProducer for SyntheticProducer {
     }
 }
 
-pub struct InMemoryProducer {
-    pub data: Vec<f64>,
+pub struct InMemoryProducer<T: FloatElem = f64> {
+    pub data: Vec<T>,
     pub cursor: usize,
     pub sample_size: usize,
     pub batch_size: usize,
@@ -242,7 +281,7 @@ pub struct InMemoryProducer {
     pub batch_limit: usize,
 }
 
-impl BatchProducer for InMemoryProducer {
+impl<T: FloatElem + ToBatchData> BatchProducer for InMemoryProducer<T> {
     fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>> {
         if self.batches_yielded >= self.batch_limit {
             return Ok(None);
@@ -259,13 +298,13 @@ impl BatchProducer for InMemoryProducer {
         self.batches_yielded += 1;
         let slice = &self.data[start..end];
 
-        let data = match recycled {
-            Some(BatchData::F64(mut buf)) => {
+        let data = match recycled.and_then(T::from_recycled) {
+            Some(mut buf) => {
                 buf.clear();
                 buf.extend_from_slice(slice);
-                BatchData::F64(buf)
+                T::wrap(buf)
             }
-            _ => BatchData::F64(slice.to_vec()),
+            None => T::wrap(slice.to_vec()),
         };
 
         Ok(Some(PrefetchedBatch {
@@ -277,11 +316,11 @@ impl BatchProducer for InMemoryProducer {
     }
 }
 
-pub struct StreamingProducer {
-    pub reader: ParquetStreamingReader,
-    pub buffer: Vec<f64>,
+pub struct StreamingProducer<T: FloatElem = f64> {
+    pub reader: ParquetStreamingReader<T>,
+    pub buffer: Vec<T>,
     pub buffer_cursor: usize,
-    pub read_chunk_scratch: Vec<f64>,
+    pub read_chunk_scratch: Vec<T>,
     pub sample_size: usize,
     pub batch_size: usize,
     pub num_qubits: usize,
@@ -289,7 +328,7 @@ pub struct StreamingProducer {
     pub batch_limit: usize,
 }
 
-impl BatchProducer for StreamingProducer {
+impl<T: FloatElem + ToBatchData> BatchProducer for StreamingProducer<T> {
     fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>> {
         if self.batches_yielded >= self.batch_limit {
             return Ok(None);
@@ -316,13 +355,13 @@ impl BatchProducer for StreamingProducer {
         self.buffer_cursor = end;
         self.batches_yielded += 1;
 
-        let data = match recycled {
-            Some(BatchData::F64(mut buf)) => {
+        let data = match recycled.and_then(T::from_recycled) {
+            Some(mut buf) => {
                 buf.clear();
                 buf.extend_from_slice(&self.buffer[start..end]);
-                BatchData::F64(buf)
+                T::wrap(buf)
             }
-            _ => BatchData::F64(self.buffer[start..end].to_vec()),
+            None => T::wrap(self.buffer[start..end].to_vec()),
         };
 
         if self.buffer_cursor >= self.buffer.len() / BUFFER_COMPACT_DENOM {
@@ -389,28 +428,67 @@ fn path_extension_lower(path: &Path) -> Option<String> {
         .map(|s| s.to_lowercase())
 }
 
-/// Dispatches by path extension to the appropriate io reader. Returns (data, num_samples, sample_size).
-/// Unsupported or missing extension returns Err with message listing supported formats.
+/// f64→f32 narrowing cast: values outside f32 range silently become ±Inf.
+fn cast_f64_to_batch_data(
+    data: Vec<f64>,
+    n: usize,
+    s: usize,
+    dtype: Precision,
+    fmt: &str,
+) -> (BatchData, usize, usize) {
+    if matches!(dtype, Precision::Float32) {
+        log::warn!(
+            "{fmt} file loaded as f64, casting to f32: values outside f32 range become ±Inf."
+        );
+        (
+            BatchData::F32(data.iter().map(|&x| x as f32).collect()),
+            n,
+            s,
+        )
+    } else {
+        (BatchData::F64(data), n, s)
+    }
+}
+
 fn read_file_by_extension(
     path: &Path,
     null_handling: NullHandling,
-) -> Result<(Vec<f64>, usize, usize)> {
+    dtype: Precision,
+) -> Result<(BatchData, usize, usize)> {
+    use crate::reader::DataReader;
     let ext_lower = path_extension_lower(path);
     let ext = ext_lower.as_deref();
     match ext {
         Some("parquet") => {
-            use crate::reader::DataReader;
-            let mut reader = crate::readers::ParquetReader::new(path, None, null_handling)?;
-            reader.read_batch()
+            if matches!(dtype, Precision::Float32) {
+                let mut reader =
+                    crate::readers::ParquetReader::<f32>::new(path, None, null_handling)?;
+                let (data, n, s) = reader.read_batch()?;
+                Ok((BatchData::F32(data), n, s))
+            } else {
+                let mut reader =
+                    crate::readers::ParquetReader::<f64>::new(path, None, null_handling)?;
+                let (data, n, s) = reader.read_batch()?;
+                Ok((BatchData::F64(data), n, s))
+            }
         }
         Some("arrow") | Some("feather") | Some("ipc") => {
-            use crate::reader::DataReader;
             let mut reader = crate::readers::ArrowIPCReader::new(path, null_handling)?;
-            reader.read_batch()
+            let (data, n, s) = reader.read_batch()?;
+            Ok(cast_f64_to_batch_data(data, n, s, dtype, "Arrow IPC"))
         }
-        Some("npy") => io::read_numpy_batch(path),
-        Some("pt") | Some("pth") => io::read_torch_batch(path),
-        Some("pb") => io::read_tensorflow_batch(path),
+        Some("npy") => {
+            let (data, n, s) = io::read_numpy_batch(path)?;
+            Ok(cast_f64_to_batch_data(data, n, s, dtype, "NumPy"))
+        }
+        Some("pt") | Some("pth") => {
+            let (data, n, s) = io::read_torch_batch(path)?;
+            Ok(cast_f64_to_batch_data(data, n, s, dtype, "PyTorch"))
+        }
+        Some("pb") => {
+            let (data, n, s) = io::read_tensorflow_batch(path)?;
+            Ok(cast_f64_to_batch_data(data, n, s, dtype, "TensorFlow"))
+        }
         _ => Err(MahoutError::InvalidInput(format!(
             "Unsupported file extension {:?}. Supported: .parquet, .arrow, .feather, .ipc, .npy, .pt, .pth, .pb",
             path.extension()
@@ -450,6 +528,63 @@ impl Drop for PipelineIterator {
     }
 }
 
+fn build_streaming_producer<T>(
+    path: &Path,
+    config: &PipelineConfig,
+    batch_limit: usize,
+) -> Result<ProducerHandles>
+where
+    T: FloatElem + ToBatchData,
+{
+    let mut reader = ParquetStreamingReader::<T>::new(
+        path,
+        Some(DEFAULT_PARQUET_ROW_GROUP_SIZE),
+        config.null_handling,
+    )?;
+    let vector_len = vector_len(config.num_qubits, config.encoding);
+
+    const INITIAL_CHUNK_CAP: usize = 64 * 1024;
+    // Buffer must hold at least one complete sample; for amplitude encoding with 17+ qubits
+    // vector_len (2^n) exceeds INITIAL_CHUNK_CAP and read_chunk would return 0 on a valid file.
+    let initial_cap = INITIAL_CHUNK_CAP.max(vector_len);
+    let mut buffer = vec![T::default(); initial_cap];
+    let written = reader.read_chunk(&mut buffer)?;
+    if written == 0 {
+        return Err(MahoutError::InvalidInput(
+            "Parquet file is empty or contains no data.".to_string(),
+        ));
+    }
+    let sample_size = reader.get_sample_size().ok_or_else(|| {
+        MahoutError::InvalidInput(
+            "Parquet streaming reader did not set sample_size after first chunk.".to_string(),
+        )
+    })?;
+    if sample_size != vector_len {
+        return Err(MahoutError::InvalidInput(format!(
+            "File feature length {} does not match vector_len {} for num_qubits={}, encoding={}",
+            sample_size,
+            vector_len,
+            config.num_qubits,
+            config.encoding.as_str()
+        )));
+    }
+
+    buffer.truncate(written);
+    let read_chunk_scratch = vec![T::default(); initial_cap];
+    let producer = StreamingProducer::<T> {
+        reader,
+        buffer,
+        buffer_cursor: 0,
+        read_chunk_scratch,
+        sample_size,
+        batch_size: config.batch_size,
+        num_qubits: config.num_qubits as usize,
+        batches_yielded: 0,
+        batch_limit,
+    };
+    spawn_producer(producer, config.prefetch_depth)
+}
+
 impl PipelineIterator {
     pub fn new_synthetic(engine: QdpEngine, mut config: PipelineConfig) -> Result<Self> {
         config.normalize();
@@ -479,10 +614,11 @@ impl PipelineIterator {
     ) -> Result<Self> {
         config.normalize();
         let path = path.as_ref();
-        let (data, num_samples, sample_size) = read_file_by_extension(path, config.null_handling)?;
+        let (batch_data, num_samples, sample_size) =
+            read_file_by_extension(path, config.null_handling, config.dtype)?;
         let vector_len = vector_len(config.num_qubits, config.encoding);
 
-        // Dimension validation at construction.
+        // Dimension validation before moving batch_data.
         if sample_size != vector_len {
             return Err(MahoutError::InvalidInput(format!(
                 "File feature length {} does not match vector_len {} for num_qubits={}, encoding={}",
@@ -492,26 +628,42 @@ impl PipelineIterator {
                 config.encoding.as_str()
             )));
         }
-        if data.len() != num_samples * sample_size {
+        if batch_data.len() != num_samples * sample_size {
             return Err(MahoutError::InvalidInput(format!(
                 "File data length {} is not num_samples ({}) * sample_size ({})",
-                data.len(),
+                batch_data.len(),
                 num_samples,
                 sample_size
             )));
         }
 
-        let producer = InMemoryProducer {
-            data,
-            cursor: 0,
-            sample_size,
-            batch_size: config.batch_size,
-            num_qubits: config.num_qubits as usize,
-            batches_yielded: 0,
-            batch_limit,
-        };
         let prefetch_depth = config.prefetch_depth;
-        let (rx, recycle_tx, _producer_handle) = spawn_producer(producer, prefetch_depth)?;
+        let (rx, recycle_tx, _producer_handle) = match batch_data {
+            BatchData::F32(data) => spawn_producer(
+                InMemoryProducer::<f32> {
+                    data,
+                    cursor: 0,
+                    sample_size,
+                    batch_size: config.batch_size,
+                    num_qubits: config.num_qubits as usize,
+                    batches_yielded: 0,
+                    batch_limit,
+                },
+                prefetch_depth,
+            )?,
+            BatchData::F64(data) => spawn_producer(
+                InMemoryProducer::<f64> {
+                    data,
+                    cursor: 0,
+                    sample_size,
+                    batch_size: config.batch_size,
+                    num_qubits: config.num_qubits as usize,
+                    batches_yielded: 0,
+                    batch_limit,
+                },
+                prefetch_depth,
+            )?,
+        };
         Ok(Self {
             engine,
             config,
@@ -539,54 +691,11 @@ impl PipelineIterator {
             )));
         }
 
-        let mut reader = ParquetStreamingReader::new(
-            path,
-            Some(DEFAULT_PARQUET_ROW_GROUP_SIZE),
-            config.null_handling,
-        )?;
-        let vector_len = vector_len(config.num_qubits, config.encoding);
-
-        // Read first chunk to learn sample_size; reuse as initial buffer.
-        const INITIAL_CHUNK_CAP: usize = 64 * 1024;
-        let mut buffer = vec![0.0; INITIAL_CHUNK_CAP];
-        let written = reader.read_chunk(&mut buffer)?;
-        if written == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Parquet file is empty or contains no data.".to_string(),
-            ));
-        }
-        let sample_size = reader.get_sample_size().ok_or_else(|| {
-            MahoutError::InvalidInput(
-                "Parquet streaming reader did not set sample_size after first chunk.".to_string(),
-            )
-        })?;
-
-        if sample_size != vector_len {
-            return Err(MahoutError::InvalidInput(format!(
-                "File feature length {} does not match vector_len {} for num_qubits={}, encoding={}",
-                sample_size,
-                vector_len,
-                config.num_qubits,
-                config.encoding.as_str()
-            )));
-        }
-
-        buffer.truncate(written);
-        let read_chunk_scratch = vec![0.0; INITIAL_CHUNK_CAP];
-
-        let producer = StreamingProducer {
-            reader,
-            buffer,
-            buffer_cursor: 0,
-            read_chunk_scratch,
-            sample_size,
-            batch_size: config.batch_size,
-            num_qubits: config.num_qubits as usize,
-            batches_yielded: 0,
-            batch_limit,
+        let (rx, recycle_tx, _producer_handle) = if matches!(config.dtype, Precision::Float32) {
+            build_streaming_producer::<f32>(path, &config, batch_limit)?
+        } else {
+            build_streaming_producer::<f64>(path, &config, batch_limit)?
         };
-        let prefetch_depth = config.prefetch_depth;
-        let (rx, recycle_tx, _producer_handle) = spawn_producer(producer, prefetch_depth)?;
         Ok(Self {
             engine,
             config,
@@ -1364,5 +1473,191 @@ mod tests {
             config.prefetch_depth > 0,
             "normalize() must set prefetch_depth > 0"
         );
+    }
+
+    // -------------------------------------------------------------------------
+    // dtype file-load tests
+    //
+    // These tests verify that PipelineConfig.dtype is respected when loading
+    // from file sources.  They stop at the BatchData variant boundary — the
+    // encode kernel (encode_batch_f32_for_pipeline) is CUDA-gated and cannot
+    // be exercised in CPU-only CI.  BatchData::F32 is the observable proxy that
+    // confirms the f32 kernel would be called on a GPU host; this mirrors the
+    // existing convention in test_synthetic_producer_f32_*.
+    // -------------------------------------------------------------------------
+
+    mod dtype_file_tests {
+        use super::*;
+        use arrow::array::{ArrayRef, FixedSizeListBuilder, Float32Builder, RecordBatch};
+        use arrow::datatypes::{DataType, Field, Schema};
+        use parquet::arrow::ArrowWriter;
+        use std::fs;
+        use std::sync::Arc;
+
+        fn write_f32_parquet(path: &std::path::Path) {
+            // 8 samples, each 4 features — matches amplitude encoding with 2 qubits (2^2=4)
+            let item_field = Arc::new(Field::new("item", DataType::Float32, true));
+            let list_field = Field::new("data", DataType::FixedSizeList(item_field, 4), true);
+            let schema = Arc::new(Schema::new(vec![list_field]));
+            let mut builder = FixedSizeListBuilder::new(Float32Builder::new(), 4);
+            for _ in 0..8 {
+                builder.values().append_slice(&[0.25_f32, 0.5, 0.75, 1.0]);
+                builder.append(true);
+            }
+            let array = Arc::new(builder.finish()) as ArrayRef;
+            let batch = RecordBatch::try_new(schema.clone(), vec![array]).unwrap();
+            let file = fs::File::create(path).unwrap();
+            let mut writer = ArrowWriter::try_new(file, schema, None).unwrap();
+            writer.write(&batch).unwrap();
+            writer.close().unwrap();
+        }
+
+        static FILE_COUNTER: std::sync::atomic::AtomicUsize =
+            std::sync::atomic::AtomicUsize::new(0);
+
+        fn temp_parquet_path(tag: &str) -> std::path::PathBuf {
+            let n = FILE_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            std::env::temp_dir().join(format!(
+                "mahout_pipeline_dtype_{tag}_{pid}_{n}.parquet",
+                pid = std::process::id(),
+            ))
+        }
+
+        #[test]
+        fn test_read_file_by_extension_f32_parquet_returns_f32_batch_data() {
+            let path = temp_parquet_path("f32");
+            write_f32_parquet(&path);
+            let result = read_file_by_extension(&path, NullHandling::FillZero, Precision::Float32);
+            let _ = fs::remove_file(&path);
+            let (batch_data, num_samples, sample_size) = result.unwrap();
+            assert!(
+                matches!(batch_data, BatchData::F32(_)),
+                "dtype=Float32 + f32 Parquet must yield BatchData::F32"
+            );
+            assert_eq!(num_samples, 8);
+            assert_eq!(sample_size, 4);
+        }
+
+        #[test]
+        fn test_read_file_by_extension_f64_parquet_returns_f64_batch_data() {
+            use arrow::array::Float64Builder;
+            use arrow::datatypes::DataType;
+            let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+            let list_field = Field::new("data", DataType::FixedSizeList(item_field, 4), true);
+            let schema = Arc::new(Schema::new(vec![list_field]));
+            let mut builder = FixedSizeListBuilder::new(Float64Builder::new(), 4);
+            for _ in 0..8 {
+                builder.values().append_slice(&[0.1_f64, 0.2, 0.3, 0.4]);
+                builder.append(true);
+            }
+            let array = Arc::new(builder.finish()) as ArrayRef;
+            let batch = RecordBatch::try_new(schema.clone(), vec![array]).unwrap();
+            let path = temp_parquet_path("f64");
+            let file = fs::File::create(&path).unwrap();
+            let mut writer = ArrowWriter::try_new(file, schema, None).unwrap();
+            writer.write(&batch).unwrap();
+            writer.close().unwrap();
+
+            let result = read_file_by_extension(&path, NullHandling::FillZero, Precision::Float64);
+            let _ = fs::remove_file(&path);
+            let (batch_data, num_samples, sample_size) = result.unwrap();
+            assert!(
+                matches!(batch_data, BatchData::F64(_)),
+                "dtype=Float64 must yield BatchData::F64 (regression)"
+            );
+            assert_eq!(num_samples, 8);
+            assert_eq!(sample_size, 4);
+        }
+
+        #[test]
+        fn test_inmemory_producer_f32_produce_yields_f32_batch_data() {
+            let data = vec![0.25_f32, 0.5, 0.75, 1.0, 0.1, 0.2, 0.3, 0.4]; // 2 samples × 4
+            let mut producer = InMemoryProducer::<f32> {
+                data,
+                cursor: 0,
+                sample_size: 4,
+                batch_size: 2,
+                num_qubits: 2,
+                batches_yielded: 0,
+                batch_limit: 10,
+            };
+            let batch = producer.produce(None).unwrap().unwrap();
+            assert!(
+                matches!(batch.data, BatchData::F32(_)),
+                "InMemoryProducer::<f32>.produce() must yield BatchData::F32 \
+                 so that next_batch() routes to encode_batch_f32_for_pipeline"
+            );
+            assert_eq!(batch.batch_n, 2);
+            assert_eq!(batch.sample_size, 4);
+        }
+
+        #[test]
+        fn test_streaming_producer_f32_produce_yields_f32_batch_data() {
+            let path = temp_parquet_path("streaming_f32");
+            write_f32_parquet(&path);
+
+            let result = (|| -> Result<BatchData> {
+                let mut reader = ParquetStreamingReader::<f32>::new(
+                    &path,
+                    Some(DEFAULT_PARQUET_ROW_GROUP_SIZE),
+                    NullHandling::FillZero,
+                )?;
+                const CAP: usize = 64 * 1024;
+                let mut buffer = vec![0.0_f32; CAP];
+                let written = reader.read_chunk(&mut buffer)?;
+                if written == 0 {
+                    return Err(MahoutError::InvalidInput("empty file".into()));
+                }
+                let sample_size = reader.get_sample_size().unwrap();
+                buffer.truncate(written);
+                let scratch = vec![0.0_f32; CAP];
+                let mut producer = StreamingProducer::<f32> {
+                    reader,
+                    buffer,
+                    buffer_cursor: 0,
+                    read_chunk_scratch: scratch,
+                    sample_size,
+                    batch_size: 4,
+                    num_qubits: 2,
+                    batches_yielded: 0,
+                    batch_limit: 10,
+                };
+                let batch = producer.produce(None)?.unwrap();
+                Ok(batch.data)
+            })();
+
+            let _ = fs::remove_file(&path);
+            assert!(
+                matches!(result.unwrap(), BatchData::F32(_)),
+                "StreamingProducer::<f32>.produce() must yield BatchData::F32"
+            );
+        }
+
+        #[test]
+        fn test_build_streaming_producer_f32_channel_yields_f32_batch_data() {
+            // BatchData::F32 is the observable proxy for the f32 GPU kernel path; the kernel
+            // itself is CUDA-gated and cannot be called in CPU-only CI.
+            let path = temp_parquet_path("build_sp_f32");
+            write_f32_parquet(&path);
+            // 2 qubits + Amplitude → vector_len = 2^2 = 4, matching write_f32_parquet's 4 features.
+            let config = PipelineConfig {
+                num_qubits: 2,
+                encoding: Encoding::Amplitude,
+                batch_size: 4,
+                dtype: Precision::Float32,
+                prefetch_depth: 1,
+                ..PipelineConfig::default()
+            };
+            let result = (|| -> Result<BatchData> {
+                let (rx, _recycle_tx, _handle) =
+                    build_streaming_producer::<f32>(&path, &config, 1)?;
+                rx.recv().unwrap().map(|b| b.data)
+            })();
+            let _ = fs::remove_file(&path);
+            assert!(
+                matches!(result.unwrap(), BatchData::F32(_)),
+                "build_streaming_producer::<f32> must deliver BatchData::F32 through the channel"
+            );
+        }
     }
 }
