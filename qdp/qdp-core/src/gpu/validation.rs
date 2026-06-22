@@ -23,7 +23,7 @@
 #![allow(unused_unsafe)]
 
 use crate::error::{MahoutError, Result, cuda_error_to_string};
-use cudarc::driver::{CudaDevice, CudaSlice, DevicePtrMut};
+use crate::gpu_rt::{CudaDevice, CudaSlice, DevicePtrMut};
 use std::ffi::c_void;
 use std::sync::Arc;
 

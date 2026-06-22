@@ -24,7 +24,7 @@ use crate::gpu::cuda_ffi::{
     CUDA_EVENT_DEFAULT, CUDA_SUCCESS, cudaEventCreateWithFlags, cudaEventDestroy,
     cudaEventElapsedTime, cudaEventRecord, cudaEventSynchronize,
 };
-use cudarc::driver::safe::CudaStream;
+use crate::gpu_rt::CudaStream;
 use std::ffi::c_void;
 
 /// Tracks overlap between H2D copy and compute operations using CUDA events.

@@ -26,10 +26,10 @@ use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use tensor::QuantumTensor;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use loader::PyQuantumLoader;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 #[pyfunction]
 #[pyo3(signature = (device_id, num_qubits, batch_size, total_batches, encoding_method, warmup_batches=0, seed=None, dtype="f64"))]
 #[allow(clippy::too_many_arguments)]
@@ -78,9 +78,9 @@ fn _qdp(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     m.add_class::<QdpEngine>()?;
     m.add_class::<QuantumTensor>()?;
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     m.add_class::<PyQuantumLoader>()?;
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     m.add_function(wrap_pyfunction!(run_throughput_pipeline_py, m)?)?;
     Ok(())
 }
