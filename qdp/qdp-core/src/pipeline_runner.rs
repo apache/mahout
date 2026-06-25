@@ -428,6 +428,26 @@ fn path_extension_lower(path: &Path) -> Option<String> {
         .map(|s| s.to_lowercase())
 }
 
+/// Largest integer exactly representable by an f32 (its mantissa is 24 bits): `2^24`.
+/// Basis indices above this would silently change value when narrowed to f32.
+const MAX_EXACT_F32_INT: f64 = (1u64 << 24) as f64;
+
+/// Reject an explicit f32 request for a basis file whose indices exceed f32's exact
+/// integer range. Basis values are integer state indices, not floats, so narrowing
+/// `16_777_217` to `16_777_216` would encode the wrong state. Rather than silently
+/// corrupt (or silently widen back to f64), surface the conflict to the caller.
+fn reject_basis_f32_out_of_range(data: &BatchData) -> Result<()> {
+    if let BatchData::F64(v) = data
+        && let Some(&bad) = v.iter().find(|&&x| x > MAX_EXACT_F32_INT)
+    {
+        return Err(MahoutError::InvalidInput(format!(
+            "basis index {bad:.0} exceeds f32's exact integer range ({MAX_EXACT_F32_INT:.0}); \
+             narrowing to f32 would encode the wrong state. Use dtype='float64' for this basis file."
+        )));
+    }
+    Ok(())
+}
+
 /// f64→f32 narrowing cast: values outside f32 range silently become ±Inf.
 fn cast_f64_to_batch_data(
     data: Vec<f64>,
@@ -454,46 +474,60 @@ fn read_file_by_extension(
     path: &Path,
     null_handling: NullHandling,
     dtype: Precision,
+    encoding: Encoding,
 ) -> Result<(BatchData, usize, usize)> {
     use crate::reader::DataReader;
+    // Basis values are integer state indices, not floats; f32's 24-bit mantissa
+    // corrupts indices above 2^24. Always read basis as f64, then reject an explicit
+    // f32 request whose indices would not survive the narrowing (see below).
+    let basis = matches!(encoding, Encoding::Basis);
+    let read_dtype = if basis { Precision::Float64 } else { dtype };
     let ext_lower = path_extension_lower(path);
     let ext = ext_lower.as_deref();
-    match ext {
+    let result = match ext {
         Some("parquet") => {
-            if matches!(dtype, Precision::Float32) {
+            if matches!(read_dtype, Precision::Float32) {
                 let mut reader =
                     crate::readers::ParquetReader::<f32>::new(path, None, null_handling)?;
                 let (data, n, s) = reader.read_batch()?;
-                Ok((BatchData::F32(data), n, s))
+                (BatchData::F32(data), n, s)
             } else {
                 let mut reader =
                     crate::readers::ParquetReader::<f64>::new(path, None, null_handling)?;
                 let (data, n, s) = reader.read_batch()?;
-                Ok((BatchData::F64(data), n, s))
+                (BatchData::F64(data), n, s)
             }
         }
         Some("arrow") | Some("feather") | Some("ipc") => {
             let mut reader = crate::readers::ArrowIPCReader::new(path, null_handling)?;
             let (data, n, s) = reader.read_batch()?;
-            Ok(cast_f64_to_batch_data(data, n, s, dtype, "Arrow IPC"))
+            cast_f64_to_batch_data(data, n, s, read_dtype, "Arrow IPC")
         }
         Some("npy") => {
             let (data, n, s) = io::read_numpy_batch(path)?;
-            Ok(cast_f64_to_batch_data(data, n, s, dtype, "NumPy"))
+            cast_f64_to_batch_data(data, n, s, read_dtype, "NumPy")
         }
         Some("pt") | Some("pth") => {
             let (data, n, s) = io::read_torch_batch(path)?;
-            Ok(cast_f64_to_batch_data(data, n, s, dtype, "PyTorch"))
+            cast_f64_to_batch_data(data, n, s, read_dtype, "PyTorch")
         }
         Some("pb") => {
             let (data, n, s) = io::read_tensorflow_batch(path)?;
-            Ok(cast_f64_to_batch_data(data, n, s, dtype, "TensorFlow"))
+            cast_f64_to_batch_data(data, n, s, read_dtype, "TensorFlow")
         }
-        _ => Err(MahoutError::InvalidInput(format!(
-            "Unsupported file extension {:?}. Supported: .parquet, .arrow, .feather, .ipc, .npy, .pt, .pth, .pb",
-            path.extension()
-        ))),
+        _ => {
+            return Err(MahoutError::InvalidInput(format!(
+                "Unsupported file extension {:?}. Supported: .parquet, .arrow, .feather, .ipc, .npy, .pt, .pth, .pb",
+                path.extension()
+            )));
+        }
+    };
+    // basis is always read as f64 above; reject the f32 request only when the indices
+    // would actually have been corrupted by the narrowing the caller asked for.
+    if basis && matches!(dtype, Precision::Float32) {
+        reject_basis_f32_out_of_range(&result.0)?;
     }
+    Ok(result)
 }
 
 /// Stateful iterator that yields one batch DLPack at a time for Python `for` loop consumption.
@@ -526,6 +560,32 @@ impl Drop for PipelineIterator {
             let _ = handle.join();
         }
     }
+}
+
+/// Spawn an in-memory producer over already-loaded `data`. Mirrors
+/// [`build_streaming_producer`] so the f32/f64 dispatch in `new_from_file` is a single
+/// generic call instead of two byte-for-byte-identical match arms.
+fn build_inmemory_producer<T>(
+    data: Vec<T>,
+    sample_size: usize,
+    config: &PipelineConfig,
+    batch_limit: usize,
+) -> Result<ProducerHandles>
+where
+    T: FloatElem + ToBatchData,
+{
+    spawn_producer(
+        InMemoryProducer::<T> {
+            data,
+            cursor: 0,
+            sample_size,
+            batch_size: config.batch_size,
+            num_qubits: config.num_qubits as usize,
+            batches_yielded: 0,
+            batch_limit,
+        },
+        config.prefetch_depth,
+    )
 }
 
 fn build_streaming_producer<T>(
@@ -615,7 +675,7 @@ impl PipelineIterator {
         config.normalize();
         let path = path.as_ref();
         let (batch_data, num_samples, sample_size) =
-            read_file_by_extension(path, config.null_handling, config.dtype)?;
+            read_file_by_extension(path, config.null_handling, config.dtype, config.encoding)?;
         let vector_len = vector_len(config.num_qubits, config.encoding);
 
         // Dimension validation before moving batch_data.
@@ -637,32 +697,13 @@ impl PipelineIterator {
             )));
         }
 
-        let prefetch_depth = config.prefetch_depth;
         let (rx, recycle_tx, _producer_handle) = match batch_data {
-            BatchData::F32(data) => spawn_producer(
-                InMemoryProducer::<f32> {
-                    data,
-                    cursor: 0,
-                    sample_size,
-                    batch_size: config.batch_size,
-                    num_qubits: config.num_qubits as usize,
-                    batches_yielded: 0,
-                    batch_limit,
-                },
-                prefetch_depth,
-            )?,
-            BatchData::F64(data) => spawn_producer(
-                InMemoryProducer::<f64> {
-                    data,
-                    cursor: 0,
-                    sample_size,
-                    batch_size: config.batch_size,
-                    num_qubits: config.num_qubits as usize,
-                    batches_yielded: 0,
-                    batch_limit,
-                },
-                prefetch_depth,
-            )?,
+            BatchData::F32(data) => {
+                build_inmemory_producer::<f32>(data, sample_size, &config, batch_limit)?
+            }
+            BatchData::F64(data) => {
+                build_inmemory_producer::<f64>(data, sample_size, &config, batch_limit)?
+            }
         };
         Ok(Self {
             engine,
@@ -691,7 +732,25 @@ impl PipelineIterator {
             )));
         }
 
-        let (rx, recycle_tx, _producer_handle) = if matches!(config.dtype, Precision::Float32) {
+        // Basis values are integer state indices; f32 narrowing corrupts indices above
+        // 2^24 (see read_file_by_extension). The streaming reader is chunked so we cannot
+        // pre-scan the whole file, so for basis we always stream as f64 (lossless) rather
+        // than honoring an f32 request that could silently change states mid-stream.
+        //
+        // The non-streaming loader can pre-scan and so *rejects* an out-of-range f32 basis
+        // request; the chunked streaming path cannot, so it downgrades to f64 instead. Warn
+        // so the caller is not left believing the stream ran in f32.
+        let f32_requested = matches!(config.dtype, Precision::Float32);
+        let is_basis = matches!(config.encoding, Encoding::Basis);
+        if f32_requested && is_basis {
+            log::warn!(
+                "float32 requested for streaming basis file; basis indices are integers and f32 \
+                 cannot represent indices above {MAX_EXACT_F32_INT:.0} exactly, so this stream is \
+                 read as f64. Use dtype='float64' to silence this warning."
+            );
+        }
+        let use_f32 = f32_requested && !is_basis;
+        let (rx, recycle_tx, _producer_handle) = if use_f32 {
             build_streaming_producer::<f32>(path, &config, batch_limit)?
         } else {
             build_streaming_producer::<f64>(path, &config, batch_limit)?
@@ -1527,13 +1586,26 @@ mod tests {
         fn test_read_file_by_extension_f32_parquet_returns_f32_batch_data() {
             let path = temp_parquet_path("f32");
             write_f32_parquet(&path);
-            let result = read_file_by_extension(&path, NullHandling::FillZero, Precision::Float32);
+            let result = read_file_by_extension(
+                &path,
+                NullHandling::FillZero,
+                Precision::Float32,
+                Encoding::Amplitude,
+            );
             let _ = fs::remove_file(&path);
             let (batch_data, num_samples, sample_size) = result.unwrap();
-            assert!(
-                matches!(batch_data, BatchData::F32(_)),
-                "dtype=Float32 + f32 Parquet must yield BatchData::F32"
-            );
+            // Assert the actual values, not just the variant: a zeroed/garbled F32 batch
+            // would still match `BatchData::F32(_)` but is not what we loaded.
+            match batch_data {
+                BatchData::F32(buf) => {
+                    assert_eq!(buf.len(), 8 * 4);
+                    assert!((buf[0] - 0.25).abs() < 1e-6, "first value must round-trip");
+                    assert_eq!(&buf[..4], &[0.25_f32, 0.5, 0.75, 1.0]);
+                }
+                other => {
+                    panic!("dtype=Float32 + f32 Parquet must yield BatchData::F32, got {other:?}")
+                }
+            }
             assert_eq!(num_samples, 8);
             assert_eq!(sample_size, 4);
         }
@@ -1558,15 +1630,106 @@ mod tests {
             writer.write(&batch).unwrap();
             writer.close().unwrap();
 
-            let result = read_file_by_extension(&path, NullHandling::FillZero, Precision::Float64);
+            let result = read_file_by_extension(
+                &path,
+                NullHandling::FillZero,
+                Precision::Float64,
+                Encoding::Amplitude,
+            );
             let _ = fs::remove_file(&path);
             let (batch_data, num_samples, sample_size) = result.unwrap();
-            assert!(
-                matches!(batch_data, BatchData::F64(_)),
-                "dtype=Float64 must yield BatchData::F64 (regression)"
-            );
+            match batch_data {
+                BatchData::F64(buf) => {
+                    assert_eq!(buf.len(), 8 * 4);
+                    assert!((buf[0] - 0.1).abs() < 1e-12, "first value must round-trip");
+                    assert_eq!(&buf[..4], &[0.1_f64, 0.2, 0.3, 0.4]);
+                }
+                other => {
+                    panic!("dtype=Float64 must yield BatchData::F64 (regression), got {other:?}")
+                }
+            }
             assert_eq!(num_samples, 8);
             assert_eq!(sample_size, 4);
+        }
+
+        /// Basis encoding has sample_size 1 (one integer state index per sample).
+        fn write_basis_parquet(path: &std::path::Path, indices: &[f64]) {
+            use arrow::array::Float64Builder;
+            let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+            let list_field = Field::new("data", DataType::FixedSizeList(item_field, 1), true);
+            let schema = Arc::new(Schema::new(vec![list_field]));
+            let mut builder = FixedSizeListBuilder::new(Float64Builder::new(), 1);
+            for &idx in indices {
+                builder.values().append_value(idx);
+                builder.append(true);
+            }
+            let array = Arc::new(builder.finish()) as ArrayRef;
+            let batch = RecordBatch::try_new(schema.clone(), vec![array]).unwrap();
+            let file = fs::File::create(path).unwrap();
+            let mut writer = ArrowWriter::try_new(file, schema, None).unwrap();
+            writer.write(&batch).unwrap();
+            writer.close().unwrap();
+        }
+
+        #[test]
+        fn test_basis_f32_request_kept_as_f64_when_indices_fit() {
+            // Indices <= 2^24 are exactly representable in f32, so an f32 request is
+            // lossless — but basis is always kept as f64 to route through the integer
+            // path. Values must round-trip exactly.
+            let path = temp_parquet_path("basis_small");
+            write_basis_parquet(&path, &[0.0, 1.0, 1024.0, 16_777_216.0]);
+            let result = read_file_by_extension(
+                &path,
+                NullHandling::FillZero,
+                Precision::Float32,
+                Encoding::Basis,
+            );
+            let _ = fs::remove_file(&path);
+            match result.unwrap().0 {
+                BatchData::F64(buf) => {
+                    assert_eq!(buf, vec![0.0, 1.0, 1024.0, 16_777_216.0]);
+                }
+                other => panic!("basis must be kept as F64 to preserve indices, got {other:?}"),
+            }
+        }
+
+        #[test]
+        fn test_basis_f32_request_rejected_when_index_exceeds_f32_range() {
+            // 16_777_217 = 2^24 + 1 cannot be represented exactly in f32 (becomes
+            // 16_777_216), so an explicit f32 request must be rejected, not silently
+            // corrupted. This is the bug from PR #1407 review item #1.
+            let path = temp_parquet_path("basis_big_f32");
+            write_basis_parquet(&path, &[1.0, 16_777_217.0]);
+            let result = read_file_by_extension(
+                &path,
+                NullHandling::FillZero,
+                Precision::Float32,
+                Encoding::Basis,
+            );
+            let _ = fs::remove_file(&path);
+            let err = result.expect_err("f32 basis with index > 2^24 must error");
+            assert!(
+                matches!(err, MahoutError::InvalidInput(_)),
+                "expected InvalidInput, got {err:?}"
+            );
+        }
+
+        #[test]
+        fn test_basis_f64_large_index_loads_exactly() {
+            // The same large index under an f64 request loads fine and keeps its value.
+            let path = temp_parquet_path("basis_big_f64");
+            write_basis_parquet(&path, &[1.0, 16_777_217.0]);
+            let result = read_file_by_extension(
+                &path,
+                NullHandling::FillZero,
+                Precision::Float64,
+                Encoding::Basis,
+            );
+            let _ = fs::remove_file(&path);
+            match result.unwrap().0 {
+                BatchData::F64(buf) => assert_eq!(buf, vec![1.0, 16_777_217.0]),
+                other => panic!("f64 basis must yield BatchData::F64, got {other:?}"),
+            }
         }
 
         #[test]
@@ -1631,6 +1794,93 @@ mod tests {
                 matches!(result.unwrap(), BatchData::F32(_)),
                 "StreamingProducer::<f32>.produce() must yield BatchData::F32"
             );
+        }
+
+        /// Direct unit test of the shared f64→f32 narrowing helper used by every
+        /// non-Parquet format (Arrow IPC, NumPy, PyTorch, TensorFlow). Covers both the
+        /// variant switch and the documented ±Inf behavior for values outside f32 range.
+        #[test]
+        fn test_cast_f64_to_batch_data_narrows_and_overflows() {
+            // f32 request: in-range values cast exactly, out-of-range overflow to +Inf.
+            let (batch, n, s) = cast_f64_to_batch_data(
+                vec![0.25, 0.5, 1e40, -1e40],
+                1,
+                4,
+                Precision::Float32,
+                "test",
+            );
+            match batch {
+                BatchData::F32(buf) => {
+                    assert_eq!(buf[0], 0.25_f32);
+                    assert_eq!(buf[1], 0.5_f32);
+                    assert!(
+                        buf[2].is_infinite() && buf[2] > 0.0,
+                        "1e40 must overflow to +Inf"
+                    );
+                    assert!(
+                        buf[3].is_infinite() && buf[3] < 0.0,
+                        "-1e40 must overflow to -Inf"
+                    );
+                }
+                other => panic!("Float32 request must yield BatchData::F32, got {other:?}"),
+            }
+            assert_eq!((n, s), (1, 4));
+
+            // f64 request: passthrough, no cast.
+            let (batch, _, _) =
+                cast_f64_to_batch_data(vec![0.1, 0.2], 1, 2, Precision::Float64, "test");
+            assert_eq!(batch, BatchData::F64(vec![0.1, 0.2]));
+        }
+
+        /// End-to-end coverage of the Arrow IPC → f32 path through `read_file_by_extension`:
+        /// the reader produces f64, the cast helper narrows it to BatchData::F32.
+        #[test]
+        fn test_read_file_by_extension_arrow_f32_narrows_to_f32_batch_data() {
+            use arrow::array::Float64Builder;
+            use arrow::ipc::writer::FileWriter as ArrowIpcFileWriter;
+
+            let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+            let list_field = Field::new("data", DataType::FixedSizeList(item_field, 4), true);
+            let schema = Arc::new(Schema::new(vec![list_field]));
+            let mut builder = FixedSizeListBuilder::new(Float64Builder::new(), 4);
+            for _ in 0..3 {
+                builder.values().append_slice(&[0.25_f64, 0.5, 0.75, 1.0]);
+                builder.append(true);
+            }
+            let array = Arc::new(builder.finish()) as ArrayRef;
+            let batch = RecordBatch::try_new(schema.clone(), vec![array]).unwrap();
+
+            let n = FILE_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            let path = std::env::temp_dir().join(format!(
+                "mahout_pipeline_dtype_arrow_{pid}_{n}.arrow",
+                pid = std::process::id(),
+            ));
+            {
+                let file = fs::File::create(&path).unwrap();
+                let mut writer = ArrowIpcFileWriter::try_new(file, &schema).unwrap();
+                writer.write(&batch).unwrap();
+                writer.finish().unwrap();
+            }
+
+            let result = read_file_by_extension(
+                &path,
+                NullHandling::FillZero,
+                Precision::Float32,
+                Encoding::Amplitude,
+            );
+            let _ = fs::remove_file(&path);
+            let (batch_data, num_samples, sample_size) = result.unwrap();
+            match batch_data {
+                BatchData::F32(buf) => {
+                    assert_eq!(buf.len(), 3 * 4);
+                    assert_eq!(&buf[..4], &[0.25_f32, 0.5, 0.75, 1.0]);
+                }
+                other => {
+                    panic!("Arrow IPC + dtype=Float32 must narrow to BatchData::F32, got {other:?}")
+                }
+            }
+            assert_eq!(num_samples, 3);
+            assert_eq!(sample_size, 4);
         }
 
         #[test]
