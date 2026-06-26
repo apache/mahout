@@ -25,7 +25,9 @@ use pyo3::prelude::*;
 use qdp_core::{Dtype, Encoding, QdpEngine as CoreEngine};
 
 #[cfg(target_os = "linux")]
-use crate::loader::{PyQuantumLoader, config_from_args, parse_null_handling, path_from_py};
+use crate::loader::{
+    PyQuantumLoader, config_from_args, parse_dtype, parse_null_handling, path_from_py,
+};
 
 /// PyO3 wrapper for QdpEngine
 ///
@@ -535,6 +537,10 @@ impl QdpEngine {
         null_handling: Option<&str>,
     ) -> PyResult<PyQuantumLoader> {
         let nh = parse_null_handling(null_handling)?;
+        // Synthetic data is generated in-process for throughput benchmarking, so it
+        // defaults to f32 (PipelineConfig::normalize downgrades to f64 for encodings
+        // without an f32 batch path). This is deliberate and unrelated to the file
+        // loaders, which default to f64 to keep user-supplied data lossless.
         let config = config_from_args(
             &self.engine,
             batch_size,
@@ -554,7 +560,7 @@ impl QdpEngine {
     #[cfg(target_os = "linux")]
     /// Create a file-backed pipeline iterator (full read then batch; for QuantumDataLoader.source_file(path)).
     #[allow(clippy::too_many_arguments)]
-    #[pyo3(signature = (path, batch_size, num_qubits, encoding_method, batch_limit=None, null_handling=None))]
+    #[pyo3(signature = (path, batch_size, num_qubits, encoding_method, batch_limit=None, null_handling=None, dtype=None))]
     fn create_file_loader(
         &self,
         py: Python<'_>,
@@ -564,10 +570,12 @@ impl QdpEngine {
         encoding_method: &str,
         batch_limit: Option<usize>,
         null_handling: Option<&str>,
+        dtype: Option<&str>,
     ) -> PyResult<PyQuantumLoader> {
         let path_str = path_from_py(path)?;
         let batch_limit = batch_limit.unwrap_or(usize::MAX);
         let nh = parse_null_handling(null_handling)?;
+        let dt = parse_dtype(dtype)?;
         let config = config_from_args(
             &self.engine,
             batch_size,
@@ -576,7 +584,7 @@ impl QdpEngine {
             0,
             None,
             nh,
-            Dtype::Float32,
+            dt,
         )?;
         let engine = self.engine.clone();
         // Resolve remote URLs before detaching from GIL. The _resolved guard keeps the
@@ -603,7 +611,7 @@ impl QdpEngine {
     #[cfg(target_os = "linux")]
     /// Create a streaming Parquet pipeline iterator (for QuantumDataLoader.source_file(path, streaming=True)).
     #[allow(clippy::too_many_arguments)]
-    #[pyo3(signature = (path, batch_size, num_qubits, encoding_method, batch_limit=None, null_handling=None))]
+    #[pyo3(signature = (path, batch_size, num_qubits, encoding_method, batch_limit=None, null_handling=None, dtype=None))]
     fn create_streaming_file_loader(
         &self,
         py: Python<'_>,
@@ -613,10 +621,12 @@ impl QdpEngine {
         encoding_method: &str,
         batch_limit: Option<usize>,
         null_handling: Option<&str>,
+        dtype: Option<&str>,
     ) -> PyResult<PyQuantumLoader> {
         let path_str = path_from_py(path)?;
         let batch_limit = batch_limit.unwrap_or(usize::MAX);
         let nh = parse_null_handling(null_handling)?;
+        let dt = parse_dtype(dtype)?;
         let config = config_from_args(
             &self.engine,
             batch_size,
@@ -625,7 +635,7 @@ impl QdpEngine {
             0,
             None,
             nh,
-            Dtype::Float32,
+            dt,
         )?;
         let engine = self.engine.clone();
         // Resolve remote URLs before detaching from GIL. The _resolved guard keeps the
