@@ -16,7 +16,7 @@
 
 use crate::pytorch::{
     extract_cuda_tensor_info, get_torch_cuda_stream_ptr, is_cuda_tensor, is_pytorch_tensor,
-    validate_cuda_tensor_for_encoding, validate_shape, validate_tensor,
+    validate_cuda_tensor_for_encoding, validate_shape, validate_tensor_cpu,
 };
 use crate::tensor::QuantumTensor;
 use numpy::{PyReadonlyArray1, PyReadonlyArray2, PyUntypedArrayMethods};
@@ -206,7 +206,7 @@ impl QdpEngine {
         }
 
         // CPU tensor path
-        validate_tensor(data)?;
+        validate_tensor_cpu(data)?;
         // PERF: Avoid Tensor -> Python list -> Vec deep copies.
         //
         // For CPU tensors, `tensor.detach().numpy()` returns a NumPy view that shares the same
