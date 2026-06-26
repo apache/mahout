@@ -60,7 +60,10 @@ impl CollectiveCommunicator for RecordingCollective {
     }
 
     fn all_reduce_sum_f64(&self, local_value: f64) -> qdp_core::Result<f64> {
-        self.seen.lock().unwrap().push(local_value);
+        self.seen
+            .lock()
+            .expect("recording collective observations mutex poisoned")
+            .push(local_value);
         Ok(self.global_sum)
     }
 }

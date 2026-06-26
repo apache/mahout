@@ -147,8 +147,7 @@ impl DistributedAmplitudePlan {
     /// Logical half-open amplitude ranges owned by one rank.
     pub fn rank_shard_ranges(&self, rank: usize) -> Vec<(usize, usize)> {
         self.placement
-            .placements_for_rank(rank)
-            .into_iter()
+            .placements_for_rank_iter(rank)
             .map(|placement| (placement.start_idx, placement.end_idx))
             .collect()
     }

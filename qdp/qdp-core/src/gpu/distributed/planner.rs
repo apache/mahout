@@ -141,23 +141,21 @@ impl PlacementPlan {
         Ok(shard_len)
     }
 
-    /// Return all placements owned by one rank.
-    pub fn placements_for_rank(&self, rank: usize) -> Vec<&ShardPlacement> {
+    /// Iterate over placements owned by one rank without allocating.
+    pub fn placements_for_rank_iter(&self, rank: usize) -> impl Iterator<Item = &ShardPlacement> {
         self.placements
             .iter()
-            .filter(|placement| placement.rank_id == rank)
-            .collect()
+            .filter(move |placement| placement.rank_id == rank)
     }
 
     /// Number of shards owned by one rank.
-    pub fn num_local_shards(&self, rank: usize) -> usize {
-        self.placements_for_rank(rank).len()
+    pub(crate) fn num_local_shards(&self, rank: usize) -> usize {
+        self.placements_for_rank_iter(rank).count()
     }
 
     /// Largest shard length owned by one rank.
     pub fn local_max_len(&self, rank: usize) -> usize {
-        self.placements_for_rank(rank)
-            .into_iter()
+        self.placements_for_rank_iter(rank)
             .map(ShardPlacement::local_len)
             .max()
             .unwrap_or(0)
@@ -171,23 +169,12 @@ pub struct PlacementPlanner;
 impl PlacementPlanner {
     /// Build one placement plan from one validated device mesh and request.
     pub fn plan(mesh: &DeviceMesh, request: &PlacementRequest) -> Result<PlacementPlan> {
-        if request.world_size == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Distributed placement world size must be at least 1".to_string(),
-            ));
-        }
-
-        if mesh.num_devices() == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Placement planner requires at least one device".to_string(),
-            ));
-        }
+        Self::validate_inputs(mesh, request)?;
 
         let global_len = request.global_len()?;
         match request.mode {
             DistributionMode::Single => {
-                let device_ids = Self::select_device_ids(mesh, request)?;
-                let device_id = *device_ids.first().ok_or_else(|| {
+                let device_id = mesh.device_ids.first().copied().ok_or_else(|| {
                     MahoutError::InvalidInput(
                         "Single-device placement requires one device ID".to_string(),
                     )
@@ -206,7 +193,7 @@ impl PlacementPlanner {
                 })
             }
             DistributionMode::ShardedCapacity => {
-                let device_ids = Self::select_device_ids(mesh, request)?;
+                let device_ids = Self::select_sharded_device_ids(mesh);
                 let shard_lengths =
                     Self::plan_shard_lengths(global_len, device_ids.len(), request.shard_policy)?;
                 let placements =
@@ -231,24 +218,14 @@ impl PlacementPlanner {
     /// local devices `[0, 1]` in a two-rank world, the rank/device sequence is
     /// `(0, 0), (1, 0), (0, 1), (1, 1)`.
     pub fn plan_rank_local(mesh: &DeviceMesh, request: &PlacementRequest) -> Result<PlacementPlan> {
-        if request.world_size == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Distributed placement world size must be at least 1".to_string(),
-            ));
-        }
-
-        if mesh.num_devices() == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Placement planner requires at least one device".to_string(),
-            ));
-        }
+        Self::validate_inputs(mesh, request)?;
 
         if request.mode != DistributionMode::ShardedCapacity {
             return Self::plan(mesh, request);
         }
 
         let global_len = request.global_len()?;
-        let device_ids = Self::select_device_ids(mesh, request)?;
+        let device_ids = Self::select_sharded_device_ids(mesh);
         let total_shards = device_ids
             .len()
             .checked_mul(request.world_size)
@@ -275,29 +252,28 @@ impl PlacementPlanner {
         })
     }
 
-    fn select_device_ids(mesh: &DeviceMesh, request: &PlacementRequest) -> Result<Vec<usize>> {
-        match request.mode {
-            DistributionMode::Single => mesh
-                .device_ids
-                .first()
-                .copied()
-                .map(|device_id| vec![device_id])
-                .ok_or_else(|| {
-                    MahoutError::InvalidInput(
-                        "Single-device placement requires one device ID".to_string(),
-                    )
-                }),
-            DistributionMode::ShardedCapacity => {
-                let recommended = mesh.recommended_placement_device_ids();
-                if recommended.is_empty() {
-                    Ok(mesh.device_ids.clone())
-                } else {
-                    Ok(recommended)
-                }
-            }
-            DistributionMode::Replicated => Err(MahoutError::NotImplemented(
-                "Replicated placement is not implemented yet".to_string(),
-            )),
+    fn validate_inputs(mesh: &DeviceMesh, request: &PlacementRequest) -> Result<()> {
+        if request.world_size == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Distributed placement world size must be at least 1".to_string(),
+            ));
+        }
+
+        if mesh.num_devices() == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Placement planner requires at least one device".to_string(),
+            ));
+        }
+
+        Ok(())
+    }
+
+    fn select_sharded_device_ids(mesh: &DeviceMesh) -> Vec<usize> {
+        let recommended = mesh.recommended_placement_device_ids();
+        if recommended.is_empty() {
+            mesh.device_ids.clone()
+        } else {
+            recommended
         }
     }
 

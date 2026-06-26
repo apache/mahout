@@ -181,9 +181,8 @@ fn sharded_plan_assigns_ranks_round_robin() {
         .collect::<Vec<_>>();
 
     assert_eq!(ranks, vec![0, 1, 0, 1]);
-    assert_eq!(plan.placements_for_rank(0).len(), 2);
-    assert_eq!(plan.placements_for_rank(1).len(), 2);
-    assert_eq!(plan.num_local_shards(0), 2);
+    assert_eq!(plan.placements_for_rank_iter(0).count(), 2);
+    assert_eq!(plan.placements_for_rank_iter(1).count(), 2);
     assert_eq!(plan.local_max_len(0), 4);
 }
 
@@ -243,7 +242,7 @@ fn single_rank_request_preserves_rank_zero_ownership() {
             .iter()
             .all(|placement| placement.rank_id == 0)
     );
-    assert_eq!(plan.num_local_shards(0), 2);
+    assert_eq!(plan.placements_for_rank_iter(0).count(), 2);
 }
 
 #[test]
@@ -276,6 +275,6 @@ fn rank_local_planner_expands_local_devices_across_world() {
 
     assert_eq!(rank_device_pairs, vec![(0, 0), (1, 0), (0, 1), (1, 1)]);
     assert_eq!(ranges, vec![(0, 1), (1, 2), (2, 3), (3, 4)]);
-    assert_eq!(plan.placements_for_rank(0).len(), 2);
-    assert_eq!(plan.placements_for_rank(1).len(), 2);
+    assert_eq!(plan.placements_for_rank_iter(0).count(), 2);
+    assert_eq!(plan.placements_for_rank_iter(1).count(), 2);
 }

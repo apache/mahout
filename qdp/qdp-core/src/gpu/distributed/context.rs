@@ -65,13 +65,12 @@ impl<'a> DistributedExecutionContext<'a> {
         collectives: &'a dyn CollectiveCommunicator,
     ) -> Result<Self> {
         Self::validate_collective_metadata(0, 1, collectives)?;
-        Ok(Self {
-            rank: 0,
-            world_size: 1,
-            mesh: DeviceMesh::new(device_ids)?,
+        Ok(Self::from_validated_parts(
+            0,
+            1,
+            DeviceMesh::new(device_ids)?,
             collectives,
-            device_collectives: None,
-        })
+        ))
     }
 
     /// Build one rank-local execution context from the CUDA devices owned by
@@ -84,7 +83,12 @@ impl<'a> DistributedExecutionContext<'a> {
     ) -> Result<Self> {
         Self::validate_rank_world(rank, world_size)?;
         Self::validate_collective_metadata(rank, world_size, collectives)?;
-        Self::rank_local_with_mesh(rank, world_size, DeviceMesh::new(device_ids)?, collectives)
+        Ok(Self::from_validated_parts(
+            rank,
+            world_size,
+            DeviceMesh::new(device_ids)?,
+            collectives,
+        ))
     }
 
     /// Build one rank-local execution context from an already constructed mesh.
@@ -96,13 +100,12 @@ impl<'a> DistributedExecutionContext<'a> {
     ) -> Result<Self> {
         Self::validate_rank_world(rank, world_size)?;
         Self::validate_collective_metadata(rank, world_size, collectives)?;
-        Ok(Self {
+        Ok(Self::from_validated_parts(
             rank,
             world_size,
             mesh,
             collectives,
-            device_collectives: None,
-        })
+        ))
     }
 
     /// Rank represented by this execution context.
@@ -128,6 +131,21 @@ impl<'a> DistributedExecutionContext<'a> {
     /// Access optional CUDA-aware device collectives.
     pub fn device_collectives(&self) -> Option<&dyn DeviceCollectiveCommunicator> {
         self.device_collectives
+    }
+
+    fn from_validated_parts(
+        rank: usize,
+        world_size: usize,
+        mesh: DeviceMesh,
+        collectives: &'a dyn CollectiveCommunicator,
+    ) -> Self {
+        Self {
+            rank,
+            world_size,
+            mesh,
+            collectives,
+            device_collectives: None,
+        }
     }
 
     fn validate_rank_world(rank: usize, world_size: usize) -> Result<()> {

@@ -145,9 +145,8 @@ impl DistributedStateLayout {
             )));
         }
 
-        let placements = plan.placement.placements_for_rank(rank_id);
-        let mut shards = Vec::with_capacity(placements.len());
-        for placement in placements {
+        let mut shards = Vec::with_capacity(plan.num_local_shards(rank_id));
+        for placement in plan.placement.placements_for_rank_iter(rank_id) {
             let (start_idx, end_idx) = (placement.start_idx, placement.end_idx);
             shards.push(StateShardLayout {
                 rank_id: placement.rank_id,

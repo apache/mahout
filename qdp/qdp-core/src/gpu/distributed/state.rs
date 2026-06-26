@@ -92,19 +92,22 @@ impl DistributedStateVector {
 
     /// Return zero-copy metadata for all materialized local shards.
     pub fn local_shard_views(&self) -> Vec<LocalShardView> {
-        self.shards
-            .iter()
-            .map(|shard| LocalShardView {
-                rank_id: shard.rank_id,
-                device_id: shard.device_id,
-                shard_id: shard.shard_id,
-                start_idx: shard.start_idx,
-                end_idx: shard.end_idx,
-                local_len: shard.local_len,
-                precision: self.precision,
-                ptr: shard.buffer.ptr_void(),
-            })
-            .collect()
+        self.iter_local_shard_views().collect()
+    }
+
+    /// Iterate zero-copy metadata for materialized local shards without
+    /// allocating an intermediate vector.
+    pub fn iter_local_shard_views(&self) -> impl Iterator<Item = LocalShardView> + '_ {
+        self.shards.iter().map(|shard| LocalShardView {
+            rank_id: shard.rank_id,
+            device_id: shard.device_id,
+            shard_id: shard.shard_id,
+            start_idx: shard.start_idx,
+            end_idx: shard.end_idx,
+            local_len: shard.local_len,
+            precision: self.precision,
+            ptr: shard.buffer.ptr_void(),
+        })
     }
 
     #[cfg(target_os = "linux")]
@@ -169,7 +172,7 @@ impl DistributedStateVector {
         }
 
         let mut shards = Vec::with_capacity(layout.shards.len());
-        for (shard_layout, buffer) in layout.shards.into_iter().zip(buffers.into_iter()) {
+        for (shard_layout, buffer) in layout.shards.into_iter().zip(buffers) {
             if buffer.precision() != layout.precision {
                 return Err(MahoutError::InvalidInput(format!(
                     "Distributed shard precision mismatch on shard {}: expected {:?}, got {:?}",

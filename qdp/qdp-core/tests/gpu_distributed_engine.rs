@@ -387,6 +387,8 @@ fn distributed_state_exposes_local_zero_copy_shard_views() {
     .unwrap();
 
     let views = state.local_shard_views();
+    let iter_views = state.iter_local_shard_views().collect::<Vec<_>>();
+    assert_eq!(iter_views, views);
     assert_eq!(views.len(), 1);
     assert_eq!(views[0].rank_id, 0);
     assert_eq!(views[0].device_id, 0);
