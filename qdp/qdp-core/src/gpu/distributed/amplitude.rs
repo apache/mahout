@@ -49,6 +49,22 @@ impl DistributedAmplitudePlan {
     /// Validate one distributed amplitude request and derive the shard math used
     /// by later layout and materialization steps.
     pub fn for_request(mesh: &DeviceMesh, request: PlacementRequest) -> Result<Self> {
+        let placement = Self::plan_request(mesh, &request, PlacementPlanner::plan)?;
+        Self::from_placement(request, placement)
+    }
+
+    /// Validate one distributed amplitude request against a rank-local mesh and
+    /// derive global shard metadata for all ranks.
+    pub fn for_rank_local_request(mesh: &DeviceMesh, request: PlacementRequest) -> Result<Self> {
+        let placement = Self::plan_request(mesh, &request, PlacementPlanner::plan_rank_local)?;
+        Self::from_placement(request, placement)
+    }
+
+    fn plan_request(
+        mesh: &DeviceMesh,
+        request: &PlacementRequest,
+        planner: fn(&DeviceMesh, &PlacementRequest) -> Result<PlacementPlan>,
+    ) -> Result<PlacementPlan> {
         if request.num_qubits == 0 {
             return Err(MahoutError::InvalidInput(
                 "Number of qubits must be at least 1 for distributed amplitude planning"
@@ -68,8 +84,11 @@ impl DistributedAmplitudePlan {
             )));
         }
 
-        let num_devices = mesh.num_devices();
-        let placement = PlacementPlanner::plan(mesh, &request)?;
+        planner(mesh, request)
+    }
+
+    fn from_placement(request: PlacementRequest, placement: PlacementPlan) -> Result<Self> {
+        let num_devices = placement.num_devices();
         Self::validate_local_shard_shape(request.num_qubits, &placement)?;
         let global_len = placement.global_len;
         let num_qubits = request.num_qubits;

@@ -245,3 +245,37 @@ fn single_rank_request_preserves_rank_zero_ownership() {
     );
     assert_eq!(plan.num_local_shards(0), 2);
 }
+
+#[test]
+fn rank_local_planner_expands_local_devices_across_world() {
+    let topology = GpuTopology::placeholder(2);
+    let mesh = DeviceMesh {
+        device_ids: vec![0, 1],
+        devices: Vec::new(),
+        topology,
+    };
+    let request = PlacementRequest::new_with_world(
+        2,
+        DistributionMode::ShardedCapacity,
+        ShardPolicy::Equal,
+        2,
+    )
+    .unwrap();
+
+    let plan = PlacementPlanner::plan_rank_local(&mesh, &request).unwrap();
+    let rank_device_pairs = plan
+        .placements
+        .iter()
+        .map(|placement| (placement.rank_id, placement.device_id))
+        .collect::<Vec<_>>();
+    let ranges = plan
+        .placements
+        .iter()
+        .map(|placement| (placement.start_idx, placement.end_idx))
+        .collect::<Vec<_>>();
+
+    assert_eq!(rank_device_pairs, vec![(0, 0), (1, 0), (0, 1), (1, 1)]);
+    assert_eq!(ranges, vec![(0, 1), (1, 2), (2, 3), (3, 4)]);
+    assert_eq!(plan.placements_for_rank(0).len(), 2);
+    assert_eq!(plan.placements_for_rank(1).len(), 2);
+}

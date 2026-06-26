@@ -225,6 +225,56 @@ impl PlacementPlanner {
         }
     }
 
+    /// Build a global placement plan from one rank's local device mesh.
+    ///
+    /// Placements are emitted shard-major by local device, then rank. For
+    /// local devices `[0, 1]` in a two-rank world, the rank/device sequence is
+    /// `(0, 0), (1, 0), (0, 1), (1, 1)`.
+    pub fn plan_rank_local(mesh: &DeviceMesh, request: &PlacementRequest) -> Result<PlacementPlan> {
+        if request.world_size == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Distributed placement world size must be at least 1".to_string(),
+            ));
+        }
+
+        if mesh.num_devices() == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Placement planner requires at least one device".to_string(),
+            ));
+        }
+
+        if request.mode != DistributionMode::ShardedCapacity {
+            return Self::plan(mesh, request);
+        }
+
+        let global_len = request.global_len()?;
+        let device_ids = Self::select_device_ids(mesh, request)?;
+        let total_shards = device_ids
+            .len()
+            .checked_mul(request.world_size)
+            .ok_or_else(|| {
+                MahoutError::InvalidInput(format!(
+                    "Rank-local shard count overflowed for {} devices across world size {}",
+                    device_ids.len(),
+                    request.world_size
+                ))
+            })?;
+        let shard_lengths =
+            Self::plan_shard_lengths(global_len, total_shards, request.shard_policy)?;
+        let placements = Self::build_rank_local_shard_placements(
+            &device_ids,
+            &shard_lengths,
+            request.world_size,
+        );
+
+        Ok(PlacementPlan {
+            mode: request.mode,
+            global_len,
+            placements,
+            gather_device_id: mesh.recommended_gather_device_id(),
+        })
+    }
+
     fn select_device_ids(mesh: &DeviceMesh, request: &PlacementRequest) -> Result<Vec<usize>> {
         match request.mode {
             DistributionMode::Single => mesh
@@ -297,6 +347,33 @@ impl PlacementPlanner {
                 let end_idx = start_idx + local_len;
                 let placement = ShardPlacement {
                     rank_id: shard_id % world_size,
+                    device_id,
+                    shard_id,
+                    start_idx,
+                    end_idx,
+                };
+                start_idx = end_idx;
+                placement
+            })
+            .collect()
+    }
+
+    fn build_rank_local_shard_placements(
+        device_ids: &[usize],
+        shard_lengths: &[usize],
+        world_size: usize,
+    ) -> Vec<ShardPlacement> {
+        let mut start_idx = 0usize;
+        device_ids
+            .iter()
+            .copied()
+            .flat_map(|device_id| (0..world_size).map(move |rank_id| (rank_id, device_id)))
+            .zip(shard_lengths.iter().copied())
+            .enumerate()
+            .map(|(shard_id, ((rank_id, device_id), local_len))| {
+                let end_idx = start_idx + local_len;
+                let placement = ShardPlacement {
+                    rank_id,
                     device_id,
                     shard_id,
                     start_idx,

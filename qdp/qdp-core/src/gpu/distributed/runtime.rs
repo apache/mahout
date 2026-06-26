@@ -110,7 +110,7 @@ pub(crate) fn plan_distributed_encode(
     request: PlacementRequest,
 ) -> Result<DistributedAmplitudePlan> {
     validate_distributed_input(host_data, &request)?;
-    DistributedAmplitudePlan::for_request(execution.mesh(), request)
+    DistributedAmplitudePlan::for_rank_local_request(execution.mesh(), request)
 }
 
 pub(crate) fn calculate_local_norm_sq(

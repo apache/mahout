@@ -343,11 +343,12 @@ fn prepare_distributed_amplitude_uses_only_rank_local_norm_contribution() {
     )
     .unwrap();
 
-    assert_eq!(*seen.lock().unwrap(), vec![25.0]);
+    assert_eq!(*seen.lock().unwrap(), vec![20.0]);
     assert!((prepared.inv_norm - (1.0 / 30.0f64.sqrt())).abs() < 1e-12);
     assert_eq!(prepared.layout.rank_id, 1);
-    assert_eq!(prepared.layout.num_shards(), 1);
+    assert_eq!(prepared.layout.num_shards(), 2);
     assert_eq!(prepared.layout.shards[0].shard_id, 1);
+    assert_eq!(prepared.layout.shards[1].shard_id, 3);
 }
 
 #[test]
@@ -408,6 +409,49 @@ fn prepare_distributed_amplitude_on_defaults_request_world_to_execution_world() 
         None,
     ) {
         Ok(_) => panic!("expected handle-less mesh to fail after request resolution"),
+        Err(err) => err,
+    };
+
+    assert_eq!(*seen.lock().unwrap(), vec![20.0]);
+    assert!(matches!(
+        err,
+        qdp_core::MahoutError::InvalidInput(msg)
+        if msg.contains("Device mesh / device handles mismatch")
+    ));
+}
+
+#[test]
+fn prepare_distributed_amplitude_on_plans_from_rank_local_mesh() {
+    let mesh = qdp_core::gpu::DeviceMesh {
+        device_ids: vec![0],
+        devices: Vec::new(),
+        topology: qdp_core::gpu::GpuTopology::placeholder(1),
+    };
+    let seen = Arc::new(Mutex::new(Vec::new()));
+    let collectives = RecordingCollective {
+        rank: 1,
+        world_size: 2,
+        global_sum: 30.0,
+        seen: Arc::clone(&seen),
+    };
+    let execution =
+        DistributedExecutionContext::rank_local_with_mesh(1, 2, mesh, &collectives).unwrap();
+    let request = PlacementRequest::new_with_world(
+        2,
+        DistributionMode::ShardedCapacity,
+        ShardPolicy::Equal,
+        2,
+    )
+    .unwrap();
+
+    let err = match QdpEngine::prepare_distributed_amplitude_on(
+        &execution,
+        &[1.0, 2.0, 3.0, 4.0],
+        2,
+        Precision::Float64,
+        Some(request),
+    ) {
+        Ok(_) => panic!("expected handle-less mesh to fail after rank-local planning"),
         Err(err) => err,
     };
 
