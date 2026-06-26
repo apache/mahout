@@ -40,6 +40,27 @@ except ImportError as e:
     _QDP_IMPORT_ERROR = str(e)
 
 
+def _gpu_available() -> bool:
+    """Return True if a CUDA device is actually usable at runtime.
+
+    The ``_qdp`` extension can now be built and imported without the CUDA
+    toolkit -- it links stub CUDA Runtime symbols (see qdp-core ``build.rs`` /
+    ``cuda_ffi.rs``).  So importing ``_qdp`` no longer implies a working GPU,
+    and ``@pytest.mark.gpu`` tests must additionally check for a real device.
+    This mirrors the ``torch.cuda.is_available()`` guard used by the inline
+    skips throughout the QDP test modules.
+    """
+    try:
+        import torch
+
+        return bool(torch.cuda.is_available())
+    except Exception:
+        return False
+
+
+_GPU_AVAILABLE = _gpu_available()
+
+
 def pytest_configure(config):
     """Register custom pytest markers."""
     config.addinivalue_line(
@@ -49,13 +70,22 @@ def pytest_configure(config):
 
 
 def pytest_collection_modifyitems(config, items):
-    """Auto-skip GPU/QDP tests if the _qdp extension is not available."""
-    if _QDP_AVAILABLE:
-        return
+    """Auto-skip QDP tests when the extension is missing, and GPU tests when
+    no CUDA device is available.
 
-    skip_marker = pytest.mark.skip(
+    ``_qdp`` can now build/import without a GPU (stub CUDA symbols), so
+    extension availability alone no longer implies a usable device.  GPU tests
+    are therefore skipped whenever ``torch.cuda.is_available()`` is False, even
+    when the extension imports -- otherwise they execute against the stub
+    runtime and abort the worker process.
+    """
+    skip_no_qdp = pytest.mark.skip(
         reason=f"QDP extension not available: {_QDP_IMPORT_ERROR}. "
         "Build with: cd qdp/qdp-python && maturin develop"
+    )
+    skip_no_gpu = pytest.mark.skip(
+        reason="GPU required: no CUDA device available. The _qdp extension is "
+        "importable but linked against CUDA stubs, or no GPU is present."
     )
 
     # Tests that work without _qdp (PyTorch reference backend tests).
@@ -67,16 +97,20 @@ def pytest_collection_modifyitems(config, items):
     }
 
     for item in items:
-        # Skip tests explicitly marked with @pytest.mark.gpu
-        if "gpu" in item.keywords:
-            item.add_marker(skip_marker)
+        is_gpu = "gpu" in item.keywords
 
-        # Skip all tests in testing/qdp/ directory, except those that
-        # explicitly do not require the Rust extension.
         fspath_str = str(item.fspath)
-        if "testing/qdp" in fspath_str or "testing\\qdp" in fspath_str:
-            if not any(name in fspath_str for name in _NO_QDP_OK):
-                item.add_marker(skip_marker)
+        needs_qdp = (
+            "testing/qdp" in fspath_str or "testing\\qdp" in fspath_str
+        ) and not any(name in fspath_str for name in _NO_QDP_OK)
+
+        if not _QDP_AVAILABLE:
+            # No extension at all: skip GPU tests and everything needing _qdp.
+            if is_gpu or needs_qdp:
+                item.add_marker(skip_no_qdp)
+        elif is_gpu and not _GPU_AVAILABLE:
+            # Extension built (possibly with CUDA stubs) but no usable device.
+            item.add_marker(skip_no_gpu)
 
 
 @pytest.fixture
