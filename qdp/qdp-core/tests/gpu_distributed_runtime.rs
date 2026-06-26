@@ -92,6 +92,21 @@ fn rank_local_execution_context_rejects_rank_out_of_range() {
 }
 
 #[test]
+fn single_process_rejects_collective_metadata_mismatch_before_cuda_init() {
+    let collectives = TestCollective {
+        rank: 1,
+        world_size: 3,
+    };
+    let err = DistributedExecutionContext::single_process(vec![0], &collectives).unwrap_err();
+
+    assert!(matches!(
+        err,
+        qdp_core::MahoutError::InvalidInput(msg)
+        if msg.contains("collective") && msg.contains("rank")
+    ));
+}
+
+#[test]
 fn prepare_distributed_amplitude_handles_padding_tail_in_norm() {
     let prepared = QdpEngine::prepare_distributed_amplitude(
         vec![0],

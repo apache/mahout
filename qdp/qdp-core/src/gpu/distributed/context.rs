@@ -64,6 +64,7 @@ impl<'a> DistributedExecutionContext<'a> {
         device_ids: Vec<usize>,
         collectives: &'a dyn CollectiveCommunicator,
     ) -> Result<Self> {
+        Self::validate_collective_metadata(0, 1, collectives)?;
         Ok(Self {
             rank: 0,
             world_size: 1,
