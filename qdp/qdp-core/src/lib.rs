@@ -187,7 +187,8 @@ impl QdpEngine {
         precision: Precision,
         request: Option<PlacementRequest>,
     ) -> Result<PreparedDistributedAmplitudeEncode> {
-        let request = Self::resolve_distributed_request(num_qubits, request)?;
+        let request =
+            Self::resolve_distributed_request_for_execution(num_qubits, request, execution)?;
         runtime::validate_distributed_input(data, &request)?;
         let (plan, inv_norm, layout) =
             runtime::prepare_distributed_encode(execution, data, precision, request)?;
@@ -236,7 +237,8 @@ impl QdpEngine {
         precision: Precision,
         request: Option<PlacementRequest>,
     ) -> Result<DistributedStateVector> {
-        let request = Self::resolve_distributed_request(num_qubits, request)?;
+        let request =
+            Self::resolve_distributed_request_for_execution(num_qubits, request, execution)?;
         runtime::validate_distributed_input(data, &request)?;
         runtime::encode_distributed_to_shards(execution, data, precision, request)
     }
@@ -260,6 +262,32 @@ impl QdpEngine {
                 DistributionMode::ShardedCapacity,
                 ShardPolicy::Equal,
             )),
+        }
+    }
+
+    fn resolve_distributed_request_for_execution(
+        num_qubits: usize,
+        request: Option<PlacementRequest>,
+        execution: &DistributedExecutionContext<'_>,
+    ) -> Result<PlacementRequest> {
+        match request {
+            Some(request) => {
+                let request = Self::resolve_distributed_request(num_qubits, Some(request))?;
+                if request.world_size != execution.world_size() {
+                    return Err(MahoutError::InvalidInput(format!(
+                        "Distributed request world size mismatch: execution world size {} but request specifies {}",
+                        execution.world_size(),
+                        request.world_size
+                    )));
+                }
+                Ok(request)
+            }
+            None => PlacementRequest::new_with_world(
+                num_qubits,
+                DistributionMode::ShardedCapacity,
+                ShardPolicy::Equal,
+                execution.world_size(),
+            ),
         }
     }
 

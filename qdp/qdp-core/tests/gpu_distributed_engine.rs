@@ -26,6 +26,10 @@ mod common;
 #[test]
 fn prepare_distributed_amplitude_returns_expected_metadata() {
     #[cfg(target_os = "linux")]
+    if cudarc::driver::CudaDevice::new(0).is_err() {
+        return;
+    }
+    #[cfg(target_os = "linux")]
     if cudarc::driver::CudaDevice::new(1).is_err() {
         return;
     }
@@ -50,6 +54,10 @@ fn prepare_distributed_amplitude_returns_expected_metadata() {
 
 #[test]
 fn prepare_distributed_amplitude_on_execution_context_returns_expected_metadata() {
+    #[cfg(target_os = "linux")]
+    if cudarc::driver::CudaDevice::new(0).is_err() {
+        return;
+    }
     #[cfg(target_os = "linux")]
     if cudarc::driver::CudaDevice::new(1).is_err() {
         return;

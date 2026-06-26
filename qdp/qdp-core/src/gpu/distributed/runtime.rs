@@ -147,13 +147,12 @@ pub(crate) fn calculate_inv_norm_distributed(
     host_data: &[f64],
     execution: &DistributedExecutionContext<'_>,
 ) -> Result<f64> {
-    let mut partials = Vec::with_capacity(plan.num_devices);
-    for shard_id in 0..plan.num_devices {
-        let (start_idx, end_idx) = plan.shard_range(shard_id)?;
-        partials.push(calculate_local_norm_sq(host_data, start_idx, end_idx)?);
+    let mut local_norm_sq = 0.0f64;
+    for placement in plan.placement.placements_for_rank(execution.rank()) {
+        local_norm_sq +=
+            calculate_local_norm_sq(host_data, placement.start_idx, placement.end_idx)?;
     }
 
-    let local_norm_sq = partials.iter().copied().sum();
     let global_norm_sq = execution.collectives().all_reduce_sum_f64(local_norm_sq)?;
     if global_norm_sq <= 0.0 || !global_norm_sq.is_finite() {
         return Err(MahoutError::InvalidInput(
@@ -172,7 +171,8 @@ pub(crate) fn prepare_distributed_encode(
 ) -> Result<(DistributedAmplitudePlan, f64, DistributedStateLayout)> {
     let plan = plan_distributed_encode(execution, host_data, request)?;
     let inv_norm = calculate_inv_norm_distributed(&plan, host_data, execution)?;
-    let layout = DistributedStateLayout::new(execution.mesh(), &plan, precision)?;
+    let layout =
+        DistributedStateLayout::new_for_rank(execution.mesh(), &plan, precision, execution.rank())?;
     Ok((plan, inv_norm, layout))
 }
 
@@ -187,8 +187,8 @@ pub(crate) fn encode_distributed_to_shards(
         prepare_distributed_encode(execution, host_data, precision, request)?;
     let num_qubits = plan.request.num_qubits;
 
-    let mut buffers = Vec::with_capacity(plan.num_devices);
-    for placement in &plan.placement.placements {
+    let mut buffers = Vec::with_capacity(plan.num_local_shards(execution.rank()));
+    for placement in plan.placement.placements_for_rank(execution.rank()) {
         let device = execution.mesh().device_for_id(placement.device_id)?;
         let _device_guard = DistributedDeviceContextGuard::switch_to(placement.device_id)?;
         let (start_idx, end_idx) = (placement.start_idx, placement.end_idx);
