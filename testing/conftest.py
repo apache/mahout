@@ -47,9 +47,18 @@ def _gpu_available() -> bool:
     toolkit -- it links stub CUDA Runtime symbols (see qdp-core ``build.rs`` /
     ``cuda_ffi.rs``).  So importing ``_qdp`` no longer implies a working GPU,
     and ``@pytest.mark.gpu`` tests must additionally check for a real device.
-    This mirrors the ``torch.cuda.is_available()`` guard used by the inline
-    skips throughout the QDP test modules.
+
+    Prefers the native engine's own signal (``qumat_qdp.is_cuda_available()``),
+    which is correct even for a stub build: a host with a GPU + PyTorch but no
+    CUDA toolkit builds ``_qdp`` against stubs, where ``torch.cuda.is_available()``
+    would wrongly report True. Falls back to torch when the helper is absent.
     """
+    try:
+        from qumat_qdp import is_cuda_available
+
+        return bool(is_cuda_available())
+    except Exception:
+        pass
     try:
         import torch
 
