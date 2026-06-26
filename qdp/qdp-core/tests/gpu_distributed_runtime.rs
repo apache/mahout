@@ -14,7 +14,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use qdp_core::gpu::{DistributedExecutionContext, LocalCollectiveCommunicator};
 use qdp_core::{DistributionMode, PlacementRequest, Precision, QdpEngine, ShardPolicy};
+
+#[test]
+fn rank_local_execution_context_reports_rank_metadata() {
+    let collectives = LocalCollectiveCommunicator;
+    let execution = DistributedExecutionContext::rank_local(1, 3, vec![0], &collectives).unwrap();
+
+    assert_eq!(execution.rank(), 1);
+    assert_eq!(execution.world_size(), 3);
+    assert_eq!(execution.mesh().num_devices(), 1);
+    assert!(execution.device_collectives().is_none());
+}
+
+#[test]
+fn rank_local_execution_context_rejects_rank_out_of_range() {
+    let collectives = LocalCollectiveCommunicator;
+    let err = DistributedExecutionContext::rank_local(2, 2, vec![0], &collectives).unwrap_err();
+
+    assert!(matches!(
+        err,
+        qdp_core::MahoutError::InvalidInput(msg)
+        if msg.contains("rank") && msg.contains("world size")
+    ));
+}
 
 #[test]
 fn prepare_distributed_amplitude_handles_padding_tail_in_norm() {

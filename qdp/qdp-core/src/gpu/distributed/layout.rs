@@ -14,6 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::fmt;
 use std::sync::Arc;
 
 use cudarc::driver::CudaDevice;
@@ -28,6 +29,7 @@ use super::shared;
 /// One shard of a logically distributed state vector.
 #[derive(Clone)]
 pub struct StateShardLayout {
+    pub rank_id: usize,
     pub device: Arc<CudaDevice>,
     pub device_id: usize,
     pub shard_id: usize,
@@ -36,16 +38,45 @@ pub struct StateShardLayout {
     pub local_len: usize,
 }
 
+impl fmt::Debug for StateShardLayout {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("StateShardLayout")
+            .field("rank_id", &self.rank_id)
+            .field("device_id", &self.device_id)
+            .field("shard_id", &self.shard_id)
+            .field("start_idx", &self.start_idx)
+            .field("end_idx", &self.end_idx)
+            .field("local_len", &self.local_len)
+            .finish()
+    }
+}
+
 /// Metadata describing how one distributed state is mapped onto one execution
 /// context.
 #[derive(Clone)]
 pub struct DistributedStateLayout {
+    pub rank_id: usize,
+    pub world_size: usize,
     pub num_qubits: usize,
     pub precision: Precision,
     pub global_len: usize,
     pub shard_bits: Option<usize>,
     pub topology: GpuTopology,
     pub shards: Vec<StateShardLayout>,
+}
+
+impl fmt::Debug for DistributedStateLayout {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("DistributedStateLayout")
+            .field("rank_id", &self.rank_id)
+            .field("world_size", &self.world_size)
+            .field("num_qubits", &self.num_qubits)
+            .field("precision", &self.precision)
+            .field("global_len", &self.global_len)
+            .field("shard_bits", &self.shard_bits)
+            .field("shards", &self.shards)
+            .finish()
+    }
 }
 
 impl DistributedStateLayout {
@@ -81,20 +112,24 @@ impl DistributedStateLayout {
         plan: &DistributedAmplitudePlan,
         precision: Precision,
     ) -> Result<Self> {
-        if mesh.num_devices() != plan.num_devices {
+        Self::new_for_rank(mesh, plan, precision, 0)
+    }
+
+    /// Build one rank-local distributed state layout from placements owned by
+    /// `rank_id`.
+    pub fn new_for_rank(
+        mesh: &DeviceMesh,
+        plan: &DistributedAmplitudePlan,
+        precision: Precision,
+        rank_id: usize,
+    ) -> Result<Self> {
+        if rank_id >= plan.request.world_size {
             return Err(MahoutError::InvalidInput(format!(
-                "Device mesh / amplitude plan mismatch: {} devices vs {} planned shards",
-                mesh.num_devices(),
-                plan.num_devices
+                "rank {} is out of range for world size {}",
+                rank_id, plan.request.world_size
             )));
         }
-        if mesh.devices.len() != plan.num_devices {
-            return Err(MahoutError::InvalidInput(format!(
-                "Device mesh / device handles mismatch: {} handles for {} planned shards",
-                mesh.devices.len(),
-                plan.num_devices
-            )));
-        }
+
         if plan.placement.placements.len() != plan.num_devices {
             return Err(MahoutError::InvalidInput(format!(
                 "Placement plan mismatch: {} placements for {} planned shards",
@@ -102,11 +137,20 @@ impl DistributedStateLayout {
                 plan.num_devices
             )));
         }
+        if mesh.devices.len() != mesh.device_ids.len() {
+            return Err(MahoutError::InvalidInput(format!(
+                "Device mesh / device handles mismatch: {} handles for {} device IDs",
+                mesh.devices.len(),
+                mesh.device_ids.len()
+            )));
+        }
 
-        let mut shards = Vec::with_capacity(mesh.num_devices());
-        for placement in &plan.placement.placements {
+        let placements = plan.placement.placements_for_rank(rank_id);
+        let mut shards = Vec::with_capacity(placements.len());
+        for placement in placements {
             let (start_idx, end_idx) = (placement.start_idx, placement.end_idx);
             shards.push(StateShardLayout {
+                rank_id: placement.rank_id,
                 device: mesh.device_for_id(placement.device_id)?,
                 device_id: placement.device_id,
                 shard_id: placement.shard_id,
@@ -117,6 +161,8 @@ impl DistributedStateLayout {
         }
 
         Ok(Self {
+            rank_id,
+            world_size: plan.request.world_size,
             num_qubits: plan.num_qubits,
             precision,
             global_len: plan.global_len,

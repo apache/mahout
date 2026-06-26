@@ -167,6 +167,71 @@ fn distributed_state_layout_rejects_mesh_with_missing_device_handles() {
 }
 
 #[test]
+fn distributed_state_layout_rejects_rank_out_of_range_before_device_handles() {
+    let mesh = DeviceMesh {
+        device_ids: vec![1],
+        devices: Vec::new(),
+        topology: GpuTopology::placeholder(1),
+    };
+    let planning_mesh = DeviceMesh {
+        device_ids: vec![0, 1],
+        devices: Vec::new(),
+        topology: GpuTopology::placeholder(2),
+    };
+    let request = PlacementRequest::new_with_world(
+        2,
+        DistributionMode::ShardedCapacity,
+        ShardPolicy::Equal,
+        2,
+    )
+    .unwrap();
+    let plan = DistributedAmplitudePlan::for_request(&planning_mesh, request).unwrap();
+
+    let err =
+        DistributedStateLayout::new_for_rank(&mesh, &plan, Precision::Float64, 2).unwrap_err();
+
+    assert!(matches!(
+        err,
+        qdp_core::MahoutError::InvalidInput(msg)
+        if msg.contains("rank") && msg.contains("world size")
+    ));
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn distributed_state_layout_can_be_rank_local() {
+    let device1 = match cudarc::driver::CudaDevice::new(1) {
+        Ok(device) => device,
+        Err(_) => return,
+    };
+    let rank_mesh =
+        DeviceMesh::from_parts(vec![1], vec![device1], GpuTopology::placeholder(1)).unwrap();
+    let planning_mesh = DeviceMesh {
+        device_ids: vec![0, 1],
+        devices: Vec::new(),
+        topology: GpuTopology::placeholder(2),
+    };
+    let request = PlacementRequest::new_with_world(
+        2,
+        DistributionMode::ShardedCapacity,
+        ShardPolicy::Equal,
+        2,
+    )
+    .unwrap();
+    let plan = DistributedAmplitudePlan::for_request(&planning_mesh, request).unwrap();
+
+    let layout =
+        DistributedStateLayout::new_for_rank(&rank_mesh, &plan, Precision::Float64, 1).unwrap();
+
+    assert_eq!(layout.rank_id, 1);
+    assert_eq!(layout.world_size, 2);
+    assert_eq!(layout.num_shards(), 1);
+    assert_eq!(layout.shards[0].rank_id, 1);
+    assert_eq!(layout.shards[0].device_id, 1);
+    assert_eq!(layout.shards[0].shard_id, 1);
+}
+
+#[test]
 fn distributed_amplitude_plan_reports_rank_local_ranges() {
     let topology = GpuTopology::placeholder(4);
     let mesh = DeviceMesh {
