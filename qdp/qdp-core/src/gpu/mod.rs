@@ -40,7 +40,10 @@ pub(crate) mod cuda_ffi;
 
 #[cfg(target_os = "linux")]
 pub use buffer_pool::{PinnedBufferHandle, PinnedBufferPool};
-pub use communicator::{CollectiveCommunicator, LocalCollectiveCommunicator};
+pub use communicator::{
+    CollectiveCommunicator, DeviceCollectiveBackend, DeviceCollectiveCommunicator,
+    LocalCollectiveCommunicator, MpiDeviceCollectiveCommunicator, NcclDeviceCollectiveCommunicator,
+};
 pub use distributed::{
     DistributedAmplitudePlan, DistributedExecutionContext, DistributedStateLayout,
     DistributedStateVector, DistributionMode, PlacementPlan, PlacementPlanner, PlacementRequest,

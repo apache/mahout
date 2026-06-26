@@ -14,31 +14,110 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::ffi::c_void;
+
 use crate::error::{MahoutError, Result};
 
 /// Abstracts cross-shard collective operations.
 ///
-/// The current implementation executes collectives inside one process. A future
-/// MPI-backed implementation can provide the same interface while mapping the
-/// partial contributions to rank-local shards and performing a real all-reduce.
+/// Implementations expose rank-local scalar semantics: each rank contributes
+/// one local value and receives the globally reduced scalar.
 pub trait CollectiveCommunicator: Send + Sync {
-    /// Sum one set of per-shard partial contributions into one global scalar.
-    fn all_reduce_sum_f64(&self, values: &[f64]) -> Result<f64>;
+    /// Rank of the current process in the collective world.
+    fn rank(&self) -> usize;
+
+    /// Number of ranks participating in the collective world.
+    fn world_size(&self) -> usize;
+
+    /// Sum one rank-local contribution into one global scalar.
+    fn all_reduce_sum_f64(&self, local_value: f64) -> Result<f64>;
 }
 
-/// In-process collective implementation for the current single-process
-/// distributed path.
+/// Device collective backend selected for GPU-resident reductions.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DeviceCollectiveBackend {
+    Local,
+    CudaAwareMpi,
+    Nccl,
+    Unavailable,
+}
+
+/// Abstracts GPU-resident collective operations.
+pub trait DeviceCollectiveCommunicator: Send + Sync {
+    fn backend_kind(&self) -> DeviceCollectiveBackend;
+
+    /// # Safety
+    ///
+    /// Callers must ensure the raw pointers and stream are valid for the
+    /// selected CUDA device and that `recv_ptr` can hold `count` `f32` values.
+    unsafe fn all_reduce_sum_f32_device(
+        &self,
+        send_ptr: *const c_void,
+        recv_ptr: *mut c_void,
+        count: usize,
+        device_id: usize,
+        stream: *mut c_void,
+    ) -> Result<()>;
+}
+
+/// In-process collective implementation for the single-rank path.
 #[derive(Default, Debug, Clone, Copy)]
 pub struct LocalCollectiveCommunicator;
 
 impl CollectiveCommunicator for LocalCollectiveCommunicator {
-    fn all_reduce_sum_f64(&self, values: &[f64]) -> Result<f64> {
-        if values.is_empty() {
-            return Err(MahoutError::InvalidInput(
-                "Collective reduction requires at least one partial contribution".to_string(),
-            ));
-        }
+    fn rank(&self) -> usize {
+        0
+    }
 
-        Ok(values.iter().copied().sum())
+    fn world_size(&self) -> usize {
+        1
+    }
+
+    fn all_reduce_sum_f64(&self, local_value: f64) -> Result<f64> {
+        Ok(local_value)
+    }
+}
+
+#[derive(Default, Debug, Clone, Copy)]
+pub struct MpiDeviceCollectiveCommunicator;
+
+impl DeviceCollectiveCommunicator for MpiDeviceCollectiveCommunicator {
+    fn backend_kind(&self) -> DeviceCollectiveBackend {
+        DeviceCollectiveBackend::CudaAwareMpi
+    }
+
+    unsafe fn all_reduce_sum_f32_device(
+        &self,
+        _send_ptr: *const c_void,
+        _recv_ptr: *mut c_void,
+        _count: usize,
+        _device_id: usize,
+        _stream: *mut c_void,
+    ) -> Result<()> {
+        Err(MahoutError::NotImplemented(
+            "CUDA-aware MPI device collectives are reserved but not implemented".to_string(),
+        ))
+    }
+}
+
+#[derive(Default, Debug, Clone, Copy)]
+pub struct NcclDeviceCollectiveCommunicator;
+
+impl DeviceCollectiveCommunicator for NcclDeviceCollectiveCommunicator {
+    fn backend_kind(&self) -> DeviceCollectiveBackend {
+        DeviceCollectiveBackend::Nccl
+    }
+
+    unsafe fn all_reduce_sum_f32_device(
+        &self,
+        _send_ptr: *const c_void,
+        _recv_ptr: *mut c_void,
+        _count: usize,
+        _device_id: usize,
+        _stream: *mut c_void,
+    ) -> Result<()> {
+        Err(MahoutError::NotImplemented(
+            "NCCL device collectives are reserved but not implemented".to_string(),
+        ))
     }
 }

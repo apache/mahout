@@ -14,22 +14,67 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use qdp_core::gpu::{CollectiveCommunicator, LocalCollectiveCommunicator};
+use std::ffi::c_void;
+
+use qdp_core::gpu::{
+    CollectiveCommunicator, DeviceCollectiveBackend, DeviceCollectiveCommunicator,
+    LocalCollectiveCommunicator, MpiDeviceCollectiveCommunicator, NcclDeviceCollectiveCommunicator,
+};
 
 #[test]
-fn local_collective_reduce_sum_returns_total() {
+fn local_collective_reports_single_rank_identity() {
     let comm = LocalCollectiveCommunicator;
-    let values = vec![1.0, 2.0, 3.0];
-    assert_eq!(comm.all_reduce_sum_f64(&values).unwrap(), 6.0);
+
+    assert_eq!(comm.rank(), 0);
+    assert_eq!(comm.world_size(), 1);
+    assert_eq!(comm.all_reduce_sum_f64(12.5).unwrap(), 12.5);
 }
 
 #[test]
-fn local_collective_reduce_sum_rejects_empty_inputs() {
-    let comm = LocalCollectiveCommunicator;
-    let err = comm.all_reduce_sum_f64(&[]).unwrap_err();
+fn placeholder_mpi_device_collective_is_explicitly_unavailable() {
+    let backend = MpiDeviceCollectiveCommunicator;
+    assert_eq!(
+        backend.backend_kind(),
+        DeviceCollectiveBackend::CudaAwareMpi
+    );
+
+    let err = unsafe {
+        backend.all_reduce_sum_f32_device(
+            std::ptr::null::<c_void>(),
+            std::ptr::null_mut::<c_void>(),
+            0,
+            0,
+            std::ptr::null_mut::<c_void>(),
+        )
+    }
+    .unwrap_err();
+
     assert!(matches!(
         err,
-        qdp_core::MahoutError::InvalidInput(msg)
-        if msg.contains("at least one partial contribution")
+        qdp_core::MahoutError::NotImplemented(msg)
+        if msg.contains("CUDA-aware MPI device collectives")
+    ));
+}
+
+#[test]
+fn placeholder_nccl_device_collective_is_explicitly_unavailable() {
+    let backend = NcclDeviceCollectiveCommunicator;
+    assert_eq!(backend.backend_kind(), DeviceCollectiveBackend::Nccl);
+
+    let err = unsafe {
+        backend.all_reduce_sum_f32_device(
+            std::ptr::null::<c_void>(),
+            std::ptr::null_mut::<c_void>(),
+            0,
+            0,
+            std::ptr::null_mut::<c_void>(),
+        )
+    }
+    .unwrap_err();
+
+    assert!(matches!(
+        err,
+        qdp_core::MahoutError::NotImplemented(msg)
+        if msg.contains("NCCL device collectives")
     ));
 }

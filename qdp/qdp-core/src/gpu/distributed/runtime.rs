@@ -153,7 +153,8 @@ pub(crate) fn calculate_inv_norm_distributed(
         partials.push(calculate_local_norm_sq(host_data, start_idx, end_idx)?);
     }
 
-    let global_norm_sq = execution.collectives().all_reduce_sum_f64(&partials)?;
+    let local_norm_sq = partials.iter().copied().sum();
+    let global_norm_sq = execution.collectives().all_reduce_sum_f64(local_norm_sq)?;
     if global_norm_sq <= 0.0 || !global_norm_sq.is_finite() {
         return Err(MahoutError::InvalidInput(
             "Input data has zero or non-finite norm (contains NaN, Inf, or all zeros)".to_string(),
