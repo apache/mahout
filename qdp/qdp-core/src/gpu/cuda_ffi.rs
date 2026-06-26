@@ -133,11 +133,7 @@ mod no_cuda_stubs {
     /// Matches the "999" convention used by qdp-kernels' kernel-launcher stubs.
     const QDP_CUDA_UNAVAILABLE: i32 = 999;
 
-    pub(crate) unsafe fn cudaHostAlloc(
-        _pHost: *mut *mut c_void,
-        _size: usize,
-        _flags: u32,
-    ) -> i32 {
+    pub(crate) unsafe fn cudaHostAlloc(_pHost: *mut *mut c_void, _size: usize, _flags: u32) -> i32 {
         QDP_CUDA_UNAVAILABLE
     }
 

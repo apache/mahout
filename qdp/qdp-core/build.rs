@@ -64,6 +64,9 @@ fn configure_cuda_linkage() {
     println!("cargo::rustc-check-cfg=cfg(qdp_no_cuda)");
     println!("cargo:rerun-if-env-changed=QDP_NO_CUDA");
     println!("cargo:rerun-if-env-changed=CUDA_PATH");
+    // The whole CUDA-vs-stub decision hinges on finding nvcc on PATH, so a PATH
+    // change (e.g. installing the toolkit) must re-trigger this script.
+    println!("cargo:rerun-if-env-changed=PATH");
 
     let force_no_cuda = env::var("QDP_NO_CUDA")
         .map(|v| v == "1" || v.eq_ignore_ascii_case("true") || v.eq_ignore_ascii_case("yes"))
@@ -73,7 +76,8 @@ fn configure_cuda_linkage() {
         && Command::new("nvcc")
             .arg("--version")
             .output()
-            .is_ok();
+            .map(|o| o.status.success())
+            .unwrap_or(false);
 
     if !has_cuda {
         println!("cargo:rustc-cfg=qdp_no_cuda");
