@@ -133,9 +133,7 @@ pub(crate) fn calculate_local_norm_sq(
     let mut local_sum = 0.0f64;
     for &value in &host_data[start_idx..slice_end] {
         if !value.is_finite() {
-            return Err(MahoutError::InvalidInput(
-                "Input data contains NaN or Inf".to_string(),
-            ));
+            return Ok(f64::NAN);
         }
         local_sum += value * value;
     }

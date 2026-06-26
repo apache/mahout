@@ -276,7 +276,45 @@ fn prepare_distributed_amplitude_rejects_non_finite_input() {
     assert!(matches!(
         err,
         qdp_core::MahoutError::InvalidInput(msg)
-        if msg.contains("NaN or Inf")
+        if msg.contains("zero or non-finite norm")
+    ));
+}
+
+#[test]
+fn prepare_distributed_amplitude_reduces_before_rejecting_non_finite_input() {
+    let mesh = DeviceMesh {
+        device_ids: vec![0],
+        devices: Vec::new(),
+        topology: GpuTopology::placeholder(1),
+    };
+    let seen = Arc::new(Mutex::new(Vec::new()));
+    let collectives = RecordingCollective {
+        rank: 0,
+        world_size: 1,
+        global_sum: f64::NAN,
+        seen: Arc::clone(&seen),
+    };
+    let execution =
+        DistributedExecutionContext::rank_local_with_mesh(0, 1, mesh, &collectives).unwrap();
+
+    let err = match QdpEngine::prepare_distributed_amplitude_on(
+        &execution,
+        &[1.0, f64::NAN],
+        1,
+        Precision::Float64,
+        None,
+    ) {
+        Ok(_) => panic!("expected non-finite input to be rejected after reduction"),
+        Err(err) => err,
+    };
+
+    let seen = seen.lock().unwrap();
+    assert_eq!(seen.len(), 1);
+    assert!(!seen[0].is_finite());
+    assert!(matches!(
+        err,
+        qdp_core::MahoutError::InvalidInput(msg)
+        if msg.contains("zero or non-finite norm")
     ));
 }
 
