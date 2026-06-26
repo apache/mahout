@@ -82,6 +82,7 @@ impl<'a> DistributedExecutionContext<'a> {
         collectives: &'a dyn CollectiveCommunicator,
     ) -> Result<Self> {
         Self::validate_rank_world(rank, world_size)?;
+        Self::validate_collective_metadata(rank, world_size, collectives)?;
         Self::rank_local_with_mesh(rank, world_size, DeviceMesh::new(device_ids)?, collectives)
     }
 
@@ -93,6 +94,7 @@ impl<'a> DistributedExecutionContext<'a> {
         collectives: &'a dyn CollectiveCommunicator,
     ) -> Result<Self> {
         Self::validate_rank_world(rank, world_size)?;
+        Self::validate_collective_metadata(rank, world_size, collectives)?;
         Ok(Self {
             rank,
             world_size,
@@ -132,6 +134,24 @@ impl<'a> DistributedExecutionContext<'a> {
             return Err(MahoutError::InvalidInput(format!(
                 "Distributed execution rank {} must be within world size {}",
                 rank, world_size
+            )));
+        }
+
+        Ok(())
+    }
+
+    fn validate_collective_metadata(
+        rank: usize,
+        world_size: usize,
+        collectives: &dyn CollectiveCommunicator,
+    ) -> Result<()> {
+        if rank != collectives.rank() || world_size != collectives.world_size() {
+            return Err(MahoutError::InvalidInput(format!(
+                "Distributed execution collective metadata mismatch: requested rank {} within world size {}, collective reports rank {} within world size {}",
+                rank,
+                world_size,
+                collectives.rank(),
+                collectives.world_size()
             )));
         }
 

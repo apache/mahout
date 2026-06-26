@@ -15,13 +15,37 @@
 // limitations under the License.
 
 use qdp_core::gpu::{
-    DeviceMesh, DistributedExecutionContext, GpuTopology, LocalCollectiveCommunicator,
+    CollectiveCommunicator, DeviceMesh, DistributedExecutionContext, GpuTopology,
+    LocalCollectiveCommunicator,
 };
 use qdp_core::{DistributionMode, PlacementRequest, Precision, QdpEngine, ShardPolicy};
 
+#[derive(Clone, Copy)]
+struct TestCollective {
+    rank: usize,
+    world_size: usize,
+}
+
+impl CollectiveCommunicator for TestCollective {
+    fn rank(&self) -> usize {
+        self.rank
+    }
+
+    fn world_size(&self) -> usize {
+        self.world_size
+    }
+
+    fn all_reduce_sum_f64(&self, local_value: f64) -> qdp_core::Result<f64> {
+        Ok(local_value)
+    }
+}
+
 #[test]
 fn rank_local_execution_context_reports_rank_metadata() {
-    let collectives = LocalCollectiveCommunicator;
+    let collectives = TestCollective {
+        rank: 1,
+        world_size: 3,
+    };
     let mesh = DeviceMesh {
         device_ids: vec![0],
         devices: Vec::new(),
@@ -34,6 +58,25 @@ fn rank_local_execution_context_reports_rank_metadata() {
     assert_eq!(execution.world_size(), 3);
     assert_eq!(execution.mesh().num_devices(), 1);
     assert!(execution.device_collectives().is_none());
+}
+
+#[test]
+fn rank_local_execution_context_rejects_collective_metadata_mismatch() {
+    let collectives = LocalCollectiveCommunicator;
+    let mesh = DeviceMesh {
+        device_ids: vec![0],
+        devices: Vec::new(),
+        topology: GpuTopology::placeholder(1),
+    };
+
+    let err =
+        DistributedExecutionContext::rank_local_with_mesh(1, 3, mesh, &collectives).unwrap_err();
+
+    assert!(matches!(
+        err,
+        qdp_core::MahoutError::InvalidInput(msg)
+        if msg.contains("collective") && msg.contains("rank")
+    ));
 }
 
 #[test]
