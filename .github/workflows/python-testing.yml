@@ -57,8 +57,44 @@ jobs:
           QDP_NO_CUDA: "1"
         run: cargo check --workspace --tests
 
-  test:
+  # Build the QDP extension once (CPU / no-CUDA stub build, all supported
+  # Python versions) and hand the wheels to the test matrix below, so the
+  # extension is compiled a single time instead of once per matrix leg.
+  build:
     needs: rust-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Set up Python (all supported versions)
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: |
+            3.10
+            3.11
+            3.12
+
+      # QDP_NO_CUDA forces the stub build so the wheels load and run on the
+      # GPU-less test runners below. This matches the previous per-leg
+      # behaviour, which fell back to stubs because nvcc is absent on the
+      # runner (see qdp/qdp-core/build.rs and qdp/qdp-kernels/build.rs).
+      - name: Build QDP wheels (CPU / no-CUDA stubs)
+        uses: PyO3/maturin-action@v1
+        with:
+          working-directory: qdp/qdp-python
+          command: build
+          args: --release --out dist -i python3.10 -i python3.11 -i python3.12
+          sccache: true
+        env:
+          QDP_NO_CUDA: "1"
+
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: qdp-cpu-wheels
+          path: qdp/qdp-python/dist/*.whl
+
+  test:
+    needs: build
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -78,13 +114,22 @@ jobs:
       - name: Install dependencies
         run: uv sync --group dev
 
-      - name: Build QDP extension
-        uses: PyO3/maturin-action@v1
+      - name: Download prebuilt QDP wheels
+        uses: actions/download-artifact@v5
         with:
-          working-directory: qdp/qdp-python
-          command: develop
-          args: --release
-          sccache: true
+          name: qdp-cpu-wheels
+          path: dist
+
+      # Install the wheel matching this leg's interpreter instead of
+      # recompiling the extension (the build job above already did that once).
+      - name: Install QDP extension (prebuilt wheel)
+        env:
+          PYTHON_VERSION: ${{ matrix.python-version }}
+        run: |
+          tag="cp${PYTHON_VERSION/./}"
+          wheel=$(ls dist/*"${tag}"*.whl)
+          echo "Installing ${wheel}"
+          uv pip install "${wheel}"
 
       - name: Install PyTorch (CPU)
         run: uv pip install torch --index-url https://download.pytorch.org/whl/cpu
