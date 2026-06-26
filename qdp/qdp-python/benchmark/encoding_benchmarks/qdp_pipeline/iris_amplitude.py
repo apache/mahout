@@ -344,8 +344,10 @@ def _run_training_gpu(
         return torch.mean((Y_batch - preds) ** 2)
 
     torch.manual_seed(seed)
-    weights = 0.01 * torch.randn(
-        num_layers, NUM_QUBITS, 3, device=device, dtype=real_dtype, requires_grad=True
+    weights = (
+        (0.01 * torch.randn(num_layers, NUM_QUBITS, 3, device=device, dtype=real_dtype))
+        .detach()
+        .requires_grad_(True)
     )
     bias = torch.tensor(0.0, device=device, dtype=real_dtype, requires_grad=True)
     opt = torch.optim.SGD([weights, bias], lr=lr, momentum=0.9, nesterov=True)
