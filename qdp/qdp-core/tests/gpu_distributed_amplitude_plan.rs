@@ -165,3 +165,25 @@ fn distributed_state_layout_rejects_mesh_with_missing_device_handles() {
         if msg.contains("device handles")
     ));
 }
+
+#[test]
+fn distributed_amplitude_plan_reports_rank_local_ranges() {
+    let topology = GpuTopology::placeholder(4);
+    let mesh = DeviceMesh {
+        device_ids: vec![0, 1, 2, 3],
+        devices: Vec::new(),
+        topology,
+    };
+    let request = PlacementRequest::new_with_world(
+        4,
+        DistributionMode::ShardedCapacity,
+        ShardPolicy::Equal,
+        2,
+    )
+    .unwrap();
+    let plan = DistributedAmplitudePlan::for_request(&mesh, request).unwrap();
+
+    assert_eq!(plan.num_local_shards(0), 2);
+    assert_eq!(plan.num_local_shards(1), 2);
+    assert_eq!(plan.rank_shard_ranges(1), vec![(4, 8), (12, 16)]);
+}

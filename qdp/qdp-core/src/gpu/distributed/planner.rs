@@ -42,6 +42,7 @@ pub struct PlacementRequest {
     pub num_qubits: usize,
     pub mode: DistributionMode,
     pub shard_policy: ShardPolicy,
+    pub world_size: usize,
 }
 
 impl PlacementRequest {
@@ -51,7 +52,29 @@ impl PlacementRequest {
             num_qubits,
             mode,
             shard_policy,
+            world_size: 1,
         }
+    }
+
+    /// Create one placement request with explicit rank-world metadata.
+    pub fn new_with_world(
+        num_qubits: usize,
+        mode: DistributionMode,
+        shard_policy: ShardPolicy,
+        world_size: usize,
+    ) -> Result<Self> {
+        if world_size == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Distributed placement world size must be at least 1".to_string(),
+            ));
+        }
+
+        Ok(Self {
+            num_qubits,
+            mode,
+            shard_policy,
+            world_size,
+        })
     }
 
     /// Compute the global amplitude length implied by `num_qubits`.
@@ -68,6 +91,7 @@ impl PlacementRequest {
 /// One logical placement decision produced by the planner.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ShardPlacement {
+    pub rank_id: usize,
     pub device_id: usize,
     pub shard_id: usize,
     pub start_idx: usize,
@@ -116,6 +140,28 @@ impl PlacementPlan {
         }
         Ok(shard_len)
     }
+
+    /// Return all placements owned by one rank.
+    pub fn placements_for_rank(&self, rank: usize) -> Vec<&ShardPlacement> {
+        self.placements
+            .iter()
+            .filter(|placement| placement.rank_id == rank)
+            .collect()
+    }
+
+    /// Number of shards owned by one rank.
+    pub fn num_local_shards(&self, rank: usize) -> usize {
+        self.placements_for_rank(rank).len()
+    }
+
+    /// Largest shard length owned by one rank.
+    pub fn local_max_len(&self, rank: usize) -> usize {
+        self.placements_for_rank(rank)
+            .into_iter()
+            .map(ShardPlacement::local_len)
+            .max()
+            .unwrap_or(0)
+    }
 }
 
 /// Stateless planner for device placement decisions.
@@ -144,6 +190,7 @@ impl PlacementPlanner {
                     mode: request.mode,
                     global_len,
                     placements: vec![ShardPlacement {
+                        rank_id: 0,
                         device_id,
                         shard_id: 0,
                         start_idx: 0,
@@ -156,7 +203,8 @@ impl PlacementPlanner {
                 let device_ids = Self::select_device_ids(mesh, request)?;
                 let shard_lengths =
                     Self::plan_shard_lengths(global_len, device_ids.len(), request.shard_policy)?;
-                let placements = Self::build_shard_placements(&device_ids, &shard_lengths);
+                let placements =
+                    Self::build_shard_placements(&device_ids, &shard_lengths, request.world_size);
 
                 Ok(PlacementPlan {
                     mode: request.mode,
@@ -231,6 +279,7 @@ impl PlacementPlanner {
     fn build_shard_placements(
         device_ids: &[usize],
         shard_lengths: &[usize],
+        world_size: usize,
     ) -> Vec<ShardPlacement> {
         let mut start_idx = 0usize;
         device_ids
@@ -241,6 +290,7 @@ impl PlacementPlanner {
             .map(|(shard_id, (device_id, local_len))| {
                 let end_idx = start_idx + local_len;
                 let placement = ShardPlacement {
+                    rank_id: shard_id % world_size,
                     device_id,
                     shard_id,
                     start_idx,

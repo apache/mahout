@@ -156,3 +156,69 @@ fn sharded_capacity_prefers_topology_recommended_device_order() {
     assert_eq!(plan.gather_device_id, Some(11));
     assert_eq!(ordered_ids, vec![11, 10, 12]);
 }
+
+#[test]
+fn sharded_plan_assigns_ranks_round_robin() {
+    let topology = GpuTopology::placeholder(4);
+    let mesh = DeviceMesh {
+        device_ids: vec![0, 1, 2, 3],
+        devices: Vec::new(),
+        topology,
+    };
+    let request = PlacementRequest::new_with_world(
+        4,
+        DistributionMode::ShardedCapacity,
+        ShardPolicy::Equal,
+        2,
+    )
+    .unwrap();
+
+    let plan = PlacementPlanner::plan(&mesh, &request).unwrap();
+    let ranks = plan
+        .placements
+        .iter()
+        .map(|placement| placement.rank_id)
+        .collect::<Vec<_>>();
+
+    assert_eq!(ranks, vec![0, 1, 0, 1]);
+    assert_eq!(plan.placements_for_rank(0).len(), 2);
+    assert_eq!(plan.placements_for_rank(1).len(), 2);
+    assert_eq!(plan.num_local_shards(0), 2);
+    assert_eq!(plan.local_max_len(0), 4);
+}
+
+#[test]
+fn placement_request_rejects_zero_world_size() {
+    let err = PlacementRequest::new_with_world(
+        2,
+        DistributionMode::ShardedCapacity,
+        ShardPolicy::Equal,
+        0,
+    )
+    .unwrap_err();
+
+    assert!(matches!(
+        err,
+        qdp_core::MahoutError::InvalidInput(msg)
+        if msg.contains("world size")
+    ));
+}
+
+#[test]
+fn single_rank_request_preserves_rank_zero_ownership() {
+    let topology = GpuTopology::placeholder(2);
+    let mesh = DeviceMesh {
+        device_ids: vec![3, 7],
+        devices: Vec::new(),
+        topology,
+    };
+    let request = PlacementRequest::new(3, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
+
+    let plan = PlacementPlanner::plan(&mesh, &request).unwrap();
+    assert!(
+        plan.placements
+            .iter()
+            .all(|placement| placement.rank_id == 0)
+    );
+    assert_eq!(plan.num_local_shards(0), 2);
+}

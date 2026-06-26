@@ -120,6 +120,25 @@ impl DistributedAmplitudePlan {
             .unwrap_or(0)
     }
 
+    /// Number of shards owned by one rank.
+    pub fn num_local_shards(&self, rank: usize) -> usize {
+        self.placement.num_local_shards(rank)
+    }
+
+    /// Logical half-open amplitude ranges owned by one rank.
+    pub fn rank_shard_ranges(&self, rank: usize) -> Vec<(usize, usize)> {
+        self.placement
+            .placements_for_rank(rank)
+            .into_iter()
+            .map(|placement| (placement.start_idx, placement.end_idx))
+            .collect()
+    }
+
+    /// Largest shard length owned by one rank.
+    pub fn max_local_len_for_rank(&self, rank: usize) -> usize {
+        self.placement.local_max_len(rank)
+    }
+
     /// Estimated bytes required by the largest local shard at one target precision.
     pub fn estimated_max_shard_bytes(&self, precision: Precision) -> Result<usize> {
         estimated_amplitude_bytes(self.max_local_len(), precision)
