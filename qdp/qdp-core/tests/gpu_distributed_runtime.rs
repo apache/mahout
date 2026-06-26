@@ -14,13 +14,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use qdp_core::gpu::{DistributedExecutionContext, LocalCollectiveCommunicator};
+use qdp_core::gpu::{
+    DeviceMesh, DistributedExecutionContext, GpuTopology, LocalCollectiveCommunicator,
+};
 use qdp_core::{DistributionMode, PlacementRequest, Precision, QdpEngine, ShardPolicy};
 
 #[test]
 fn rank_local_execution_context_reports_rank_metadata() {
     let collectives = LocalCollectiveCommunicator;
-    let execution = DistributedExecutionContext::rank_local(1, 3, vec![0], &collectives).unwrap();
+    let mesh = DeviceMesh {
+        device_ids: vec![0],
+        devices: Vec::new(),
+        topology: GpuTopology::placeholder(1),
+    };
+    let execution =
+        DistributedExecutionContext::rank_local_with_mesh(1, 3, mesh, &collectives).unwrap();
 
     assert_eq!(execution.rank(), 1);
     assert_eq!(execution.world_size(), 3);

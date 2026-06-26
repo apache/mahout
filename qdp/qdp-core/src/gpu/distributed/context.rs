@@ -82,10 +82,21 @@ impl<'a> DistributedExecutionContext<'a> {
         collectives: &'a dyn CollectiveCommunicator,
     ) -> Result<Self> {
         Self::validate_rank_world(rank, world_size)?;
+        Self::rank_local_with_mesh(rank, world_size, DeviceMesh::new(device_ids)?, collectives)
+    }
+
+    /// Build one rank-local execution context from an already constructed mesh.
+    pub fn rank_local_with_mesh(
+        rank: usize,
+        world_size: usize,
+        mesh: DeviceMesh,
+        collectives: &'a dyn CollectiveCommunicator,
+    ) -> Result<Self> {
+        Self::validate_rank_world(rank, world_size)?;
         Ok(Self {
             rank,
             world_size,
-            mesh: DeviceMesh::new(device_ids)?,
+            mesh,
             collectives,
             device_collectives: None,
         })
