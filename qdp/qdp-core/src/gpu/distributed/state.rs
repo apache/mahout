@@ -14,6 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::ffi::c_void;
 use std::sync::Arc;
 
 use cudarc::driver::CudaDevice;
@@ -26,9 +27,23 @@ use crate::gpu::memory::{BufferStorage, Precision};
 use super::DistributedStateLayout;
 use super::shared;
 
+/// Borrowed metadata for one local GPU shard suitable for zero-copy handoff.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct LocalShardView {
+    pub rank_id: usize,
+    pub device_id: usize,
+    pub shard_id: usize,
+    pub start_idx: usize,
+    pub end_idx: usize,
+    pub local_len: usize,
+    pub precision: Precision,
+    pub ptr: *mut c_void,
+}
+
 /// One materialized shard of a distributed state vector.
 #[derive(Clone)]
 pub struct StateShard {
+    pub rank_id: usize,
     pub device: Arc<CudaDevice>,
     pub device_id: usize,
     pub shard_id: usize,
@@ -41,6 +56,8 @@ pub struct StateShard {
 /// Materialized multi-GPU state vector with one live buffer per shard.
 #[derive(Clone)]
 pub struct DistributedStateVector {
+    pub rank_id: usize,
+    pub world_size: usize,
     pub num_qubits: usize,
     pub precision: Precision,
     pub global_len: usize,
@@ -71,6 +88,23 @@ impl DistributedStateVector {
     /// Number of materialized shards in this distributed state.
     pub fn num_shards(&self) -> usize {
         self.shards.len()
+    }
+
+    /// Return zero-copy metadata for all materialized local shards.
+    pub fn local_shard_views(&self) -> Vec<LocalShardView> {
+        self.shards
+            .iter()
+            .map(|shard| LocalShardView {
+                rank_id: shard.rank_id,
+                device_id: shard.device_id,
+                shard_id: shard.shard_id,
+                start_idx: shard.start_idx,
+                end_idx: shard.end_idx,
+                local_len: shard.local_len,
+                precision: self.precision,
+                ptr: shard.buffer.ptr_void(),
+            })
+            .collect()
     }
 
     #[cfg(target_os = "linux")]
@@ -145,6 +179,7 @@ impl DistributedStateVector {
                 )));
             }
             shards.push(StateShard {
+                rank_id: shard_layout.rank_id,
                 device: shard_layout.device,
                 device_id: shard_layout.device_id,
                 shard_id: shard_layout.shard_id,
@@ -156,6 +191,8 @@ impl DistributedStateVector {
         }
 
         Ok(Self {
+            rank_id: layout.rank_id,
+            world_size: layout.world_size,
             num_qubits: layout.num_qubits,
             precision: layout.precision,
             global_len: layout.global_len,

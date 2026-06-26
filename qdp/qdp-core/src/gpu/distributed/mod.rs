@@ -29,4 +29,4 @@ pub use planner::{
     DistributionMode, PlacementPlan, PlacementPlanner, PlacementRequest, ShardPlacement,
     ShardPolicy,
 };
-pub use state::{DistributedStateVector, StateShard};
+pub use state::{DistributedStateVector, LocalShardView, StateShard};

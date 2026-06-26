@@ -369,3 +369,31 @@ fn distributed_state_rejects_precision_mismatched_host_reads() {
         if msg.contains("float32 data, not float64")
     ));
 }
+
+#[test]
+#[cfg(target_os = "linux")]
+fn distributed_state_exposes_local_zero_copy_shard_views() {
+    let Some(_device0) = common::cuda_device() else {
+        return;
+    };
+
+    let state = QdpEngine::encode_distributed_amplitude_to_shards(
+        vec![0],
+        &[1.0, 2.0],
+        1,
+        Precision::Float32,
+        None,
+    )
+    .unwrap();
+
+    let views = state.local_shard_views();
+    assert_eq!(views.len(), 1);
+    assert_eq!(views[0].rank_id, 0);
+    assert_eq!(views[0].device_id, 0);
+    assert_eq!(views[0].shard_id, 0);
+    assert_eq!(views[0].start_idx, 0);
+    assert_eq!(views[0].end_idx, 2);
+    assert_eq!(views[0].precision, Precision::Float32);
+    assert_eq!(views[0].local_len, 2);
+    assert!(!views[0].ptr.is_null());
+}

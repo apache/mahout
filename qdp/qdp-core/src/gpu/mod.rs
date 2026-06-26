@@ -46,8 +46,9 @@ pub use communicator::{
 };
 pub use distributed::{
     DistributedAmplitudePlan, DistributedExecutionContext, DistributedStateLayout,
-    DistributedStateVector, DistributionMode, PlacementPlan, PlacementPlanner, PlacementRequest,
-    PreparedDistributedAmplitudeEncode, ShardPlacement, ShardPolicy, StateShard, StateShardLayout,
+    DistributedStateVector, DistributionMode, LocalShardView, PlacementPlan, PlacementPlanner,
+    PlacementRequest, PreparedDistributedAmplitudeEncode, ShardPlacement, ShardPolicy, StateShard,
+    StateShardLayout,
 };
 pub use encodings::{AmplitudeEncoder, AngleEncoder, BasisEncoder, QuantumEncoder};
 pub use memory::GpuStateVector;
