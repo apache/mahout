@@ -171,6 +171,12 @@ pub struct PlacementPlanner;
 impl PlacementPlanner {
     /// Build one placement plan from one validated device mesh and request.
     pub fn plan(mesh: &DeviceMesh, request: &PlacementRequest) -> Result<PlacementPlan> {
+        if request.world_size == 0 {
+            return Err(MahoutError::InvalidInput(
+                "Distributed placement world size must be at least 1".to_string(),
+            ));
+        }
+
         if mesh.num_devices() == 0 {
             return Err(MahoutError::InvalidInput(
                 "Placement planner requires at least one device".to_string(),

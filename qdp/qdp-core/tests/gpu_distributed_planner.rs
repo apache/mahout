@@ -205,6 +205,29 @@ fn placement_request_rejects_zero_world_size() {
 }
 
 #[test]
+fn placement_planner_rejects_public_request_with_zero_world_size() {
+    let topology = GpuTopology::placeholder(2);
+    let mesh = DeviceMesh {
+        device_ids: vec![0, 1],
+        devices: Vec::new(),
+        topology,
+    };
+    let request = PlacementRequest {
+        num_qubits: 2,
+        mode: DistributionMode::ShardedCapacity,
+        shard_policy: ShardPolicy::Equal,
+        world_size: 0,
+    };
+
+    let err = PlacementPlanner::plan(&mesh, &request).unwrap_err();
+    assert!(matches!(
+        err,
+        qdp_core::MahoutError::InvalidInput(msg)
+        if msg.contains("world size")
+    ));
+}
+
+#[test]
 fn single_rank_request_preserves_rank_zero_ownership() {
     let topology = GpuTopology::placeholder(2);
     let mesh = DeviceMesh {
