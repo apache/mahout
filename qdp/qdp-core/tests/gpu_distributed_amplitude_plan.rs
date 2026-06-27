@@ -225,7 +225,7 @@ fn distributed_state_layout_rejects_mesh_with_missing_device_handles() {
     let request = PlacementRequest::new(2, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
     let plan = DistributedAmplitudePlan::for_request(&mesh, request).unwrap();
 
-    let err = match DistributedStateLayout::new(&mesh, &plan, Precision::Float64) {
+    let err = match DistributedStateLayout::new_for_rank(&mesh, &plan, Precision::Float64, 0) {
         Ok(_) => panic!("expected malformed mesh to be rejected"),
         Err(err) => err,
     };

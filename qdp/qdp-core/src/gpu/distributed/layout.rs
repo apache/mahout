@@ -119,16 +119,6 @@ impl DistributedStateLayout {
         self.shards
     }
 
-    /// Build one distributed state layout from one execution mesh and one
-    /// distributed state plan.
-    pub fn new(
-        mesh: &DeviceMesh,
-        plan: &(impl AsRef<DistributedStatePlan> + ?Sized),
-        precision: Precision,
-    ) -> Result<Self> {
-        Self::new_for_rank(mesh, plan, precision, 0)
-    }
-
     /// Build one rank-local distributed state layout from placements owned by
     /// `rank_id`.
     pub fn new_for_rank(

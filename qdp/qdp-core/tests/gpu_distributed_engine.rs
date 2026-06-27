@@ -121,7 +121,7 @@ fn distributed_layout_uses_device_handles_for_reordered_placements() {
         Some(1)
     );
 
-    let layout = DistributedStateLayout::new(&mesh, &plan, Precision::Float32).unwrap();
+    let layout = DistributedStateLayout::new_for_rank(&mesh, &plan, Precision::Float32, 0).unwrap();
     assert_eq!(layout.shards()[0].device_id, 1);
     assert_eq!(layout.shards()[0].device.ordinal(), 1);
     assert_eq!(layout.shards()[1].device_id, 0);
