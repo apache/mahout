@@ -21,6 +21,7 @@ mod planner;
 pub(crate) mod runtime;
 mod shared;
 mod state;
+mod state_plan;
 
 pub use amplitude::{DistributedAmplitudePlan, PreparedDistributedAmplitudeEncode};
 pub use context::DistributedExecutionContext;
@@ -30,3 +31,4 @@ pub use planner::{
     ShardPolicy,
 };
 pub use state::{DistributedStateVector, LocalShardView, StateShard};
+pub use state_plan::DistributedStatePlan;

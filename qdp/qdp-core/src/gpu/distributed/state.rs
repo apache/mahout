@@ -63,7 +63,7 @@ pub struct DistributedStateVector {
     pub global_len: usize,
     pub shard_bits: Option<usize>,
     pub topology: crate::gpu::topology::GpuTopology,
-    pub shards: Vec<StateShard>,
+    shards: Vec<StateShard>,
 }
 
 impl DistributedStateVector {
@@ -88,6 +88,16 @@ impl DistributedStateVector {
     /// Number of materialized shards in this distributed state.
     pub fn num_shards(&self) -> usize {
         self.shards.len()
+    }
+
+    /// Borrow all materialized local shards.
+    pub fn shards(&self) -> &[StateShard] {
+        &self.shards
+    }
+
+    /// Iterate over materialized local shards.
+    pub fn iter_shards(&self) -> impl Iterator<Item = &StateShard> {
+        self.shards.iter()
     }
 
     /// Return zero-copy metadata for all materialized local shards.
@@ -163,21 +173,30 @@ impl DistributedStateVector {
         layout: DistributedStateLayout,
         buffers: Vec<Arc<BufferStorage>>,
     ) -> Result<Self> {
-        if buffers.len() != layout.shards.len() {
+        let layout_shards_len = layout.num_shards();
+        if buffers.len() != layout_shards_len {
             return Err(MahoutError::InvalidInput(format!(
                 "Distributed state buffer mismatch: {} buffers for {} shards",
                 buffers.len(),
-                layout.shards.len()
+                layout_shards_len
             )));
         }
 
-        let mut shards = Vec::with_capacity(layout.shards.len());
-        for (shard_layout, buffer) in layout.shards.into_iter().zip(buffers) {
-            if buffer.precision() != layout.precision {
+        let rank_id = layout.rank_id;
+        let world_size = layout.world_size;
+        let num_qubits = layout.num_qubits;
+        let precision = layout.precision;
+        let global_len = layout.global_len;
+        let shard_bits = layout.shard_bits;
+        let topology = layout.topology.clone();
+
+        let mut shards = Vec::with_capacity(layout_shards_len);
+        for (shard_layout, buffer) in layout.into_shards().into_iter().zip(buffers) {
+            if buffer.precision() != precision {
                 return Err(MahoutError::InvalidInput(format!(
                     "Distributed shard precision mismatch on shard {}: expected {:?}, got {:?}",
                     shard_layout.shard_id,
-                    layout.precision,
+                    precision,
                     buffer.precision()
                 )));
             }
@@ -194,13 +213,13 @@ impl DistributedStateVector {
         }
 
         Ok(Self {
-            rank_id: layout.rank_id,
-            world_size: layout.world_size,
-            num_qubits: layout.num_qubits,
-            precision: layout.precision,
-            global_len: layout.global_len,
-            shard_bits: layout.shard_bits,
-            topology: layout.topology,
+            rank_id,
+            world_size,
+            num_qubits,
+            precision,
+            global_len,
+            shard_bits,
+            topology,
             shards,
         })
     }

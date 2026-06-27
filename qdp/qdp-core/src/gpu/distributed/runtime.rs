@@ -146,7 +146,7 @@ pub(crate) fn calculate_inv_norm_distributed(
     execution: &DistributedExecutionContext<'_>,
 ) -> Result<f64> {
     let mut local_norm_sq = 0.0f64;
-    for placement in plan.placement.placements_for_rank_iter(execution.rank()) {
+    for placement in plan.placements_for_rank_iter(execution.rank()) {
         local_norm_sq +=
             calculate_local_norm_sq(host_data, placement.start_idx, placement.end_idx)?;
     }
@@ -183,10 +183,10 @@ pub(crate) fn encode_distributed_to_shards(
 ) -> Result<DistributedStateVector> {
     let (plan, inv_norm, layout) =
         prepare_distributed_encode(execution, host_data, precision, request)?;
-    let num_qubits = plan.request.num_qubits;
+    let num_qubits = plan.request().num_qubits;
 
     let mut buffers = Vec::with_capacity(plan.num_local_shards(execution.rank()));
-    for placement in plan.placement.placements_for_rank_iter(execution.rank()) {
+    for placement in plan.placements_for_rank_iter(execution.rank()) {
         let device = execution.mesh().device_for_id(placement.device_id)?;
         let _device_guard = DistributedDeviceContextGuard::switch_to(placement.device_id)?;
         let (start_idx, end_idx) = (placement.start_idx, placement.end_idx);

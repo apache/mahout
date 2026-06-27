@@ -148,11 +148,6 @@ impl PlacementPlan {
             .filter(move |placement| placement.rank_id == rank)
     }
 
-    /// Number of shards owned by one rank.
-    pub(crate) fn num_local_shards(&self, rank: usize) -> usize {
-        self.placements_for_rank_iter(rank).count()
-    }
-
     /// Largest shard length owned by one rank.
     pub fn local_max_len(&self, rank: usize) -> usize {
         self.placements_for_rank_iter(rank)

@@ -16,22 +16,15 @@
 
 use crate::error::{MahoutError, Result};
 use crate::gpu::distributed::{
-    DistributionMode, PlacementPlan, PlacementPlanner, PlacementRequest, ShardPlacement,
-    ShardPolicy,
+    DistributedStatePlan, DistributionMode, PlacementPlan, PlacementPlanner, PlacementRequest,
 };
-use crate::gpu::memory::Precision;
 use crate::gpu::topology::DeviceMesh;
+use std::ops::Deref;
 
-/// Shared planning math for amplitude-sharded state construction.
+/// Amplitude-specific wrapper around the shared distributed state plan.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DistributedAmplitudePlan {
-    pub request: PlacementRequest,
-    pub placement: PlacementPlan,
-    pub num_qubits: usize,
-    pub global_len: usize,
-    pub num_devices: usize,
-    pub shard_bits: Option<usize>,
-    pub uniform_shard_len: Option<usize>,
+    pub state: DistributedStatePlan,
 }
 
 /// Result of preparing a distributed amplitude encode without yet allocating
@@ -88,118 +81,22 @@ impl DistributedAmplitudePlan {
     }
 
     fn from_placement(request: PlacementRequest, placement: PlacementPlan) -> Result<Self> {
-        let num_devices = placement.num_devices();
-        Self::validate_local_shard_shape(request.num_qubits, &placement)?;
-        let global_len = placement.global_len;
-        let num_qubits = request.num_qubits;
-        let (shard_bits, uniform_shard_len) = match request.shard_policy {
-            ShardPolicy::Equal => {
-                debug_assert!(num_devices.is_power_of_two());
-                let shard_bits = num_devices.trailing_zeros() as usize;
-                if shard_bits > request.num_qubits {
-                    return Err(MahoutError::InvalidInput(format!(
-                        "Cannot shard {} qubits across {} devices: shard bits {} exceed qubit count",
-                        request.num_qubits, num_devices, shard_bits
-                    )));
-                }
-                (Some(shard_bits), Some(placement.shard_len()?))
-            }
-            ShardPolicy::BalancedUneven => (None, None),
-        };
-
         Ok(Self {
-            request,
-            placement,
-            num_qubits,
-            global_len,
-            num_devices,
-            shard_bits,
-            uniform_shard_len,
+            state: DistributedStatePlan::from_placement(request, placement)?,
         })
-    }
-
-    /// Logical half-open amplitude range covered by one shard ID.
-    pub fn shard_range(&self, shard_id: usize) -> Result<(usize, usize)> {
-        let placement = self.placement.placements.get(shard_id).ok_or_else(|| {
-            MahoutError::InvalidInput(format!(
-                "Shard ID {} out of range for {} devices",
-                shard_id, self.num_devices
-            ))
-        })?;
-        Ok((placement.start_idx, placement.end_idx))
-    }
-
-    /// Largest local shard length across the current placement.
-    pub fn max_local_len(&self) -> usize {
-        self.placement
-            .placements
-            .iter()
-            .map(ShardPlacement::local_len)
-            .max()
-            .unwrap_or(0)
-    }
-
-    /// Number of shards owned by one rank.
-    pub fn num_local_shards(&self, rank: usize) -> usize {
-        self.placement.num_local_shards(rank)
-    }
-
-    /// Logical half-open amplitude ranges owned by one rank.
-    pub fn rank_shard_ranges(&self, rank: usize) -> Vec<(usize, usize)> {
-        self.placement
-            .placements_for_rank_iter(rank)
-            .map(|placement| (placement.start_idx, placement.end_idx))
-            .collect()
-    }
-
-    /// Largest shard length owned by one rank.
-    pub fn max_local_len_for_rank(&self, rank: usize) -> usize {
-        self.placement.local_max_len(rank)
-    }
-
-    /// Estimated bytes required by the largest local shard at one target precision.
-    pub fn estimated_max_shard_bytes(&self, precision: Precision) -> Result<usize> {
-        estimated_amplitude_bytes(self.max_local_len(), precision)
-    }
-
-    fn validate_local_shard_shape(num_qubits: usize, placement: &PlacementPlan) -> Result<()> {
-        let required_local_len = placement
-            .placements
-            .iter()
-            .map(ShardPlacement::local_len)
-            .max()
-            .ok_or_else(|| {
-                MahoutError::InvalidInput(
-                    "Placement plan must contain at least one shard".to_string(),
-                )
-            })?;
-
-        if required_local_len == 0 {
-            return Err(MahoutError::InvalidInput(format!(
-                "Distributed amplitude request for {} qubits produced an empty local shard",
-                num_qubits
-            )));
-        }
-
-        let _ = estimated_amplitude_bytes(required_local_len, Precision::Float32)?;
-        let _ = estimated_amplitude_bytes(required_local_len, Precision::Float64)?;
-
-        Ok(())
     }
 }
 
-fn estimated_amplitude_bytes(local_len: usize, precision: Precision) -> Result<usize> {
-    let bytes_per_amplitude = match precision {
-        Precision::Float32 => 8usize,
-        Precision::Float64 => 16usize,
-    };
+impl AsRef<DistributedStatePlan> for DistributedAmplitudePlan {
+    fn as_ref(&self) -> &DistributedStatePlan {
+        &self.state
+    }
+}
 
-    local_len
-        .checked_mul(bytes_per_amplitude)
-        .ok_or_else(|| {
-            MahoutError::InvalidInput(format!(
-                "Distributed amplitude shard byte estimate overflowed for local_len={} and precision={:?}",
-                local_len, precision
-            ))
-        })
+impl Deref for DistributedAmplitudePlan {
+    type Target = DistributedStatePlan;
+
+    fn deref(&self) -> &Self::Target {
+        &self.state
+    }
 }

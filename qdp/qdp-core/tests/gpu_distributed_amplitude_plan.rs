@@ -16,8 +16,8 @@
 
 use qdp_core::Precision;
 use qdp_core::gpu::{
-    DeviceMesh, DistributedAmplitudePlan, DistributedStateLayout, DistributionMode, GpuTopology,
-    PlacementRequest, ShardPolicy,
+    DeviceMesh, DistributedAmplitudePlan, DistributedStateLayout, DistributedStatePlan,
+    DistributionMode, GpuTopology, PlacementPlanner, PlacementRequest, ShardPolicy,
 };
 
 #[test]
@@ -35,6 +35,76 @@ fn distributed_amplitude_plan_has_expected_shard_math() {
     assert_eq!(plan.uniform_shard_len, Some(4));
     assert_eq!(plan.shard_range(0).unwrap(), (0, 4));
     assert_eq!(plan.shard_range(3).unwrap(), (12, 16));
+}
+
+#[test]
+fn distributed_state_plan_carries_workload_neutral_shard_math() {
+    let topology = GpuTopology::placeholder(4);
+    let mesh = DeviceMesh {
+        device_ids: vec![0, 1, 2, 3],
+        devices: Vec::new(),
+        topology,
+    };
+    let request = PlacementRequest::new(4, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
+    let placement = PlacementPlanner::plan(&mesh, &request).unwrap();
+    let plan = DistributedStatePlan::from_placement(request, placement).unwrap();
+
+    assert_eq!(plan.request().num_qubits, 4);
+    assert_eq!(plan.placement().num_devices(), 4);
+    assert_eq!(plan.global_len, 16);
+    assert_eq!(plan.num_devices, 4);
+    assert_eq!(plan.shard_bits, Some(2));
+    assert_eq!(plan.uniform_shard_len, Some(4));
+    assert_eq!(plan.shard_range(2).unwrap(), (8, 12));
+    assert_eq!(
+        plan.estimated_max_shard_bytes(Precision::Float32).unwrap(),
+        32
+    );
+}
+
+#[test]
+fn distributed_state_plan_exposes_rank_local_placements() {
+    let topology = GpuTopology::placeholder(2);
+    let mesh = DeviceMesh {
+        device_ids: vec![0, 1],
+        devices: Vec::new(),
+        topology,
+    };
+    let request = PlacementRequest::new_with_world(
+        4,
+        DistributionMode::ShardedCapacity,
+        ShardPolicy::Equal,
+        2,
+    )
+    .unwrap();
+    let placement = PlacementPlanner::plan_rank_local(&mesh, &request).unwrap();
+    let plan = DistributedStatePlan::from_placement(request, placement).unwrap();
+
+    let rank_one = plan.placements_for_rank_iter(1).collect::<Vec<_>>();
+
+    assert_eq!(rank_one.len(), 2);
+    assert_eq!(rank_one[0].rank_id, 1);
+    assert_eq!(rank_one[0].device_id, 0);
+    assert_eq!((rank_one[0].start_idx, rank_one[0].end_idx), (4, 8));
+    assert_eq!(rank_one[1].rank_id, 1);
+    assert_eq!(rank_one[1].device_id, 1);
+    assert_eq!((rank_one[1].start_idx, rank_one[1].end_idx), (12, 16));
+}
+
+#[test]
+fn distributed_amplitude_plan_exposes_shared_state_plan() {
+    let topology = GpuTopology::placeholder(2);
+    let mesh = DeviceMesh {
+        device_ids: vec![0, 1],
+        devices: Vec::new(),
+        topology,
+    };
+    let request = PlacementRequest::new(3, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
+    let plan = DistributedAmplitudePlan::for_request(&mesh, request).unwrap();
+
+    let shared: &DistributedStatePlan = plan.as_ref();
+    assert_eq!(shared.global_len, plan.global_len);
+    assert_eq!(shared.shard_range(1).unwrap(), plan.shard_range(1).unwrap());
 }
 
 #[test]
@@ -226,9 +296,11 @@ fn distributed_state_layout_can_be_rank_local() {
     assert_eq!(layout.rank_id, 1);
     assert_eq!(layout.world_size, 2);
     assert_eq!(layout.num_shards(), 1);
-    assert_eq!(layout.shards[0].rank_id, 1);
-    assert_eq!(layout.shards[0].device_id, 1);
-    assert_eq!(layout.shards[0].shard_id, 1);
+    assert_eq!(layout.shards().len(), 1);
+    assert_eq!(layout.iter_shards().count(), 1);
+    assert_eq!(layout.shards()[0].rank_id, 1);
+    assert_eq!(layout.shards()[0].device_id, 1);
+    assert_eq!(layout.shards()[0].shard_id, 1);
 }
 
 #[test]

@@ -274,8 +274,8 @@ fn test_distributed_amplitude_two_gpu_smoke() {
     .expect("Distributed amplitude shard encode should succeed");
 
     assert_eq!(distributed.num_shards(), 2, "Expected two shards");
-    assert_eq!(distributed.shards[0].device_id, 0);
-    assert_eq!(distributed.shards[1].device_id, 1);
+    assert_eq!(distributed.shards()[0].device_id, 0);
+    assert_eq!(distributed.shards()[1].device_id, 1);
 
     let shard0 = distributed.copy_shard_to_host_f64(0).unwrap();
     let shard1 = distributed.copy_shard_to_host_f64(1).unwrap();

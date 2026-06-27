@@ -52,7 +52,7 @@ fn main() -> Result<(), MahoutError> {
     let num_qubits = std::env::var("QUBITS")
         .ok()
         .and_then(|value| value.parse::<usize>().ok())
-        .unwrap_or(34);
+        .unwrap_or(33);
     let host_len = std::env::var("HOST_LEN")
         .ok()
         .and_then(|value| value.parse::<usize>().ok())
@@ -71,7 +71,7 @@ fn main() -> Result<(), MahoutError> {
     let host_data = vec![1.0f64; host_len];
 
     println!(
-        "Starting distributed amplitude probe: qubits={}, host_len={}, gpus={:?}, precision={:?}, shard_policy={:?}, collectives=in-process",
+        "Starting distributed multi-GPU probe: qubits={}, host_len={}, gpus={:?}, precision={:?}, shard_policy={:?}, collectives=in-process",
         num_qubits, host_len, device_ids, precision, shard_policy
     );
 
@@ -98,7 +98,7 @@ fn main() -> Result<(), MahoutError> {
         prepared.layout.recommended_gather_device_id()
     );
 
-    for shard in &prepared.layout.shards {
+    for shard in prepared.layout.shards() {
         let shard_bytes = match precision {
             Precision::Float32 => shard.local_len * 8,
             Precision::Float64 => shard.local_len * 16,

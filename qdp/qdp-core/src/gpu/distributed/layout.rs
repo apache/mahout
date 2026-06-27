@@ -23,7 +23,7 @@ use crate::error::{MahoutError, Result};
 use crate::gpu::memory::Precision;
 use crate::gpu::topology::{DeviceMesh, GpuTopology};
 
-use super::DistributedAmplitudePlan;
+use super::DistributedStatePlan;
 use super::shared;
 
 /// One shard of a logically distributed state vector.
@@ -62,7 +62,7 @@ pub struct DistributedStateLayout {
     pub global_len: usize,
     pub shard_bits: Option<usize>,
     pub topology: GpuTopology,
-    pub shards: Vec<StateShardLayout>,
+    shards: Vec<StateShardLayout>,
 }
 
 impl fmt::Debug for DistributedStateLayout {
@@ -105,11 +105,25 @@ impl DistributedStateLayout {
         self.shards.len()
     }
 
+    /// Borrow all rank-local shard layout records.
+    pub fn shards(&self) -> &[StateShardLayout] {
+        &self.shards
+    }
+
+    /// Iterate over rank-local shard layout records.
+    pub fn iter_shards(&self) -> impl Iterator<Item = &StateShardLayout> {
+        self.shards.iter()
+    }
+
+    pub(crate) fn into_shards(self) -> Vec<StateShardLayout> {
+        self.shards
+    }
+
     /// Build one distributed state layout from one execution mesh and one
-    /// distributed amplitude plan.
+    /// distributed state plan.
     pub fn new(
         mesh: &DeviceMesh,
-        plan: &DistributedAmplitudePlan,
+        plan: &(impl AsRef<DistributedStatePlan> + ?Sized),
         precision: Precision,
     ) -> Result<Self> {
         Self::new_for_rank(mesh, plan, precision, 0)
@@ -119,34 +133,23 @@ impl DistributedStateLayout {
     /// `rank_id`.
     pub fn new_for_rank(
         mesh: &DeviceMesh,
-        plan: &DistributedAmplitudePlan,
+        plan: &(impl AsRef<DistributedStatePlan> + ?Sized),
         precision: Precision,
         rank_id: usize,
     ) -> Result<Self> {
-        if rank_id >= plan.request.world_size {
+        let plan = plan.as_ref();
+        if rank_id >= plan.request().world_size {
             return Err(MahoutError::InvalidInput(format!(
                 "rank {} is out of range for world size {}",
-                rank_id, plan.request.world_size
+                rank_id,
+                plan.request().world_size
             )));
         }
 
-        if plan.placement.placements.len() != plan.num_devices {
-            return Err(MahoutError::InvalidInput(format!(
-                "Placement plan mismatch: {} placements for {} planned shards",
-                plan.placement.placements.len(),
-                plan.num_devices
-            )));
-        }
-        if mesh.devices.len() != mesh.device_ids.len() {
-            return Err(MahoutError::InvalidInput(format!(
-                "Device mesh / device handles mismatch: {} handles for {} device IDs",
-                mesh.devices.len(),
-                mesh.device_ids.len()
-            )));
-        }
+        plan.validate_against_mesh(mesh)?;
 
         let mut shards = Vec::with_capacity(plan.num_local_shards(rank_id));
-        for placement in plan.placement.placements_for_rank_iter(rank_id) {
+        for placement in plan.placements_for_rank_iter(rank_id) {
             let (start_idx, end_idx) = (placement.start_idx, placement.end_idx);
             shards.push(StateShardLayout {
                 rank_id: placement.rank_id,
@@ -161,7 +164,7 @@ impl DistributedStateLayout {
 
         Ok(Self {
             rank_id,
-            world_size: plan.request.world_size,
+            world_size: plan.request().world_size,
             num_qubits: plan.num_qubits,
             precision,
             global_len: plan.global_len,

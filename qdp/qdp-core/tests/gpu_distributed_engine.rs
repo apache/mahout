@@ -114,15 +114,20 @@ fn distributed_layout_uses_device_handles_for_reordered_placements() {
         ShardPolicy::BalancedUneven,
     );
     let plan = DistributedAmplitudePlan::for_request(&mesh, request).unwrap();
-    assert_eq!(plan.placement.placements[0].device_id, 1);
+    assert_eq!(
+        plan.placements_for_rank_iter(0)
+            .next()
+            .map(|placement| placement.device_id),
+        Some(1)
+    );
 
     let layout = DistributedStateLayout::new(&mesh, &plan, Precision::Float32).unwrap();
-    assert_eq!(layout.shards[0].device_id, 1);
-    assert_eq!(layout.shards[0].device.ordinal(), 1);
-    assert_eq!(layout.shards[1].device_id, 0);
-    assert_eq!(layout.shards[1].device.ordinal(), 0);
-    assert_eq!(layout.shards[2].device_id, 2);
-    assert_eq!(layout.shards[2].device.ordinal(), 2);
+    assert_eq!(layout.shards()[0].device_id, 1);
+    assert_eq!(layout.shards()[0].device.ordinal(), 1);
+    assert_eq!(layout.shards()[1].device_id, 0);
+    assert_eq!(layout.shards()[1].device.ordinal(), 0);
+    assert_eq!(layout.shards()[2].device_id, 2);
+    assert_eq!(layout.shards()[2].device.ordinal(), 2);
 }
 
 #[test]
@@ -159,12 +164,12 @@ fn distributed_encoding_uses_device_handles_for_reordered_placements() {
     )
     .unwrap();
 
-    assert_eq!(state.shards[0].device_id, 1);
-    assert_eq!(state.shards[0].device.ordinal(), 1);
-    assert_eq!(state.shards[1].device_id, 0);
-    assert_eq!(state.shards[1].device.ordinal(), 0);
-    assert_eq!(state.shards[2].device_id, 2);
-    assert_eq!(state.shards[2].device.ordinal(), 2);
+    assert_eq!(state.shards()[0].device_id, 1);
+    assert_eq!(state.shards()[0].device.ordinal(), 1);
+    assert_eq!(state.shards()[1].device_id, 0);
+    assert_eq!(state.shards()[1].device.ordinal(), 0);
+    assert_eq!(state.shards()[2].device_id, 2);
+    assert_eq!(state.shards()[2].device.ordinal(), 2);
 
     let mut distributed_host = Vec::new();
     for shard_id in 0..state.num_shards() {
@@ -390,6 +395,8 @@ fn distributed_state_exposes_local_zero_copy_shard_views() {
     let iter_views = state.iter_local_shard_views().collect::<Vec<_>>();
     assert_eq!(iter_views, views);
     assert_eq!(views.len(), 1);
+    assert_eq!(state.shards().len(), 1);
+    assert_eq!(state.iter_shards().count(), 1);
     assert_eq!(views[0].rank_id, 0);
     assert_eq!(views[0].device_id, 0);
     assert_eq!(views[0].shard_id, 0);

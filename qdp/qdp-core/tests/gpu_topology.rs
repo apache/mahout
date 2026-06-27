@@ -14,7 +14,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use qdp_core::{DeviceMesh, GpuTopology, LinkKind};
+use qdp_core::DeviceMesh;
+use qdp_core::gpu::{GpuTopology, LinkKind};
 
 #[test]
 fn placeholder_topology_marks_self_edges() {

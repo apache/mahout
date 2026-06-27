@@ -38,9 +38,8 @@ mod profiling;
 pub use error::{MahoutError, Result, cuda_error_to_string};
 pub use gpu::memory::Precision;
 pub use gpu::{
-    DeviceMesh, DistributedAmplitudePlan, DistributedExecutionContext, DistributedStateVector,
-    DistributionMode, GpuTopology, LinkKind, PlacementRequest, PreparedDistributedAmplitudeEncode,
-    ShardPolicy,
+    DeviceMesh, DistributedExecutionContext, DistributedStateVector, DistributionMode,
+    PlacementRequest, PreparedDistributedAmplitudeEncode, ShardPolicy,
 };
 pub use reader::{FloatElem, NullHandling, handle_float32_nulls, handle_float64_nulls};
 pub use types::{Dtype, Encoding};

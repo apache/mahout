@@ -179,7 +179,7 @@ fn prepare_distributed_amplitude_accepts_custom_request() {
     .unwrap();
 
     assert_eq!(prepared.plan.num_qubits, 2);
-    assert_eq!(prepared.plan.placement.num_devices(), 2);
+    assert_eq!(prepared.plan.num_devices, 2);
 }
 
 #[test]
@@ -388,8 +388,8 @@ fn prepare_distributed_amplitude_uses_only_rank_local_norm_contribution() {
     assert!((prepared.inv_norm - (1.0 / 30.0f64.sqrt())).abs() < 1e-12);
     assert_eq!(prepared.layout.rank_id, 1);
     assert_eq!(prepared.layout.num_shards(), 2);
-    assert_eq!(prepared.layout.shards[0].shard_id, 1);
-    assert_eq!(prepared.layout.shards[1].shard_id, 3);
+    assert_eq!(prepared.layout.shards()[0].shard_id, 1);
+    assert_eq!(prepared.layout.shards()[1].shard_id, 3);
 }
 
 #[test]
