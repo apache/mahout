@@ -139,7 +139,8 @@ fn distributed_encoding_uses_device_handles_for_reordered_placements() {
     let device0 = mesh.device_for_id(0).unwrap();
 
     let collectives = LocalCollectiveCommunicator;
-    let execution = DistributedExecutionContext::new(mesh, &collectives);
+    let execution =
+        DistributedExecutionContext::rank_local_with_mesh(0, 1, mesh, &collectives).unwrap();
     let input = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
     let single_state = qdp_core::gpu::AmplitudeEncoder
         .encode(&device0, &input, 3)

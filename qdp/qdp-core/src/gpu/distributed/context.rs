@@ -46,18 +46,6 @@ impl fmt::Debug for DistributedExecutionContext<'_> {
 }
 
 impl<'a> DistributedExecutionContext<'a> {
-    /// Build one distributed execution context from a validated device mesh and
-    /// one collective implementation.
-    pub fn new(mesh: DeviceMesh, collectives: &'a dyn CollectiveCommunicator) -> Self {
-        Self {
-            rank: collectives.rank(),
-            world_size: collectives.world_size(),
-            mesh,
-            collectives,
-            device_collectives: None,
-        }
-    }
-
     /// Build the current single-process execution context from one caller-owned
     /// device list.
     pub fn single_process(
