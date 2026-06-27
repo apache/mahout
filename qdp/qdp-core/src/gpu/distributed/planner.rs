@@ -77,11 +77,11 @@ impl PlacementRequest {
         })
     }
 
-    /// Compute the global amplitude length implied by `num_qubits`.
+    /// Compute the global state-vector length implied by `num_qubits`.
     pub fn global_len(&self) -> Result<usize> {
         1usize.checked_shl(self.num_qubits as u32).ok_or_else(|| {
             MahoutError::InvalidInput(format!(
-                "Global amplitude length overflow for {} qubits",
+                "Global state-vector length overflow for {} qubits",
                 self.num_qubits
             ))
         })
@@ -99,7 +99,7 @@ pub struct ShardPlacement {
 }
 
 impl ShardPlacement {
-    /// Number of amplitudes assigned to this shard.
+    /// Number of state-vector entries assigned to this shard.
     pub fn local_len(&self) -> usize {
         self.end_idx - self.start_idx
     }
