@@ -19,14 +19,11 @@ use qdp_core::gpu::{
     ShardPolicy,
 };
 
+mod common;
+
 #[test]
 fn placement_planner_emits_contiguous_ranges() {
-    let topology = GpuTopology::placeholder(2);
-    let mesh = DeviceMesh {
-        device_ids: vec![3, 7],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![3, 7]);
     let request = PlacementRequest::new(3, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
     let plan = PlacementPlanner::plan(&mesh, &request).unwrap();
     assert_eq!(plan.gather_device_id, Some(3));
@@ -45,12 +42,7 @@ fn placement_planner_emits_contiguous_ranges() {
 
 #[test]
 fn balanced_uneven_policy_supports_non_power_of_two_device_counts() {
-    let topology = GpuTopology::placeholder(3);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1, 2],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1, 2]);
     let request = PlacementRequest::new(
         3,
         DistributionMode::ShardedCapacity,
@@ -74,12 +66,7 @@ fn balanced_uneven_policy_supports_non_power_of_two_device_counts() {
 
 #[test]
 fn equal_policy_rejects_non_power_of_two_device_counts() {
-    let topology = GpuTopology::placeholder(3);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1, 2],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1, 2]);
     let request = PlacementRequest::new(3, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
     let err = PlacementPlanner::plan(&mesh, &request).unwrap_err();
     assert!(matches!(
@@ -91,12 +78,7 @@ fn equal_policy_rejects_non_power_of_two_device_counts() {
 
 #[test]
 fn single_mode_uses_only_first_device() {
-    let topology = GpuTopology::placeholder(3);
-    let mesh = DeviceMesh {
-        device_ids: vec![4, 8, 15],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![4, 8, 15]);
     let request = PlacementRequest::new(3, DistributionMode::Single, ShardPolicy::Equal);
     let plan = PlacementPlanner::plan(&mesh, &request).unwrap();
     assert_eq!(plan.placements.len(), 1);
@@ -110,12 +92,7 @@ fn single_mode_uses_only_first_device() {
 
 #[test]
 fn replicated_mode_is_not_implemented() {
-    let topology = GpuTopology::placeholder(2);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1]);
     let request = PlacementRequest::new(2, DistributionMode::Replicated, ShardPolicy::Equal);
     let err = PlacementPlanner::plan(&mesh, &request).unwrap_err();
     assert!(matches!(err, qdp_core::MahoutError::NotImplemented(_)));
@@ -159,12 +136,7 @@ fn sharded_capacity_prefers_topology_recommended_device_order() {
 
 #[test]
 fn sharded_plan_assigns_ranks_round_robin() {
-    let topology = GpuTopology::placeholder(4);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1, 2, 3],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1, 2, 3]);
     let request = PlacementRequest::new_with_world(
         4,
         DistributionMode::ShardedCapacity,
@@ -205,12 +177,7 @@ fn placement_request_rejects_zero_world_size() {
 
 #[test]
 fn placement_planner_rejects_public_request_with_zero_world_size() {
-    let topology = GpuTopology::placeholder(2);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1]);
     let request = PlacementRequest {
         num_qubits: 2,
         mode: DistributionMode::ShardedCapacity,
@@ -228,12 +195,7 @@ fn placement_planner_rejects_public_request_with_zero_world_size() {
 
 #[test]
 fn single_rank_request_preserves_rank_zero_ownership() {
-    let topology = GpuTopology::placeholder(2);
-    let mesh = DeviceMesh {
-        device_ids: vec![3, 7],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![3, 7]);
     let request = PlacementRequest::new(3, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
 
     let plan = PlacementPlanner::plan(&mesh, &request).unwrap();
@@ -247,12 +209,7 @@ fn single_rank_request_preserves_rank_zero_ownership() {
 
 #[test]
 fn rank_local_planner_expands_local_devices_across_world() {
-    let topology = GpuTopology::placeholder(2);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1]);
     let request = PlacementRequest::new_with_world(
         2,
         DistributionMode::ShardedCapacity,

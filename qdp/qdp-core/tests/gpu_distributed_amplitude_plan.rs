@@ -20,14 +20,11 @@ use qdp_core::gpu::{
     DistributionMode, GpuTopology, PlacementPlanner, PlacementRequest, ShardPolicy,
 };
 
+mod common;
+
 #[test]
 fn distributed_amplitude_plan_has_expected_shard_math() {
-    let topology = GpuTopology::placeholder(4);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1, 2, 3],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1, 2, 3]);
     let request = PlacementRequest::new(4, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
     let plan = DistributedAmplitudePlan::for_request(&mesh, request).unwrap();
     assert_eq!(plan.global_len, 16);
@@ -39,12 +36,7 @@ fn distributed_amplitude_plan_has_expected_shard_math() {
 
 #[test]
 fn distributed_state_plan_carries_workload_neutral_shard_math() {
-    let topology = GpuTopology::placeholder(4);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1, 2, 3],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1, 2, 3]);
     let request = PlacementRequest::new(4, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
     let placement = PlacementPlanner::plan(&mesh, &request).unwrap();
     let plan = DistributedStatePlan::from_placement(request, placement).unwrap();
@@ -64,12 +56,7 @@ fn distributed_state_plan_carries_workload_neutral_shard_math() {
 
 #[test]
 fn distributed_state_plan_exposes_rank_local_placements() {
-    let topology = GpuTopology::placeholder(2);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1]);
     let request = PlacementRequest::new_with_world(
         4,
         DistributionMode::ShardedCapacity,
@@ -93,12 +80,7 @@ fn distributed_state_plan_exposes_rank_local_placements() {
 
 #[test]
 fn distributed_amplitude_plan_exposes_shared_state_plan() {
-    let topology = GpuTopology::placeholder(2);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1]);
     let request = PlacementRequest::new(3, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
     let plan = DistributedAmplitudePlan::for_request(&mesh, request).unwrap();
 
@@ -109,12 +91,7 @@ fn distributed_amplitude_plan_exposes_shared_state_plan() {
 
 #[test]
 fn distributed_amplitude_plan_rejects_too_many_devices_for_qubits() {
-    let topology = GpuTopology::placeholder(4);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1, 2, 3],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1, 2, 3]);
     let request = PlacementRequest::new(1, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
     let err = DistributedAmplitudePlan::for_request(&mesh, request).unwrap_err();
     assert!(matches!(err, qdp_core::MahoutError::InvalidInput(_)));
@@ -122,12 +99,7 @@ fn distributed_amplitude_plan_rejects_too_many_devices_for_qubits() {
 
 #[test]
 fn distributed_amplitude_plan_allows_extra_global_qubit_when_shards_fit() {
-    let topology = GpuTopology::placeholder(2);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1]);
     let request = PlacementRequest::new(31, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
     let plan = DistributedAmplitudePlan::for_request(&mesh, request).unwrap();
     assert_eq!(plan.global_len, 1usize << 31);
@@ -136,12 +108,7 @@ fn distributed_amplitude_plan_allows_extra_global_qubit_when_shards_fit() {
 
 #[test]
 fn distributed_amplitude_plan_supports_q34_with_balanced_six_gpu_shards() {
-    let topology = GpuTopology::placeholder(6);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1, 2, 3, 4, 5],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1, 2, 3, 4, 5]);
     let request = PlacementRequest::new(
         34,
         DistributionMode::ShardedCapacity,
@@ -162,12 +129,7 @@ fn distributed_amplitude_plan_supports_q34_with_balanced_six_gpu_shards() {
 
 #[test]
 fn distributed_amplitude_plan_rejects_zero_qubits() {
-    let topology = GpuTopology::placeholder(1);
-    let mesh = DeviceMesh {
-        device_ids: vec![0],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0]);
     let request = PlacementRequest::new(0, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
     let err = DistributedAmplitudePlan::for_request(&mesh, request).unwrap_err();
     assert!(matches!(
@@ -179,12 +141,7 @@ fn distributed_amplitude_plan_rejects_zero_qubits() {
 
 #[test]
 fn distributed_amplitude_plan_reports_out_of_range_shard_ids() {
-    let topology = GpuTopology::placeholder(2);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1]);
     let request = PlacementRequest::new(2, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
     let plan = DistributedAmplitudePlan::for_request(&mesh, request).unwrap();
     let err = plan.shard_range(2).unwrap_err();
@@ -197,12 +154,7 @@ fn distributed_amplitude_plan_reports_out_of_range_shard_ids() {
 
 #[test]
 fn balanced_uneven_distributed_amplitude_plan_omits_uniform_shard_metadata() {
-    let topology = GpuTopology::placeholder(3);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1, 2],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1, 2]);
     let request = PlacementRequest::new(
         3,
         DistributionMode::ShardedCapacity,
@@ -216,12 +168,7 @@ fn balanced_uneven_distributed_amplitude_plan_omits_uniform_shard_metadata() {
 
 #[test]
 fn distributed_state_layout_rejects_mesh_with_missing_device_handles() {
-    let topology = GpuTopology::placeholder(2);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1]);
     let request = PlacementRequest::new(2, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
     let plan = DistributedAmplitudePlan::for_request(&mesh, request).unwrap();
 
@@ -238,16 +185,8 @@ fn distributed_state_layout_rejects_mesh_with_missing_device_handles() {
 
 #[test]
 fn distributed_state_layout_rejects_rank_out_of_range_before_device_handles() {
-    let mesh = DeviceMesh {
-        device_ids: vec![1],
-        devices: Vec::new(),
-        topology: GpuTopology::placeholder(1),
-    };
-    let planning_mesh = DeviceMesh {
-        device_ids: vec![0, 1],
-        devices: Vec::new(),
-        topology: GpuTopology::placeholder(2),
-    };
+    let mesh = common::placeholder_mesh(vec![1]);
+    let planning_mesh = common::placeholder_mesh(vec![0, 1]);
     let request = PlacementRequest::new_with_world(
         2,
         DistributionMode::ShardedCapacity,
@@ -270,17 +209,12 @@ fn distributed_state_layout_rejects_rank_out_of_range_before_device_handles() {
 #[test]
 #[cfg(target_os = "linux")]
 fn distributed_state_layout_can_be_rank_local() {
-    let device1 = match cudarc::driver::CudaDevice::new(1) {
-        Ok(device) => device,
-        Err(_) => return,
+    let Some(device1) = common::cuda_device_by_id(1) else {
+        return;
     };
     let rank_mesh =
         DeviceMesh::from_parts(vec![1], vec![device1], GpuTopology::placeholder(1)).unwrap();
-    let planning_mesh = DeviceMesh {
-        device_ids: vec![0, 1],
-        devices: Vec::new(),
-        topology: GpuTopology::placeholder(2),
-    };
+    let planning_mesh = common::placeholder_mesh(vec![0, 1]);
     let request = PlacementRequest::new_with_world(
         2,
         DistributionMode::ShardedCapacity,
@@ -305,12 +239,7 @@ fn distributed_state_layout_can_be_rank_local() {
 
 #[test]
 fn distributed_amplitude_plan_reports_rank_local_ranges() {
-    let topology = GpuTopology::placeholder(4);
-    let mesh = DeviceMesh {
-        device_ids: vec![0, 1, 2, 3],
-        devices: Vec::new(),
-        topology,
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1, 2, 3]);
     let request = PlacementRequest::new_with_world(
         4,
         DistributionMode::ShardedCapacity,

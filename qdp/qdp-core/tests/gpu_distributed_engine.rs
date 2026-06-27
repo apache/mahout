@@ -26,11 +26,7 @@ mod common;
 #[test]
 fn prepare_distributed_amplitude_returns_expected_metadata() {
     #[cfg(target_os = "linux")]
-    if cudarc::driver::CudaDevice::new(0).is_err() {
-        return;
-    }
-    #[cfg(target_os = "linux")]
-    if cudarc::driver::CudaDevice::new(1).is_err() {
+    if common::cuda_devices(&[0, 1]).is_none() {
         return;
     }
 
@@ -55,11 +51,7 @@ fn prepare_distributed_amplitude_returns_expected_metadata() {
 #[test]
 fn prepare_distributed_amplitude_on_execution_context_returns_expected_metadata() {
     #[cfg(target_os = "linux")]
-    if cudarc::driver::CudaDevice::new(0).is_err() {
-        return;
-    }
-    #[cfg(target_os = "linux")]
-    if cudarc::driver::CudaDevice::new(1).is_err() {
+    if common::cuda_devices(&[0, 1]).is_none() {
         return;
     }
 
@@ -82,9 +74,7 @@ fn prepare_distributed_amplitude_on_execution_context_returns_expected_metadata(
 
 #[cfg(target_os = "linux")]
 fn reordered_three_device_mesh() -> Option<DeviceMesh> {
-    let device0 = cudarc::driver::CudaDevice::new(0).ok()?;
-    let device1 = cudarc::driver::CudaDevice::new(1).ok()?;
-    let device2 = cudarc::driver::CudaDevice::new(2).ok()?;
+    let devices = common::cuda_devices(&[0, 1, 2])?;
     let topology = GpuTopology {
         peer_access: vec![
             vec![true, true, false],
@@ -98,7 +88,22 @@ fn reordered_three_device_mesh() -> Option<DeviceMesh> {
         ],
     };
 
-    DeviceMesh::from_parts(vec![0, 1, 2], vec![device0, device1, device2], topology).ok()
+    DeviceMesh::from_parts(vec![0, 1, 2], devices, topology).ok()
+}
+
+#[cfg(target_os = "linux")]
+fn copy_all_shards_to_host_f64(state: &qdp_core::gpu::DistributedStateVector) -> Vec<f64> {
+    let mut host = Vec::new();
+    for shard_id in 0..state.num_shards() {
+        host.extend(
+            state
+                .copy_shard_to_host_f64(shard_id)
+                .unwrap()
+                .into_iter()
+                .map(|value| value.x),
+        );
+    }
+    host
 }
 
 #[test]
@@ -172,16 +177,7 @@ fn distributed_encoding_uses_device_handles_for_reordered_placements() {
     assert_eq!(state.shards()[2].device_id, 2);
     assert_eq!(state.shards()[2].device.ordinal(), 2);
 
-    let mut distributed_host = Vec::new();
-    for shard_id in 0..state.num_shards() {
-        distributed_host.extend(
-            state
-                .copy_shard_to_host_f64(shard_id)
-                .unwrap()
-                .into_iter()
-                .map(|value| value.x),
-        );
-    }
+    let distributed_host = copy_all_shards_to_host_f64(&state);
 
     assert_eq!(distributed_host, single_host);
 }
@@ -192,12 +188,9 @@ fn encode_distributed_amplitude_to_shards_returns_real_buffers() {
     let Some(device0) = common::cuda_device() else {
         return;
     };
-    let device1 = match cudarc::driver::CudaDevice::new(1) {
-        Ok(device) => device,
-        Err(_) => return,
-    };
-
-    let _ = device1;
+    if common::cuda_device_by_id(1).is_none() {
+        return;
+    }
 
     let state = QdpEngine::encode_distributed_amplitude_to_shards(
         vec![0, 1],
@@ -228,14 +221,12 @@ fn encode_distributed_amplitude_to_shards_returns_real_buffers() {
 #[test]
 #[cfg(target_os = "linux")]
 fn distributed_amplitude_matches_single_gpu_reference_on_two_gpus() {
-    let device0 = match cudarc::driver::CudaDevice::new(0) {
-        Ok(device) => device,
-        Err(_) => return,
+    let Some(device0) = common::cuda_device() else {
+        return;
     };
-    let device1 = match cudarc::driver::CudaDevice::new(1) {
-        Ok(device) => device,
-        Err(_) => return,
-    };
+    if common::cuda_device_by_id(1).is_none() {
+        return;
+    }
 
     let input = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
     let encoder = qdp_core::gpu::AmplitudeEncoder;
@@ -256,21 +247,7 @@ fn distributed_amplitude_matches_single_gpu_reference_on_two_gpus() {
     )
     .unwrap();
 
-    let mut distributed_host = Vec::new();
-    distributed_host.extend(
-        distributed
-            .copy_shard_to_host_f64(0)
-            .unwrap()
-            .into_iter()
-            .map(|value| value.x),
-    );
-    distributed_host.extend(
-        distributed
-            .copy_shard_to_host_f64(1)
-            .unwrap()
-            .into_iter()
-            .map(|value| value.x),
-    );
+    let distributed_host = copy_all_shards_to_host_f64(&distributed);
 
     assert_eq!(distributed_host.len(), single_host.len());
     for (idx, (distributed_value, single_value)) in
@@ -284,8 +261,6 @@ fn distributed_amplitude_matches_single_gpu_reference_on_two_gpus() {
             single_value
         );
     }
-
-    let _ = device1;
 }
 
 #[test]

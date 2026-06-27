@@ -14,71 +14,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::{Arc, Mutex};
-
-use qdp_core::gpu::{
-    CollectiveCommunicator, DeviceMesh, DistributedExecutionContext, GpuTopology,
-    LocalCollectiveCommunicator,
-};
+use qdp_core::gpu::{DistributedExecutionContext, LocalCollectiveCommunicator};
 use qdp_core::{DistributionMode, PlacementRequest, Precision, QdpEngine, ShardPolicy};
 
-#[derive(Clone, Copy)]
-struct TestCollective {
-    rank: usize,
-    world_size: usize,
-}
+mod common;
 
-impl CollectiveCommunicator for TestCollective {
-    fn rank(&self) -> usize {
-        self.rank
-    }
-
-    fn world_size(&self) -> usize {
-        self.world_size
-    }
-
-    fn all_reduce_sum_f64(&self, local_value: f64) -> qdp_core::Result<f64> {
-        Ok(local_value)
-    }
-}
-
-#[derive(Clone)]
-struct RecordingCollective {
-    rank: usize,
-    world_size: usize,
-    global_sum: f64,
-    seen: Arc<Mutex<Vec<f64>>>,
-}
-
-impl CollectiveCommunicator for RecordingCollective {
-    fn rank(&self) -> usize {
-        self.rank
-    }
-
-    fn world_size(&self) -> usize {
-        self.world_size
-    }
-
-    fn all_reduce_sum_f64(&self, local_value: f64) -> qdp_core::Result<f64> {
-        self.seen
-            .lock()
-            .expect("recording collective observations mutex poisoned")
-            .push(local_value);
-        Ok(self.global_sum)
-    }
-}
+use common::{RecordingCollective, TestCollective};
 
 #[test]
 fn rank_local_execution_context_reports_rank_metadata() {
-    let collectives = TestCollective {
-        rank: 1,
-        world_size: 3,
-    };
-    let mesh = DeviceMesh {
-        device_ids: vec![0],
-        devices: Vec::new(),
-        topology: GpuTopology::placeholder(1),
-    };
+    let collectives = TestCollective::new(1, 3);
+    let mesh = common::placeholder_mesh(vec![0]);
     let execution =
         DistributedExecutionContext::rank_local_with_mesh(1, 3, mesh, &collectives).unwrap();
 
@@ -91,11 +37,7 @@ fn rank_local_execution_context_reports_rank_metadata() {
 #[test]
 fn rank_local_execution_context_rejects_collective_metadata_mismatch() {
     let collectives = LocalCollectiveCommunicator;
-    let mesh = DeviceMesh {
-        device_ids: vec![0],
-        devices: Vec::new(),
-        topology: GpuTopology::placeholder(1),
-    };
+    let mesh = common::placeholder_mesh(vec![0]);
 
     let err =
         DistributedExecutionContext::rank_local_with_mesh(1, 3, mesh, &collectives).unwrap_err();
@@ -121,10 +63,7 @@ fn rank_local_execution_context_rejects_rank_out_of_range() {
 
 #[test]
 fn single_process_rejects_collective_metadata_mismatch_before_cuda_init() {
-    let collectives = TestCollective {
-        rank: 1,
-        world_size: 3,
-    };
+    let collectives = TestCollective::new(1, 3);
     let err = DistributedExecutionContext::single_process(vec![0], &collectives).unwrap_err();
 
     assert!(matches!(
@@ -137,7 +76,7 @@ fn single_process_rejects_collective_metadata_mismatch_before_cuda_init() {
 #[test]
 fn prepare_distributed_amplitude_handles_padding_tail_in_norm() {
     #[cfg(target_os = "linux")]
-    if cudarc::driver::CudaDevice::new(0).is_err() {
+    if common::cuda_device_by_id(0).is_none() {
         return;
     }
 
@@ -157,11 +96,7 @@ fn prepare_distributed_amplitude_handles_padding_tail_in_norm() {
 #[test]
 fn prepare_distributed_amplitude_accepts_custom_request() {
     #[cfg(target_os = "linux")]
-    if cudarc::driver::CudaDevice::new(0).is_err() {
-        return;
-    }
-    #[cfg(target_os = "linux")]
-    if cudarc::driver::CudaDevice::new(1).is_err() {
+    if common::cuda_devices(&[0, 1]).is_none() {
         return;
     }
 
@@ -223,15 +158,8 @@ fn prepare_distributed_amplitude_rejects_empty_input() {
 
 #[test]
 fn prepare_distributed_amplitude_rejects_zero_norm_input() {
-    let mesh = DeviceMesh {
-        device_ids: vec![0],
-        devices: Vec::new(),
-        topology: GpuTopology::placeholder(1),
-    };
-    let collectives = TestCollective {
-        rank: 0,
-        world_size: 1,
-    };
+    let mesh = common::placeholder_mesh(vec![0]);
+    let collectives = TestCollective::new(0, 1);
     let execution =
         DistributedExecutionContext::rank_local_with_mesh(0, 1, mesh, &collectives).unwrap();
     let err = match QdpEngine::prepare_distributed_amplitude_on(
@@ -254,15 +182,8 @@ fn prepare_distributed_amplitude_rejects_zero_norm_input() {
 
 #[test]
 fn prepare_distributed_amplitude_rejects_non_finite_input() {
-    let mesh = DeviceMesh {
-        device_ids: vec![0],
-        devices: Vec::new(),
-        topology: GpuTopology::placeholder(1),
-    };
-    let collectives = TestCollective {
-        rank: 0,
-        world_size: 1,
-    };
+    let mesh = common::placeholder_mesh(vec![0]);
+    let collectives = TestCollective::new(0, 1);
     let execution =
         DistributedExecutionContext::rank_local_with_mesh(0, 1, mesh, &collectives).unwrap();
     let err = match QdpEngine::prepare_distributed_amplitude_on(
@@ -285,18 +206,8 @@ fn prepare_distributed_amplitude_rejects_non_finite_input() {
 
 #[test]
 fn prepare_distributed_amplitude_reduces_before_rejecting_non_finite_input() {
-    let mesh = DeviceMesh {
-        device_ids: vec![0],
-        devices: Vec::new(),
-        topology: GpuTopology::placeholder(1),
-    };
-    let seen = Arc::new(Mutex::new(Vec::new()));
-    let collectives = RecordingCollective {
-        rank: 0,
-        world_size: 1,
-        global_sum: f64::NAN,
-        seen: Arc::clone(&seen),
-    };
+    let mesh = common::placeholder_mesh(vec![0]);
+    let (collectives, seen) = RecordingCollective::new(0, 1, f64::NAN);
     let execution =
         DistributedExecutionContext::rank_local_with_mesh(0, 1, mesh, &collectives).unwrap();
 
@@ -344,27 +255,16 @@ fn prepare_distributed_amplitude_validates_input_before_building_mesh() {
 #[test]
 #[cfg(target_os = "linux")]
 fn prepare_distributed_amplitude_uses_only_rank_local_norm_contribution() {
-    let device0 = match cudarc::driver::CudaDevice::new(0) {
-        Ok(device) => device,
-        Err(_) => return,
-    };
-    let device1 = match cudarc::driver::CudaDevice::new(1) {
-        Ok(device) => device,
-        Err(_) => return,
+    let Some(devices) = common::cuda_devices(&[0, 1]) else {
+        return;
     };
     let mesh = qdp_core::gpu::DeviceMesh::from_parts(
         vec![0, 1],
-        vec![device0, device1],
+        devices,
         qdp_core::gpu::GpuTopology::placeholder(2),
     )
     .unwrap();
-    let seen = Arc::new(Mutex::new(Vec::new()));
-    let collectives = RecordingCollective {
-        rank: 1,
-        world_size: 2,
-        global_sum: 30.0,
-        seen: Arc::clone(&seen),
-    };
+    let (collectives, seen) = RecordingCollective::new(1, 2, 30.0);
     let execution =
         DistributedExecutionContext::rank_local_with_mesh(1, 2, mesh, &collectives).unwrap();
     let request = PlacementRequest::new_with_world(
@@ -394,15 +294,8 @@ fn prepare_distributed_amplitude_uses_only_rank_local_norm_contribution() {
 
 #[test]
 fn prepare_distributed_amplitude_on_rejects_request_world_mismatch() {
-    let mesh = qdp_core::gpu::DeviceMesh {
-        device_ids: vec![0],
-        devices: Vec::new(),
-        topology: qdp_core::gpu::GpuTopology::placeholder(1),
-    };
-    let collectives = TestCollective {
-        rank: 0,
-        world_size: 2,
-    };
+    let mesh = common::placeholder_mesh(vec![0]);
+    let collectives = TestCollective::new(0, 2);
     let execution =
         DistributedExecutionContext::rank_local_with_mesh(0, 2, mesh, &collectives).unwrap();
     let request = PlacementRequest::new(2, DistributionMode::ShardedCapacity, ShardPolicy::Equal);
@@ -427,18 +320,8 @@ fn prepare_distributed_amplitude_on_rejects_request_world_mismatch() {
 
 #[test]
 fn prepare_distributed_amplitude_on_defaults_request_world_to_execution_world() {
-    let mesh = qdp_core::gpu::DeviceMesh {
-        device_ids: vec![0, 1],
-        devices: Vec::new(),
-        topology: qdp_core::gpu::GpuTopology::placeholder(2),
-    };
-    let seen = Arc::new(Mutex::new(Vec::new()));
-    let collectives = RecordingCollective {
-        rank: 1,
-        world_size: 2,
-        global_sum: 30.0,
-        seen: Arc::clone(&seen),
-    };
+    let mesh = common::placeholder_mesh(vec![0, 1]);
+    let (collectives, seen) = RecordingCollective::new(1, 2, 30.0);
     let execution =
         DistributedExecutionContext::rank_local_with_mesh(1, 2, mesh, &collectives).unwrap();
 
@@ -463,18 +346,8 @@ fn prepare_distributed_amplitude_on_defaults_request_world_to_execution_world() 
 
 #[test]
 fn prepare_distributed_amplitude_on_plans_from_rank_local_mesh() {
-    let mesh = qdp_core::gpu::DeviceMesh {
-        device_ids: vec![0],
-        devices: Vec::new(),
-        topology: qdp_core::gpu::GpuTopology::placeholder(1),
-    };
-    let seen = Arc::new(Mutex::new(Vec::new()));
-    let collectives = RecordingCollective {
-        rank: 1,
-        world_size: 2,
-        global_sum: 30.0,
-        seen: Arc::clone(&seen),
-    };
+    let mesh = common::placeholder_mesh(vec![0]);
+    let (collectives, seen) = RecordingCollective::new(1, 2, 30.0);
     let execution =
         DistributedExecutionContext::rank_local_with_mesh(1, 2, mesh, &collectives).unwrap();
     let request = PlacementRequest::new_with_world(
