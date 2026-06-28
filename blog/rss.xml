@@ -85,6 +85,132 @@
             <category>qdp</category>
         </item>
         <item>
+            <title><![CDATA[Introducing QuMat v0.5.0]]></title>
+            <link>https://mahout.apache.org/blog/2026/02/02/Qumat-0.5.0-Release</link>
+            <guid>https://mahout.apache.org/blog/2026/02/02/Qumat-0.5.0-Release</guid>
+            <pubDate>Mon, 02 Feb 2026 00:00:00 GMT</pubDate>
+            <description><![CDATA[We are excited to announce QuMat v0.5.0, the next release of Mahout's quantum machine learning stack.]]></description>
+            <content:encoded><![CDATA[<p>We are excited to announce <strong>QuMat v0.5.0</strong>, the next release of Mahout's quantum machine learning stack.</p>
+<p>The main theme of this release is moving QuMat from a circuit abstraction into a more complete quantum ML development platform. The release introduces the first public proof-of-concept of <strong>QDP (Quantum Data Plane)</strong>, adds GPU-accelerated data-to-state encoding, improves QuMat's backend behavior, and tightens the development workflow around testing, packaging, and documentation.</p>
+<p>Special thanks to everyone who contributed to this release, including PMC members Jie-Kai Chang, Guan-Ming Chiu, Andrew Musselman, Shannon Quinn (PMC Chair), and Trevor Grant; Committers Krishna Dave, Hsien-Cheng Huang, and Kuan-Hao Huang; and contributors Nary Yeh (Union.ai), Cheyu Wu (Synology), Vic Wen, ChenChen Lai, and the broader Apache Mahout community.</p>
+<!-- -->
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="whats-new-in-qumat-v050">What's New in QuMat v0.5.0<a href="https://mahout.apache.org/blog/2026/02/02/Qumat-0.5.0-Release#whats-new-in-qumat-v050" class="hash-link" aria-label="Direct link to What's New in QuMat v0.5.0" title="Direct link to What's New in QuMat v0.5.0" translate="no">​</a></h2>
+<p>QuMat v0.5.0 introduces several important changes:</p>
+<ul>
+<li class=""><strong>QDP makes its first release appearance.</strong> <code>qumat v0.5.0</code> can now install the QDP extension through the <code>qumat[qdp]</code> extra; the native extension itself is distributed as <code>qumat-qdp 0.1.0</code>.</li>
+<li class=""><strong>GPU state encoding is now part of the QuMat workflow.</strong> QDP prepares quantum states using Rust and CUDA kernels rather than Python-side preprocessing loops.</li>
+<li class=""><strong>Encoded states can move into PyTorch without a host copy.</strong> QDP exposes DLPack-compatible tensors, making it possible to hand CUDA-backed state vectors directly to PyTorch.</li>
+<li class=""><strong>QuMat's circuit APIs are more complete and better validated.</strong> The release expands gate coverage, improves parameter handling, and fixes backend-specific behavior across Qiskit, Cirq, and Amazon Braket.</li>
+<li class=""><strong>The project is easier to develop and test.</strong> The release consolidates Python packaging, adds pytest markers for GPU/QDP tests, and expands CI and documentation around QuMat and QDP.</li>
+</ul>
+<p>Let's look at the major pieces in more detail.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="qdp-the-new-data-plane-for-quantum-ml">QDP: The New Data Plane for Quantum ML<a href="https://mahout.apache.org/blog/2026/02/02/Qumat-0.5.0-Release#qdp-the-new-data-plane-for-quantum-ml" class="hash-link" aria-label="Direct link to QDP: The New Data Plane for Quantum ML" title="Direct link to QDP: The New Data Plane for Quantum ML" translate="no">​</a></h2>
+<p>A common bottleneck in quantum machine learning is preparing quantum states from classical data. Most QML frameworks need to simulate state-preparation circuits to load data into a simulator. For amplitude encoding, that can mean applying a long sequence of rotation gates before the model has done any useful work.</p>
+<p>We call this the <strong>Hiking Problem</strong>: spending most of the time hiking up the mountain, simulating gates only to load data, instead of flying the helicopter and running the actual QML model.</p>
+<p>QDP is Mahout's answer to that problem. Instead of simulating a state-preparation circuit, QDP constructs the mathematically equivalent state vector directly in GPU memory. Conceptually, this turns an expensive gate-simulation problem into a memory and vector math problem.</p>
+<p>The v0.5.0 release includes QDP as an early proof-of-concept. The target is to reduce data-loading overhead from circuit simulation complexity toward something closer to memory-copy cost, with the long-term goal of 50x-100x faster dataset loading in realistic QML simulation workflows.</p>
+<p>The high-level architecture is:</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">[Disk / Parquet]</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">      |</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">      v  Apache Arrow</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">[CPU RAM]  Rust preprocessing: normalize and pad</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">      |</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">      v  PCIe host-to-device</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">[GPU VRAM]  CUDA kernels: direct state construction</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">      |</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">      v  DLPack</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">[Downstream: PyTorch / Qiskit Aer / PennyLane]</span><br></div></code></pre></div></div>
+<p>In v0.5.0, QDP supports four encoding families:</p>
+<ul>
+<li class=""><strong>Amplitude encoding</strong> for normalized state-vector preparation.</li>
+<li class=""><strong>Angle encoding</strong> for one-value-per-qubit rotation inputs.</li>
+<li class=""><strong>Basis encoding</strong> for computational basis states.</li>
+<li class=""><strong>IQP-style encoding</strong> for entangled feature maps used in quantum ML workflows.</li>
+</ul>
+<p>QDP can read from Python lists, NumPy arrays, PyTorch tensors, and file-backed sources such as Parquet, Arrow, NumPy, and PyTorch files.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="zero-copy-pytorch-integration">Zero-Copy PyTorch Integration<a href="https://mahout.apache.org/blog/2026/02/02/Qumat-0.5.0-Release#zero-copy-pytorch-integration" class="hash-link" aria-label="Direct link to Zero-Copy PyTorch Integration" title="Direct link to Zero-Copy PyTorch Integration" translate="no">​</a></h2>
+<p>The first QDP extension package shipped with QuMat v0.5.0, <code>qumat-qdp 0.1.0</code>, focuses on a practical workflow: encode data on the GPU, then pass the encoded state into a tensor framework without copying it back through host memory.</p>
+<div class="language-python codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-python codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token keyword" style="color:#00009f">import</span><span class="token plain"> qumat</span><span class="token punctuation" style="color:#393A34">.</span><span class="token plain">qdp </span><span class="token keyword" style="color:#00009f">as</span><span class="token plain"> qdp</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token keyword" style="color:#00009f">import</span><span class="token plain"> torch</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">engine </span><span class="token operator" style="color:#393A34">=</span><span class="token plain"> qdp</span><span class="token punctuation" style="color:#393A34">.</span><span class="token plain">QdpEngine</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">device_id</span><span class="token operator" style="color:#393A34">=</span><span class="token number" style="color:#36acaa">0</span><span class="token punctuation" style="color:#393A34">)</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">qtensor </span><span class="token operator" style="color:#393A34">=</span><span class="token plain"> engine</span><span class="token punctuation" style="color:#393A34">.</span><span class="token plain">encode</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token punctuation" style="color:#393A34">[</span><span class="token number" style="color:#36acaa">1.0</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token number" style="color:#36acaa">2.0</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token number" style="color:#36acaa">3.0</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token number" style="color:#36acaa">4.0</span><span class="token punctuation" style="color:#393A34">]</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">    num_qubits</span><span class="token operator" style="color:#393A34">=</span><span class="token number" style="color:#36acaa">2</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">    encoding_method</span><span class="token operator" style="color:#393A34">=</span><span class="token string" style="color:#e3116c">"amplitude"</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">)</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">tensor </span><span class="token operator" style="color:#393A34">=</span><span class="token plain"> torch</span><span class="token punctuation" style="color:#393A34">.</span><span class="token plain">from_dlpack</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">qtensor</span><span class="token punctuation" style="color:#393A34">)</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token keyword" style="color:#00009f">print</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">tensor</span><span class="token punctuation" style="color:#393A34">)</span><span class="token plain">  </span><span class="token comment" style="color:#999988;font-style:italic"># Complex tensor on CUDA</span><br></div></code></pre></div></div>
+<p>This DLPack path is the foundation for building faster quantum ML pipelines: preprocessing can happen in QDP, encoded tensors can stay on the GPU, and downstream training code can consume them through PyTorch.</p>
+<p>The proposal-level interface for QDP started from a lower-level direct-amplitude API:</p>
+<div class="language-python codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-python codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token keyword" style="color:#00009f">import</span><span class="token plain"> pyarrow </span><span class="token keyword" style="color:#00009f">as</span><span class="token plain"> pa</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token keyword" style="color:#00009f">import</span><span class="token plain"> torch</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token keyword" style="color:#00009f">import</span><span class="token plain"> mahout_qdp </span><span class="token keyword" style="color:#00009f">as</span><span class="token plain"> qdp</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">raw_vector </span><span class="token operator" style="color:#393A34">=</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">[</span><span class="token number" style="color:#36acaa">0.1</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token number" style="color:#36acaa">0.2</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token number" style="color:#36acaa">0.3</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token number" style="color:#36acaa">0.4</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token number" style="color:#36acaa">0.5</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token number" style="color:#36acaa">0.6</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token number" style="color:#36acaa">0.7</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token number" style="color:#36acaa">0.8</span><span class="token punctuation" style="color:#393A34">]</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">input_data </span><span class="token operator" style="color:#393A34">=</span><span class="token plain"> pa</span><span class="token punctuation" style="color:#393A34">.</span><span class="token plain">array</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">raw_vector</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token builtin">type</span><span class="token operator" style="color:#393A34">=</span><span class="token plain">pa</span><span class="token punctuation" style="color:#393A34">.</span><span class="token plain">float64</span><span class="token punctuation" style="color:#393A34">(</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">)</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">state_vector_gpu </span><span class="token operator" style="color:#393A34">=</span><span class="token plain"> qdp</span><span class="token punctuation" style="color:#393A34">.</span><span class="token plain">encode_amplitude</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">input_data</span><span class="token punctuation" style="color:#393A34">)</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">dlpack_handle </span><span class="token operator" style="color:#393A34">=</span><span class="token plain"> state_vector_gpu</span><span class="token punctuation" style="color:#393A34">.</span><span class="token plain">to_dlpack</span><span class="token punctuation" style="color:#393A34">(</span><span class="token punctuation" style="color:#393A34">)</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">tensor </span><span class="token operator" style="color:#393A34">=</span><span class="token plain"> torch</span><span class="token punctuation" style="color:#393A34">.</span><span class="token plain">utils</span><span class="token punctuation" style="color:#393A34">.</span><span class="token plain">dlpack</span><span class="token punctuation" style="color:#393A34">.</span><span class="token plain">from_dlpack</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">dlpack_handle</span><span class="token punctuation" style="color:#393A34">)</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token keyword" style="color:#00009f">print</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">tensor</span><span class="token punctuation" style="color:#393A34">)</span><span class="token plain"></span><br></div><div class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token keyword" style="color:#00009f">print</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string" style="color:#e3116c">"device:"</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> tensor</span><span class="token punctuation" style="color:#393A34">.</span><span class="token plain">device</span><span class="token punctuation" style="color:#393A34">)</span><br></div></code></pre></div></div>
+<p>The packaged v0.5.0 user-facing API is exposed through <code>qumat.qdp.QdpEngine</code>, but the underlying idea is the same: direct state preparation, GPU-resident buffers, and zero-copy handoff to downstream tensor tools.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="installing-qumat-with-qdp">Installing QuMat with QDP<a href="https://mahout.apache.org/blog/2026/02/02/Qumat-0.5.0-Release#installing-qumat-with-qdp" class="hash-link" aria-label="Direct link to Installing QuMat with QDP" title="Direct link to Installing QuMat with QDP" translate="no">​</a></h2>
+<p>The base Qumat package can be installed as usual:</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">pip </span><span class="token function" style="color:#d73a49">install</span><span class="token plain"> </span><span class="token assign-left variable" style="color:#36acaa">qumat</span><span class="token operator" style="color:#393A34">==</span><span class="token number" style="color:#36acaa">0.5</span><span class="token plain">.0</span><br></div></code></pre></div></div>
+<p>To install Qumat with QDP support:</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">pip </span><span class="token function" style="color:#d73a49">install</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">"qumat[qdp]==0.5.0"</span><br></div></code></pre></div></div>
+<p>This installs <code>qumat 0.5.0</code> and resolves the QDP native extension package, <code>qumat-qdp 0.1.0</code>. These are intentionally different package versions: Qumat is the top-level Mahout quantum ML package, while <code>qumat-qdp</code> is the first separately published QDP extension behind the <code>qdp</code> extra.</p>
+<p>The <code>qumat-qdp 0.1.0</code> wheels support Python 3.10, 3.11, and 3.12 on manylinux x86_64. The accelerated QDP path requires an NVIDIA CUDA-capable GPU.</p>
+<p>The core package is also available directly on PyPI:</p>
+<ul>
+<li class="">QuMat: <a href="https://pypi.org/project/qumat/0.5.0/" target="_blank" rel="noopener noreferrer" class="">https://pypi.org/project/qumat/0.5.0/</a></li>
+<li class="">QDP extension: <a href="https://pypi.org/project/qumat-qdp/0.1.0/" target="_blank" rel="noopener noreferrer" class="">https://pypi.org/project/qumat-qdp/0.1.0/</a></li>
+</ul>
+<p>For the QDP extension, the development target is Rust 1.85 or newer, CUDA Toolkit 12.2.x or newer, Python 3.11 or newer, PyTorch 2.2.x or newer, PyArrow 16.x or newer, and PyO3 0.21.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="verification-and-benchmarking-strategy">Verification and Benchmarking Strategy<a href="https://mahout.apache.org/blog/2026/02/02/Qumat-0.5.0-Release#verification-and-benchmarking-strategy" class="hash-link" aria-label="Direct link to Verification and Benchmarking Strategy" title="Direct link to Verification and Benchmarking Strategy" translate="no">​</a></h2>
+<p>The QDP is designed to be verified in two ways: correctness and performance.</p>
+<p>For correctness, the plan is to compare QDP against reference circuit-based initialization:</p>
+<ol>
+<li class="">Generate random input vectors across a broad range of sizes.</li>
+<li class="">Use QDP to construct a state vector directly on GPU.</li>
+<li class="">Use a reference framework such as Qiskit to build and simulate a standard amplitude-initialization circuit.</li>
+<li class="">Compare the resulting states for fidelity.</li>
+</ol>
+<p>For performance, the goal is to isolate the <strong>Data-to-State</strong> pipeline: the time from having a classical vector in CPU RAM to obtaining a ready-to-use quantum state in GPU memory. This explicitly excludes downstream model training so the benchmark measures state preparation itself.</p>
+<p>The key baselines are:</p>
+<ul>
+<li class=""><strong>Qiskit <code>initialize()</code></strong> — the circuit-simulation path.</li>
+<li class=""><strong>PennyLane <code>AmplitudeEmbedding</code></strong> — a common ML-oriented workflow.</li>
+<li class=""><strong>Qiskit <code>Statevector(data)</code></strong> — a raw data-loading path.</li>
+</ul>
+<p>The two key metrics are:</p>
+<ul>
+<li class=""><strong>Time-to-State latency</strong> — how long one vector takes to become a valid GPU-backed quantum state.</li>
+<li class=""><strong>Throughput</strong> — how many vectors per second the loader can sustain under batched workloads.</li>
+</ul>
+<p>The initial benchmark plan targets NVIDIA RTX 30-series GPUs, with scaling tests across state sizes and DataLoader-style batch tests that simulate hybrid QML training loops.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="qumat-api-and-backend-improvements">QuMat API and Backend Improvements<a href="https://mahout.apache.org/blog/2026/02/02/Qumat-0.5.0-Release#qumat-api-and-backend-improvements" class="hash-link" aria-label="Direct link to QuMat API and Backend Improvements" title="Direct link to QuMat API and Backend Improvements" translate="no">​</a></h2>
+<p>QuMat 0.5.0 also improves the core circuit layer. The release expands gate coverage, adds validation, and fixes backend behavior that could previously make circuits behave differently depending on the selected framework.</p>
+<p>Highlights include:</p>
+<ul>
+<li class="">Additional gate support, including rotational gates, T gate, CSWAP, and U gate coverage.</li>
+<li class="">Better parameter validation, including partially bound parameter checks.</li>
+<li class="">Stronger qubit index validation to catch invalid circuits earlier.</li>
+<li class="">Backend fixes for Qiskit, Cirq, and Amazon Braket.</li>
+<li class="">AWS session support for Amazon Braket backend initialization.</li>
+<li class=""><code>draw_circuit()</code> fixes so circuit visualization returns a usable string.</li>
+<li class="">Measurement improvements, including overlap measurement and swap-test support.</li>
+</ul>
+<p>These changes make Qumat more predictable as a cross-framework API. Users can write circuits at the Qumat layer and move more confidently between simulators and hosted backends.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="better-testing-packaging-and-documentation">Better Testing, Packaging, and Documentation<a href="https://mahout.apache.org/blog/2026/02/02/Qumat-0.5.0-Release#better-testing-packaging-and-documentation" class="hash-link" aria-label="Direct link to Better Testing, Packaging, and Documentation" title="Direct link to Better Testing, Packaging, and Documentation" translate="no">​</a></h2>
+<p>This release also invests in project infrastructure. That work is less visible than QDP, but it matters for contributors and downstream users.</p>
+<p>The v0.5.0 cycle includes:</p>
+<ul>
+<li class=""><code>uv</code>-based Python dependency management.</li>
+<li class="">Expanded pytest configuration and custom GPU/QDP markers.</li>
+<li class="">Ruff and pre-commit integration.</li>
+<li class="">Python build workflows and broader CI coverage.</li>
+<li class="">New QDP getting-started, concepts, and benchmark documentation.</li>
+<li class="">Documentation restructuring under the Qumat and QDP namespaces.</li>
+</ul>
+<p>Together, these changes make it easier to reproduce local development environments, run CPU-only tests on ordinary machines, and reserve GPU-specific tests for machines with CUDA available.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="whats-next">What's Next<a href="https://mahout.apache.org/blog/2026/02/02/Qumat-0.5.0-Release#whats-next" class="hash-link" aria-label="Direct link to What's Next" title="Direct link to What's Next" translate="no">​</a></h2>
+<p>QuMat v0.5.0 establishes QDP as a first-class part of Mahout's quantum stack. The next step is to build on that foundation: more encoding coverage, better GPU benchmark coverage, stronger end-to-end quantum ML examples, and smoother documentation for users moving from Qumat circuits into QDP-backed training pipelines.</p>
+<p>The QDP roadmap after this release focuses on:</p>
+<ul>
+<li class="">Hardening the Rust workspace, CUDA build configuration, pre-commit checks, and integration tests.</li>
+<li class="">Expanding the direct-state-preparation core with CUDA kernels, CPU-side normalization and padding, GPU memory management, and Apache Arrow/Parquet ingestion.</li>
+<li class="">Improving DLPack safety and resource management around tensor ownership and deleters.</li>
+<li class="">Continuing PyO3-based Python binding work.</li>
+<li class="">Adding broader fidelity and performance testing across devices.</li>
+<li class="">Expanding encoder support and future integrations, including TensorFlow/Cirq paths and larger dataset or multi-GPU workflows.</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="links">Links<a href="https://mahout.apache.org/blog/2026/02/02/Qumat-0.5.0-Release#links" class="hash-link" aria-label="Direct link to Links" title="Direct link to Links" translate="no">​</a></h2>
+<ul>
+<li class="">Apache downloads: <a href="https://downloads.apache.org/mahout/0.5.0/" target="_blank" rel="noopener noreferrer" class="">https://downloads.apache.org/mahout/0.5.0/</a></li>
+<li class="">QuMat PyPI: <a href="https://pypi.org/project/qumat/0.5.0/" target="_blank" rel="noopener noreferrer" class="">https://pypi.org/project/qumat/0.5.0/</a></li>
+<li class="">QDP PyPI: <a href="https://pypi.org/project/qumat-qdp/0.1.0/" target="_blank" rel="noopener noreferrer" class="">https://pypi.org/project/qumat-qdp/0.1.0/</a></li>
+<li class="">Release tag: <a href="https://github.com/apache/mahout/releases/tag/mahout-qumat-0.5.0" target="_blank" rel="noopener noreferrer" class="">https://github.com/apache/mahout/releases/tag/mahout-qumat-0.5.0</a></li>
+<li class="">Docs: <a href="https://mahout.apache.org/" target="_blank" rel="noopener noreferrer" class="">https://mahout.apache.org/</a></li>
+</ul>
+<p>We welcome feedback and contributions on the <a href="mailto:dev@mahout.apache.org" target="_blank" rel="noopener noreferrer" class="">dev@mahout.apache.org</a> mailing list and on <a href="https://github.com/apache/mahout" target="_blank" rel="noopener noreferrer" class="">GitHub</a>.</p>]]></content:encoded>
+            <category>release</category>
+            <category>qumat</category>
+            <category>qdp</category>
+        </item>
+        <item>
             <title><![CDATA[Meeting Minutes]]></title>
             <link>https://mahout.apache.org/blog/2025/10/24/Meeting-Minutes</link>
             <guid>https://mahout.apache.org/blog/2025/10/24/Meeting-Minutes</guid>
@@ -880,73 +1006,6 @@
 <li class="">Move to GitHub Issues</li>
 <li class="">Added GitHub Issues, Projects, and Wiki</li>
 <li class="">Add "talks" page to web site</li>
-</ul>]]></content:encoded>
-            <category>minutes</category>
-        </item>
-        <item>
-            <title><![CDATA[Meeting Minutes]]></title>
-            <link>https://mahout.apache.org/blog/2024/08/02/Meeting-Minutes</link>
-            <guid>https://mahout.apache.org/blog/2024/08/02/Meeting-Minutes</guid>
-            <pubDate>Fri, 02 Aug 2024 00:00:00 GMT</pubDate>
-            <description><![CDATA[Weekly community meeting]]></description>
-            <content:encoded><![CDATA[<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="weekly-community-meeting">Weekly community meeting<a href="https://mahout.apache.org/blog/2024/08/02/Meeting-Minutes#weekly-community-meeting" class="hash-link" aria-label="Direct link to Weekly community meeting" title="Direct link to Weekly community meeting" translate="no">​</a></h2>
-<p><a href="mailto:user-subscribe@mahout.apache.org" target="_blank" rel="noopener noreferrer" class="">Subscribe</a> to the Mahout User list to ask for details on joining.</p>
-<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="attendees">Attendees<a href="https://mahout.apache.org/blog/2024/08/02/Meeting-Minutes#attendees" class="hash-link" aria-label="Direct link to Attendees" title="Direct link to Attendees" translate="no">​</a></h3>
-<ul>
-<li class="">Andrew Musselman</li>
-<li class="">Jowanza Joseph</li>
-<li class="">Tommy Naugle</li>
-<li class="">Trevor Grant</li>
-</ul>
-<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="old-business">Old Business<a href="https://mahout.apache.org/blog/2024/08/02/Meeting-Minutes#old-business" class="hash-link" aria-label="Direct link to Old Business" title="Direct link to Old Business" translate="no">​</a></h3>
-<ul>
-<li class=""><a href="https://issues.apache.org/jira/browse/MAHOUT-2198" target="_blank" rel="noopener noreferrer" class="">Make ticket to add notebooks to notebooks directory in source tree</a></li>
-<li class=""><a href="https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2204" target="_blank" rel="noopener noreferrer" class="">Splitting Mahout project code into discrete repos (andrew)</a>
-<ul>
-<li class="">mahout-website</li>
-<li class="">mahout-classic</li>
-<li class="">mahout-samsara</li>
-<li class="">mahout-qumat</li>
-</ul>
-</li>
-<li class=""><a href="https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2165" target="_blank" rel="noopener noreferrer" class="">Docker image for web site build (to jowanza)</a></li>
-<li class=""><a href="https://issues.apache.org/jira/projects/MAHOUT/issues/MAHOUT-2206" target="_blank" rel="noopener noreferrer" class="">Next steps for qiskit and cirq back ends (sub-tasks created)</a></li>
-<li class="">Roadmap
-<ul>
-<li class="">Q2
-<ul>
-<li class="">Classic in maintenance mode (done)</li>
-</ul>
-</li>
-<li class="">Q3
-<ul>
-<li class="">Qumat with hardened (tests, docs, CI/CD) cirq and qiskit backends (in flight)</li>
-<li class="">Kernel methods (in flight)</li>
-<li class="">Submit public talk about Qumat (accepted, Fossy Aug 2024)</li>
-<li class="">Amazon Braket (done)</li>
-</ul>
-</li>
-<li class="">Q4 and beyond
-<ul>
-<li class="">Distributed quantum solvers</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class=""><a href="https://issues.apache.org/jira/browse/MAHOUT-2213" target="_blank" rel="noopener noreferrer" class="">Add Braket (Trevor)</a></li>
-</ul>
-<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="new-business">New Business<a href="https://mahout.apache.org/blog/2024/08/02/Meeting-Minutes#new-business" class="hash-link" aria-label="Direct link to New Business" title="Direct link to New Business" translate="no">​</a></h3>
-<ul>
-<li class="">FOSSY talk slides and notebook <a href="https://2024.fossy.us/schedule/presentation/265/" target="_blank" rel="noopener noreferrer" class="">Abstract</a></li>
-<li class="">Other conferences to target in 2025
-<ul>
-<li class="">FOSDEM</li>
-<li class="">Berlin Buzzwords</li>
-<li class="">FOSS Backstage</li>
-</ul>
-</li>
-<li class="">Automated documentation methods</li>
-<li class="">Review of Qumat talk slides and demo notebooks</li>
 </ul>]]></content:encoded>
             <category>minutes</category>
         </item>
