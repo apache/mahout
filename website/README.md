@@ -167,39 +167,23 @@ circuit.h(0)
 
 ### Current Versions
 
-- **0.5** - Current stable release (synced from `/docs/`)
+Released versions are listed in `versions.json`. The first version in that file is
+served as `latest` at `/docs`; the editable current docs are served at `/docs/next`.
 
 ### Creating a New Version
 
 When releasing, snapshot the current docs:
 
 ```bash
-npm run docusaurus docs:version 0.5
+npm run docusaurus docs:version <release-version>
 ```
 
 This creates:
-- `versioned_docs/version-0.5/` - Frozen snapshot
+- `versioned_docs/version-<release-version>/` - Frozen snapshot
 - Updates `versions.json`
 
-### Version Configuration
-
-Edit `docusaurus.config.ts`:
-
-```typescript
-docs: {
-  lastVersion: 'current',
-  versions: {
-    current: {
-      label: '0.6-dev',
-      path: '',
-    },
-    '0.5': {
-      label: '0.5',
-      path: '0.5',
-    },
-  },
-}
-```
+`docusaurus.config.ts` reads `versions.json` automatically, so release updates
+should not require editing the Docusaurus version configuration.
 
 ## Blog Posts
 
