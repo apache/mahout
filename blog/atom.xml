@@ -171,12 +171,12 @@
         <category label="minutes" term="minutes"/>
     </entry>
     <entry>
-        <title type="html"><![CDATA[Qumat 0.4 Release]]></title>
-        <id>https://mahout.apache.org/blog/2025/04/17/Qumat-0.4-Release</id>
-        <link href="https://mahout.apache.org/blog/2025/04/17/Qumat-0.4-Release"/>
+        <title type="html"><![CDATA[Qumat 0.4.0 Release]]></title>
+        <id>https://mahout.apache.org/blog/2025/04/17/Qumat-0.4.0-Release</id>
+        <link href="https://mahout.apache.org/blog/2025/04/17/Qumat-0.4.0-Release"/>
         <updated>2025-04-17T00:00:00.000Z</updated>
         <summary type="html"><![CDATA[Qumat 0.4 Released]]></summary>
-        <content type="html"><![CDATA[<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="qumat-04-released">Qumat 0.4 Released<a href="https://mahout.apache.org/blog/2025/04/17/Qumat-0.4-Release#qumat-04-released" class="hash-link" aria-label="Direct link to Qumat 0.4 Released" title="Direct link to Qumat 0.4 Released" translate="no">​</a></h2>
+        <content type="html"><![CDATA[<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="qumat-04-released">Qumat 0.4 Released<a href="https://mahout.apache.org/blog/2025/04/17/Qumat-0.4.0-Release#qumat-04-released" class="hash-link" aria-label="Direct link to Qumat 0.4 Released" title="Direct link to Qumat 0.4 Released" translate="no">​</a></h2>
 <p><a href="https://github.com/apache/mahout/discussions/536" target="_blank" rel="noopener noreferrer" class="">Release notes</a> on GitHub Discussions.</p>]]></content>
         <author>
             <name>Mahout Team</name>

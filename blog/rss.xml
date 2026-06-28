@@ -152,12 +152,12 @@
             <category>minutes</category>
         </item>
         <item>
-            <title><![CDATA[Qumat 0.4 Release]]></title>
-            <link>https://mahout.apache.org/blog/2025/04/17/Qumat-0.4-Release</link>
-            <guid>https://mahout.apache.org/blog/2025/04/17/Qumat-0.4-Release</guid>
+            <title><![CDATA[Qumat 0.4.0 Release]]></title>
+            <link>https://mahout.apache.org/blog/2025/04/17/Qumat-0.4.0-Release</link>
+            <guid>https://mahout.apache.org/blog/2025/04/17/Qumat-0.4.0-Release</guid>
             <pubDate>Thu, 17 Apr 2025 00:00:00 GMT</pubDate>
             <description><![CDATA[Qumat 0.4 Released]]></description>
-            <content:encoded><![CDATA[<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="qumat-04-released">Qumat 0.4 Released<a href="https://mahout.apache.org/blog/2025/04/17/Qumat-0.4-Release#qumat-04-released" class="hash-link" aria-label="Direct link to Qumat 0.4 Released" title="Direct link to Qumat 0.4 Released" translate="no">​</a></h2>
+            <content:encoded><![CDATA[<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="qumat-04-released">Qumat 0.4 Released<a href="https://mahout.apache.org/blog/2025/04/17/Qumat-0.4.0-Release#qumat-04-released" class="hash-link" aria-label="Direct link to Qumat 0.4 Released" title="Direct link to Qumat 0.4 Released" translate="no">​</a></h2>
 <p><a href="https://github.com/apache/mahout/discussions/536" target="_blank" rel="noopener noreferrer" class="">Release notes</a> on GitHub Discussions.</p>]]></content:encoded>
             <category>news</category>
         </item>
