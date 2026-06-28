@@ -5,7 +5,9 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "sync": "node scripts/sync-docs.js",
+    "sync:no-api": "MAHOUT_SKIP_API_DOCS=1 node scripts/sync-docs.js",
     "start": "npm run sync && docusaurus start",
+    "start:no-api": "npm run sync:no-api && docusaurus start --no-open",
     "prebuild": "npm run sync",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",

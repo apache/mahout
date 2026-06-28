@@ -81,7 +81,7 @@ const config: Config = {
           editUrl: 'https://github.com/apache/mahout/tree/main/website-new/',
           blogTitle: 'News & Updates',
           blogDescription: 'Apache Mahout project news, releases, and community updates',
-          postsPerPage: 10,
+          postsPerPage: 'ALL',
           blogSidebarCount: 'ALL',
           remarkPlugins: [remarkMath],
           rehypePlugins: [rehypeKatex],

@@ -235,6 +235,19 @@ function generateApiDocs() {
     },
   ];
 
+  if (process.env.MAHOUT_SKIP_API_DOCS === '1') {
+    console.log('Skipping generated Python API reference docs.');
+    for (const page of pages) {
+      const outputPath = path.join(API_DEST_DIR, page.output);
+      copyFile(path.join(API_SOURCE_DIR, page.header), outputPath);
+      fs.appendFileSync(
+        outputPath,
+        '\n\nAPI reference generation was skipped for this local preview.\n',
+      );
+    }
+    return;
+  }
+
   runCommand('uv', ['sync', '--frozen', '--group', 'dev']);
 
   for (const page of pages) {
