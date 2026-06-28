@@ -14,8 +14,8 @@ const docsVersions = Object.fromEntries([
   [
     'current',
     {
-      label: 'next',
-      path: 'next',
+      label: 'master',
+      path: 'master',
     },
   ],
   ...releasedVersions.map((version, index) => [
@@ -111,9 +111,10 @@ const config: Config = {
             return [
               '/docs/download',
               '/docs/download/quickstart',
-              '/docs/next/download',
-              '/docs/next/download/quickstart',
             ];
+          }
+          if (existingPath === '/docs/master/qumat/getting-started') {
+            return ['/docs/next/download', '/docs/next/download/quickstart'];
           }
           return undefined;
         },
