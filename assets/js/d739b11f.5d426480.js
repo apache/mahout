@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkmahout_website=self.webpackChunkmahout_website||[]).push([["3003"],{36025(t,e,s){s.r(e),s.d(e,{default:()=>r});var u=s(74848),a=s(56347);function r(){return(0,u.jsx)(a.rd,{to:"/docs/qumat/getting-started"})}}}]);
