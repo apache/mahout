@@ -87,14 +87,20 @@ function ListPostItem({children, className}: Props): ReactNode {
 
 function ArticlePostItem({children, className}: Props): ReactNode {
   const {
-    metadata: {title},
+    metadata: {tags, title},
   } = useBlogPost();
+  const isMeetingMinutes =
+    title.toLowerCase().includes('meeting minutes') ||
+    tags.some((tag) => tag.label.toLowerCase() === 'minutes');
+  const breadcrumb = isMeetingMinutes
+    ? {label: 'Meeting Minutes', to: '/blog/minutes'}
+    : {label: 'Blog', to: '/blog'};
 
   return (
     <article className={clsx(styles.article, className)}>
       <header className={styles.articleHeader}>
-        <Link className={styles.breadcrumb} to="/blog">
-          News
+        <Link className={styles.breadcrumb} to={breadcrumb.to}>
+          {breadcrumb.label}
         </Link>
         <PostMeta />
         <h1 className={styles.articleTitle}>{title}</h1>

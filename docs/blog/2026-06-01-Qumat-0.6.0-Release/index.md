@@ -9,7 +9,7 @@ We are excited to announce **QuMat v0.6.0**, the next release of Mahout's quantu
 
 The main theme of this release is moving QDP from an NVIDIA-focused proof of concept into a broader GPU data plane for quantum ML. QuMat v0.6.0 brings AMD ROCm support to first-class status, closes encoder parity gaps between CUDA and ROCm, adds realistic benchmark workloads, and refreshes the documentation site for users and contributors.
 
-Special thanks to everyone who contributed to this release. We would like to thank PMC members Jie-Kai Chang, Guan-Ming Chiu, Andrew Musselman, Shannon Quinn (PMC Chair) and Trevor Grant. We also thank Committers Hsien-Cheng Huang, and Kuan-Hao Huang, along with contributors Tim Hsiung (Microsoft), Vic Wen (Microsoft), Eddie Tsai (Phind), ChenChen Lai and the broader Apache Mahout community.
+Special thanks to everyone who contributed to this release. We would like to thank PMC members Jie-Kai Chang, Guan-Ming Chiu, Andrew Musselman, Shannon Quinn (PMC Chair) and Trevor Grant. We also thank Committers Hsien-Cheng Huang, and Kuan-Hao Huang, along with contributors Yu-Ting Hsiung (Microsoft), Guan-Hua Wen (Microsoft), An-Te Tsai (Phind), Chao-Hong Yeh (Trend Micro), Han-Wen Tsao, Yu-Chen Lai and the broader Apache Mahout community.
 
 <!-- truncate -->
 
