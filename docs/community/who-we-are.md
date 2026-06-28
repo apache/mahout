@@ -33,7 +33,7 @@ Jacob Alexander Mannix  | jmannix@...       | Yes |
 Jeff Eastman            | jeastman@...      | No  | (Emeritus PMC)
 Jie-Kai (Jay) Chang     | jiekaichang@...   | Yes | @400Ping
 Krishna Dave            | krishnadave829@...| No  | @krishnadave
-Kuan-Hao Huang          | r@...             | No  | @rich7420
+Kuan-Hao Huang          | richhuang@...     | No  | @rich7420
 Nikolay Sakharnykh      | nsakharnykh@...   | No  |
 Paritosh Ranjan         | pranjan@...       | Yes | @paritoshranjan
 Pat Ferrel              | pat@...           | Yes | (Emeritus PMC) @occam
