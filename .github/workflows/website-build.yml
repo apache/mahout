@@ -22,7 +22,12 @@ on:
     paths:
       - 'website/**'
       - 'docs/**'
+      - 'qumat/**'
+      - 'qdp/qdp-python/qumat_qdp/**'
       - '.github/workflows/website-build.yml'
+
+permissions:
+  contents: read
 
 jobs:
   build:
