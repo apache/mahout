@@ -155,7 +155,23 @@ mod no_cuda_stubs {
         QDP_CUDA_UNAVAILABLE
     }
 
+    pub(crate) unsafe fn cudaGetDevice(_device: *mut i32) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaSetDevice(_device: i32) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
     pub(crate) unsafe fn cudaMemGetInfo(_free: *mut usize, _total: *mut usize) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaDeviceCanAccessPeer(
+        _can_access_peer: *mut i32,
+        _device: i32,
+        _peer_device: i32,
+    ) -> i32 {
         QDP_CUDA_UNAVAILABLE
     }
 
