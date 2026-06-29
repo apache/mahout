@@ -175,15 +175,19 @@ served as `latest` at `/docs`; the editable current docs are served at `/docs/ne
 When releasing, snapshot the current docs:
 
 ```bash
-npm run docusaurus docs:version <release-version>
+npm run version -- <release-version>
 ```
 
 This creates:
 - `versioned_docs/version-<release-version>/` - Frozen snapshot
 - Updates `versions.json`
+- Validates the generated versioned docs with a production Docusaurus build
 
 `docusaurus.config.ts` reads `versions.json` automatically, so release updates
 should not require editing the Docusaurus version configuration.
+
+The command runs the documentation sync first, so generated Python API reference
+pages are included in the version snapshot before the local build validation.
 
 ## Blog Posts
 
