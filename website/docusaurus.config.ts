@@ -226,9 +226,19 @@ const config: Config = {
         },
         // News (Blog)
         {
-          to: '/blog',
+          type: 'dropdown',
           label: 'News',
           position: 'left',
+          items: [
+            {
+              label: 'Blog',
+              to: '/blog',
+            },
+            {
+              label: 'Meeting Minutes',
+              to: '/blog/minutes',
+            },
+          ],
         },
         // Version dropdown
         {
