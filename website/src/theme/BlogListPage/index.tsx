@@ -211,7 +211,6 @@ function BlogListHeader({metadata}: Pick<Props, 'metadata'>) {
   return (
     <header className={styles.header}>
       <div>
-        <div className={styles.kicker}>Apache Mahout</div>
         <h1 className={styles.title}>News</h1>
       </div>
       <p className={styles.description}>{metadata.blogDescription}</p>
