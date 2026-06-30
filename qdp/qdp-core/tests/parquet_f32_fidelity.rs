@@ -120,23 +120,36 @@ mod gpu {
         download_complex_f32, download_complex_f64, fidelity_cross_precision,
     };
 
-    /// Returns `true` only when CUDA kernels actually launch. On a stub build
-    /// (no toolkit, e.g. CI) `QdpEngine::new` and `CudaDevice::new` still succeed
-    /// and even host→device copies work — only kernel launches fail with code
-    /// 999. So we probe with a trivial 1-qubit amplitude encode and treat any
-    /// error as "no functional GPU" → skip. A real GPU that errors here would be
-    /// a genuine bug, which the `.expect(...)` calls below still surface loudly.
+    /// Returns `true` only when CUDA kernels actually launch. Two distinct
+    /// no-GPU environments must both be detected as "skip":
+    ///   * No toolkit but a driver present (the `QDP_NO_CUDA` stub): engine and
+    ///     device creation and host→device copies all succeed — only a kernel
+    ///     launch fails with code 999, surfacing as an `Err` here.
+    ///   * No driver at all (CI runner without `libcuda.so`): `cudarc` loads the
+    ///     driver dynamically and **panics** on first use rather than returning
+    ///     an `Err`, so `.ok()` does not catch it.
+    ///
+    /// We probe with a trivial 1-qubit amplitude encode inside `catch_unwind` and
+    /// treat any panic or `Err` as "no functional GPU". A real GPU that errors
+    /// here is a genuine bug, which the `.expect(...)` calls below surface loudly.
     fn cuda_is_functional() -> bool {
-        let Some(engine) = common::qdp_engine_with_precision(Precision::Float32) else {
-            return false;
-        };
-        match engine.encode_batch_f32(&[1.0_f32, 0.0], 1, 2, 1, "amplitude") {
-            Ok(dlpack) => {
-                unsafe { common::take_deleter_and_delete(dlpack) };
-                true
-            }
-            Err(_) => false,
-        }
+        // `cudarc`'s dlopen failure panics with a long message; silence the
+        // default hook just for the probe so a skipped run isn't mistaken for a
+        // failure. Serialized because the panic hook is process-global.
+        static PROBE_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+        let _guard = PROBE_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let prev_hook = std::panic::take_hook();
+        std::panic::set_hook(Box::new(|_| {}));
+        let probe = std::panic::catch_unwind(|| {
+            let engine = common::qdp_engine_with_precision(Precision::Float32)?;
+            let dlpack = engine
+                .encode_batch_f32(&[1.0_f32, 0.0], 1, 2, 1, "amplitude")
+                .ok()?;
+            unsafe { common::take_deleter_and_delete(dlpack) };
+            Some(())
+        });
+        std::panic::set_hook(prev_hook);
+        matches!(probe, Ok(Some(())))
     }
 
     /// Read the same data from an f32 and an f64 Parquet column, encode at the
