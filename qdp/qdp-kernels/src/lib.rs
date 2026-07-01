@@ -376,6 +376,21 @@ unsafe extern "C" {
         stream: *mut c_void,
     ) -> i32;
 
+    /// Launch IQP encoding kernel using Matrix-Free Implicit Hadamard Tensor Core Engine
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before freeing
+    pub fn launch_iqp_encode_tc(
+        data_batch_d: *const f64,
+        state_batch_d: *mut c_void,
+        num_samples: usize,
+        state_len: usize,
+        num_qubits: u32,
+        enable_zz: i32,
+        stream: *mut c_void,
+    ) -> i32;
+
     /// Launch phase encoding kernel
     /// Returns CUDA error code (0 = success)
     ///
@@ -400,6 +415,23 @@ unsafe extern "C" {
         num_samples: usize,
         state_len: usize,
         num_qubits: u32,
+        stream: *mut c_void,
+    ) -> i32;
+
+    /// Launch general (non-Hadamard) GEMM using AdaptiveOzakiEngine
+    /// Provides mixed-precision graded-ring Tensor Core acceleration for arbitrary matrices.
+    /// Complements launch_iqp_encode_tc which uses the specialized ImplicitHadamard path.
+    /// Returns CUDA error code (0 = success)
+    ///
+    /// # Safety
+    /// Requires valid GPU pointers, must sync before freeing
+    pub fn launch_adaptive_ozaki_gemm(
+        a_d: *const f64,
+        b_d: *const f64,
+        c_d: *mut f64,
+        m: i32,
+        n: i32,
+        k: i32,
         stream: *mut c_void,
     ) -> i32;
 }
@@ -702,6 +734,20 @@ pub extern "C" fn launch_iqp_encode_batch(
 
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
+pub extern "C" fn launch_iqp_encode_tc(
+    _data_batch_d: *const f64,
+    _state_batch_d: *mut c_void,
+    _num_samples: usize,
+    _state_len: usize,
+    _num_qubits: u32,
+    _enable_zz: i32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
 pub extern "C" fn launch_phase_encode(
     _phases_d: *const f64,
     _state_d: *mut c_void,
@@ -720,6 +766,21 @@ pub extern "C" fn launch_phase_encode_batch(
     _num_samples: usize,
     _state_len: usize,
     _num_qubits: u32,
+    _stream: *mut c_void,
+) -> i32 {
+    999
+}
+
+// non-CUDA / non-Linux stub for the general Adaptive Ozaki GEMM entry point.
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+#[unsafe(no_mangle)]
+pub extern "C" fn launch_adaptive_ozaki_gemm(
+    _a_d: *const f64,
+    _b_d: *const f64,
+    _c_d: *mut f64,
+    _m: i32,
+    _n: i32,
+    _k: i32,
     _stream: *mut c_void,
 ) -> i32 {
     999
