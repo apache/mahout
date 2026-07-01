@@ -215,10 +215,14 @@ extern "C" int launch_iqp_encode_tc(
         unsigned int data_len = enable_zz
             ? (unsigned int)(num_qubits + (unsigned int)num_qubits * (num_qubits - 1) / 2)
             : num_qubits;
-        cudaFuncSetAttribute(iqp_phase_fwt_normalize_tc_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, 65536);
+        cudaError_t attr_err = cudaFuncSetAttribute(iqp_phase_fwt_normalize_tc_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, 65536);
+        if (attr_err != cudaSuccess) return (int)attr_err;
         iqp_phase_fwt_normalize_tc_kernel<<<num_samples, DEFAULT_BLOCK_SIZE, state_len * sizeof(cuDoubleComplex), stream>>>(
             data_batch_d, static_cast<cuDoubleComplex*>(state_batch_d), num_samples, state_len, num_qubits, data_len, enable_zz, norm_factor
         );
+        cudaError_t sync_err = cudaStreamSynchronize(stream);
+        if (sync_err != cudaSuccess) return (int)sync_err;
+        return (int)cudaGetLastError();
     } else {
         // [Phase 5] Blocked TC-FWT (Kronecker Product Decomposition)
         size_t m_samples = num_samples;

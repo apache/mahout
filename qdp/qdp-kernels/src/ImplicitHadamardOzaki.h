@@ -5,7 +5,7 @@
 #include <memory>
 #include <cstdint>
 
-#include "AdaptiveOzaki.h"
+#include "ozaki_config.h"
 
 namespace ozaki {
 
