@@ -16,8 +16,10 @@
 
 #[cfg(target_os = "linux")]
 pub mod buffer_pool;
+pub mod communicator;
 #[cfg(target_os = "linux")]
 pub(crate) mod cuda_sync;
+pub mod distributed;
 pub mod encodings;
 pub mod memory;
 /// Test-only fidelity / trace-distance helpers. Public so integration tests in
@@ -29,6 +31,7 @@ pub mod overlap_tracker;
 pub mod pipeline;
 #[cfg(target_os = "linux")]
 pub mod pool_metrics;
+pub mod topology;
 #[cfg(target_os = "linux")]
 pub(crate) mod validation;
 
@@ -37,6 +40,16 @@ pub(crate) mod cuda_ffi;
 
 #[cfg(target_os = "linux")]
 pub use buffer_pool::{PinnedBufferHandle, PinnedBufferPool};
+pub use communicator::{
+    CollectiveCommunicator, DeviceCollectiveBackend, DeviceCollectiveCommunicator,
+    LocalCollectiveCommunicator, MpiDeviceCollectiveCommunicator, NcclDeviceCollectiveCommunicator,
+};
+pub use distributed::{
+    DistributedAmplitudePlan, DistributedExecutionContext, DistributedStateLayout,
+    DistributedStatePlan, DistributedStateVector, DistributionMode, LocalShardView, PlacementPlan,
+    PlacementPlanner, PlacementRequest, PreparedDistributedAmplitudeEncode, ShardPlacement,
+    ShardPolicy, StateShard, StateShardLayout,
+};
 pub use encodings::{AmplitudeEncoder, AngleEncoder, BasisEncoder, QuantumEncoder};
 pub use memory::GpuStateVector;
 #[cfg(target_os = "linux")]
@@ -48,6 +61,7 @@ pub use metrics::{
     trace_distance_f32, trace_distance_f64,
 };
 pub use pipeline::run_dual_stream_pipeline;
+pub use topology::{DeviceMesh, GpuTopology, LinkKind};
 
 #[cfg(target_os = "linux")]
 pub use overlap_tracker::OverlapTracker;

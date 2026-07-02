@@ -67,7 +67,14 @@ unsafe extern "C" {
         ptr: *const c_void,
     ) -> i32;
 
+    pub(crate) fn cudaGetDevice(device: *mut i32) -> i32;
+    pub(crate) fn cudaSetDevice(device: i32) -> i32;
     pub(crate) fn cudaMemGetInfo(free: *mut usize, total: *mut usize) -> i32;
+    pub(crate) fn cudaDeviceCanAccessPeer(
+        can_access_peer: *mut i32,
+        device: i32,
+        peer_device: i32,
+    ) -> i32;
 
     pub(crate) fn cudaMemcpyAsync(
         dst: *mut c_void,
@@ -76,7 +83,6 @@ unsafe extern "C" {
         kind: u32,
         stream: *mut c_void,
     ) -> i32;
-
     pub(crate) fn cudaEventCreateWithFlags(event: *mut *mut c_void, flags: u32) -> i32;
     pub(crate) fn cudaEventRecord(event: *mut c_void, stream: *mut c_void) -> i32;
     pub(crate) fn cudaEventDestroy(event: *mut c_void) -> i32;
@@ -149,7 +155,23 @@ mod no_cuda_stubs {
         QDP_CUDA_UNAVAILABLE
     }
 
+    pub(crate) unsafe fn cudaGetDevice(_device: *mut i32) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaSetDevice(_device: i32) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
     pub(crate) unsafe fn cudaMemGetInfo(_free: *mut usize, _total: *mut usize) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaDeviceCanAccessPeer(
+        _can_access_peer: *mut i32,
+        _device: i32,
+        _peer_device: i32,
+    ) -> i32 {
         QDP_CUDA_UNAVAILABLE
     }
 

@@ -1,0 +1,167 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one or more
+// contributor license agreements.  See the NOTICE file distributed with
+// this work for additional information regarding copyright ownership.
+// The ASF licenses this file to You under the Apache License, Version 2.0
+// (the "License"); you may not use this file except in compliance with
+// the License.  You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+use std::fmt;
+
+use crate::error::{MahoutError, Result};
+use crate::gpu::communicator::{CollectiveCommunicator, DeviceCollectiveCommunicator};
+use crate::gpu::topology::DeviceMesh;
+
+/// Bundles the device mesh with the collective implementation that coordinates
+/// those devices.
+///
+/// The current branch uses one process with one mesh covering all participating
+/// devices. A future MPI implementation can construct one context per rank with
+/// a rank-local mesh and an MPI-backed collective implementation.
+pub struct DistributedExecutionContext<'a> {
+    rank: usize,
+    world_size: usize,
+    mesh: DeviceMesh,
+    collectives: &'a dyn CollectiveCommunicator,
+    device_collectives: Option<&'a dyn DeviceCollectiveCommunicator>,
+}
+
+impl fmt::Debug for DistributedExecutionContext<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("DistributedExecutionContext")
+            .field("rank", &self.rank)
+            .field("world_size", &self.world_size)
+            .field("device_ids", &self.mesh.device_ids)
+            .field("has_device_collectives", &self.device_collectives.is_some())
+            .finish()
+    }
+}
+
+impl<'a> DistributedExecutionContext<'a> {
+    /// Build the current single-process execution context from one caller-owned
+    /// device list.
+    pub fn single_process(
+        device_ids: Vec<usize>,
+        collectives: &'a dyn CollectiveCommunicator,
+    ) -> Result<Self> {
+        Self::validate_collective_metadata(0, 1, collectives)?;
+        Ok(Self::from_validated_parts(
+            0,
+            1,
+            DeviceMesh::new(device_ids)?,
+            collectives,
+        ))
+    }
+
+    /// Build one rank-local execution context from the CUDA devices owned by
+    /// this rank.
+    pub fn rank_local(
+        rank: usize,
+        world_size: usize,
+        device_ids: Vec<usize>,
+        collectives: &'a dyn CollectiveCommunicator,
+    ) -> Result<Self> {
+        Self::validate_rank_world(rank, world_size)?;
+        Self::validate_collective_metadata(rank, world_size, collectives)?;
+        Ok(Self::from_validated_parts(
+            rank,
+            world_size,
+            DeviceMesh::new(device_ids)?,
+            collectives,
+        ))
+    }
+
+    /// Build one rank-local execution context from an already constructed mesh.
+    pub fn rank_local_with_mesh(
+        rank: usize,
+        world_size: usize,
+        mesh: DeviceMesh,
+        collectives: &'a dyn CollectiveCommunicator,
+    ) -> Result<Self> {
+        Self::validate_rank_world(rank, world_size)?;
+        Self::validate_collective_metadata(rank, world_size, collectives)?;
+        Ok(Self::from_validated_parts(
+            rank,
+            world_size,
+            mesh,
+            collectives,
+        ))
+    }
+
+    /// Rank represented by this execution context.
+    pub fn rank(&self) -> usize {
+        self.rank
+    }
+
+    /// Total number of ranks participating in this distributed execution.
+    pub fn world_size(&self) -> usize {
+        self.world_size
+    }
+
+    /// Access the device mesh that owns the distributed state shards.
+    pub fn mesh(&self) -> &DeviceMesh {
+        &self.mesh
+    }
+
+    /// Access scalar collectives used for rank-level reductions.
+    pub fn collectives(&self) -> &dyn CollectiveCommunicator {
+        self.collectives
+    }
+
+    /// Access optional CUDA-aware device collectives.
+    pub fn device_collectives(&self) -> Option<&dyn DeviceCollectiveCommunicator> {
+        self.device_collectives
+    }
+
+    fn from_validated_parts(
+        rank: usize,
+        world_size: usize,
+        mesh: DeviceMesh,
+        collectives: &'a dyn CollectiveCommunicator,
+    ) -> Self {
+        Self {
+            rank,
+            world_size,
+            mesh,
+            collectives,
+            device_collectives: None,
+        }
+    }
+
+    fn validate_rank_world(rank: usize, world_size: usize) -> Result<()> {
+        if world_size == 0 || rank >= world_size {
+            return Err(MahoutError::InvalidInput(format!(
+                "Distributed execution rank {} must be within world size {}",
+                rank, world_size
+            )));
+        }
+
+        Ok(())
+    }
+
+    fn validate_collective_metadata(
+        rank: usize,
+        world_size: usize,
+        collectives: &dyn CollectiveCommunicator,
+    ) -> Result<()> {
+        if rank != collectives.rank() || world_size != collectives.world_size() {
+            return Err(MahoutError::InvalidInput(format!(
+                "Distributed execution collective metadata mismatch: requested rank {} within world size {}, collective reports rank {} within world size {}",
+                rank,
+                world_size,
+                collectives.rank(),
+                collectives.world_size()
+            )));
+        }
+
+        Ok(())
+    }
+}

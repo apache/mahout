@@ -37,6 +37,10 @@ mod profiling;
 
 pub use error::{MahoutError, Result, cuda_error_to_string};
 pub use gpu::memory::Precision;
+pub use gpu::{
+    DeviceMesh, DistributedExecutionContext, DistributedStateVector, DistributionMode,
+    PlacementRequest, PreparedDistributedAmplitudeEncode, ShardPolicy,
+};
 pub use reader::{FloatElem, NullHandling, handle_float32_nulls, handle_float64_nulls};
 pub use types::{Dtype, Encoding};
 
@@ -54,6 +58,7 @@ use std::ffi::c_void;
 use std::sync::Arc;
 
 use crate::dlpack::DLManagedTensor;
+use crate::gpu::distributed::runtime;
 use cudarc::driver::CudaDevice;
 
 #[cfg(target_os = "linux")]
@@ -137,6 +142,152 @@ impl QdpEngine {
             device, // CudaDevice::new already returns Arc<CudaDevice> in cudarc 0.11
             precision,
         })
+    }
+
+    /// Build a validated device mesh for one distributed execution context.
+    pub fn new_distributed_mesh(device_ids: Vec<usize>) -> Result<DeviceMesh> {
+        DeviceMesh::new(device_ids)
+    }
+
+    /// Prepare a distributed amplitude encode on a single-process device mesh.
+    ///
+    /// This is a convenience wrapper over `prepare_distributed_amplitude_on`
+    /// using an in-process collective implementation.
+    #[doc(hidden)]
+    pub fn prepare_distributed_amplitude(
+        device_ids: Vec<usize>,
+        data: &[f64],
+        num_qubits: usize,
+        precision: Precision,
+        request: Option<PlacementRequest>,
+    ) -> Result<PreparedDistributedAmplitudeEncode> {
+        let request = Self::resolve_distributed_request(num_qubits, request)?;
+        runtime::validate_distributed_input(data, &request)?;
+        let collectives = crate::gpu::LocalCollectiveCommunicator;
+        let execution = DistributedExecutionContext::single_process(device_ids, &collectives)?;
+        Self::prepare_distributed_amplitude_on(
+            &execution,
+            data,
+            num_qubits,
+            precision,
+            Some(request),
+        )
+    }
+
+    /// Prepare a distributed amplitude encode on an explicit execution context.
+    ///
+    /// The execution context owns the participating device mesh and the
+    /// collective implementation that coordinates those shards.
+    #[doc(hidden)]
+    pub fn prepare_distributed_amplitude_on(
+        execution: &DistributedExecutionContext<'_>,
+        data: &[f64],
+        num_qubits: usize,
+        precision: Precision,
+        request: Option<PlacementRequest>,
+    ) -> Result<PreparedDistributedAmplitudeEncode> {
+        let request =
+            Self::resolve_distributed_request_for_execution(num_qubits, request, execution)?;
+        runtime::validate_distributed_input(data, &request)?;
+        let (plan, inv_norm, layout) =
+            runtime::prepare_distributed_encode(execution, data, precision, request)?;
+
+        Ok(PreparedDistributedAmplitudeEncode {
+            mesh: execution.mesh().clone(),
+            plan,
+            inv_norm,
+            layout,
+        })
+    }
+
+    /// Encode amplitude data into real per-device shard buffers on a
+    /// single-process device mesh.
+    ///
+    /// This is a convenience wrapper over `encode_distributed_amplitude_to_shards_on`
+    /// using an in-process collective implementation.
+    #[doc(hidden)]
+    pub fn encode_distributed_amplitude_to_shards(
+        device_ids: Vec<usize>,
+        data: &[f64],
+        num_qubits: usize,
+        precision: Precision,
+        request: Option<PlacementRequest>,
+    ) -> Result<DistributedStateVector> {
+        let request = Self::resolve_distributed_request(num_qubits, request)?;
+        runtime::validate_distributed_input(data, &request)?;
+        let collectives = crate::gpu::LocalCollectiveCommunicator;
+        let execution = DistributedExecutionContext::single_process(device_ids, &collectives)?;
+        Self::encode_distributed_amplitude_to_shards_on(
+            &execution,
+            data,
+            num_qubits,
+            precision,
+            Some(request),
+        )
+    }
+
+    /// Materialize a distributed amplitude state on an explicit execution
+    /// context.
+    #[doc(hidden)]
+    pub fn encode_distributed_amplitude_to_shards_on(
+        execution: &DistributedExecutionContext<'_>,
+        data: &[f64],
+        num_qubits: usize,
+        precision: Precision,
+        request: Option<PlacementRequest>,
+    ) -> Result<DistributedStateVector> {
+        let request =
+            Self::resolve_distributed_request_for_execution(num_qubits, request, execution)?;
+        runtime::validate_distributed_input(data, &request)?;
+        runtime::encode_distributed_to_shards(execution, data, precision, request)
+    }
+
+    fn resolve_distributed_request(
+        num_qubits: usize,
+        request: Option<PlacementRequest>,
+    ) -> Result<PlacementRequest> {
+        match request {
+            Some(request) => {
+                if request.num_qubits != num_qubits {
+                    return Err(MahoutError::InvalidInput(format!(
+                        "Distributed request qubit mismatch: argument specifies {} qubits but request specifies {}",
+                        num_qubits, request.num_qubits
+                    )));
+                }
+                Ok(request)
+            }
+            None => Ok(PlacementRequest::new(
+                num_qubits,
+                DistributionMode::ShardedCapacity,
+                ShardPolicy::Equal,
+            )),
+        }
+    }
+
+    fn resolve_distributed_request_for_execution(
+        num_qubits: usize,
+        request: Option<PlacementRequest>,
+        execution: &DistributedExecutionContext<'_>,
+    ) -> Result<PlacementRequest> {
+        match request {
+            Some(request) => {
+                let request = Self::resolve_distributed_request(num_qubits, Some(request))?;
+                if request.world_size != execution.world_size() {
+                    return Err(MahoutError::InvalidInput(format!(
+                        "Distributed request world size mismatch: execution world size {} but request specifies {}",
+                        execution.world_size(),
+                        request.world_size
+                    )));
+                }
+                Ok(request)
+            }
+            None => PlacementRequest::new_with_world(
+                num_qubits,
+                DistributionMode::ShardedCapacity,
+                ShardPolicy::Equal,
+                execution.world_size(),
+            ),
+        }
     }
 
     /// Encode classical data into quantum state

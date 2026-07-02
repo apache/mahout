@@ -18,9 +18,9 @@
 
 #[cfg(target_os = "linux")]
 use qdp_core::MahoutError;
-use qdp_core::QdpEngine;
 #[cfg(target_os = "linux")]
 use qdp_core::gpu::pipeline::run_dual_stream_pipeline_aligned;
+use qdp_core::{Precision, QdpEngine};
 
 mod common;
 
@@ -246,6 +246,54 @@ fn test_single_encode_dlpack_2d_shape() {
 
         common::take_deleter_and_delete(dlpack_ptr);
     }
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_distributed_amplitude_two_gpu_smoke() {
+    println!("Testing distributed amplitude shard encode on two GPUs...");
+
+    if common::cuda_device().is_none() {
+        println!("SKIP: No GPU available");
+        return;
+    }
+
+    if cudarc::driver::CudaDevice::new(1).is_err() {
+        println!("SKIP: Second GPU unavailable");
+        return;
+    }
+
+    let data = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+    let distributed = QdpEngine::encode_distributed_amplitude_to_shards(
+        vec![0, 1],
+        &data,
+        3,
+        Precision::Float64,
+        None,
+    )
+    .expect("Distributed amplitude shard encode should succeed");
+
+    assert_eq!(distributed.num_shards(), 2, "Expected two shards");
+    assert_eq!(distributed.shards()[0].device_id, 0);
+    assert_eq!(distributed.shards()[1].device_id, 1);
+
+    let shard0 = distributed.copy_shard_to_host_f64(0).unwrap();
+    let shard1 = distributed.copy_shard_to_host_f64(1).unwrap();
+
+    assert_eq!(shard0.len(), 4);
+    assert_eq!(shard1.len(), 4);
+
+    let total_prob: f64 = shard0
+        .iter()
+        .chain(shard1.iter())
+        .map(|value| value.x * value.x + value.y * value.y)
+        .sum();
+    assert!(
+        (total_prob - 1.0).abs() < 1e-10,
+        "Distributed state should remain normalized"
+    );
+
+    println!("PASS: Distributed amplitude shard encode succeeded on two GPUs");
 }
 
 #[test]

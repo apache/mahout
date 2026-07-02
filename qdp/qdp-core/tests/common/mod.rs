@@ -22,6 +22,7 @@ use arrow::datatypes::{DataType, Field, Schema};
 use arrow::record_batch::RecordBatch;
 use parquet::arrow::ArrowWriter;
 use parquet::file::properties::WriterProperties;
+use qdp_core::gpu::{CollectiveCommunicator, DeviceMesh, GpuTopology};
 
 #[cfg(target_os = "linux")]
 use cudarc::driver::{CudaDevice, CudaSlice};
@@ -29,6 +30,91 @@ use cudarc::driver::{CudaDevice, CudaSlice};
 use qdp_core::dlpack::DLManagedTensor;
 #[cfg(target_os = "linux")]
 use qdp_core::{Precision, QdpEngine};
+
+#[allow(dead_code)]
+pub fn placeholder_mesh(device_ids: Vec<usize>) -> DeviceMesh {
+    let topology = GpuTopology::placeholder(device_ids.len());
+    DeviceMesh {
+        device_ids,
+        devices: Vec::new(),
+        topology,
+    }
+}
+
+#[derive(Clone, Copy)]
+#[allow(dead_code)]
+pub struct TestCollective {
+    pub rank: usize,
+    pub world_size: usize,
+}
+
+impl TestCollective {
+    #[allow(dead_code)]
+    pub fn new(rank: usize, world_size: usize) -> Self {
+        Self { rank, world_size }
+    }
+}
+
+impl CollectiveCommunicator for TestCollective {
+    fn rank(&self) -> usize {
+        self.rank
+    }
+
+    fn world_size(&self) -> usize {
+        self.world_size
+    }
+
+    fn all_reduce_sum_f64(&self, local_value: f64) -> qdp_core::Result<f64> {
+        Ok(local_value)
+    }
+}
+
+#[derive(Clone)]
+#[allow(dead_code)]
+pub struct RecordingCollective {
+    pub rank: usize,
+    pub world_size: usize,
+    pub global_sum: f64,
+    pub seen: std::sync::Arc<std::sync::Mutex<Vec<f64>>>,
+}
+
+impl RecordingCollective {
+    #[allow(dead_code)]
+    pub fn new(
+        rank: usize,
+        world_size: usize,
+        global_sum: f64,
+    ) -> (Self, std::sync::Arc<std::sync::Mutex<Vec<f64>>>) {
+        let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        (
+            Self {
+                rank,
+                world_size,
+                global_sum,
+                seen: std::sync::Arc::clone(&seen),
+            },
+            seen,
+        )
+    }
+}
+
+impl CollectiveCommunicator for RecordingCollective {
+    fn rank(&self) -> usize {
+        self.rank
+    }
+
+    fn world_size(&self) -> usize {
+        self.world_size
+    }
+
+    fn all_reduce_sum_f64(&self, local_value: f64) -> qdp_core::Result<f64> {
+        self.seen
+            .lock()
+            .expect("recording collective observations mutex poisoned")
+            .push(local_value);
+        Ok(self.global_sum)
+    }
+}
 
 /// Creates normalized test data (f64)
 #[allow(dead_code)] // Used by multiple test modules
@@ -86,6 +172,23 @@ pub fn write_fixed_size_list_parquet(path: &str, data: &[f64], sample_size: usiz
 #[allow(dead_code)]
 pub fn cuda_device() -> Option<Arc<CudaDevice>> {
     CudaDevice::new(0).ok()
+}
+
+/// Returns one CUDA device handle by ordinal, or `None` when unavailable.
+#[cfg(target_os = "linux")]
+#[allow(dead_code)]
+pub fn cuda_device_by_id(device_id: usize) -> Option<Arc<CudaDevice>> {
+    CudaDevice::new(device_id).ok()
+}
+
+/// Returns all requested CUDA device handles, or `None` if any device is unavailable.
+#[cfg(target_os = "linux")]
+#[allow(dead_code)]
+pub fn cuda_devices(device_ids: &[usize]) -> Option<Vec<Arc<CudaDevice>>> {
+    device_ids
+        .iter()
+        .map(|&device_id| cuda_device_by_id(device_id))
+        .collect()
 }
 
 /// Returns a QDP engine, or `None` when GPU-backed engine initialization is unavailable.
