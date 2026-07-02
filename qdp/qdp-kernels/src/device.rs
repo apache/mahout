@@ -173,7 +173,9 @@ mod hip {
                 range.start <= range.end && range.end <= self.len,
                 "slice_mut out of bounds"
             );
-            let offset_ptr = self.ptr + (range.start * std::mem::size_of::<T>()) as u64;
+            // Widen to u64 before multiplying so a large start offset cannot wrap
+            // in usize before the byte offset is applied.
+            let offset_ptr = self.ptr + range.start as u64 * std::mem::size_of::<T>() as u64;
             CudaViewMut {
                 ptr: offset_ptr,
                 len: range.end - range.start,
@@ -245,8 +247,10 @@ mod hip {
         _device: Arc<CudaDevice>,
     }
 
+    // Send but not Sync, matching cudarc's CudaStream: a stream handle can move
+    // between threads, but hipStream_t is not safe to enqueue onto concurrently
+    // from multiple threads via `&`, so we do not widen the contract to Sync.
     unsafe impl Send for CudaStream {}
-    unsafe impl Sync for CudaStream {}
 
     impl Drop for CudaStream {
         fn drop(&mut self) {

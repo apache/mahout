@@ -26,17 +26,37 @@
 typedef hipDoubleComplex cuDoubleComplex;
 typedef hipFloatComplex  cuComplex;
 
+// Newer ROCm hip_complex.h already ships CUDA-compat aliases (make_cuComplex,
+// cuCreal, ...) with these exact names; redefining them would be a hard build
+// break. Guard every alias with #ifndef so we only define the ones the installed
+// header does not already provide.
+#ifndef make_cuDoubleComplex
 #define make_cuDoubleComplex make_hipDoubleComplex
+#endif
+#ifndef make_cuComplex
 #define make_cuComplex       make_hipFloatComplex
+#endif
 
 // The kernels call cuCreal/cuCimag/cuCadd/cuCsub only on cuDoubleComplex, so
 // alias to HIP's double-precision helpers (hipC*), not the float (hipC*f) set.
+#ifndef cuCreal
 #define cuCreal cuCreal_double
+#endif
+#ifndef cuCimag
 #define cuCimag cuCimag_double
+#endif
+#ifndef cuCadd
 #define cuCadd  cuCadd_double
+#endif
+#ifndef cuCsub
 #define cuCsub  cuCsub_double
+#endif
+#ifndef cuCmul
 #define cuCmul  cuCmul_double
+#endif
+#ifndef cuConj
 #define cuConj  cuConj_double
+#endif
 
 static __host__ __device__ inline double cuCreal_double(hipDoubleComplex z) { return hipCreal(z); }
 static __host__ __device__ inline double cuCimag_double(hipDoubleComplex z) { return hipCimag(z); }

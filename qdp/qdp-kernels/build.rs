@@ -257,6 +257,10 @@ fn build_hip() {
     for src in KERNEL_SOURCES {
         build.file(src);
     }
+    // Compile-time verification that the Rust mirror of hipPointerAttribute_t /
+    // hipMemoryType in qdp-core/src/gpu/cuda_ffi.rs still matches the installed
+    // ROCm headers; its static_asserts fail the build loudly on any drift.
+    build.file("hip_compat/verify_pointer_attrs.cpp");
     build.compile("kernels");
 
     // Link the HIP runtime. Honor an explicit ROCM_PATH; otherwise rely on the
@@ -305,6 +309,7 @@ fn main() {
     println!("cargo:rerun-if-changed=hip_compat/cuda_runtime.h");
     println!("cargo:rerun-if-changed=hip_compat/cuComplex.h");
     println!("cargo:rerun-if-changed=hip_compat/vector_types.h");
+    println!("cargo:rerun-if-changed=hip_compat/verify_pointer_attrs.cpp");
 
     // AMD/HIP build path: compile the same .cu sources with hipcc. Gated by the
     // `hip` Cargo feature or QDP_USE_HIP=1; the CUDA path below is unchanged when off.
