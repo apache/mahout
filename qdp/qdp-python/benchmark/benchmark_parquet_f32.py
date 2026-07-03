@@ -90,9 +90,14 @@ def run_loader(
 ) -> tuple[float, float]:
     """Iterate the loader at the given dtype; return (duration_sec, vec/s).
 
-    Vectors are taken from the file's own row count (Parquet metadata) rather
-    than ``batch_size`` per iteration, so a partial final batch is not
-    overcounted for arbitrary ``--parquet`` files.
+    The native file loader reads the *entire* file regardless of ``--batches``:
+    ``total_batches`` is ignored for file sources (only ``--batch-size`` sets
+    batch granularity), and iteration runs until EOF. So the loop processes
+    exactly the file's Parquet row count, and ``num_rows / elapsed`` is the true
+    throughput for any ``--parquet`` file -- not just the generated case where
+    ``num_rows == batches * batch_size``. (Do not clamp to ``batches *
+    batch_size``: for a file larger than that, the whole file is still read, so
+    clamping would divide the full read time by an undercount.)
     """
     total_vectors = pq.read_metadata(path).num_rows
     loader = (
@@ -119,7 +124,13 @@ def main() -> None:
     # batches * batch_size * 2^qubits. 12 qubits keeps the default run ~0.4 GB;
     # raise --qubits with that cost in mind.
     parser.add_argument("--qubits", type=int, default=12)
-    parser.add_argument("--batches", type=int, default=200)
+    parser.add_argument(
+        "--batches",
+        type=int,
+        default=200,
+        help="Number of batches. Sizes the generated data (batches * batch_size "
+        "rows); ignored with --parquet, where the whole file is always read.",
+    )
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--encoding", type=str, default="amplitude")
     parser.add_argument("--trials", type=int, default=3)
