@@ -17,12 +17,18 @@
 // Allow unused_unsafe: CUDA FFI and kernel functions are unsafe in CUDA builds but safe stubs in no-CUDA builds.
 // The compiler can't statically determine which path is taken.
 #![allow(unused_unsafe)]
+// The `stream.stream as *mut c_void` casts at kernel-launch call sites are a
+// real conversion on the CUDA backend (cudarc's CUstream is a distinct pointer
+// type) but a no-op on HIP, where the stream field is already *mut c_void. Keep
+// the cast for backend-agnostic call sites and silence the HIP-only redundancy.
+#![cfg_attr(feature = "hip", allow(clippy::unnecessary_cast))]
 
 pub mod dlpack;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 mod encoding;
 pub mod error;
 pub mod gpu;
+pub mod gpu_rt;
 pub mod io;
 mod platform;
 pub mod preprocessing;
@@ -41,10 +47,10 @@ pub use reader::{FloatElem, NullHandling, handle_float32_nulls, handle_float64_n
 pub use types::{Dtype, Encoding};
 
 // Throughput/latency pipeline runner: single path using QdpEngine and encode_batch in Rust.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 mod pipeline_runner;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub use pipeline_runner::{
     PipelineConfig, PipelineIterator, PipelineRunResult, run_latency_pipeline,
     run_throughput_pipeline,
@@ -54,9 +60,9 @@ use std::ffi::c_void;
 use std::sync::Arc;
 
 use crate::dlpack::DLManagedTensor;
-use cudarc::driver::CudaDevice;
+use crate::gpu_rt::CudaDevice;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn validate_cuda_input_ptr(device: &CudaDevice, ptr: *const c_void) -> Result<()> {
     use crate::gpu::cuda_ffi::{
         CUDA_MEMORY_TYPE_DEVICE, CUDA_MEMORY_TYPE_MANAGED, CudaPointerAttributes,
@@ -179,7 +185,7 @@ impl QdpEngine {
 
     /// Block until all GPU work on the default stream has completed.
     /// Used by the generic pipeline and other callers that need to sync before timing.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub fn synchronize(&self) -> Result<()> {
         self.device
             .synchronize()
@@ -289,7 +295,7 @@ impl QdpEngine {
     /// * `host_data` - 1D input data (e.g. single sample for amplitude)
     /// * `num_qubits` - Number of qubits
     /// * `encoding_method` - Strategy (currently only "amplitude" supported for this path)
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub fn run_dual_stream_encode(
         &self,
         host_data: &[f64],
@@ -497,7 +503,7 @@ impl QdpEngine {
     /// - Point to valid GPU memory on the same device as the engine
     /// - Contain at least `input_len` elements of the expected dtype
     /// - Remain valid for the duration of this call
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_from_gpu_ptr(
         &self,
         input_d: *const std::ffi::c_void,
@@ -524,7 +530,7 @@ impl QdpEngine {
     /// # Safety
     /// Same as [`encode_from_gpu_ptr`](Self::encode_from_gpu_ptr). Additionally, `stream` must
     /// be a valid CUDA stream on the same device as the engine, or null.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_from_gpu_ptr_with_stream(
         &self,
         input_d: *const std::ffi::c_void,
@@ -575,7 +581,7 @@ impl QdpEngine {
     /// - Point to valid GPU memory on the same device as the engine
     /// - Contain at least `input_len` f32 elements
     /// - Remain valid for the duration of this call
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_from_gpu_ptr_f32(
         &self,
         input_d: *const f32,
@@ -600,7 +606,7 @@ impl QdpEngine {
     /// # Safety
     /// In addition to the `encode_from_gpu_ptr_f32` requirements, the stream pointer
     /// must remain valid for the duration of this call.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_from_gpu_ptr_f32_with_stream(
         &self,
         input_d: *const f32,
@@ -640,7 +646,7 @@ impl QdpEngine {
     /// - Point to valid GPU memory on the same device as the engine
     /// - Contain at least `input_len` f32 elements
     /// - Remain valid for the duration of this call
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_angle_from_gpu_ptr_f32(
         &self,
         input_d: *const f32,
@@ -662,7 +668,7 @@ impl QdpEngine {
     /// # Safety
     /// In addition to the `encode_angle_from_gpu_ptr_f32` requirements, the stream pointer
     /// must remain valid for the duration of this call.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_angle_from_gpu_ptr_f32_with_stream(
         &self,
         input_d: *const f32,
@@ -702,7 +708,7 @@ impl QdpEngine {
     /// - Point to valid GPU memory on the same device as the engine
     /// - Contain at least `num_samples * sample_size` f32 elements
     /// - Remain valid for the duration of this call
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_batch_from_gpu_ptr_f32(
         &self,
         input_batch_d: *const f32,
@@ -726,7 +732,7 @@ impl QdpEngine {
     /// # Safety
     /// In addition to the `encode_batch_from_gpu_ptr_f32` requirements, the stream pointer
     /// must remain valid for the duration of this call.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_batch_from_gpu_ptr_f32_with_stream(
         &self,
         input_batch_d: *const f32,
@@ -774,7 +780,7 @@ impl QdpEngine {
     /// - Point to valid GPU memory on the same device as the engine
     /// - Contain at least `num_samples * sample_size` f32 elements
     /// - Remain valid for the duration of this call
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_angle_batch_from_gpu_ptr_f32(
         &self,
         input_batch_d: *const f32,
@@ -798,7 +804,7 @@ impl QdpEngine {
     /// # Safety
     /// In addition to the `encode_angle_batch_from_gpu_ptr_f32` requirements, the stream pointer
     /// must remain valid for the duration of this call.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_angle_batch_from_gpu_ptr_f32_with_stream(
         &self,
         input_batch_d: *const f32,
@@ -845,7 +851,7 @@ impl QdpEngine {
     /// The input pointer must:
     /// - Point to one valid f32 in GPU memory on the same device as the engine
     /// - Remain valid for the duration of this call
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_basis_from_gpu_ptr_f32(
         &self,
         input_d: *const f32,
@@ -866,7 +872,7 @@ impl QdpEngine {
     /// # Safety
     /// In addition to the `encode_basis_from_gpu_ptr_f32` requirements, the
     /// stream pointer must remain valid for the duration of this call.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_basis_from_gpu_ptr_f32_with_stream(
         &self,
         input_d: *const f32,
@@ -903,7 +909,7 @@ impl QdpEngine {
     /// - Point to valid GPU memory on the same device as the engine
     /// - Contain at least `num_samples` f32 elements
     /// - Remain valid for the duration of this call
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_basis_batch_from_gpu_ptr_f32(
         &self,
         input_batch_d: *const f32,
@@ -928,7 +934,7 @@ impl QdpEngine {
     /// # Safety
     /// In addition to the `encode_basis_batch_from_gpu_ptr_f32` requirements,
     /// the stream pointer must remain valid for the duration of this call.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_basis_batch_from_gpu_ptr_f32_with_stream(
         &self,
         input_batch_d: *const f32,
@@ -985,7 +991,7 @@ impl QdpEngine {
     /// - Point to valid GPU memory on the same device as the engine
     /// - Contain at least `num_samples * sample_size` elements of the expected dtype
     /// - Remain valid for the duration of this call
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_batch_from_gpu_ptr(
         &self,
         input_batch_d: *const std::ffi::c_void,
@@ -1014,7 +1020,7 @@ impl QdpEngine {
     /// # Safety
     /// Same as [`encode_batch_from_gpu_ptr`](Self::encode_batch_from_gpu_ptr). Additionally,
     /// `stream` must be a valid CUDA stream on the same device as the engine, or null.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub unsafe fn encode_batch_from_gpu_ptr_with_stream(
         &self,
         input_batch_d: *const std::ffi::c_void,

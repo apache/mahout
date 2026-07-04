@@ -23,7 +23,8 @@
 #![allow(unused_unsafe)]
 
 use crate::error::{MahoutError, Result, cuda_error_to_string};
-use cudarc::driver::{CudaDevice, CudaSlice, DevicePtrMut};
+use crate::gpu::cuda_sync::sync_cuda_stream;
+use crate::gpu_rt::{CudaDevice, CudaSlice, DevicePtrMut};
 use std::ffi::c_void;
 use std::sync::Arc;
 
@@ -71,6 +72,12 @@ pub unsafe fn assert_all_finite_f32(
             cuda_error_to_string(ret)
         )));
     }
+    // The kernel runs on the caller's `stream`, which may be non-blocking (a
+    // forked/PyTorch stream) and therefore not ordered against the default-stream
+    // readback below. Synchronize `stream` first so the flag the kernel wrote is
+    // visible; otherwise the host can read the still-zero flag and validation
+    // silently passes.
+    sync_cuda_stream(stream, "finite validation (f32) stream synchronize failed")?;
     let host_flags = device.dtoh_sync_copy(&flag).map_err(|e| {
         MahoutError::Cuda(format!(
             "{}: failed to copy finite validation flag: {:?}",
@@ -122,6 +129,9 @@ pub unsafe fn assert_all_finite_f64(
             cuda_error_to_string(ret)
         )));
     }
+    // Synchronize the caller's stream before the default-stream flag readback
+    // (see assert_all_finite_f32 for the race this closes).
+    sync_cuda_stream(stream, "finite validation (f64) stream synchronize failed")?;
     let host_flags = device.dtoh_sync_copy(&flag).map_err(|e| {
         MahoutError::Cuda(format!(
             "{}: failed to copy finite validation flag: {:?}",
@@ -207,6 +217,12 @@ pub unsafe fn validate_and_cast_basis_indices_f32(
             cuda_error_to_string(ret)
         )));
     }
+    // Synchronize the caller's stream before the default-stream flag readback so
+    // an out-of-range index cannot slip past validation (see assert_all_finite_f32).
+    sync_cuda_stream(
+        stream,
+        "basis-index validate+cast stream synchronize failed",
+    )?;
     let host_flags = device.dtoh_sync_copy(&flag).map_err(|e| {
         MahoutError::Cuda(format!(
             "Failed to copy basis-index validation flag: {:?}",
@@ -259,6 +275,9 @@ pub unsafe fn assert_basis_indices_in_range_usize(
             cuda_error_to_string(ret)
         )));
     }
+    // Synchronize the caller's stream before the default-stream flag readback so
+    // an out-of-range index cannot slip past validation (see assert_all_finite_f32).
+    sync_cuda_stream(stream, "basis-index bounds-check stream synchronize failed")?;
     let host_flags = device.dtoh_sync_copy(&flag).map_err(|e| {
         MahoutError::Cuda(format!(
             "Failed to copy basis-index validation flag: {:?}",

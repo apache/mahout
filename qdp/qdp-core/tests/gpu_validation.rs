@@ -22,7 +22,7 @@ use qdp_core::gpu::encodings::MAX_QUBITS;
 mod common;
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_input_validation_invalid_strategy() {
     println!("Testing invalid strategy name rejection...");
 
@@ -48,7 +48,7 @@ fn test_input_validation_invalid_strategy() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_input_validation_qubit_mismatch() {
     println!("Testing qubit size validation...");
 
@@ -78,7 +78,7 @@ fn test_input_validation_qubit_mismatch() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_input_validation_zero_qubits() {
     println!("Testing zero qubits rejection...");
 
@@ -104,7 +104,7 @@ fn test_input_validation_zero_qubits() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_input_validation_max_qubits() {
     println!("Testing maximum qubit limit ({MAX_QUBITS})...");
 
@@ -130,7 +130,7 @@ fn test_input_validation_max_qubits() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_input_validation_batch_zero_samples() {
     println!("Testing zero num_samples rejection...");
 
@@ -155,7 +155,7 @@ fn test_input_validation_batch_zero_samples() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_empty_data() {
     println!("Testing empty data rejection...");
 
@@ -178,7 +178,7 @@ fn test_empty_data() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_zero_norm_data() {
     println!("Testing zero-norm data rejection...");
 
@@ -210,7 +210,7 @@ fn test_error_types() {
 }
 
 #[test]
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(qdp_gpu_platform))]
 fn test_non_linux_graceful_failure() {
     let result = QdpEngine::new(0);
     assert!(result.is_err());
