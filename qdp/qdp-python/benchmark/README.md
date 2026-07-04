@@ -9,6 +9,8 @@ scripts:
   that measures vectors/sec across Mahout, PennyLane, and Qiskit.
 - `benchmark_latency.py`: Data-to-State latency benchmark (CPU RAM -> GPU VRAM).
 - `benchmark_phase.py`: GPU phase encoding latency benchmark (batch encode timing).
+- `benchmark_parquet_f32.py`: end-to-end f32 vs f64 Parquet pipeline throughput
+  (vectors/sec and f32/f64 speedup); see [Parquet f32 vs f64](#parquet-f32-vs-f64-throughput).
 
 ## Quick Start
 
@@ -34,9 +36,31 @@ uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_e2e.py
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_latency.py
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_throughput.py
 uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_phase.py
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_parquet_f32.py
 ```
 
 This keeps all benchmark dependencies in the unified repo root venv (`mahout/.venv`).
+
+## Parquet f32 vs f64 throughput
+
+`benchmark_parquet_f32.py` reads the same amplitude data from a Parquet file
+through `QuantumDataLoader` at `dtype("float32")` and `dtype("float64")`, and
+reports vectors/sec for each plus the f32/f64 speedup (issue #1342). The
+expected win is ~25-35% when the Parquet column is native f32.
+
+```bash
+uv run --project qdp/qdp-python python qdp/qdp-python/benchmark/benchmark_parquet_f32.py \
+    --qubits 12 --batches 200 --batch-size 64
+```
+
+By default two temporary files holding the same data — a native
+`FixedSizeList<Float32>` and a native `FixedSizeList<Float64>` — are generated
+and each is read at its matching dtype, so the f32 run measures the zero-copy
+native-f32 path (not a f64→f32 cast). Pass `--parquet PATH` to benchmark your
+own file at both dtypes instead. The generated data is materialized in RAM and
+on disk and grows as `batches * batch_size * 2^qubits`, so raise `--qubits` with
+that cost in mind. Requires an NVIDIA GPU (the native file loader is Linux +
+CUDA only); not run in CI.
 
 ## Manual Setup
 

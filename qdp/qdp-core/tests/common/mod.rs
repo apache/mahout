@@ -17,7 +17,9 @@
 #[cfg(target_os = "linux")]
 use std::sync::Arc;
 
-use arrow::array::{FixedSizeListArray, Float64Array};
+use arrow::array::{
+    Array, FixedSizeListArray, Float32Builder, Float64Array, Float64Builder, ListBuilder,
+};
 use arrow::datatypes::{DataType, Field, Schema};
 use arrow::record_batch::RecordBatch;
 use parquet::arrow::ArrowWriter;
@@ -72,6 +74,79 @@ pub fn write_fixed_size_list_parquet(path: &str, data: &[f64], sample_size: usiz
         false,
     )]));
 
+    let batch = RecordBatch::try_new(schema.clone(), vec![Arc::new(list_array) as _]).unwrap();
+
+    let file = File::create(path).unwrap();
+    let props = WriterProperties::builder().build();
+    let mut writer = ArrowWriter::try_new(file, schema, Some(props)).unwrap();
+    writer.write(&batch).unwrap();
+    writer.close().unwrap();
+}
+
+/// Writes a `List<Float32>` Parquet file; each `sample_size` consecutive values in
+/// `data` form one row. Mirrors [`write_list_parquet_f64`] for the f32 column path
+/// (issue #1342 Parquet f32 fidelity tests).
+#[allow(dead_code)]
+#[allow(clippy::manual_is_multiple_of)]
+pub fn write_list_parquet_f32(path: &str, data: &[f32], sample_size: usize) {
+    assert!(sample_size > 0, "sample_size must be > 0");
+    assert!(
+        data.len() % sample_size == 0,
+        "Data length ({}) must be a multiple of sample size ({})",
+        data.len(),
+        sample_size
+    );
+    use std::fs::File;
+    use std::sync::Arc;
+
+    let mut builder = ListBuilder::new(Float32Builder::new());
+    for row in data.chunks(sample_size) {
+        builder.values().append_slice(row);
+        builder.append(true);
+    }
+    let list_array = builder.finish();
+
+    let schema = Arc::new(Schema::new(vec![Field::new(
+        "data",
+        list_array.data_type().clone(),
+        true,
+    )]));
+    let batch = RecordBatch::try_new(schema.clone(), vec![Arc::new(list_array) as _]).unwrap();
+
+    let file = File::create(path).unwrap();
+    let props = WriterProperties::builder().build();
+    let mut writer = ArrowWriter::try_new(file, schema, Some(props)).unwrap();
+    writer.write(&batch).unwrap();
+    writer.close().unwrap();
+}
+
+/// Writes a `List<Float64>` Parquet file; each `sample_size` consecutive values in
+/// `data` form one row. Companion to [`write_list_parquet_f32`].
+#[allow(dead_code)]
+#[allow(clippy::manual_is_multiple_of)]
+pub fn write_list_parquet_f64(path: &str, data: &[f64], sample_size: usize) {
+    assert!(sample_size > 0, "sample_size must be > 0");
+    assert!(
+        data.len() % sample_size == 0,
+        "Data length ({}) must be a multiple of sample size ({})",
+        data.len(),
+        sample_size
+    );
+    use std::fs::File;
+    use std::sync::Arc;
+
+    let mut builder = ListBuilder::new(Float64Builder::new());
+    for row in data.chunks(sample_size) {
+        builder.values().append_slice(row);
+        builder.append(true);
+    }
+    let list_array = builder.finish();
+
+    let schema = Arc::new(Schema::new(vec![Field::new(
+        "data",
+        list_array.data_type().clone(),
+        true,
+    )]));
     let batch = RecordBatch::try_new(schema.clone(), vec![Arc::new(list_array) as _]).unwrap();
 
     let file = File::create(path).unwrap();
