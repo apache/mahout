@@ -210,8 +210,12 @@ def test_fwt_tc_path_agreement_loose(engine, num_qubits):
     batch_size = 8
     data = make_data(batch_size, num_qubits, seed=42)
 
-    fwt_state = torch.from_dlpack(engine.encode(data, num_qubits, "iqp")).cpu().clone().cpu()
-    tc_state = torch.from_dlpack(engine.encode_batch_tc(data, num_qubits)).clone().cpu().cpu()
+    fwt_state = (
+        torch.from_dlpack(engine.encode(data, num_qubits, "iqp")).cpu().clone().cpu()
+    )
+    tc_state = (
+        torch.from_dlpack(engine.encode_batch_tc(data, num_qubits)).clone().cpu().cpu()
+    )
 
     max_err = (fwt_state - tc_state).abs().max().item()
     # Ensure error is within the Ozaki 7-prime CRT bound (TOLERANCES["large_n"]["atol"])

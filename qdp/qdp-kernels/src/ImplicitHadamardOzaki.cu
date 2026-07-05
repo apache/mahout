@@ -61,15 +61,6 @@ __device__ __forceinline__ size_t get_A8_offset(int r, int c, int m, int k) {
 __global__ void precompute_modulo_kernel_p26_implicit(const double* __restrict__ s, int8_t* __restrict__ d, int r, int c, int m, double sh, double sl) {
     int local_k = threadIdx.x; int local_m = threadIdx.y;
     int tile_k = blockIdx.x; int tile_m = blockIdx.y;
-    const double scale[7] = {
-        64.0,
-        14.0 * 64.0,
-        10.0 * 64.0,
-        9.0 * 64.0,
-        8.0 * 64.0,
-        8.0 * 64.0,
-        7.0 * 64.0
-    };
     size_t padded_size = (size_t)((r + 127) / 128) * ((c + 31) / 32) * 4096;
     int num_tiles_k = (c + 31) / 32;
     int m_idx = (tile_m / 4) * 128 + (tile_m % 4) * 32 + local_m;
@@ -110,14 +101,7 @@ __device__ void implicit_ozaki_process_one_tile(
     constexpr int kTileBytes = 2048;
     constexpr int kBufferCount = SingleBuffer ? 1 : 2;
     constexpr int kPrimeStride = kTileBytes * kBufferCount;
-    double cA[7], cB[7];
-    #pragma unroll
     const uint64_t M = 168897325606883ULL;
-    const uint64_t f[7] = {
-        147618922380819ULL, 112099994871825ULL, 134807957135769ULL,
-        34726552928518ULL, 96747011755399ULL, 130435558389474ULL,
-        19153304965729ULL
-    };
 
     const int total_tiles_m = (m + 63) / 64;
     const int tile_m = (ct % total_tiles_m) * 64;
@@ -354,8 +338,6 @@ __global__ void __launch_bounds__(THREADS, 3) implicit_hadamard_ozaki_fused_batc
     const int wr   = wid / WARPS_C;
     const int wc   = wid % WARPS_C;
 
-    constexpr int kAS = 64*32;
-    constexpr int kBS = 32*64;
     __shared__ alignas(128) double smem_out[64 * 64];
     int8_t* smem = (int8_t*)smem_out;
 
@@ -374,11 +356,6 @@ __global__ void __launch_bounds__(THREADS, 3) implicit_hadamard_ozaki_fused_batc
 
     // Barrett reduction magic: inv_p[i] ≈ floor(2^32 / prime[i]) + 1
     // rem = vp - prime * ((uint64_t)vp * barrett >> 32)
-    constexpr uint32_t kPrime[7]   = {127, 113, 109, 107, 103, 101, 97};
-    constexpr uint64_t kBarrett[7] = {
-        33818641ULL, 37991696ULL, 39408440ULL, 40131153ULL,
-        41680701ULL, 42516781ULL, 44278014ULL
-    };
     const uint64_t M_p[7] = {
         147618922380819ULL, 112099994871825ULL, 134807957135769ULL,
         34726552928518ULL, 96747011755399ULL, 130435558389474ULL,
@@ -562,6 +539,22 @@ void ImplicitHadamardOzakiEngine::execute_implicit_hadamard(const double* d_A, d
     naive_hadamard_ozaki_kernel<<<grid, block, 0, stream>>>(d_A, d_C, m, n, k, norm_factor, transpose_batch, batch_rows);
 }
 
-void ImplicitHadamardOzakiEngine::execute_fused_kronecker_hadamard(const double* d_X, double* d_Z, double* d_Y, int batch_size, int dim, double norm_factor, cudaStream_t stream) {}
+void ImplicitHadamardOzakiEngine::execute_fused_kronecker_hadamard(
+    const double* d_X,
+    double* d_Z,
+    double* d_Y,
+    int batch_size,
+    int dim,
+    double norm_factor,
+    cudaStream_t stream
+) {
+    (void)d_X;
+    (void)d_Z;
+    (void)d_Y;
+    (void)batch_size;
+    (void)dim;
+    (void)norm_factor;
+    (void)stream;
+}
 
 } // namespace ozaki
