@@ -49,17 +49,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Install Rust toolchain
-        shell: bash
-        run: |
-          if ! command -v rustup >/dev/null 2>&1; then
-            curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal --default-toolchain stable
-          else
-            rustup toolchain install stable --profile minimal
-            rustup default stable
-          fi
-          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          "$HOME/.cargo/bin/rustc" --version
-          "$HOME/.cargo/bin/cargo" --version
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
 
       - name: Cargo check (no-CUDA stubs)
         working-directory: qdp
