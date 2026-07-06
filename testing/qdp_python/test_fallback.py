@@ -108,7 +108,13 @@ class TestBackendDetection:
         except ImportError:
             assert is_cuda_available() is False
         else:
-            assert is_cuda_available() == bool(_qdp.cuda_available())
+            probe = getattr(_qdp, "cuda_available", None)
+            if probe is None and hasattr(_qdp, "_qdp"):
+                probe = getattr(_qdp._qdp, "cuda_available", None)
+            if probe is None:
+                assert is_cuda_available() is False
+            else:
+                assert is_cuda_available() == bool(probe())
 
 
 # ---------------------------------------------------------------------------

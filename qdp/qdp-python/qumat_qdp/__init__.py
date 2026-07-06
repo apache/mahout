@@ -57,6 +57,8 @@ def is_cuda_available() -> bool:
     if _qdp_mod is None:
         return False
     probe = getattr(_qdp_mod, "cuda_available", None)
+    if probe is None and hasattr(_qdp_mod, "_qdp"):
+        probe = getattr(_qdp_mod._qdp, "cuda_available", None)
     if probe is None:
         return False
     try:
