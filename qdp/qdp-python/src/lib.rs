@@ -68,6 +68,18 @@ fn run_throughput_pipeline_py(
     ))
 }
 
+/// Returns ``True`` if a usable CUDA device is available to the native engine.
+///
+/// This reflects whether GPU work can actually run -- it is ``False`` for a
+/// stub build (the extension built without the CUDA toolkit) or a host with no
+/// CUDA device, and ``True`` only when the native runtime reports a device.
+/// Importability of this module only means it was built, which a stub build
+/// makes possible without a GPU.
+#[pyfunction]
+fn cuda_available() -> bool {
+    qdp_core::cuda_runtime_available()
+}
+
 /// Quantum Data Plane (QDP) Python module
 ///
 /// GPU-accelerated quantum data encoding with DLPack integration.
@@ -78,6 +90,7 @@ fn _qdp(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     m.add_class::<QdpEngine>()?;
     m.add_class::<QuantumTensor>()?;
+    m.add_function(wrap_pyfunction!(cuda_available, m)?)?;
     #[cfg(target_os = "linux")]
     m.add_class::<PyQuantumLoader>()?;
     #[cfg(target_os = "linux")]

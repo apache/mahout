@@ -44,6 +44,19 @@ pub(crate) const CUDA_SUCCESS: i32 = 0;
 #[allow(dead_code)]
 pub(crate) const CUDA_ERROR_NOT_READY: i32 = 34;
 
+// CUDA Runtime API bindings.
+//
+// On systems with the CUDA Toolkit installed, `qdp-core`'s build script emits
+// `cargo:rustc-link-lib=cudart` and the extern block below is used unchanged.
+//
+// On systems without the toolkit (e.g. driver-only Linux hosts, or macOS),
+// the build script sets `qdp_no_cuda` and the stub block is used instead.
+// Stubs match each extern's signature and return a non-zero sentinel
+// (`QDP_CUDA_UNAVAILABLE`, mirroring qdp-kernels' "999" convention) so the
+// crate links cleanly but any actual GPU call surfaces as a runtime error
+// through the existing `if ret != 0 { Err(...) }` paths in the callers.
+
+#[cfg(not(qdp_no_cuda))]
 unsafe extern "C" {
     pub(crate) fn cudaHostAlloc(pHost: *mut *mut c_void, size: usize, flags: u32) -> i32;
     pub(crate) fn cudaFreeHost(ptr: *mut c_void) -> i32;
@@ -55,6 +68,10 @@ unsafe extern "C" {
     ) -> i32;
 
     pub(crate) fn cudaMemGetInfo(free: *mut usize, total: *mut usize) -> i32;
+
+    /// Number of CUDA-capable devices. Used to detect whether a GPU is
+    /// actually present at runtime (see `cuda_runtime_available`).
+    pub(crate) fn cudaGetDeviceCount(count: *mut i32) -> i32;
 
     pub(crate) fn cudaMemcpyAsync(
         dst: *mut c_void,
@@ -98,4 +115,128 @@ unsafe extern "C" {
     /// Both events must have been created with CUDA_EVENT_DEFAULT flag.
     /// Reference: https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html
     pub(crate) fn cudaEventElapsedTime(ms: *mut f32, start: *mut c_void, end: *mut c_void) -> i32;
+}
+
+// ---------------------------------------------------------------------------
+// Stub implementations when building without the CUDA toolkit (`qdp_no_cuda`).
+//
+// Wrapped in a private module so a single `#[allow(non_snake_case)]` covers
+// all stub names (the originals are camelCase to match the real CUDA Runtime
+// API; the `extern "C"` block above is exempt from this lint, but plain Rust
+// fns are not).
+// ---------------------------------------------------------------------------
+
+#[cfg(qdp_no_cuda)]
+#[allow(non_snake_case)]
+mod no_cuda_stubs {
+    use super::CudaPointerAttributes;
+    use std::ffi::c_void;
+
+    /// Sentinel error code returned by stub CUDA Runtime calls.
+    ///
+    /// Matches the "999" convention used by qdp-kernels' kernel-launcher stubs.
+    const QDP_CUDA_UNAVAILABLE: i32 = 999;
+
+    pub(crate) unsafe fn cudaHostAlloc(_pHost: *mut *mut c_void, _size: usize, _flags: u32) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaFreeHost(_ptr: *mut c_void) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    #[allow(dead_code)]
+    pub(crate) unsafe fn cudaPointerGetAttributes(
+        _attributes: *mut CudaPointerAttributes,
+        _ptr: *const c_void,
+    ) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaMemGetInfo(_free: *mut usize, _total: *mut usize) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaGetDeviceCount(_count: *mut i32) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaMemcpyAsync(
+        _dst: *mut c_void,
+        _src: *const c_void,
+        _count: usize,
+        _kind: u32,
+        _stream: *mut c_void,
+    ) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaEventCreateWithFlags(_event: *mut *mut c_void, _flags: u32) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaEventRecord(_event: *mut c_void, _stream: *mut c_void) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaEventDestroy(_event: *mut c_void) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaStreamWaitEvent(
+        _stream: *mut c_void,
+        _event: *mut c_void,
+        _flags: u32,
+    ) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaStreamSynchronize(_stream: *mut c_void) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaMemsetAsync(
+        _devPtr: *mut c_void,
+        _value: i32,
+        _count: usize,
+        _stream: *mut c_void,
+    ) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    #[allow(dead_code)]
+    pub(crate) unsafe fn cudaEventQuery(_event: *mut c_void) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaEventSynchronize(_event: *mut c_void) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaEventElapsedTime(
+        _ms: *mut f32,
+        _start: *mut c_void,
+        _end: *mut c_void,
+    ) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+}
+
+#[cfg(qdp_no_cuda)]
+pub(crate) use no_cuda_stubs::*;
+
+/// Returns `true` if a usable CUDA device is present at runtime.
+///
+/// This is deliberately distinct from "the extension is importable": a
+/// no-toolkit (`qdp_no_cuda`) build links CUDA stubs that return a non-zero
+/// sentinel, and a host with the toolkit but no GPU reports zero devices. Both
+/// yield `false` here, so callers (and the Python test suite) can gate GPU work
+/// on an accurate signal rather than mere importability.
+pub fn cuda_runtime_available() -> bool {
+    let mut count: i32 = 0;
+    // SAFETY: `cudaGetDeviceCount` writes a single `i32` through `count` and
+    // accesses no other memory. In a `qdp_no_cuda` build this resolves to the
+    // stub above, which returns the unavailable sentinel without dereferencing.
+    let rc = unsafe { cudaGetDeviceCount(&mut count) };
+    rc == CUDA_SUCCESS && count > 0
 }

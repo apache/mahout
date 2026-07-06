@@ -26,6 +26,7 @@ This document describes **repository-wide** setup and workflow. For **subproject
 - [Quick Start](#quick-start)
 - [Development Workflow](#development-workflow)
 - [Testing](#testing)
+- [API Documentation](#api-documentation)
 - [Project-Specific Guides](#project-specific-guides)
 - [Troubleshooting](#troubleshooting)
 - [References](#references)
@@ -130,6 +131,19 @@ You can also run subsets from the repo root:
 | `make test_python` | Python tests via pytest and pytest-cov (syncs dev deps; builds QDP extension if GPU present, then runs full suite). HTML report: `htmlcov/index.html` at repo root. |
 
 See [testing/README.md](testing/README.md) for more options and details.
+
+---
+
+## API Documentation
+
+API reference documentation is generated from source code. To update the Python API reference content, edit the relevant Python docstrings. Use `docs/api/` only for generation settings, page metadata, or other API documentation structure changes. The generated pages are written under `website/docs/api/` for the Docusaurus site.
+
+**Preview documentation locally:**
+
+```bash
+cd website
+npm run start
+```
 
 ---
 

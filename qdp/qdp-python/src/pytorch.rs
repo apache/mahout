@@ -33,12 +33,12 @@ pub fn is_pytorch_tensor(obj: &Bound<'_, PyAny>) -> PyResult<bool> {
     Ok(module_name == "torch")
 }
 
-/// Helper to validate CPU tensor
-pub fn validate_tensor(tensor: &Bound<'_, PyAny>) -> PyResult<()> {
-    if !is_pytorch_tensor(tensor)? {
-        return Err(PyRuntimeError::new_err("Object is not a PyTorch Tensor"));
-    }
-
+/// Validate that a PyTorch tensor lives on the CPU.
+///
+/// The caller must have already confirmed `tensor` is a `torch.Tensor` (e.g.
+/// via [`is_pytorch_tensor`]). This function only checks device placement, so
+/// it also rejects non-CPU backends such as CUDA, MPS, XLA, and HPU.
+pub fn validate_tensor_cpu(tensor: &Bound<'_, PyAny>) -> PyResult<()> {
     let device = tensor.getattr("device")?;
     let device_type: String = device.getattr("type")?.extract()?;
 

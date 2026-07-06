@@ -85,4 +85,5 @@ class QdpTensor:
         return torch.from_dlpack(self)
 
 
+#: Backward-compatible alias for :class:`QdpTensor`.
 QuantumTensor = QdpTensor

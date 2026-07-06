@@ -168,6 +168,9 @@ fn main() {
     println!("cargo:rerun-if-changed=src/phase.cu");
     println!("cargo:rerun-if-env-changed=QDP_NO_CUDA");
     println!("cargo:rerun-if-env-changed=QDP_CUDA_ARCH_LIST");
+    // The whole CUDA-vs-stub decision hinges on finding nvcc on PATH, so a PATH
+    // change (e.g. installing the toolkit) must re-trigger this script.
+    println!("cargo:rerun-if-env-changed=PATH");
     println!("cargo:rerun-if-changed=src/kernel_config.h");
 
     // Check if CUDA is available by looking for nvcc
@@ -175,7 +178,12 @@ fn main() {
         .map(|v| v == "1" || v.eq_ignore_ascii_case("true") || v.eq_ignore_ascii_case("yes"))
         .unwrap_or(false);
 
-    let has_cuda = !force_no_cuda && Command::new("nvcc").arg("--version").output().is_ok();
+    let has_cuda = !force_no_cuda
+        && Command::new("nvcc")
+            .arg("--version")
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false);
 
     if !has_cuda {
         // Expose a cfg for conditional compilation of stub symbols on Linux.

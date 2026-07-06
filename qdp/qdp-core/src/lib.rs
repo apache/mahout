@@ -36,8 +36,9 @@ pub mod types;
 mod profiling;
 
 pub use error::{MahoutError, Result, cuda_error_to_string};
+pub use gpu::cuda_ffi::cuda_runtime_available;
 pub use gpu::memory::Precision;
-pub use reader::{FloatElem, NullHandling, handle_float64_nulls};
+pub use reader::{FloatElem, NullHandling, handle_float32_nulls, handle_float64_nulls};
 pub use types::{Dtype, Encoding};
 
 // Throughput/latency pipeline runner: single path using QdpEngine and encode_batch in Rust.

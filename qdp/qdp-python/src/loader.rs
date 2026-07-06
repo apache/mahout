@@ -83,6 +83,19 @@ mod loader_impl {
         }
     }
 
+    /// Parse an optional Python dtype string into the Rust enum. Defaults to f64 so
+    /// file loads are lossless unless the caller explicitly opts into f32 narrowing.
+    pub fn parse_dtype(s: Option<&str>) -> PyResult<Dtype> {
+        match s {
+            None => Ok(Dtype::Float64),
+            Some(v) => Dtype::from_str_ci(v).map_err(|e| {
+                pyo3::exceptions::PyValueError::new_err(format!(
+                    "Invalid dtype '{v}': {e}. Expected 'float32'/'f32' or 'float64'/'f64'."
+                ))
+            }),
+        }
+    }
+
     /// Build PipelineConfig from Python args. device_id is 0 (engine does not expose it); iterator uses engine clone with correct device.
     #[allow(clippy::too_many_arguments)]
     pub fn config_from_args(
@@ -121,4 +134,6 @@ mod loader_impl {
 }
 
 #[cfg(target_os = "linux")]
-pub use loader_impl::{PyQuantumLoader, config_from_args, parse_null_handling, path_from_py};
+pub use loader_impl::{
+    PyQuantumLoader, config_from_args, parse_dtype, parse_null_handling, path_from_py,
+};

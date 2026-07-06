@@ -5,9 +5,11 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
 import WaveAnimation from '@site/src/components/WaveAnimation';
+import releasedVersions from '../../versions.json';
 
 import styles from './index.module.css';
 
+const latestReleasedVersion = releasedVersions[0] ?? 'next';
 const siteUrl = 'https://mahout.apache.org';
 const pageTitle = 'Apache Mahout';
 const pageDescription =
@@ -87,7 +89,7 @@ function HomepageHeader() {
                 pip install qumat
               </a>
             </div>
-            <p className={styles.versionText}>Currently v0.5</p>
+            <p className={styles.versionText}>Currently v{latestReleasedVersion}</p>
           </div>
         </div>
       </div>
@@ -100,10 +102,10 @@ function Sidebar() {
     <aside className={styles.sidebar}>
       {/* Qumat Release Banner */}
       <div className={styles.sidebarCard}>
-        <div className={styles.cardHeader}>Qumat 0.5 Released!</div>
+        <div className={styles.cardHeader}>Qumat {latestReleasedVersion} Released!</div>
         <div className={styles.cardBody}>
           <p>Mahout's new quantum computing layer for building ML circuits on simulators and real quantum hardware.</p>
-          <Link to="/docs/qumat/getting-started">Download Qumat 0.5 →</Link>
+          <Link to="/docs/qumat/getting-started">Download Qumat {latestReleasedVersion} →</Link>
         </div>
       </div>
 

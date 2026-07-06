@@ -41,9 +41,10 @@ on:
 
 jobs:
   rust-check:
-    # Fast gate: type-check both with and without CUDA stubs so duplicate
-    # stub definitions or cfg mismatches fail in ~30s instead of surfacing
-    # during the slower maturin build below.
+    # Early gate: type-check both with and without CUDA stubs so duplicate
+    # stub definitions or cfg mismatches fail quickly instead of surfacing
+    # during the slower maturin build below. Also runs qdp-core f32 Parquet
+    # CPU smoke tests (issue #1342).
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -66,6 +67,17 @@ jobs:
         env:
           QDP_NO_CUDA: "1"
         run: cargo check --workspace --tests
+
+      # CPU smoke for the f32 Parquet pipeline (issue #1342). No GPU in CI, so
+      # GPU fidelity cases self-skip when the probe finds no functional GPU
+      # (stub build: kernel launch returns Err; no driver: cudarc panics and
+      # catch_unwind treats it as skip). Reader-level assertions still run.
+      # Scoped to these two binaries -- other gpu_*.rs tests lack probe-skip.
+      - name: Cargo test (f32 Parquet CPU smoke)
+        working-directory: qdp
+        env:
+          QDP_NO_CUDA: "1"
+        run: cargo test -p qdp-core --test parquet_f32 --test parquet_f32_fidelity
 
   test:
     needs: rust-check

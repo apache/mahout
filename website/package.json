@@ -5,7 +5,9 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "sync": "node scripts/sync-docs.js",
+    "sync:no-api": "MAHOUT_SKIP_API_DOCS=1 node scripts/sync-docs.js",
     "start": "npm run sync && docusaurus start",
+    "start:no-api": "npm run sync:no-api && docusaurus start --no-open",
     "prebuild": "npm run sync",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
@@ -15,7 +17,7 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "typecheck": "tsc",
-    "version": "docusaurus docs:version"
+    "version": "node scripts/version-docs.js"
   },
   "dependencies": {
     "@docusaurus/core": "3.10.1",

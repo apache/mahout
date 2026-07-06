@@ -1,8 +1,31 @@
 import { themes as prismThemes } from 'prism-react-renderer';
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import { readFileSync } from 'node:fs';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+
+const releasedVersions = JSON.parse(
+  readFileSync(new URL('./versions.json', import.meta.url), 'utf-8'),
+) as string[];
+
+const latestVersion = releasedVersions[0] ?? 'current';
+const docsVersions = Object.fromEntries([
+  [
+    'current',
+    {
+      label: 'master',
+      path: 'master',
+    },
+  ],
+  ...releasedVersions.map((version, index) => [
+    version,
+    {
+      label: index === 0 ? 'latest' : version,
+      path: index === 0 ? '' : version,
+    },
+  ]),
+]);
 
 const config: Config = {
   title: 'Apache Mahout',
@@ -41,27 +64,13 @@ const config: Config = {
       'classic',
       {
         docs: {
-          path: '../docs/',
+          path: './docs/',
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/apache/mahout/tree/main/docs/',
           remarkPlugins: [remarkMath],
           rehypePlugins: [rehypeKatex],
-          // Versioning configuration
-          lastVersion: '0.5',
-          versions: {
-            current: {
-              label: 'next',
-              path: 'next',
-            },
-            '0.5': {
-              label: 'latest', // or '0.5' if preferred
-              path: '',
-            },
-            '0.4': {
-              label: '0.4',
-              path: '0.4',
-            },
-          },
+          lastVersion: latestVersion,
+          versions: docsVersions,
         },
         blog: {
           showReadingTime: true,
@@ -72,7 +81,7 @@ const config: Config = {
           editUrl: 'https://github.com/apache/mahout/tree/main/website-new/',
           blogTitle: 'News & Updates',
           blogDescription: 'Apache Mahout project news, releases, and community updates',
-          postsPerPage: 10,
+          postsPerPage: 'ALL',
           blogSidebarCount: 'ALL',
           remarkPlugins: [remarkMath],
           rehypePlugins: [rehypeKatex],
@@ -102,9 +111,10 @@ const config: Config = {
             return [
               '/docs/download',
               '/docs/download/quickstart',
-              '/docs/next/download',
-              '/docs/next/download/quickstart',
             ];
+          }
+          if (existingPath === '/docs/master/qumat/getting-started') {
+            return ['/docs/next/download', '/docs/next/download/quickstart'];
           }
           return undefined;
         },
@@ -216,9 +226,19 @@ const config: Config = {
         },
         // News (Blog)
         {
-          to: '/blog',
+          type: 'dropdown',
           label: 'News',
           position: 'left',
+          items: [
+            {
+              label: 'Blog',
+              to: '/blog',
+            },
+            {
+              label: 'Meeting Minutes',
+              to: '/blog/minutes',
+            },
+          ],
         },
         // Version dropdown
         {
