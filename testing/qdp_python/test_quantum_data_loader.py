@@ -38,6 +38,7 @@ def _loader_available():
 def _require_loader_cls() -> type[QuantumDataLoaderType]:
     if QuantumDataLoader is None:
         pytest.skip("QuantumDataLoader not available")
+    assert QuantumDataLoader is not None
     return QuantumDataLoader
 
 
