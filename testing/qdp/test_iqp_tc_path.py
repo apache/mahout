@@ -21,6 +21,8 @@ import pytest
 import torch
 from qumat_qdp import QdpEngine
 
+pytestmark = pytest.mark.gpu
+
 TOLERANCES = {
     # N <= 12: shared-mem fusion has full FP64 precision
     "small_n": {"atol": 1e-9, "rtol": 1e-9},
