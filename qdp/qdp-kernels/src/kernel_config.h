@@ -51,13 +51,6 @@
 #define CUDA_MAX_GRID_DIM_1D 2147483647
 
 // ============================================================================
-// Qubit Limits
-// ============================================================================
-// Maximum qubits supported (16GB GPU memory limit)
-// This limit ensures state vectors fit within practical GPU memory constraints
-#define MAX_QUBITS 30
-
-// ============================================================================
 // FWT (Fast Walsh-Hadamard Transform) Configuration
 // ============================================================================
 // Threshold for shared memory FWT optimization
