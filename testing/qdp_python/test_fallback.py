@@ -23,6 +23,8 @@ The PyTorch reference backend must be explicitly selected via
 
 from __future__ import annotations
 
+from typing import cast
+
 import pytest
 
 torch = pytest.importorskip("torch")
@@ -106,7 +108,13 @@ class TestBackendDetection:
         except ImportError:
             assert is_cuda_available() is False
         else:
-            assert is_cuda_available() == bool(_qdp.cuda_available())
+            probe = getattr(_qdp, "cuda_available", None)
+            if probe is None and hasattr(_qdp, "_qdp"):
+                probe = getattr(_qdp._qdp, "cuda_available", None)
+            if probe is None:
+                assert is_cuda_available() is False
+            else:
+                assert is_cuda_available() == bool(probe())
 
 
 # ---------------------------------------------------------------------------
@@ -176,7 +184,7 @@ class TestLoaderPytorchBackend:
         )
         batches = list(loader)
         assert len(batches) == 2
-        assert batches[0].shape == (4, 8)
+        assert cast("torch.Tensor", batches[0]).shape == (4, 8)
 
     def test_synthetic_pytorch_basis(self):
         from qumat_qdp.loader import QuantumDataLoader
@@ -192,7 +200,7 @@ class TestLoaderPytorchBackend:
         batches = list(loader)
         assert len(batches) == 2
         for b in batches:
-            assert b.shape == (3, 4)
+            assert cast("torch.Tensor", b).shape == (3, 4)
 
     def test_file_npy_pytorch(self, tmp_path):
         import numpy as np
@@ -244,7 +252,7 @@ class TestLoaderPytorchBackend:
         )
         batches = list(loader)
         assert len(batches) == 2
-        assert batches[0].shape == (4, 8)
+        assert cast("torch.Tensor", batches[0]).shape == (4, 8)
 
     def test_synthetic_pytorch_iqp_z(self):
         from qumat_qdp.loader import QuantumDataLoader
@@ -259,7 +267,7 @@ class TestLoaderPytorchBackend:
         )
         batches = list(loader)
         assert len(batches) == 2
-        assert batches[0].shape == (4, 8)
+        assert cast("torch.Tensor", batches[0]).shape == (4, 8)
 
     def test_file_pt_pytorch(self, tmp_path):
         from qumat_qdp.loader import QuantumDataLoader

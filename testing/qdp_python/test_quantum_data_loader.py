@@ -18,7 +18,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -38,7 +38,8 @@ def _loader_available():
 def _require_loader_cls() -> type[QuantumDataLoaderType]:
     if QuantumDataLoader is None:
         pytest.skip("QuantumDataLoader not available")
-    return cast("type[QuantumDataLoaderType]", QuantumDataLoader)
+    assert QuantumDataLoader is not None
+    return QuantumDataLoader
 
 
 @pytest.fixture
