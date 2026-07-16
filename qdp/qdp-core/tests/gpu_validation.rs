@@ -127,6 +127,16 @@ fn test_input_validation_max_qubits() {
         }
         _ => panic!("Expected InvalidInput error for max qubits"),
     }
+
+    // Use the platform word size so a missing validation call fails at the shift without
+    // attempting an enormous GPU allocation.
+    let excessive_qubits = usize::BITS as usize;
+    let result = engine.encode_batch_f32(&[1.0_f32], 1, 1, excessive_qubits, "amplitude");
+    assert!(
+        matches!(result, Err(MahoutError::InvalidInput(msg)) if
+            msg.contains("exceeds") && msg.contains(&MAX_QUBITS.to_string())),
+        "f32 batch path should use the shared qubit limit"
+    );
 }
 
 #[test]

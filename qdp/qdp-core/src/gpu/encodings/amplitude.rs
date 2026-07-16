@@ -22,7 +22,7 @@
 
 use std::sync::Arc;
 
-use super::QuantumEncoder;
+use super::{QuantumEncoder, validate_qubit_count};
 #[cfg(target_os = "linux")]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
@@ -308,6 +308,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         num_qubits: usize,
         stream: *mut c_void,
     ) -> Result<GpuStateVector> {
+        validate_qubit_count(num_qubits)?;
         let state_len = 1 << num_qubits;
         if input_len == 0 {
             return Err(MahoutError::InvalidInput(
@@ -371,6 +372,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         num_qubits: usize,
         stream: *mut c_void,
     ) -> Result<GpuStateVector> {
+        validate_qubit_count(num_qubits)?;
         let state_len = 1 << num_qubits;
         if sample_size == 0 {
             return Err(MahoutError::InvalidInput(
@@ -469,6 +471,7 @@ impl QuantumEncoder for AmplitudeEncoder {
     ) -> Result<GpuStateVector> {
         crate::profile_scope!("AmplitudeEncoder::encode_batch_f32");
 
+        validate_qubit_count(num_qubits)?;
         let state_len = 1 << num_qubits;
 
         if sample_size == 0 {
@@ -603,6 +606,7 @@ impl QuantumEncoder for AmplitudeEncoder {
         num_qubits: usize,
         stream: *mut c_void,
     ) -> Result<GpuStateVector> {
+        validate_qubit_count(num_qubits)?;
         let state_len = 1 << num_qubits;
         if sample_size == 0 {
             return Err(MahoutError::InvalidInput(
@@ -859,6 +863,7 @@ impl AmplitudeEncoder {
             ));
         }
 
+        validate_qubit_count(num_qubits)?;
         let state_len = 1usize << num_qubits;
         if input_len > state_len {
             return Err(MahoutError::InvalidInput(format!(
@@ -928,6 +933,7 @@ impl AmplitudeEncoder {
         num_qubits: usize,
         stream: *mut c_void,
     ) -> Result<GpuStateVector> {
+        validate_qubit_count(num_qubits)?;
         let state_len = 1 << num_qubits;
         if num_samples == 0 {
             return Err(MahoutError::InvalidInput(
