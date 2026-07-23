@@ -22,6 +22,7 @@ pub mod dlpack;
 #[cfg(target_os = "linux")]
 mod encoding;
 pub mod error;
+pub mod estimate;
 pub mod gpu;
 pub mod io;
 mod platform;
@@ -36,6 +37,7 @@ pub mod types;
 mod profiling;
 
 pub use error::{MahoutError, Result, cuda_error_to_string};
+pub use estimate::{MemoryEstimate, estimate_memory};
 pub use gpu::cuda_ffi::cuda_runtime_available;
 pub use gpu::memory::Precision;
 pub use reader::{FloatElem, NullHandling, handle_float32_nulls, handle_float64_nulls};
