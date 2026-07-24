@@ -16,6 +16,8 @@
 
 """Smoke and normalization tests for FWT vs Tensor Core IQP paths (GPU vs GPU)."""
 
+import os
+
 import pytest
 import torch
 from qumat_qdp import QdpEngine
@@ -27,14 +29,30 @@ def _iqp_param_count(num_qubits: int) -> int:
 
 @pytest.fixture(scope="module")
 def engine():
+    require_gpu = os.environ.get("QDP_REQUIRE_GPU", "0") == "1"
+
     try:
         eng = QdpEngine(device_id=0, precision="float64")
     except Exception as exc:
+        if require_gpu:
+            pytest.fail(f"QDP_REQUIRE_GPU=1 but QdpEngine init failed: {exc}")
         pytest.skip(f"Could not initialize QdpEngine: {exc}")
+        return
+
     if not hasattr(eng, "encode_batch_tc"):
+        if require_gpu:
+            pytest.fail(
+                "QDP_REQUIRE_GPU=1 but encode_batch_tc not available in this build"
+            )
         pytest.skip("encode_batch_tc not available in this build")
+        return
+
     if not torch.cuda.is_available():
+        if require_gpu:
+            pytest.fail("QDP_REQUIRE_GPU=1 but CUDA not available")
         pytest.skip("CUDA not available")
+        return
+
     return eng
 
 

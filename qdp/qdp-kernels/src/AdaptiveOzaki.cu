@@ -91,6 +91,14 @@ __device__ __forceinline__ void ldmatrix_x2_int8(uint32_t* d, void* smem_ptr) {
         : "=r"(d[0]), "=r"(d[1]) : "r"(smem_addr));
 }
 
+#define CHECK_ALLOC(call) do { \
+    cudaError_t _e = (call); \
+    if (_e != cudaSuccess) { \
+        freeWorkspace(); \
+        return; \
+    } \
+} while(0)
+
 AdaptiveOzakiEngine::AdaptiveOzakiEngine(const OzakiConfig& config) : config_(config) {
 }
 AdaptiveOzakiEngine::~AdaptiveOzakiEngine() {
@@ -99,25 +107,26 @@ AdaptiveOzakiEngine::~AdaptiveOzakiEngine() {
 
 void AdaptiveOzakiEngine::allocateWorkspace(int m, int n, int k) {
     if (workspace_allocated_) freeWorkspace();
+
     int nm = (m + 127) / 128, nn = (n + 127) / 128;
-    cudaMalloc(&dmA_h, nm * 8); cudaMalloc(&dmA_l, nm * 8);
-    cudaMalloc(&dmB_h, nn * 8); cudaMalloc(&dmB_l, nn * 8);
+    CHECK_ALLOC(cudaMalloc(&dmA_h, nm * 8)); CHECK_ALLOC(cudaMalloc(&dmA_l, nm * 8));
+    CHECK_ALLOC(cudaMalloc(&dmB_h, nn * 8)); CHECK_ALLOC(cudaMalloc(&dmB_l, nn * 8));
 
     size_t padded_mk = (size_t)((m + 127) / 128) * ((k + 31) / 32) * 4096;
     size_t padded_kn = (size_t)((n + 63) / 64) * ((k + 31) / 32) * 2048;
-    cudaMalloc(&dA8_h, 7ULL * padded_mk); cudaMalloc(&dA8_l, 7ULL * padded_mk);
-    cudaMalloc(&dB8_h, 7ULL * padded_kn); cudaMalloc(&dB8_l, 7ULL * padded_kn);
+    CHECK_ALLOC(cudaMalloc(&dA8_h, 7ULL * padded_mk)); CHECK_ALLOC(cudaMalloc(&dA8_l, 7ULL * padded_mk));
+    CHECK_ALLOC(cudaMalloc(&dB8_h, 7ULL * padded_kn)); CHECK_ALLOC(cudaMalloc(&dB8_l, 7ULL * padded_kn));
 
     size_t mk = (size_t)m * k;
     size_t kn = (size_t)k * n;
-    cudaMalloc(&dA_hi_f32, mk * sizeof(float));
-    cudaMalloc(&dA_low_f32, mk * sizeof(float));
-    cudaMalloc(&dB_hi_f32, kn * sizeof(float));
-    cudaMalloc(&dB_low_f32, kn * sizeof(float));
-    cudaMalloc(&d_global_work_queue, sizeof(int));
+    CHECK_ALLOC(cudaMalloc(&dA_hi_f32, mk * sizeof(float)));
+    CHECK_ALLOC(cudaMalloc(&dA_low_f32, mk * sizeof(float)));
+    CHECK_ALLOC(cudaMalloc(&dB_hi_f32, kn * sizeof(float)));
+    CHECK_ALLOC(cudaMalloc(&dB_low_f32, kn * sizeof(float)));
+    CHECK_ALLOC(cudaMalloc(&d_global_work_queue, sizeof(int)));
 
     workspace_allocated_ = true;
-    }
+}
 
     void AdaptiveOzakiEngine::freeWorkspace() {
     if (!workspace_allocated_) return;
@@ -1350,33 +1359,3 @@ void AdaptiveOzakiEngine::accumulateFusedSlicedProductWMMA(const double* d_A, co
 }
 
 } // namespace ozaki
-
-// PR6: Hook up AdaptiveOzakiEngine for mixed-precision graded-ring Tensor Core
-// operations on *non-Hadamard* (arbitrary matrix) logic. This complements the
-// ImplicitHadamardOzakiEngine (specialized for +/-1 Hadamard structure in IQP FWT)
-// and finalizes the full TC-accelerated pipeline for general GEMM use cases in QDP.
-extern "C" int launch_adaptive_ozaki_gemm(
-    const double* dA,
-    const double* dB,
-    double* dC,
-    int m, int n, int k,
-    cudaStream_t stream
-) {
-    // Default to hybrid mode for best mixed FP64/INT8 TC performance on modern GPUs (sm_80+).
-    // Caller can extend later to pass config.
-    ozaki::OzakiConfig config;
-    config.mode = ozaki::ExecutionMode::Phase26HybridOzaki;
-
-    ozaki::AdaptiveOzakiEngine engine(config);
-    // execute() manages its own workspace and internal streams for hybrid path.
-    // For stream forwarding in future: extend execute() signature or use events.
-    engine.execute(dA, dB, dC, m, n, k);
-
-    // Best-effort: if a stream was provided by caller, honor a sync for safety
-    // (engine may have used internal streams). Real production path should refine this.
-    if (stream) {
-        cudaStreamSynchronize(stream);
-    }
-
-    return static_cast<int>(cudaGetLastError());
-}

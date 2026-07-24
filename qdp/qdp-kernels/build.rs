@@ -26,9 +26,15 @@
 use std::env;
 use std::process::Command;
 
-const DEFAULT_CUBIN_ARCHES: &[&str] = &["80", "86", "89", "90", "100", "120"];
-const DEFAULT_PTX_CANDIDATES: &[&str] = &["120", "100", "90", "89", "86", "80"];
-const LEGACY_FALLBACK_ARCHES: &[&str] = &["80", "86"];
+// Legacy kernels (iqp.cu, amplitude.cu, etc.) — support Turing (sm_75) and above
+const DEFAULT_CUBIN_ARCHES: &[&str] = &["75", "80", "86", "89", "90", "100", "120"];
+const DEFAULT_PTX_CANDIDATES: &[&str] = &["120", "100", "90", "89", "86", "80", "75"];
+const LEGACY_FALLBACK_ARCHES: &[&str] = &["75", "80", "86"];
+
+// Ozaki TC kernels require sm_80+ (mma.sync.aligned.m16n8k32.s8, ldmatrix)
+const OZAKI_CUBIN_ARCHES: &[&str] = &["80", "86", "89", "90", "100", "120"];
+const OZAKI_PTX_CANDIDATES: &[&str] = &["120", "100", "90", "89", "86", "80"];
+const OZAKI_FALLBACK_ARCHES: &[&str] = &["80", "86"];
 
 fn add_sm_target(build: &mut cc::Build, arch: &str) {
     build.flag("-gencode");
@@ -219,6 +225,7 @@ fn main() {
         apply_default_arch_targets(&mut build);
     }
 
+    // --- Build 1: Legacy kernels (sm_75+) ---
     build
         .file("src/amplitude.cu")
         .file("src/basis.cu")
@@ -226,8 +233,54 @@ fn main() {
         .file("src/validation.cu")
         .file("src/iqp.cu")
         .file("src/iqp_tc.cu")
-        .file("src/ImplicitHadamardOzaki.cu")
-        .file("src/AdaptiveOzaki.cu") // hook up general AdaptiveOzakiEngine for non-Hadamard graded-ring TC GEMM
         .file("src/phase.cu")
         .compile("kernels");
+
+    // --- Build 2: Ozaki TC kernels (sm_80+ only) ---
+    let mut build_ozaki = cc::Build::new();
+    build_ozaki.include(format!("{}/include", cuda_path));
+    build_ozaki.include("src");
+    build_ozaki
+        .cuda(true)
+        .flag("-cudart=shared")
+        .flag("-std=c++17");
+
+    {
+        let supported_sm = query_nvcc_list("--list-gpu-code");
+        let supported_compute = query_nvcc_list("--list-gpu-arch");
+        if supported_sm.is_empty() && supported_compute.is_empty() {
+            for arch in OZAKI_FALLBACK_ARCHES {
+                add_sm_target(&mut build_ozaki, arch);
+            }
+        } else {
+            let cubin_arches = if supported_sm.is_empty() {
+                &supported_compute
+            } else {
+                &supported_sm
+            };
+            let mut added = false;
+            for arch in OZAKI_CUBIN_ARCHES {
+                if nvcc_supports(cubin_arches, arch) {
+                    add_sm_target(&mut build_ozaki, arch);
+                    added = true;
+                }
+            }
+            if !added {
+                for arch in OZAKI_FALLBACK_ARCHES {
+                    add_sm_target(&mut build_ozaki, arch);
+                }
+            }
+            if let Some(ptx_arch) = OZAKI_PTX_CANDIDATES
+                .iter()
+                .find(|a| nvcc_supports(&supported_compute, a))
+            {
+                add_ptx_target(&mut build_ozaki, ptx_arch);
+            }
+        }
+    }
+
+    build_ozaki
+        .file("src/ImplicitHadamardOzaki.cu")
+        .file("src/AdaptiveOzaki.cu")
+        .compile("kernels_ozaki");
 }
