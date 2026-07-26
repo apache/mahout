@@ -1,0 +1,52 @@
+.pageShell {
+  margin: 0 auto;
+  max-width: 1200px;
+  padding: 2.5rem var(--ifm-spacing-horizontal) 4rem;
+}
+
+.articleGrid {
+  align-items: start;
+  display: grid;
+  gap: 4rem;
+  grid-template-columns: minmax(0, 48rem) 15rem;
+  justify-content: center;
+}
+
+.articleColumn {
+  min-width: 0;
+}
+
+.tocPanel {
+  border-left: 1px solid var(--ifm-color-emphasis-200);
+  padding-left: 1rem;
+  position: sticky;
+  top: calc(var(--ifm-navbar-height) + 1.5rem);
+}
+
+.tocTitle {
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}
+
+.paginator {
+  margin: 3rem 0 0;
+  max-width: 48rem;
+}
+
+@media (max-width: 996px) {
+  .pageShell {
+    padding-top: 1.5rem;
+  }
+
+  .articleGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tocPanel {
+    display: none;
+  }
+}

@@ -150,16 +150,12 @@ impl DataReader for ArrowIPCReader {
                             MahoutError::Io("Failed to downcast to ListArray".to_string())
                         })?;
 
+                    // Phase 1: find sample_size from non-null rows and validate consistency.
                     for i in 0..list_array.len() {
-                        let value_array = list_array.value(i);
-                        let float_array = value_array
-                            .as_any()
-                            .downcast_ref::<Float64Array>()
-                            .ok_or_else(|| {
-                                MahoutError::Io("List values must be Float64".to_string())
-                            })?;
-
-                        let current_size = float_array.len();
+                        if list_array.is_null(i) {
+                            continue;
+                        }
+                        let current_size = list_array.value_length(i) as usize;
 
                         if let Some(expected) = sample_size {
                             if current_size != expected {
@@ -180,10 +176,53 @@ impl DataReader for ArrowIPCReader {
                                 })?;
                             all_data.reserve(new_capacity);
                         }
+                    }
 
+                    // Phase 2: collect data, handling null outer rows per NullHandling policy.
+                    if list_array.null_count() == 0 {
+                        let values = list_array.values();
+                        let float_array = values
+                            .as_any()
+                            .downcast_ref::<Float64Array>()
+                            .ok_or_else(|| MahoutError::Io("Values must be Float64".to_string()))?;
                         handle_float64_nulls(&mut all_data, float_array, self.null_handling)?;
-
-                        num_samples += 1;
+                        num_samples += list_array.len();
+                    } else {
+                        for i in 0..list_array.len() {
+                            if list_array.is_null(i) {
+                                match self.null_handling {
+                                    NullHandling::Reject => {
+                                        return Err(MahoutError::InvalidInput(
+                                            "Null outer row in List column. Use \
+                                             NullHandling::FillZero to replace with zeros, \
+                                             or clean the data at the source."
+                                                .to_string(),
+                                        ));
+                                    }
+                                    NullHandling::FillZero => {
+                                        if let Some(ss) = sample_size {
+                                            all_data.extend(std::iter::repeat_n(0.0_f64, ss));
+                                            num_samples += 1;
+                                        }
+                                        // sample_size unknown: skip this null row without counting it.
+                                    }
+                                }
+                            } else {
+                                let value_array = list_array.value(i);
+                                let float_array = value_array
+                                    .as_any()
+                                    .downcast_ref::<Float64Array>()
+                                    .ok_or_else(|| {
+                                        MahoutError::Io("List values must be Float64".to_string())
+                                    })?;
+                                handle_float64_nulls(
+                                    &mut all_data,
+                                    float_array,
+                                    self.null_handling,
+                                )?;
+                                num_samples += 1;
+                            }
+                        }
                     }
                 }
 
@@ -200,5 +239,159 @@ impl DataReader for ArrowIPCReader {
             .ok_or_else(|| MahoutError::Io("Arrow file contains no data".to_string()))?;
 
         Ok((all_data, num_samples, sample_size))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use arrow::array::{ArrayRef, Float64Builder, ListBuilder, RecordBatch};
+    use arrow::datatypes::{DataType, Field, Schema};
+    use arrow::ipc::writer::FileWriter as ArrowIpcFileWriter;
+    use std::fs;
+    use std::sync::Arc;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    static TEST_FILE_COUNTER: AtomicUsize = AtomicUsize::new(0);
+
+    struct TempTestFile {
+        path: std::path::PathBuf,
+    }
+
+    impl TempTestFile {
+        fn new() -> Self {
+            let count = TEST_FILE_COUNTER.fetch_add(1, Ordering::SeqCst);
+            let path = std::env::temp_dir().join(format!(
+                "mahout_test_arrow_ipc_{}_{}.arrow",
+                std::process::id(),
+                count
+            ));
+            Self { path }
+        }
+
+        fn path(&self) -> &std::path::Path {
+            &self.path
+        }
+    }
+
+    impl Drop for TempTestFile {
+        fn drop(&mut self) {
+            let _ = fs::remove_file(&self.path);
+        }
+    }
+
+    fn write_test_arrow_ipc(schema: Arc<Schema>, arrays: Vec<ArrayRef>) -> TempTestFile {
+        let file = TempTestFile::new();
+        let batch = RecordBatch::try_new(schema.clone(), arrays).unwrap();
+        let os_file = fs::File::create(file.path()).unwrap();
+        let mut writer = ArrowIpcFileWriter::try_new(os_file, &schema).unwrap();
+        writer.write(&batch).unwrap();
+        writer.finish().unwrap();
+        file
+    }
+
+    fn write_ipc_list_with_null_outer_middle() -> TempTestFile {
+        // [[1.0, 2.0], null, [3.0, 4.0]]
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::List(item_field.clone()), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = ListBuilder::new(Float64Builder::new());
+        builder.values().append_slice(&[1.0, 2.0]);
+        builder.append(true);
+        builder.append(false); // null outer row
+        builder.values().append_slice(&[3.0, 4.0]);
+        builder.append(true);
+        let array = Arc::new(builder.finish()) as ArrayRef;
+
+        write_test_arrow_ipc(schema, vec![array])
+    }
+
+    fn write_ipc_list_with_null_outer_first() -> TempTestFile {
+        // [null, [1.0, 2.0], [3.0, 4.0]] — null row at position 0
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::List(item_field.clone()), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = ListBuilder::new(Float64Builder::new());
+        builder.append(false); // null outer row at position 0
+        builder.values().append_slice(&[1.0, 2.0]);
+        builder.append(true);
+        builder.values().append_slice(&[3.0, 4.0]);
+        builder.append(true);
+        let array = Arc::new(builder.finish()) as ArrayRef;
+
+        write_test_arrow_ipc(schema, vec![array])
+    }
+
+    #[test]
+    fn test_arrow_ipc_reader_null_outer_row_middle_fill_zero() {
+        // [[1,2], null, [3,4]] with FillZero → [1,2, 0,0, 3,4]
+        let file = write_ipc_list_with_null_outer_middle();
+        let mut reader = ArrowIPCReader::new(file.path(), NullHandling::FillZero).unwrap();
+        let (data, num_samples, sample_size) = reader.read_batch().unwrap();
+        assert_eq!(data, vec![1.0, 2.0, 0.0, 0.0, 3.0, 4.0]);
+        assert_eq!(num_samples, 3);
+        assert_eq!(sample_size, 2);
+    }
+
+    #[test]
+    fn test_arrow_ipc_reader_null_outer_row_middle_reject() {
+        // [[1,2], null, [3,4]] with Reject → error
+        let file = write_ipc_list_with_null_outer_middle();
+        let mut reader = ArrowIPCReader::new(file.path(), NullHandling::Reject).unwrap();
+        let result = reader.read_batch();
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("Null outer row"));
+    }
+
+    #[test]
+    fn test_arrow_ipc_reader_null_outer_row_first_fill_zero() {
+        // [null, [1,2], [3,4]] — null at row 0 must not corrupt sample_size
+        let file = write_ipc_list_with_null_outer_first();
+        let mut reader = ArrowIPCReader::new(file.path(), NullHandling::FillZero).unwrap();
+        let (data, num_samples, sample_size) = reader.read_batch().unwrap();
+        assert_eq!(data, vec![0.0, 0.0, 1.0, 2.0, 3.0, 4.0]);
+        assert_eq!(num_samples, 3);
+        assert_eq!(sample_size, 2);
+    }
+
+    #[test]
+    fn test_arrow_ipc_reader_cross_batch_all_null_first_fill_zero() {
+        // Batch 1: [null, null]   — sample_size unknown
+        // Batch 2: [[1,2], [3,4]] — sample_size established here
+        // All-null leading batch must not corrupt num_samples.
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::List(item_field.clone()), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut b1 = ListBuilder::new(Float64Builder::new());
+        b1.append(false);
+        b1.append(false);
+        let batch1 =
+            RecordBatch::try_new(schema.clone(), vec![Arc::new(b1.finish()) as ArrayRef]).unwrap();
+
+        let mut b2 = ListBuilder::new(Float64Builder::new());
+        b2.values().append_slice(&[1.0, 2.0]);
+        b2.append(true);
+        b2.values().append_slice(&[3.0, 4.0]);
+        b2.append(true);
+        let batch2 =
+            RecordBatch::try_new(schema.clone(), vec![Arc::new(b2.finish()) as ArrayRef]).unwrap();
+
+        let file = TempTestFile::new();
+        {
+            let os_file = fs::File::create(file.path()).unwrap();
+            let mut writer = ArrowIpcFileWriter::try_new(os_file, &schema).unwrap();
+            writer.write(&batch1).unwrap();
+            writer.write(&batch2).unwrap();
+            writer.finish().unwrap();
+        }
+
+        let mut reader = ArrowIPCReader::new(file.path(), NullHandling::FillZero).unwrap();
+        let (data, num_samples, sample_size) = reader.read_batch().unwrap();
+        assert_eq!(data, vec![1.0, 2.0, 3.0, 4.0]);
+        assert_eq!(num_samples, 2);
+        assert_eq!(sample_size, 2);
     }
 }

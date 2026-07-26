@@ -44,6 +44,10 @@ if TYPE_CHECKING:
 # Seed must fit Rust u64: 0 <= seed <= 2^64 - 1.
 _U64_MAX = 2**64 - 1
 
+# Accepted dtype aliases for .dtype(); forwarded verbatim to the native loader,
+# which parses them case-insensitively (Dtype::from_str_ci).
+_VALID_DTYPES = frozenset({"float32", "f32", "float64", "f64"})
+
 # Canonical encoding names (must match Encoding enum in qdp-core/src/types.rs).
 _VALID_ENCODINGS: frozenset[str] = frozenset(
     {"amplitude", "angle", "basis", "iqp", "iqp-z", "phase"}
@@ -271,6 +275,16 @@ class QuantumDataLoader:
         encoding_method: str = "amplitude",
         seed: int | None = None,
     ) -> None:
+        """Create a loader builder with default synthetic batching settings.
+
+        :param device_id: GPU device ordinal used by native and PyTorch backends.
+        :param num_qubits: Number of qubits in each encoded output state.
+        :param batch_size: Number of samples per emitted batch.
+        :param total_batches: Maximum number of batches to emit.
+        :param encoding_method: Encoding method name.
+        :param seed: Optional synthetic data seed.
+        :raises ValueError: If any initial setting is invalid.
+        """
         _validate_loader_args(
             device_id=device_id,
             num_qubits=num_qubits,
@@ -292,6 +306,7 @@ class QuantumDataLoader:
         self._synthetic_requested = False  # set True only by source_synthetic()
         self._file_requested = False
         self._null_handling: str | None = None
+        self._dtype: str | None = None  # None -> native default (float64, lossless)
         self._backend_name: str = _BACKEND_RUST
 
     def qubits(self, n: int) -> QuantumDataLoader:
@@ -400,6 +415,13 @@ class QuantumDataLoader:
         Remote ``s3://`` and ``gs://`` paths are accepted when the native remote
         I/O feature is enabled; remote query strings and fragments are rejected.
 
+        Element precision is controlled by :meth:`dtype`. By default file input is
+        loaded as ``float64`` (lossless). Selecting ``dtype("float32")`` narrows f64
+        file contents to f32 on load; values outside the f32 range become ``±Inf``.
+        ``basis`` encoding is exempt: its values are integer state indices, so it is
+        always loaded as f64 and an explicit ``float32`` request is rejected when an
+        index exceeds f32's exact integer range (``2**24``).
+
         :param path: Local or supported remote input path.
         :param streaming: Whether to request native streaming file loading.
         :returns: ``self`` for fluent builder chaining.
@@ -423,6 +445,25 @@ class QuantumDataLoader:
         self._file_path = path
         self._file_requested = True
         self._streaming_requested = streaming
+        return self
+
+    def dtype(self, name: str) -> QuantumDataLoader:
+        """Set the element precision used when loading file sources.
+
+        Applies to the native :meth:`source_file` path. ``"float64"`` (the default)
+        loads file contents losslessly; ``"float32"`` narrows them to f32 on load.
+        See :meth:`source_file` for the cast caveats, including the ``basis``
+        exemption.
+
+        :param name: ``"float32"``/``"f32"`` or ``"float64"``/``"f64"`` (case-insensitive).
+        :returns: ``self`` for fluent builder chaining.
+        :raises ValueError: If ``name`` is not a recognized dtype.
+        """
+        if not isinstance(name, str) or name.strip().lower() not in _VALID_DTYPES:
+            raise ValueError(
+                f"dtype must be one of {sorted(_VALID_DTYPES)}, got {name!r}"
+            )
+        self._dtype = name.strip().lower()
         return self
 
     def seed(self, s: int | None = None) -> QuantumDataLoader:
@@ -570,6 +611,7 @@ class QuantumDataLoader:
                     encoding_method=self._encoding_method,
                     batch_limit=None,
                     null_handling=self._null_handling,
+                    dtype=self._dtype,
                 )
             )
         create_synthetic_loader = getattr(engine, "create_synthetic_loader", None)

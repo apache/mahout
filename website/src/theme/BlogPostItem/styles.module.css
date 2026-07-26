@@ -1,0 +1,133 @@
+.meta {
+  align-items: center;
+  color: var(--ifm-color-emphasis-600);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.86rem;
+  font-weight: 700;
+  gap: 0.45rem;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.listItem {
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  padding: 0 0 1.75rem;
+}
+
+.listTitle {
+  font-size: clamp(1.6rem, 3vw, 2.35rem);
+  letter-spacing: 0;
+  line-height: 1.08;
+  margin: 0.65rem 0 0.85rem;
+}
+
+.listTitle a {
+  color: var(--ifm-font-color-base);
+}
+
+.listTitle a:hover {
+  color: var(--ifm-link-hover-color);
+  text-decoration: none;
+}
+
+.listAuthors {
+  margin-bottom: 0.6rem;
+}
+
+.listAuthors :global(.avatar) {
+  margin-bottom: 0;
+}
+
+.listContent {
+  color: var(--ifm-color-emphasis-800);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.listContent > :last-child {
+  margin-bottom: 0;
+}
+
+.listItem :global(footer) {
+  margin-top: 1rem;
+}
+
+.article {
+  margin: 0 auto;
+  max-width: 48rem;
+}
+
+.articleHeader {
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  margin-bottom: 2.5rem;
+  padding: 1.25rem 0 2rem;
+}
+
+.breadcrumb {
+  color: var(--ifm-color-primary-darkest);
+  display: inline-flex;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 2.25rem;
+  text-transform: uppercase;
+}
+
+.breadcrumb::before {
+  content: '<';
+  margin-right: 0.4rem;
+}
+
+.articleTitle {
+  font-size: clamp(2.15rem, 4.6vw, 3.85rem);
+  letter-spacing: 0;
+  line-height: 1.05;
+  margin: 0.9rem 0 1.4rem;
+}
+
+.articleContent {
+  font-size: 1.06rem;
+  line-height: 1.78;
+}
+
+.articleContent :global(h2) {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+  font-size: clamp(1.65rem, 3vw, 2.2rem);
+  letter-spacing: 0;
+  margin-top: 3rem;
+  padding-top: 2rem;
+}
+
+.articleContent :global(h3) {
+  font-size: 1.35rem;
+  letter-spacing: 0;
+  margin-top: 2rem;
+}
+
+.articleContent :global(img) {
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+}
+
+.article :global(footer) {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+}
+
+@media (max-width: 996px) {
+  .article {
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .articleHeader {
+    padding-top: 0.5rem;
+  }
+
+  .breadcrumb {
+    margin-bottom: 1.5rem;
+  }
+}

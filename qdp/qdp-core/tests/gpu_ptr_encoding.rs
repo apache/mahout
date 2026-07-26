@@ -19,6 +19,8 @@
 #![cfg(target_os = "linux")]
 
 use cudarc::driver::{DevicePtr, DeviceSlice};
+use qdp_core::gpu::encodings::MAX_QUBITS;
+use qdp_core::gpu::{AmplitudeEncoder, QuantumEncoder};
 use qdp_core::{MahoutError, Precision, QdpEngine};
 use std::ffi::c_void;
 
@@ -40,7 +42,58 @@ fn engine_f32() -> Option<QdpEngine> {
     common::qdp_engine_with_precision(Precision::Float32)
 }
 
+fn assert_max_qubits_error<T>(result: qdp_core::Result<T>) {
+    assert!(
+        matches!(result, Err(MahoutError::InvalidInput(msg)) if
+            msg.contains("exceeds") && msg.contains(&MAX_QUBITS.to_string())),
+        "amplitude GPU-pointer path should use the shared qubit limit"
+    );
+}
+
 // ---- Validation / error-path tests (return before using pointer) ----
+
+#[test]
+fn test_amplitude_gpu_pointer_paths_reject_excessive_qubits() {
+    let Some(engine) = common::qdp_engine() else {
+        return;
+    };
+
+    let Some((_f64_device, f64_data_d)) = common::copy_f64_to_device(&[1.0]) else {
+        return;
+    };
+    let Some((f32_device, f32_data_d)) = common::copy_f32_to_device(&[1.0_f32]) else {
+        return;
+    };
+    let f64_ptr = *f64_data_d.device_ptr() as *const f64 as *const c_void;
+    let f32_ptr = *f32_data_d.device_ptr() as *const f32;
+
+    // Use the platform word size so a missing validation call fails at the shift without
+    // attempting an enormous GPU allocation.
+    let excessive_qubits = usize::BITS as usize;
+
+    assert_max_qubits_error(unsafe {
+        engine.encode_from_gpu_ptr(f64_ptr, 1, excessive_qubits, "amplitude")
+    });
+    assert_max_qubits_error(unsafe {
+        engine.encode_batch_from_gpu_ptr(f64_ptr, 1, 1, excessive_qubits, "amplitude")
+    });
+    assert_max_qubits_error(unsafe {
+        engine.encode_from_gpu_ptr_f32(f32_ptr, 1, excessive_qubits)
+    });
+    assert_max_qubits_error(unsafe {
+        engine.encode_batch_from_gpu_ptr_f32(f32_ptr, 1, 1, excessive_qubits)
+    });
+    assert_max_qubits_error(unsafe {
+        AmplitudeEncoder.encode_batch_from_gpu_ptr_f32(
+            &f32_device,
+            f32_ptr as *const c_void,
+            1,
+            1,
+            excessive_qubits,
+            std::ptr::null_mut(),
+        )
+    });
+}
 
 #[test]
 fn test_encode_from_gpu_ptr_unknown_method() {

@@ -44,6 +44,27 @@ else:
 
 BACKEND = get_backend()
 
+
+def is_cuda_available() -> bool:
+    """Return whether a usable CUDA device is available to the native engine.
+
+    Unlike the importability of the ``_qdp`` extension -- which only means it
+    was built, possibly against CUDA stubs on a host without the toolkit -- this
+    reflects whether GPU work can actually run: ``False`` for a stub build or a
+    host with no CUDA device, ``True`` only when the native runtime reports at
+    least one device.
+    """
+    if _qdp_mod is None:
+        return False
+    probe = getattr(_qdp_mod, "cuda_available", None)
+    if probe is None:
+        return False
+    try:
+        return bool(probe())
+    except Exception:
+        return False
+
+
 from qumat_qdp.api import (
     LatencyResult,
     QdpBenchmark,
@@ -68,6 +89,7 @@ __all__ = [
     "ThroughputResult",
     "TritonAmdEngine",
     "force_backend",
+    "is_cuda_available",
     "is_triton_amd_available",
     "run_throughput_pipeline_py",
 ]

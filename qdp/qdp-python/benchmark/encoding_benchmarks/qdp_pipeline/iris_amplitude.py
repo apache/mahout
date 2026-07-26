@@ -322,9 +322,12 @@ def _run_training_gpu(
 ) -> dict[str, Any]:
     """GPU path: lightning.gpu + PyTorch interface, data stays on GPU. Optional early stop every 100 steps."""
     device = encoded_train.device
-    dtype = encoded_train.dtype
-    Y_train_t = torch.tensor(Y_train, dtype=dtype, device=device)
-    Y_test_t = torch.tensor(Y_test, dtype=dtype, device=device)
+    # Encoded data may be complex (from QDP); use real dtype for weights, bias and labels.
+    real_dtype = (
+        torch.float64 if encoded_train.dtype == torch.complex128 else torch.float32
+    )
+    Y_train_t = torch.tensor(Y_train, dtype=real_dtype, device=device)
+    Y_test_t = torch.tensor(Y_test, dtype=real_dtype, device=device)
 
     @qml.qnode(dev_qml, interface="torch", diff_method="adjoint")
     def circuit(weights, state_vector):
@@ -341,10 +344,12 @@ def _run_training_gpu(
         return torch.mean((Y_batch - preds) ** 2)
 
     torch.manual_seed(seed)
-    weights = 0.01 * torch.randn(
-        num_layers, NUM_QUBITS, 3, device=device, dtype=dtype, requires_grad=True
+    weights = (
+        (0.01 * torch.randn(num_layers, NUM_QUBITS, 3, device=device, dtype=real_dtype))
+        .detach()
+        .requires_grad_(True)
     )
-    bias = torch.tensor(0.0, device=device, dtype=dtype, requires_grad=True)
+    bias = torch.tensor(0.0, device=device, dtype=real_dtype, requires_grad=True)
     opt = torch.optim.SGD([weights, bias], lr=lr, momentum=0.9, nesterov=True)
 
     t0 = time.perf_counter()

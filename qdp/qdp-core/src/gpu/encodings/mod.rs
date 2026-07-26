@@ -26,7 +26,7 @@ use cudarc::driver::CudaDevice;
 use std::ffi::c_void;
 
 /// Maximum number of qubits supported (16GB GPU memory limit)
-/// This constant must match MAX_QUBITS in qdp-kernels/src/kernel_config.h
+/// Shared by all QDP encoder validation paths.
 pub const MAX_QUBITS: usize = 30;
 
 /// Validates qubit count against practical limits.

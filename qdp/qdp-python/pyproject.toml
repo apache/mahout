@@ -31,7 +31,7 @@ dynamic = ["version"]
 [dependency-groups]
 dev = [
     "pytest",
-    "torch>=2.2,<=2.9.0",
+    "torch>=2.2,<=2.12.0",
     "triton>=3.0",
 ]
 benchmark = [
@@ -39,7 +39,7 @@ benchmark = [
     "pandas>=2.0",
     "pyarrow>=14.0",
     "tensorflow>=2.20",
-    "torch>=2.2,<=2.9.0",
+    "torch>=2.2,<=2.12.0",
     "triton>=3.0",
     "qiskit>=1.0",
     "qiskit-aer>=0.17.2",

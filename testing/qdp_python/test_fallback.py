@@ -85,6 +85,29 @@ class TestBackendDetection:
         t = get_torch()
         assert t is not None  # torch is available in test env
 
+    def test_is_cuda_available_returns_bool(self):
+        """is_cuda_available() returns a plain bool without crashing.
+
+        On a stub build (the extension built without the CUDA toolkit) or a host
+        with no device it must be False -- and querying it must NOT abort the
+        process, which is the regression this guards (a stub build previously
+        aborted when GPU code ran).
+        """
+        from qumat_qdp import is_cuda_available
+
+        assert isinstance(is_cuda_available(), bool)
+
+    def test_is_cuda_available_matches_extension(self):
+        """The helper mirrors the native ``_qdp.cuda_available()`` signal."""
+        from qumat_qdp import is_cuda_available
+
+        try:
+            import _qdp
+        except ImportError:
+            assert is_cuda_available() is False
+        else:
+            assert is_cuda_available() == bool(_qdp.cuda_available())
+
 
 # ---------------------------------------------------------------------------
 # Loader with explicit PyTorch backend

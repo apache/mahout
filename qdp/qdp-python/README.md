@@ -89,12 +89,14 @@ Backend support boundary:
 ### Pipeline / loader dtype (Rust internals)
 
 `QuantumDataLoader` and `run_throughput_pipeline` build a Rust `PipelineConfig` with an
-`encoding` plus a `dtype` (float32 vs float64). The prefetch thread can only keep an
+`encoding` plus a `dtype` (float32 vs float64). The prefetch thread can keep an
 end-to-end **float32 host batch** for encodings whose GPU stack implements the batch **f32**
-path (`encode_batch_f32`). **Today that is amplitude only.** Angle and basis still fall back
-to float64 for that loop until their batch f32 implementations exist. The eventual full
-matrix (e.g. angle/basis under `supports_f32` once kernels are wired) is broader than what
-the pipeline uses today.
+path (`encode_batch_f32`): `amplitude`, `angle`, and `basis`. IQP-family and phase
+encodings still normalize to float64 in this loop.
+
+For streaming basis files, the loader reads basis indices as float64 even when float32 is
+requested, because basis values are integer state indices and float32 cannot represent
+large indices exactly.
 
 ## Input Sources
 
