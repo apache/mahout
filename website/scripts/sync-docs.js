@@ -25,7 +25,6 @@ const DEST_DIR = path.resolve(__dirname, '../docs');
 const BLOG_SOURCE_DIR = path.resolve(__dirname, '../../docs/blog');
 const BLOG_DEST_DIR = path.resolve(__dirname, '../blog');
 const API_SOURCE_DIR = path.resolve(__dirname, '../../docs/api');
-const API_DEST_DIR = path.resolve(__dirname, '../docs/api');
 
 // Files that should be preserved during sync (not deleted)
 const PRESERVE_FILES = ['.gitignore'];
@@ -37,7 +36,7 @@ const EXCLUDE_PATTERNS = [
   /\.pyc$/,
   /^__pycache__$/,
   /^blog$/, // Blog is synced separately to website/blog
-  /^api$/, // API generator config is rendered separately into website/docs/api
+  /^api$/, // API generator config replaces the Qumat and QDP API pages
 ];
 
 /**
@@ -217,28 +216,24 @@ function runCommand(command, args, options = {}) {
  * Generate Python API reference docs with pydoc-markdown.
  */
 function generateApiDocs() {
-  fs.rmSync(API_DEST_DIR, { recursive: true, force: true });
-  ensureDir(API_DEST_DIR);
-
-  copyFile(path.join(API_SOURCE_DIR, 'index.md'), path.join(API_DEST_DIR, 'index.md'));
-
   const pages = [
     {
       header: 'qumat_header.md',
       config: 'qumat.yml',
-      output: 'qumat.md',
+      output: path.join('qumat', 'api.md'),
     },
     {
       header: 'qumat_qdp_header.md',
       config: 'qumat_qdp.yml',
-      output: 'qumat_qdp.md',
+      output: path.join('qdp', 'api.md'),
     },
   ];
 
   if (process.env.MAHOUT_SKIP_API_DOCS === '1') {
     console.log('Skipping generated Python API reference docs.');
     for (const page of pages) {
-      const outputPath = path.join(API_DEST_DIR, page.output);
+      const outputPath = path.join(DEST_DIR, page.output);
+      ensureDir(path.dirname(outputPath));
       copyFile(path.join(API_SOURCE_DIR, page.header), outputPath);
       fs.appendFileSync(
         outputPath,
@@ -251,7 +246,8 @@ function generateApiDocs() {
   runCommand('uv', ['sync', '--frozen', '--group', 'dev']);
 
   for (const page of pages) {
-    const outputPath = path.join(API_DEST_DIR, page.output);
+    const outputPath = path.join(DEST_DIR, page.output);
+    ensureDir(path.dirname(outputPath));
     copyFile(path.join(API_SOURCE_DIR, page.header), outputPath);
 
     const generated = runCommand(
@@ -259,7 +255,7 @@ function generateApiDocs() {
       ['run', '--frozen', '--group', 'dev', 'pydoc-markdown', path.join('docs/api', page.config)],
       { capture: true },
     );
-    fs.appendFileSync(outputPath, generated);
+    fs.appendFileSync(outputPath, `\n${generated}`);
   }
 }
 

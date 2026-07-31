@@ -20,8 +20,9 @@ anywhere.'
 - [Basic Gates](./qumat/basic-gates) - Introduction to fundamental quantum gates (NOT, Hadamard, CNOT, Toffoli, SWAP, Pauli gates, CSWAP, U gate)
 - [Parameterized Quantum Circuits and Rotation Gates](./qumat/parameterized-circuits) - Rotation gates (Rx, Ry, Rz) and creating/optimizing parameterized circuits
 
-### API Reference
-- [API Documentation](./qumat/api) - Complete reference for all QuMat class methods
+### Python API Reference
+- [Qumat API](./qumat/api) - Generated reference for quantum circuits
+- [QDP API](./qdp/api) - Generated reference for quantum data encoding
 
 ### Additional Resources
 - [Parameterized Quantum Circuits: Developer's Guide](./advanced/pqc) - In-depth guide to PQCs

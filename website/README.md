@@ -15,7 +15,7 @@ npm install
 npm run start
 ```
 
-This starts a local development server at `http://localhost:3000` with hot reload. The changes to the documentation will be reflected at `http://localhost:3000/docs/next/`.
+This starts a local development server at `http://localhost:3000` with hot reload. The changes to the documentation will be reflected at `http://localhost:3000/docs/master/`.
 
 ## Architecture
 
@@ -156,10 +156,14 @@ Syntax highlighting is available for: Python, Java, Scala, Rust, Bash, and more.
 
 ````markdown
 ```python
-from qumat import QumatCircuit
+from qumat import QuMat
 
-circuit = QumatCircuit(2)
-circuit.h(0)
+qumat = QuMat({
+    "backend_name": "qiskit",
+    "backend_options": {"simulator_type": "aer_simulator"},
+})
+qumat.create_empty_circuit(num_qubits=2)
+qumat.apply_hadamard_gate(0)
 ```
 ````
 
@@ -168,7 +172,7 @@ circuit.h(0)
 ### Current Versions
 
 Released versions are listed in `versions.json`. The first version in that file is
-served as `latest` at `/docs`; the editable current docs are served at `/docs/next`.
+served as `latest` at `/docs`; the editable current docs are served at `/docs/master`.
 
 ### Creating a New Version
 
@@ -227,7 +231,7 @@ Triggers:
 
 ### Changes are not reflected in the development server
 
-Please ensure that you are looking at `http://localhost:3000/docs/next/`.
+Please ensure that you are looking at `http://localhost:3000/docs/master/`.
 
 ### Broken Links
 
