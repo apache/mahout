@@ -72,7 +72,7 @@ def get_backend() -> Backend:
     """Return the active backend.
 
     Only the Rust backend is auto-detected.  The PyTorch reference
-    backend must be selected explicitly via :func:`force_backend`.
+    backend must be selected explicitly via ``force_backend()``.
     """
     if _forced_backend is not None:
         return _forced_backend
