@@ -157,7 +157,7 @@ def _build_torch_dataset(loader: QuantumDataLoader):
                 "as_torch_dataset() requires PyTorch. Install with: pip install torch"
             ) from None
 
-        class _QdpDataset(IterableDataset):  # type: ignore[misc]
+        class _QdpDataset(IterableDataset):
             """IterableDataset wrapping a QuantumDataLoader."""
 
             def __init__(self, source: QuantumDataLoader) -> None:

@@ -17,7 +17,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, MutableMapping
-from typing import Any
+from typing import Any, cast
 
 import boto3
 from braket.aws import AwsDevice, AwsSession
@@ -134,7 +134,7 @@ def execute_circuit(
     else:
         task = backend.run(circuit, shots=shots)
     result = task.result()
-    return result.measurement_counts  # ty: ignore[possibly-missing-attribute]
+    return cast("dict[str, int]", cast(Any, result).measurement_counts)
 
 
 # placeholder method for use in the testing suite
@@ -155,7 +155,7 @@ def get_final_state_vector(
         result = backend.run(circuit, shots=0, inputs=inputs).result()
     else:
         result = backend.run(circuit, shots=0).result()
-    state_vector = result.values[0]  # ty: ignore[possibly-missing-attribute]
+    state_vector = cast(Any, result).values[0]
 
     return state_vector
 
