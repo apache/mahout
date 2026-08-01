@@ -41,27 +41,18 @@ __global__ void amplitude_encode_kernel(
     double v1 = 0.0;
     double v2 = 0.0;
 
-    // Vectorized Load Optimization:
-    // If we are well within bounds, treat input as double2 to issue a single 128-bit load instruction.
-    // Use __ldg() to pull through the read-only cache; cudaMalloc aligns to 256 bytes so the
-    // reinterpret_cast<double2*> load is naturally aligned.
+    // double2 load via __ldg when aligned and in bounds.
     if (state_idx_base + 1 < input_len) {
-        // Reinterpret cast to load two doubles at once
         const double2 loaded = __ldg(reinterpret_cast<const double2*>(input) + idx);
         v1 = loaded.x;
         v2 = loaded.y;
     }
-    // Handle edge case: Odd input length
     else if (state_idx_base < input_len) {
         v1 = __ldg(input + state_idx_base);
-        // v2 remains 0.0
     }
 
-    // Write output:
-    // Apply pre-calculated reciprocal (multiplication is faster than division)
     state[state_idx_base]     = make_cuDoubleComplex(v1 * inv_norm, 0.0);
 
-    // Check boundary for the second element (state_len is usually power of 2, but good to be safe)
     if (state_idx_base + 1 < state_len) {
         state[state_idx_base + 1] = make_cuDoubleComplex(v2 * inv_norm, 0.0);
     }
@@ -82,7 +73,6 @@ __global__ void amplitude_encode_kernel_f32(
     float v2 = 0.0f;
 
     if (state_idx_base + 1 < input_len) {
-        // Mirror the double kernel: cached vectorized load for two floats
         const float2 loaded = __ldg(reinterpret_cast<const float2*>(input) + idx);
         v1 = loaded.x;
         v2 = loaded.y;
@@ -225,17 +215,7 @@ int launch_amplitude_encode_f32(
     return (int)cudaGetLastError();
 }
 
-/// Optimized batch amplitude encoding kernel
-///
-/// Memory Layout (row-major):
-/// - input_batch: [sample0_data | sample1_data | ... | sampleN_data]
-/// - state_batch: [sample0_state | sample1_state | ... | sampleN_state]
-///
-/// Optimizations:
-/// 1. Vectorized double2 loads for 128-bit memory transactions when aligned
-/// 2. Grid-stride loop for arbitrary batch sizes
-/// 3. Coalesced memory access within warps
-/// 4. Scalar fallback for misaligned sample bases and odd tails
+/// Batch amplitude encoding kernel (grid-stride, vectorized loads when aligned).
 __global__ void amplitude_encode_batch_kernel(
     const double* __restrict__ input_batch,
     cuDoubleComplex* __restrict__ state_batch,
@@ -244,25 +224,20 @@ __global__ void amplitude_encode_batch_kernel(
     size_t input_len,
     size_t state_len
 ) {
-    // Grid-stride loop pattern for flexibility
-    const size_t elements_per_sample = state_len / 2;  // Each thread handles 2 elements
+    const size_t elements_per_sample = state_len / 2;
     const size_t total_work = num_samples * elements_per_sample;
     const size_t stride = gridDim.x * blockDim.x;
 
     size_t global_idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-    // Process elements in grid-stride fashion
     for (size_t idx = global_idx; idx < total_work; idx += stride) {
-        // Decompose linear index into (sample, element_pair)
         const size_t sample_idx = idx / elements_per_sample;
         const size_t elem_pair = idx % elements_per_sample;
 
-        // Calculate base addresses (strength-reduced)
         const size_t input_base = sample_idx * input_len;
         const size_t state_base = sample_idx * state_len;
         const size_t elem_offset = elem_pair * 2;
 
-        // Load inverse norm (cached by L1)
         const double inv_norm = inv_norms[sample_idx];
 
         double v1, v2;
@@ -281,16 +256,12 @@ __global__ void amplitude_encode_batch_kernel(
                 ? __ldg(sample_input + elem_offset + 1)
                 : 0.0;
         } else {
-            // Padding region
             v1 = v2 = 0.0;
         }
 
-        // Normalize and write as complex numbers
-        // Compiler will optimize multiplications
         const cuDoubleComplex c1 = make_cuDoubleComplex(v1 * inv_norm, 0.0);
         const cuDoubleComplex c2 = make_cuDoubleComplex(v2 * inv_norm, 0.0);
 
-        // Write to global memory (coalesced within warp)
         state_batch[state_base + elem_offset] = c1;
         if (elem_offset + 1 < state_len) {
             state_batch[state_base + elem_offset + 1] = c2;
@@ -298,17 +269,7 @@ __global__ void amplitude_encode_batch_kernel(
     }
 }
 
-/// Optimized batch amplitude encoding kernel (float32)
-///
-/// Memory Layout (row-major):
-/// - input_batch: [sample0_data | sample1_data | ... | sampleN_data]
-/// - state_batch: [sample0_state | sample1_state | ... | sampleN_state]
-///
-/// Optimizations:
-/// 1. Vectorized float2 loads for 64-bit memory transactions
-/// 2. Grid-stride loop for arbitrary batch sizes
-/// 3. Coalesced memory access within warps
-/// 4. Minimized register pressure
+/// Batch amplitude encoding kernel (float32).
 __global__ void amplitude_encode_batch_kernel_f32(
     const float* __restrict__ input_batch,
     cuComplex* __restrict__ state_batch,
@@ -317,25 +278,20 @@ __global__ void amplitude_encode_batch_kernel_f32(
     size_t input_len,
     size_t state_len
 ) {
-    // Grid-stride loop pattern for flexibility
     const size_t elements_per_sample = state_len / 2;
     const size_t total_work = num_samples * elements_per_sample;
     const size_t stride = gridDim.x * blockDim.x;
 
     size_t global_idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-    // Process elements in grid-stride fashion
     for (size_t idx = global_idx; idx < total_work; idx += stride) {
-        // Decompose linear index into (sample, element_pair)
         const size_t sample_idx = idx / elements_per_sample;
         const size_t elem_pair = idx % elements_per_sample;
 
-        // Calculate base addresses (strength-reduced)
         const size_t input_base = sample_idx * input_len;
         const size_t state_base = sample_idx * state_len;
         const size_t elem_offset = elem_pair * 2;
 
-        // Load inverse norm (cached by L1)
         const float inv_norm = inv_norms[sample_idx];
 
         float v1, v2;
@@ -357,11 +313,9 @@ __global__ void amplitude_encode_batch_kernel_f32(
             v1 = v2 = 0.0f;
         }
 
-        // Normalize and write as complex numbers
         const cuComplex c1 = make_cuComplex(v1 * inv_norm, 0.0f);
         const cuComplex c2 = make_cuComplex(v2 * inv_norm, 0.0f);
 
-        // Write to global memory (coalesced within warp)
         state_batch[state_base + elem_offset] = c1;
         if (elem_offset + 1 < state_len) {
             state_batch[state_base + elem_offset + 1] = c2;
@@ -397,14 +351,9 @@ int launch_amplitude_encode_batch(
 
     cuDoubleComplex* state_complex_d = static_cast<cuDoubleComplex*>(state_batch_d);
 
-    // Optimal configuration for modern GPUs (SM 7.0+)
-    // - Block size: DEFAULT_BLOCK_SIZE threads (8 warps, good occupancy)
-    // - Grid size: Enough blocks to saturate GPU, but not excessive
     const int blockSize = DEFAULT_BLOCK_SIZE;
     const size_t total_work = num_samples * (state_len / 2);
 
-    // Calculate grid size: aim for high occupancy without too many blocks
-    // Limit to reasonable number of blocks to avoid scheduler overhead
     const size_t blocks_needed = (total_work + blockSize - 1) / blockSize;
     const size_t max_blocks = MAX_GRID_BLOCKS;
     const size_t gridSize = (blocks_needed < max_blocks) ? blocks_needed : max_blocks;
@@ -462,7 +411,6 @@ __global__ void l2_norm_kernel(
     size_t input_len,
     double* __restrict__ out_accum
 ) {
-    // Vectorized double2 loads for bandwidth and coalescing
     const size_t vec_idx = blockIdx.x * blockDim.x + threadIdx.x;
     const size_t stride = gridDim.x * blockDim.x;
 
@@ -497,7 +445,6 @@ __global__ void l2_norm_kernel_f32(
     size_t input_len,
     float* __restrict__ out_accum
 ) {
-    // Vectorized float2 loads for bandwidth and coalescing
     const size_t vec_idx = blockIdx.x * blockDim.x + threadIdx.x;
     const size_t stride = gridDim.x * blockDim.x;
 
