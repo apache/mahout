@@ -36,7 +36,7 @@ prost = "0.12"
 prost-build = "0.12"
 bytes = "1.11"
 # PyTorch tensor loading (optional)
-tch = "0.22"
+tch = "0.24"
 # Optional: vendored protoc to avoid build failures when protoc is missing
 protoc-bin-vendored = "3"
 # Remote I/O (S3, GCS, Azure) via object_store
