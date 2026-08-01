@@ -101,7 +101,7 @@ const config: Config = {
       {
         // Only include redirects for paths that are known to exist
         // Additional redirects can be added after build verification
-        createRedirects(existingPath) {
+        createRedirects(existingPath: string) {
           // Redirect /news.html to /blog
           if (existingPath === '/blog') {
             return ['/news.html', '/news'];
