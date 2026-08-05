@@ -279,12 +279,22 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
             unsafe {
                 crate::profile_scope!("GPU::Dispatch");
 
-                // Async copy to device (only if staging buffers are allocated)
+                // Async copy to device (only if staging buffers are allocated).
+                // `current_len` counts f64 elements; the copy takes bytes.
                 if dev_staging.is_some() {
+                    let copy_bytes = current_len
+                        .checked_mul(std::mem::size_of::<f64>())
+                        .ok_or_else(|| {
+                            MahoutError::MemoryAllocation(format!(
+                                "Staging copy size overflow: {} * {}",
+                                current_len,
+                                std::mem::size_of::<f64>()
+                            ))
+                        })?;
                     ctx.async_copy_to_device(
                         host_buffer.ptr() as *const c_void,
                         dev_ptr as *mut c_void,
-                        current_len,
+                        copy_bytes,
                     )?;
                     ctx.record_copy_done(event_slot)?;
                     ctx.wait_for_copy(event_slot)?;

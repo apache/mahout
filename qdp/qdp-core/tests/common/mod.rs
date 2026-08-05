@@ -231,6 +231,46 @@ pub unsafe fn assert_dlpack_shape_2d_and_delete(
     unsafe { take_deleter_and_delete(dlpack_ptr) };
 }
 
+/// Downloads a complex128 DLPack tensor as interleaved real and imaginary values.
+#[cfg(target_os = "linux")]
+#[allow(dead_code)]
+pub unsafe fn download_dlpack_complex_f64(dlpack_ptr: *mut DLManagedTensor) -> Vec<f64> {
+    assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
+
+    let tensor = unsafe { &(*dlpack_ptr).dl_tensor };
+    assert!(tensor.ndim > 0, "DLPack tensor should have dimensions");
+    assert!(!tensor.shape.is_null(), "DLPack shape should not be null");
+    assert!(!tensor.data.is_null(), "DLPack data should not be null");
+    assert_eq!(
+        tensor.device.device_type,
+        qdp_core::dlpack::DLDeviceType::kDLCUDA
+    );
+    assert_eq!(tensor.dtype.code, qdp_core::dlpack::DL_COMPLEX);
+    assert_eq!(tensor.dtype.bits, 128);
+    assert_eq!(tensor.dtype.lanes, 1);
+
+    let shape = unsafe { std::slice::from_raw_parts(tensor.shape, tensor.ndim as usize) };
+    let num_elements = shape.iter().try_fold(1_usize, |count, &dim| {
+        usize::try_from(dim)
+            .ok()
+            .and_then(|dim| count.checked_mul(dim))
+    });
+    let num_elements = num_elements.expect("DLPack shape should fit in usize");
+    let byte_count = num_elements
+        .checked_mul(std::mem::size_of::<qdp_kernels::CuDoubleComplex>())
+        .expect("DLPack byte count should fit in usize");
+    let mut host = vec![0.0_f64; num_elements * 2];
+    let device_ptr = (tensor.data as u64)
+        .checked_add(tensor.byte_offset)
+        .expect("DLPack byte offset should fit in a device pointer");
+
+    let ret = unsafe {
+        cudarc::driver::sys::lib().cuMemcpyDtoH_v2(host.as_mut_ptr().cast(), device_ptr, byte_count)
+    };
+    assert_eq!(ret, cudarc::driver::sys::CUresult::CUDA_SUCCESS);
+    host
+}
+
 /// Takes the DLPack deleter from the managed tensor and invokes it exactly once.
 #[cfg(target_os = "linux")]
 #[allow(dead_code)]

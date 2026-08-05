@@ -143,11 +143,9 @@ fn test_angle_successful_encoding_from_parquet() {
         return;
     };
 
-    let num_qubits = 4;
+    let num_qubits = 3;
     let num_samples = 3;
-    let data: Vec<f64> = (0..num_samples * num_qubits)
-        .map(|i| (i as f64) * std::f64::consts::PI / (num_qubits * num_samples) as f64)
-        .collect();
+    let data = vec![0.1_f64, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
 
     let path = "/tmp/test_angle_success.parquet";
     common::write_fixed_size_list_parquet(path, &data, num_qubits);
@@ -158,11 +156,35 @@ fn test_angle_successful_encoding_from_parquet() {
     let _ = std::fs::remove_file(path);
 
     unsafe {
-        common::assert_dlpack_shape_2d_and_delete(
-            dlpack_ptr,
-            num_samples as i64,
-            (1 << num_qubits) as i64,
-        );
+        let state_len = 1 << num_qubits;
+        common::assert_dlpack_shape_2d(dlpack_ptr, num_samples as i64, state_len as i64);
+        let actual = common::download_dlpack_complex_f64(dlpack_ptr);
+
+        for sample_index in 0..num_samples {
+            let sample = &data[sample_index * num_qubits..(sample_index + 1) * num_qubits];
+            for state_index in 0..state_len {
+                let expected = sample
+                    .iter()
+                    .enumerate()
+                    .fold(1.0, |amplitude, (bit, angle)| {
+                        amplitude
+                            * if state_index & (1 << bit) == 0 {
+                                angle.cos()
+                            } else {
+                                angle.sin()
+                            }
+                    });
+                let output_index = sample_index * state_len + state_index;
+                assert!(
+                    (actual[output_index * 2] - expected).abs() < 1e-12,
+                    "state[{sample_index}, {state_index}] real part: expected {expected}, got {}",
+                    actual[output_index * 2]
+                );
+                assert_eq!(actual[output_index * 2 + 1], 0.0);
+            }
+        }
+
+        common::take_deleter_and_delete(dlpack_ptr);
     }
 }
 
