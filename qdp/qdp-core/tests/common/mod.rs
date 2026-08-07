@@ -259,7 +259,10 @@ pub unsafe fn download_dlpack_complex_f64(dlpack_ptr: *mut DLManagedTensor) -> V
     let byte_count = num_elements
         .checked_mul(std::mem::size_of::<qdp_kernels::CuDoubleComplex>())
         .expect("DLPack byte count should fit in usize");
-    let mut host = vec![0.0_f64; num_elements * 2];
+    let host_len = num_elements
+        .checked_mul(2)
+        .expect("DLPack complex128 element count should fit in usize");
+    let mut host = vec![0.0_f64; host_len];
     let device_ptr = (tensor.data as u64)
         .checked_add(tensor.byte_offset)
         .expect("DLPack byte offset should fit in a device pointer");
