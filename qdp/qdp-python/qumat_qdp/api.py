@@ -18,15 +18,18 @@
 Benchmark API: supports Rust-optimized pipeline and PyTorch reference backend.
 
 Usage:
-    from qumat_qdp import QdpBenchmark, ThroughputResult, LatencyResult
 
-    # Rust backend (default):
-    result = (QdpBenchmark(device_id=0).qubits(16).encoding("amplitude")
-              .batches(100, size=64).warmup(2).run_throughput())
+```python
+from qumat_qdp import QdpBenchmark, ThroughputResult, LatencyResult
 
-    # PyTorch reference (must be explicitly selected):
-    result = (QdpBenchmark(device_id=0).backend("pytorch").qubits(16)
-              .encoding("amplitude").batches(100, size=64).run_throughput())
+# Rust backend (default):
+result = (QdpBenchmark(device_id=0).qubits(16).encoding("amplitude")
+          .batches(100, size=64).warmup(2).run_throughput())
+
+# PyTorch reference (must be explicitly selected):
+result = (QdpBenchmark(device_id=0).backend("pytorch").qubits(16)
+          .encoding("amplitude").batches(100, size=64).run_throughput())
+```
 """
 
 from __future__ import annotations
@@ -40,7 +43,7 @@ from typing import Any
 class ThroughputResult:
     """Throughput benchmark measurement.
 
-    Returned by :meth:`QdpBenchmark.run_throughput`.  ``duration_sec`` is the
+    Returned by ``QdpBenchmark.run_throughput()``.  ``duration_sec`` is the
     measured timed section after any configured warmup batches.  ``vectors_per_sec``
     is computed over ``total_batches * batch_size`` encoded input vectors.
     """
@@ -53,7 +56,7 @@ class ThroughputResult:
 class LatencyResult:
     """Latency benchmark measurement.
 
-    Returned by :meth:`QdpBenchmark.run_latency`.  ``duration_sec`` is the same
+    Returned by ``QdpBenchmark.run_latency()``.  ``duration_sec`` is the same
     timed interval used for throughput, and ``latency_ms_per_vector`` is the
     average milliseconds per encoded input vector across the measured batches.
     """
@@ -206,7 +209,7 @@ class QdpBenchmark:
         pipeline with any configured warmup batches; ``"pytorch"`` runs the
         reference encoder loop and synchronizes CUDA timing when applicable.
 
-        :returns: A :class:`ThroughputResult` containing elapsed seconds and
+        :returns: A ``ThroughputResult`` containing elapsed seconds and
             encoded vectors per second.
         :raises ValueError: If required benchmark parameters are missing.
         :raises RuntimeError: If the Rust backend is selected but unavailable.
@@ -223,7 +226,7 @@ class QdpBenchmark:
         method.  The Rust backend reports latency from the native pipeline; the
         PyTorch backend derives average latency from its throughput run.
 
-        :returns: A :class:`LatencyResult` containing elapsed seconds and mean
+        :returns: A ``LatencyResult`` containing elapsed seconds and mean
             milliseconds per encoded vector.
         :raises ValueError: If required benchmark parameters are missing.
         :raises RuntimeError: If the Rust backend is selected but unavailable.

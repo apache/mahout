@@ -18,13 +18,16 @@
 Quantum Data Loader: Python builder for Rust-backed batch iterator.
 
 Usage:
-    from qumat_qdp import QuantumDataLoader
 
-    loader = (QuantumDataLoader(device_id=0).qubits(16).encoding("amplitude")
-              .batches(100, size=64).source_synthetic())
-    for qt in loader:
-        batch = torch.from_dlpack(qt)
-        ...
+```python
+from qumat_qdp import QuantumDataLoader
+
+loader = (QuantumDataLoader(device_id=0).qubits(16).encoding("amplitude")
+          .batches(100, size=64).source_synthetic())
+for qt in loader:
+    batch = torch.from_dlpack(qt)
+    ...
+```
 """
 
 from __future__ import annotations
@@ -333,7 +336,7 @@ class QuantumDataLoader:
         ``"iqp"``, ``"iqp-z"``, and ``"phase"``.  Use these canonical
         lowercase names because the selected backend receives the string exactly
         as supplied.  The PyTorch reference backend supports the same methods as
-        :mod:`qumat_qdp.torch_ref`; use the native backend for methods that are
+        ``qumat_qdp.torch_ref``; use the native backend for methods that are
         not available in the reference path.
 
         :param method: Encoding method name.
@@ -415,7 +418,7 @@ class QuantumDataLoader:
         Remote ``s3://`` and ``gs://`` paths are accepted when the native remote
         I/O feature is enabled; remote query strings and fragments are rejected.
 
-        Element precision is controlled by :meth:`dtype`. By default file input is
+        Element precision is controlled by ``dtype()``. By default file input is
         loaded as ``float64`` (lossless). Selecting ``dtype("float32")`` narrows f64
         file contents to f32 on load; values outside the f32 range become ``±Inf``.
         ``basis`` encoding is exempt: its values are integer state indices, so it is
@@ -450,9 +453,9 @@ class QuantumDataLoader:
     def dtype(self, name: str) -> QuantumDataLoader:
         """Set the element precision used when loading file sources.
 
-        Applies to the native :meth:`source_file` path. ``"float64"`` (the default)
+        Applies to the native ``source_file()`` path. ``"float64"`` (the default)
         loads file contents losslessly; ``"float32"`` narrows them to f32 on load.
-        See :meth:`source_file` for the cast caveats, including the ``basis``
+        See ``source_file()`` for the cast caveats, including the ``basis``
         exemption.
 
         :param name: ``"float32"``/``"f32"`` or ``"float64"``/``"f64"`` (case-insensitive).
