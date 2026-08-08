@@ -60,7 +60,7 @@ def create_empty_circuit(num_qubits: int | None = None) -> CircuitLike:
     circuit: CircuitLike = Circuit()
     if num_qubits is not None:
         for i in range(num_qubits):
-            circuit.i(i)  # type: ignore[unresolved-attribute]
+            circuit.i(i)  # ty: ignore[unresolved-attribute]
     return circuit
 
 
@@ -134,7 +134,7 @@ def execute_circuit(
     else:
         task = backend.run(circuit, shots=shots)
     result = task.result()
-    return result.measurement_counts  # ty: ignore[possibly-missing-attribute]
+    return result.measurement_counts  # ty: ignore[unresolved-attribute]
 
 
 # placeholder method for use in the testing suite
@@ -155,7 +155,7 @@ def get_final_state_vector(
         result = backend.run(circuit, shots=0, inputs=inputs).result()
     else:
         result = backend.run(circuit, shots=0).result()
-    state_vector = result.values[0]  # ty: ignore[possibly-missing-attribute]
+    state_vector = result.values[0]  # ty: ignore[unresolved-attribute]
 
     return state_vector
 

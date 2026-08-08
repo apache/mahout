@@ -41,7 +41,7 @@ def initialize_backend(backend_config: Mapping[str, Any]) -> AerSimulator:
     else:
         backend = AerSimulator(method=simulator_type)
 
-    backend.shots = shots  # type: ignore[assignment, misc]  # runtime-settable
+    backend.shots = shots  # ty: ignore[unresolved-attribute]  # runtime-settable
     return backend
 
 
