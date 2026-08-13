@@ -78,6 +78,10 @@ mod cuda_rt {
 
         pub(crate) fn cudaMemGetInfo(free: *mut usize, total: *mut usize) -> i32;
 
+        /// Number of CUDA-capable devices. Used to detect whether a GPU is
+        /// actually present at runtime (see `cuda_runtime_available`).
+        pub(crate) fn cudaGetDeviceCount(count: *mut i32) -> i32;
+
         pub(crate) fn cudaMemcpyAsync(
             dst: *mut c_void,
             src: *const c_void,
@@ -162,6 +166,10 @@ mod no_cuda_stubs {
     }
 
     pub(crate) unsafe fn cudaMemGetInfo(_free: *mut usize, _total: *mut usize) -> i32 {
+        QDP_CUDA_UNAVAILABLE
+    }
+
+    pub(crate) unsafe fn cudaGetDeviceCount(_count: *mut i32) -> i32 {
         QDP_CUDA_UNAVAILABLE
     }
 
@@ -299,6 +307,7 @@ mod hip_rt {
         fn hipEventQuery(event: *mut c_void) -> i32;
         fn hipEventSynchronize(event: *mut c_void) -> i32;
         fn hipEventElapsedTime(ms: *mut f32, start: *mut c_void, end: *mut c_void) -> i32;
+        fn hipGetDeviceCount(count: *mut i32) -> i32;
     }
 
     // hipHostMallocDefault == 0, matching cudaHostAllocDefault used by callers.
@@ -418,4 +427,25 @@ mod hip_rt {
     ) -> i32 {
         unsafe { hipEventElapsedTime(ms, start, end) }
     }
+
+    pub(crate) unsafe fn cudaGetDeviceCount(count: *mut i32) -> i32 {
+        unsafe { hipGetDeviceCount(count) }
+    }
+}
+
+/// Returns `true` if a usable GPU is present at runtime.
+///
+/// This is deliberately distinct from "the extension is importable": a
+/// no-toolkit (`qdp_no_cuda`) build links CUDA stubs that return a non-zero
+/// sentinel, and a host with the toolkit but no GPU reports zero devices. Both
+/// yield `false` here, so callers (and the Python test suite) can gate GPU work
+/// on an accurate signal rather than mere importability. On the HIP backend the
+/// call resolves to `hipGetDeviceCount`, so it reports AMD devices the same way.
+pub fn cuda_runtime_available() -> bool {
+    let mut count: i32 = 0;
+    // SAFETY: `cudaGetDeviceCount` writes a single `i32` through `count` and
+    // accesses no other memory. In a `qdp_no_cuda` build this resolves to the
+    // stub above, which returns the unavailable sentinel without dereferencing.
+    let rc = unsafe { cudaGetDeviceCount(&mut count) };
+    rc == CUDA_SUCCESS && count > 0
 }

@@ -26,6 +26,7 @@ Ellen Friedman          | ellenf@...        | No  | @Ellen_Friedman
 Frank Scholten          | frankscholten@... | No  |
 Gokhan Capan            | gcapan@...        | No  |
 Grant Ingersoll         | gsingers@...      | No  | (Emeritus PMC) @gsingers
+Guan-Hua (Vic) Wen      | vicwen@...        | No  | @viiccwen
 Guan-Ming (Wesley) Chiu | guanmingchiu@...  | Yes | @guan404ming
 Holden Karau            | holden@...        | No  |
 Isabel Drost-Fromm      | isabel@...        | Yes | <!--Passion for free software (development, but to some extend also the political and economic implications), interested in agile development and project management, lives in Germany. Follow me on Twitter @MaineC-->

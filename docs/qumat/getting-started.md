@@ -37,12 +37,16 @@ The project uses `uv` to handle dependency overrides required for Python 3.10+ c
 ## Basic Usage
 
 ```python
-from qumat import QumatCircuit
+from qumat import QuMat
 
-circuit = QumatCircuit(2)
-circuit.h(0)
-circuit.cx(0, 1)
-result = circuit.run()
+qumat = QuMat({
+    "backend_name": "qiskit",
+    "backend_options": {"simulator_type": "aer_simulator"},
+})
+qumat.create_empty_circuit(num_qubits=2)
+qumat.apply_hadamard_gate(0)
+qumat.apply_cnot_gate(0, 1)
+result = qumat.execute_circuit()
 print(result)
 ```
 

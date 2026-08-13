@@ -58,16 +58,6 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'API Reference (experiments)',
-      collapsed: true,
-      link: {type: 'doc', id: 'api/index'},
-      items: [
-        'api/qumat',
-        'api/qumat_qdp',
-      ],
-    },
-    {
-      type: 'category',
       label: 'Quantum Computing Primer',
       collapsed: true,
       link: {type: 'doc', id: 'learning/quantum-computing-primer/index'},
