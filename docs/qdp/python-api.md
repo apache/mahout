@@ -21,6 +21,7 @@ from qumat_qdp import (
     BACKEND,
     Backend,
     LatencyResult,
+    MemoryEstimate,
     NativeQuantumTensor,
     QdpBenchmark,
     QdpEngine,
@@ -30,6 +31,7 @@ from qumat_qdp import (
     RustQdpEngine,
     ThroughputResult,
     TritonAmdEngine,
+    estimate_memory,
     force_backend,
     is_triton_amd_available,
     run_throughput_pipeline_py,
@@ -42,6 +44,7 @@ Key exports:
 - `QdpBenchmark`: benchmark builder for the Rust pipeline or explicit PyTorch reference backend.
 - `QuantumDataLoader`: batch iterator builder for synthetic or file-backed inputs.
 - `QdpTensor` / `QuantumTensor`: thin DLPack facade type.
+- `estimate_memory` / `MemoryEstimate`: upfront host and device memory sizing for a pipeline configuration.
 - `Backend`, `BACKEND`, `force_backend`: backend detection and override helpers for the `_qdp` / PyTorch-reference selection layer.
 - `TritonAmdEngine`, `is_triton_amd_available`: direct AMD-route entry points.
 - `RustQdpEngine`, `NativeQuantumTensor`: native `_qdp` exports when the extension is available.
@@ -246,6 +249,18 @@ File source notes:
 - The Rust backend supports broader file formats and streaming loaders.
 - The explicit PyTorch backend supports synthetic data plus `.npy`, `.pt`, and `.pth` files only.
 
+Memory check notes:
+
+- The Rust backend estimates how much device memory a configuration needs and rejects it when the estimate exceeds free GPU memory, rather than failing part-way through a run. The check runs when iteration starts, before any input file is read — so a `QuantumDataLoader(...)` call returns normally and the rejection surfaces at the `for` statement.
+- The error names the encoding, batch size, and qubit count alongside the requested and available memory, and the remedy is to lower `batch_size` or `qubits`.
+- The rejection is raised as `RuntimeError`, not `ValueError`, because the loader wraps every backend error in `RuntimeError` — catch that and match on the message. `estimate_memory()` raises `ValueError` for the same oversized configuration.
+- The estimate budgets two concurrent batch state buffers, because a batch stays resident on the device until the consumer releases its tensor. A configuration that fits one buffer but not two is rejected.
+- The buffer is sized by the wider of the loader's input dtype and the engine's precision, since the input dtype sets the encode path's working precision while every path converts its result to the engine precision. With the defaults — file loaders read float64, `QdpEngine` runs float32 — it is the input dtype that sizes the budget. The error reports both values.
+- Basis input read from a file is always budgeted as float64, because basis values are integer state indices that the file readers load as float64 whatever `dtype` is requested. Synthetic basis data is budgeted at the requested `dtype`.
+- The check is skipped whenever the CUDA runtime reports no usable device — a build without the CUDA toolkit, a host with no driver, or an empty `CUDA_VISIBLE_DEVICES` — so CPU-only environments are unaffected.
+- The comparison is against free memory sampled when iteration starts; nothing is reserved. Another process or a second loader can claim that memory before the first batch is allocated, so passing the check is a fast sanity check rather than a guarantee.
+- To size a configuration before building the loader, call `estimate_memory()` (see [Memory Estimation API](#memory-estimation-api)).
+
 Iteration behavior depends on backend:
 
 | Loader backend | Iteration yields |
@@ -300,6 +315,38 @@ for qt in loader:
     batch = torch.from_dlpack(qt)
 ```
 
+## Memory Estimation API
+
+`estimate_memory()` answers the same question the loader's memory check answers when iteration starts, but without building anything — use it to size `qubits` and `batch_size` against a memory budget instead of discovering the ceiling from a rejection.
+
+Signature:
+
+`estimate_memory(num_qubits, batch_size, encoding_method="amplitude", dtype="f64", prefetch_depth=16)`
+
+Returns a `MemoryEstimate` with three fields, all in bytes:
+
+| Field | Meaning |
+|-------|---------|
+| `cpu_prefetch_bytes` | Host prefetch pool: `prefetch_depth` batches of raw, unencoded input |
+| `gpu_state_bytes` | Device state-vector buffer, including the two-buffer allowance the memory check applies |
+| `total_bytes` | Sum of the two |
+
+```python
+from qumat_qdp import estimate_memory
+
+est = estimate_memory(num_qubits=20, batch_size=64, dtype="f32")
+print(f"{est.gpu_state_bytes / 1024**2:.0f} MiB of device state")
+```
+
+Notes:
+
+- The function is pure configuration arithmetic: it allocates nothing and opens no device, so it works on a stub build or a host with no GPU — which is the point, since it exists to size configurations that the current machine may not be able to run.
+- The device state vector holds `2**num_qubits` complex amplitudes per sample for every encoding, so `gpu_state_bytes` is identical for `amplitude` and `angle` at equal qubit counts even though their input widths differ. Only `cpu_prefetch_bytes` reflects the input width.
+- `prefetch_depth` scales `cpu_prefetch_bytes` only. Device memory does not depend on it, which is why the memory check's error suggests lowering `batch_size` or `qubits` and never `prefetch_depth`.
+- `gpu_state_bytes` is the figure the memory check compares against free VRAM, with one caveat: the check budgets the wider of this `dtype` and the engine's precision, and always float64 for `basis` read from a file. Pass the engine precision as `dtype` when the two differ, or the estimate will be half what the check applies.
+- Every failure the estimator reports is an argument error — unknown encoding or dtype name, a `num_qubits` whose `2**n` state vector is not representable, or arithmetic overflow — and raises `ValueError`. A negative `num_qubits` or `batch_size` fails at the argument boundary first and raises `OverflowError`. `RuntimeError` is raised only when the `_qdp` extension is not installed.
+- Encodings without an f32 batch path are estimated as float64 even when float32 is requested, mirroring what the pipeline does with the same request.
+
 ## Low-level Rust Pipeline Helper
 
 `run_throughput_pipeline_py(...)` is the low-level native helper used by the Rust benchmark path.
@@ -313,6 +360,8 @@ Returns a tuple:
 `(duration_sec, vectors_per_sec, latency_ms_per_vector)`
 
 This helper is only available when `_qdp` is installed.
+
+It builds its own engine and pipeline rather than going through `QuantumDataLoader`, so the memory check described under [Data Loader API](#data-loader-api) does not apply to it: an oversized configuration fails part-way through the run. Call `estimate_memory()` first if you are sizing a benchmark near the limits of the device.
 
 ## Backward Compatibility
 
