@@ -2053,9 +2053,10 @@ mod tests {
     // too machine-dependent to gate CI, and the behavioural guarantee is already covered by
     // `test_streaming_producer_buffer_capacity_constant_over_100_batches`.
     //
-    //     make -C qdp bench_streaming_buffer
+    // Override the workload with BENCH_REPEATS=<n> BENCH_BATCHES=<n>:
     //
-    // Methodology and recorded results: qdp/docs/benchmarks/streaming-buffer-vecdeque.md.
+    //     cargo test -p qdp-core --release --lib buffer_bench -- \
+    //         --ignored --nocapture --test-threads=1
     // -------------------------------------------------------------------------
     mod buffer_bench {
         use super::*;
@@ -2318,7 +2319,7 @@ mod tests {
         }
 
         #[test]
-        #[ignore = "benchmark; run via `make -C qdp bench_streaming_buffer`"]
+        #[ignore = "benchmark; run with `cargo test -p qdp-core --release --lib buffer_bench -- --ignored --nocapture`"]
         fn bench_streaming_buffer_vec_cursor_vs_vecdeque() {
             // Same 64 KiB refill granularity as build_streaming_producer's INITIAL_CHUNK_CAP.
             const READ_CHUNK: usize = 64 * 1024;
@@ -2493,7 +2494,7 @@ mod tests {
         }
 
         #[test]
-        #[ignore = "benchmark; run via `make -C qdp bench_streaming_buffer`"]
+        #[ignore = "benchmark; run with `cargo test -p qdp-core --release --lib buffer_bench -- --ignored --nocapture`"]
         fn bench_buffer_strategy_isolated() {
             const READ_CHUNK: usize = 64 * 1024;
             let repeats = env_usize("BENCH_REPEATS", 5);

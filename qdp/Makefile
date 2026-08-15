@@ -1,4 +1,4 @@
-.PHONY: install install_profile install_benchmark build build_nvtx_profile run_nvtx_profile test test_python test_rust benchmark bench_streaming_buffer clean help
+.PHONY: install install_profile install_benchmark build build_nvtx_profile run_nvtx_profile test test_python test_rust benchmark clean help
 
 help:
 	@echo "Available targets:"
@@ -6,7 +6,6 @@ help:
 	@echo "  make build_nvtx_profile  - Build qdp-core with observability features"
 	@echo "  make run_nvtx_profile    - Build example, run with nsys, and show stats (EXAMPLE=nvtx_profile)"
 	@echo "  make test_rust           - Run Rust unit tests only"
-	@echo "  make bench_streaming_buffer - StreamingProducer buffer before/after benchmark"
 	@echo "  make clean               - Clean build artifacts"
 
 build:
@@ -20,15 +19,6 @@ build_nvtx_profile:
 test_rust:
 	@echo "Running Rust unit tests..."
 	cargo test --workspace
-
-# Before/after benchmark for the StreamingProducer buffer change (#1462): the frozen
-# pre-change Vec + cursor producer against the current VecDeque ring buffer.
-# Both benchmarks are #[ignore]d, so a normal `make test_rust` never pays for them.
-# Override the workload with BENCH_REPEATS=<n> BENCH_BATCHES=<n>.
-bench_streaming_buffer:
-	@echo "Running StreamingProducer buffer before/after benchmark (release)..."
-	cargo test -p qdp-core --release --lib buffer_bench -- \
-		--ignored --nocapture --test-threads=1
 
 run_nvtx_profile:
 	$(eval EXAMPLE ?= nvtx_profile)
