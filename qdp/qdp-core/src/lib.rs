@@ -180,6 +180,15 @@ impl QdpEngine {
         &self.device
     }
 
+    /// Precision every encode path converts its result to before handing back a DLPack tensor.
+    ///
+    /// This — not the pipeline's host-input `dtype` — determines the element size of the state
+    /// buffer that stays resident on the device, because `encode*_for_pipeline` ends with
+    /// [`GpuStateVector::to_precision`](crate::gpu::memory::GpuStateVector::to_precision).
+    pub fn precision(&self) -> Precision {
+        self.precision
+    }
+
     /// Block until all GPU work on the default stream has completed.
     /// Used by the generic pipeline and other callers that need to sync before timing.
     #[cfg(target_os = "linux")]

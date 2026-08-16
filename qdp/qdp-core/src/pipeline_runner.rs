@@ -24,7 +24,9 @@ use std::time::Instant;
 use crate::QdpEngine;
 use crate::dlpack::DLManagedTensor;
 use crate::error::{MahoutError, Result};
-use crate::gpu::memory::Precision;
+use crate::estimate::estimate_memory;
+use crate::gpu::cuda_ffi::cuda_runtime_available;
+use crate::gpu::memory::{Precision, ensure_device_memory_available, ensure_fits_in_free_memory};
 use crate::io;
 use crate::reader::{FloatElem, NullHandling, StreamingDataReader};
 use crate::readers::ParquetStreamingReader;
@@ -206,6 +208,168 @@ fn compute_optimal_prefetch_depth(
     match bytes_per_batch {
         None | Some(0) => MIN_DEPTH,
         Some(bpb) => (TARGET_BYTES / bpb).clamp(MIN_DEPTH, MAX_DEPTH),
+    }
+}
+
+/// Element precision of the state buffer that stays resident on the device.
+///
+/// Not simply `config.dtype`, which describes the *host* input:
+///
+/// * Every encode path ends with `to_precision(engine.precision())`, so the resident buffer is
+///   materialized at the engine's precision. The two are set independently — the Python synthetic
+///   loader hardcodes an f32 config dtype while `QdpEngine(precision="float64")` is a documented
+///   public option — and taking the narrower of the two would under-budget by 2x.
+/// * Basis input is integer state indices, which the *file* loaders always read as f64 regardless
+///   of `config.dtype` (see `read_file_by_extension` and the streaming loader's `use_f32`), so the
+///   encoder produces an f64 state for basis whatever the config says. `basis_reads_f64` carries
+///   that distinction: the synthetic producer fills basis batches at `config.dtype` (and
+///   [`Encoding::supports_f32`] is true for basis, so `normalize` leaves an f32 request alone),
+///   so forcing f64 there would over-budget by 2x and reject configurations that run fine.
+///
+/// Taking the widest precision in play keeps the estimate on the conservative side of all three.
+fn resident_device_precision(
+    config: &PipelineConfig,
+    engine_precision: Precision,
+    basis_reads_f64: bool,
+) -> Precision {
+    let host_precision = if basis_reads_f64 && matches!(config.encoding, Encoding::Basis) {
+        Precision::Float64
+    } else {
+        config.dtype
+    };
+    match (host_precision, engine_precision) {
+        (Precision::Float32, Precision::Float32) => Precision::Float32,
+        _ => Precision::Float64,
+    }
+}
+
+/// Names the configuration in the GPU-memory guard's error and log messages.
+///
+/// Split out of [`ensure_config_fits_device`] so the wording can be asserted without a device.
+/// `num_qubits` is deliberately absent: it is passed to `ensure_device_memory_available`
+/// separately, which appends it as `(qubits=N)`. Both the requested host `dtype` and the
+/// precision actually budgeted appear, because when they differ the second one explains the size.
+fn vram_check_context(config: &PipelineConfig, device_precision: Precision) -> String {
+    format!(
+        "pipeline construction (encoding={}, batch_size={}, dtype={:?}, device_precision={:?}, \
+         peak=2 concurrent batch buffers)",
+        config.encoding.as_str(),
+        config.batch_size,
+        config.dtype,
+        device_precision,
+    )
+}
+
+/// Reject a configuration whose GPU state buffers cannot fit in free device memory.
+///
+/// Runs at iterator construction — before any host batch is allocated and before any input file is
+/// read — so an oversized configuration fails in milliseconds with an actionable message instead of
+/// running out of memory part-way through encoding.
+///
+/// # What is compared
+///
+/// [`estimate_memory`]'s `gpu_state_bytes`, which budgets **two** concurrent batch state buffers.
+/// That factor is a real peak, not padding: [`to_dlpack`] clones the buffer `Arc`,
+/// so a batch stays resident until the consumer releases the tensor — during a `for` loop's
+/// `__next__` the previous batch is still alive while the next one is allocated — and
+/// `encode_batch_for_pipeline`'s precision conversion holds source and destination buffers at once.
+/// Comparing a single buffer would admit configurations that allocate successfully and then run out
+/// of memory on the following batch, which is the late failure this guard exists to prevent. A
+/// configuration that fits one buffer but not two is therefore rejected on purpose.
+///
+/// The precision comes from [`resident_device_precision`], not `config.dtype`, so an engine and a
+/// pipeline configured at different precisions are budgeted at the wider of the two.
+///
+/// Two peaks are still not modeled, so this budget is a floor and not the true high-water mark:
+///
+/// * The encoders upload their input batch to the device (`htod_sync_copy` in
+///   `AmplitudeEncoder::encode_batch`, plus a per-sample norm buffer) and hold it alongside the
+///   state buffers. For amplitude that input is half a state buffer, putting the real steady-state
+///   peak near 2.5 buffers against the 2 budgeted here. This one applies to *every* configuration.
+/// * While `to_precision` converts, the source buffer is alive alongside the destination, so a
+///   mismatched precision pair briefly holds a third state buffer.
+///
+/// Folding either in means teaching the estimator which encode path each config takes, which
+/// belongs in the memory model — explicitly out of scope for issue #1430 — rather than in this
+/// guard. The consequence is that a configuration sitting just under free memory can still OOM
+/// mid-run; the guard narrows that window rather than closing it.
+///
+/// `cpu_prefetch_bytes` is not compared against device memory: this guard covers device memory
+/// only. Note that [`estimate_memory`] still overflow-checks the host figure first, so a config
+/// whose device footprint fits can be rejected with [`MahoutError::InvalidInput`] for a host-side
+/// overflow. Host limits themselves — including the Parquet streaming reader's chunk buffer, which
+/// [`estimate_memory`] excludes from its model — are not checked anywhere yet.
+///
+/// # When the check does not run
+///
+/// `cudarc` links the CUDA *driver* API, while `cudaMemGetInfo` comes from the *runtime* API that
+/// `build.rs` replaces with stubs when `nvcc` is absent. A driver-only host (the PyTorch-style
+/// install called out in `build.rs`) can therefore hold a live [`QdpEngine`] while every runtime
+/// call returns the unavailable sentinel. Probing with [`cuda_runtime_available`] first keeps
+/// construction working there instead of failing on a query that cannot succeed.
+///
+/// That probe also reports unavailable when the runtime is present but exposes no device — an
+/// empty `CUDA_VISIBLE_DEVICES` — because it requires a device count above zero. Construction is
+/// then allowed through unchecked, which is correct for CPU-only environments but means the
+/// guard is silently inactive rather than merely permissive.
+///
+/// The figures are sampled here and nothing is reserved, so a config that passes can still lose
+/// the memory to another process before the first batch allocates.
+///
+/// # Errors
+///
+/// [`MahoutError::InvalidInput`] when the configuration overflows the memory model,
+/// [`MahoutError::MemoryAllocation`] when the estimate exceeds free device memory, or
+/// [`MahoutError::Cuda`] when the runtime reports itself available but the memory query then
+/// fails — a broken runtime rather than an absent one, which every other allocation path in this
+/// crate also surfaces rather than ignores.
+///
+/// [`to_dlpack`]: crate::gpu::memory::GpuStateVector::to_dlpack
+fn ensure_config_fits_device(
+    config: &PipelineConfig,
+    engine_precision: Precision,
+    basis_reads_f64: bool,
+) -> Result<()> {
+    ensure_config_fits_device_with(config, engine_precision, basis_reads_f64, None)
+}
+
+/// [`ensure_config_fits_device`] with the device memory figures injectable.
+///
+/// `device_memory` is `None` on every production path, which probes the CUDA runtime and queries
+/// it. `Some((free, total))` supplies the figures directly and skips the probe, so the
+/// accept/reject rule — the behavior issue #1430 specifies — can be asserted on a build with no
+/// CUDA runtime at all. Without this seam the rule is only reachable on a machine with a GPU,
+/// which upstream CI is not: the estimate and the probe short-circuit would still be covered, but
+/// deleting the comparison itself would not fail anything CI runs.
+fn ensure_config_fits_device_with(
+    config: &PipelineConfig,
+    engine_precision: Precision,
+    basis_reads_f64: bool,
+    device_memory: Option<(usize, usize)>,
+) -> Result<()> {
+    let device_precision = resident_device_precision(config, engine_precision, basis_reads_f64);
+    let estimate = estimate_memory(
+        config.encoding,
+        config.num_qubits,
+        config.batch_size,
+        device_precision,
+        config.prefetch_depth,
+    )?;
+
+    if device_memory.is_none() && !cuda_runtime_available() {
+        log::debug!(
+            "CUDA runtime unavailable; skipping GPU memory check for {}",
+            vram_check_context(config, device_precision)
+        );
+        return Ok(());
+    }
+
+    let requested = estimate.gpu_state_bytes as usize;
+    let context = vram_check_context(config, device_precision);
+    let qubits = Some(config.num_qubits as usize);
+    match device_memory {
+        Some((free, total)) => ensure_fits_in_free_memory(requested, &context, qubits, free, total),
+        None => ensure_device_memory_available(requested, &context, qubits),
     }
 }
 
@@ -648,6 +812,11 @@ where
 impl PipelineIterator {
     pub fn new_synthetic(engine: QdpEngine, mut config: PipelineConfig) -> Result<Self> {
         config.normalize();
+        // Before spawn_producer, which starts a thread that allocates batch_size * vector_len of
+        // host memory on its first call. Note the guard only covers the device side, so on builds
+        // where it short-circuits that host allocation is still unchecked.
+        // basis_reads_f64 = false: SyntheticProducer fills basis batches at config.dtype.
+        ensure_config_fits_device(&config, engine.precision(), false)?;
         let vector_len = vector_len(config.num_qubits, config.encoding);
         let producer = SyntheticProducer::new(config.clone(), vector_len);
         let prefetch_depth = config.prefetch_depth;
@@ -673,6 +842,9 @@ impl PipelineIterator {
         batch_limit: usize,
     ) -> Result<Self> {
         config.normalize();
+        // Before read_file_by_extension: that call loads the whole file, so checking afterwards
+        // would trade the sub-second rejection for a full read of data we are about to discard.
+        ensure_config_fits_device(&config, engine.precision(), true)?;
         let path = path.as_ref();
         let (batch_data, num_samples, sample_size) =
             read_file_by_extension(path, config.null_handling, config.dtype, config.encoding)?;
@@ -724,6 +896,8 @@ impl PipelineIterator {
         batch_limit: usize,
     ) -> Result<Self> {
         config.normalize();
+        // Before the reader opens the file and reads its first chunk.
+        ensure_config_fits_device(&config, engine.precision(), true)?;
         let path = path.as_ref();
         if path_extension_lower(path).as_deref() != Some("parquet") {
             return Err(MahoutError::InvalidInput(format!(
@@ -1032,6 +1206,211 @@ pub fn run_latency_pipeline(config: &PipelineConfig) -> Result<PipelineRunResult
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// The guard's message must name every value the user can act on. Asserted here rather than in
+    /// the integration test so the wording stays covered on machines and CI runners without a GPU.
+    #[test]
+    fn vram_check_context_names_the_actionable_values() {
+        let config = PipelineConfig {
+            num_qubits: 30,
+            batch_size: 64,
+            encoding: Encoding::Amplitude,
+            dtype: Precision::Float32,
+            prefetch_depth: 8,
+            ..PipelineConfig::default()
+        };
+
+        let context = vram_check_context(&config, Precision::Float64);
+        assert!(context.contains("encoding=amplitude"), "got: {context}");
+        assert!(context.contains("batch_size=64"), "got: {context}");
+        // Both precisions appear: the requested host dtype, and the one that sized the budget.
+        assert!(context.contains("dtype=Float32"), "got: {context}");
+        assert!(
+            context.contains("device_precision=Float64"),
+            "got: {context}"
+        );
+        // The doubled budget is surprising arithmetic unless the message explains it.
+        assert!(
+            context.contains("peak=2 concurrent batch buffers"),
+            "got: {context}"
+        );
+        // prefetch_depth is a host-side knob and does not appear in gpu_state_bytes; naming it
+        // here would suggest a remedy that cannot change the outcome.
+        assert!(!context.contains("prefetch_depth"), "got: {context}");
+    }
+
+    /// The resident device buffer is materialized at the engine's precision, so an f32 pipeline on
+    /// an f64 engine must be budgeted as f64. Budgeting the config's dtype would under-count by 2x
+    /// and cancel out the guard's entire safety factor.
+    #[test]
+    fn device_precision_follows_the_wider_of_config_and_engine() {
+        let f32_amplitude = PipelineConfig {
+            encoding: Encoding::Amplitude,
+            dtype: Precision::Float32,
+            ..PipelineConfig::default()
+        };
+
+        // Reachable by constructing QdpEngine(precision="float64") directly and calling
+        // create_synthetic_loader on it; the QuantumDataLoader builder always uses the f32 default.
+        assert_eq!(
+            resident_device_precision(&f32_amplitude, Precision::Float64, true),
+            Precision::Float64
+        );
+        assert_eq!(
+            resident_device_precision(&f32_amplitude, Precision::Float32, true),
+            Precision::Float32
+        );
+
+        let f64_amplitude = PipelineConfig {
+            dtype: Precision::Float64,
+            ..f32_amplitude
+        };
+        assert_eq!(
+            resident_device_precision(&f64_amplitude, Precision::Float32, true),
+            Precision::Float64
+        );
+    }
+
+    /// Both file loaders read basis input as f64 whatever `config.dtype` says, because basis
+    /// values are integer state indices, so the encoder produces an f64 state either way.
+    #[test]
+    fn basis_is_budgeted_as_f64_even_when_the_config_asks_for_f32() {
+        let basis_f32 = PipelineConfig {
+            encoding: Encoding::Basis,
+            dtype: Precision::Float32,
+            ..PipelineConfig::default()
+        };
+
+        assert_eq!(
+            resident_device_precision(&basis_f32, Precision::Float32, true),
+            Precision::Float64
+        );
+    }
+
+    /// The synthetic producer fills basis batches at `config.dtype`, and `supports_f32` is true for
+    /// basis so `normalize` leaves an f32 request alone. Budgeting f64 here would demand twice the
+    /// device memory the run actually uses and reject configurations that fit.
+    #[test]
+    fn synthetic_basis_is_budgeted_at_the_config_dtype() {
+        let basis_f32 = PipelineConfig {
+            encoding: Encoding::Basis,
+            dtype: Precision::Float32,
+            ..PipelineConfig::default()
+        };
+        assert!(
+            basis_f32.encoding.supports_f32(),
+            "normalize would downgrade the dtype and void this test's premise"
+        );
+
+        assert_eq!(
+            resident_device_precision(&basis_f32, Precision::Float32, false),
+            Precision::Float32
+        );
+    }
+
+    /// A configuration that overflows the memory model is rejected by `estimate_memory` before any
+    /// device is probed, so this holds with or without a GPU.
+    #[test]
+    fn unrepresentable_config_is_rejected_with_invalid_input() {
+        let config = PipelineConfig {
+            num_qubits: 64,
+            batch_size: 1,
+            encoding: Encoding::Amplitude,
+            dtype: Precision::Float64,
+            prefetch_depth: 1,
+            ..PipelineConfig::default()
+        };
+
+        let err = ensure_config_fits_device(&config, Precision::Float64, true)
+            .expect_err("2^64 is not representable, so no estimate exists");
+        assert!(
+            matches!(err, MahoutError::InvalidInput(_)),
+            "expected InvalidInput, got: {err}"
+        );
+    }
+
+    /// A small configuration must pass the guard on every build: with a GPU it fits comfortably,
+    /// and on a stub CUDA runtime the probe short-circuits before the memory query.
+    #[test]
+    fn modest_config_passes_the_guard() {
+        let config = PipelineConfig {
+            num_qubits: 8,
+            batch_size: 4,
+            encoding: Encoding::Amplitude,
+            dtype: Precision::Float32,
+            prefetch_depth: 1,
+            ..PipelineConfig::default()
+        };
+
+        assert!(ensure_config_fits_device(&config, Precision::Float32, true).is_ok());
+    }
+
+    /// The configuration the rejection tests below use: 20 qubits, batch 8, f32 amplitude, so
+    /// `gpu_state_bytes` is 2 (concurrent buffers) * 8 * 2^20 * 8 B = 128 MiB exactly.
+    fn rejection_test_config() -> PipelineConfig {
+        PipelineConfig {
+            num_qubits: 20,
+            batch_size: 8,
+            encoding: Encoding::Amplitude,
+            dtype: Precision::Float32,
+            prefetch_depth: 1,
+            ..PipelineConfig::default()
+        }
+    }
+
+    const REJECTION_TEST_REQUIRED_BYTES: usize = 2 * 8 * (1 << 20) * 8;
+
+    /// The behavior issue #1430 specifies: a configuration whose estimate exceeds free VRAM is
+    /// rejected. Injecting the memory figures keeps this reachable on a build with no CUDA
+    /// runtime, so the rule is covered where CI actually runs rather than only on a GPU host.
+    #[test]
+    fn config_larger_than_free_memory_is_rejected() {
+        let config = rejection_test_config();
+        let free = REJECTION_TEST_REQUIRED_BYTES - 1;
+
+        let err = ensure_config_fits_device_with(
+            &config,
+            Precision::Float32,
+            true,
+            Some((free, REJECTION_TEST_REQUIRED_BYTES * 4)),
+        )
+        .expect_err("estimate exceeds free memory by one byte, so this must be rejected");
+
+        assert!(
+            matches!(err, MahoutError::MemoryAllocation(_)),
+            "expected MemoryAllocation, got: {err}"
+        );
+        // The remedy has to be actionable: #1430 asks for the offending values by name.
+        let message = err.to_string();
+        for expected in ["amplitude", "batch_size=8", "qubits=20", "Reduce qubits"] {
+            assert!(
+                message.contains(expected),
+                "rejection message missing {expected:?}: {message}"
+            );
+        }
+    }
+
+    /// The other side of the same rule: exactly enough free memory is accepted. Pins the
+    /// comparison as `requested > free` rather than `>=`, so a config that fits precisely is not
+    /// turned away.
+    #[test]
+    fn config_that_exactly_fits_free_memory_is_accepted() {
+        let config = rejection_test_config();
+
+        assert!(
+            ensure_config_fits_device_with(
+                &config,
+                Precision::Float32,
+                true,
+                Some((
+                    REJECTION_TEST_REQUIRED_BYTES,
+                    REJECTION_TEST_REQUIRED_BYTES * 4
+                )),
+            )
+            .is_ok(),
+            "an estimate equal to free memory fits and must be accepted"
+        );
+    }
 
     fn assert_generate_and_inplace_match(encoding_method: &str) {
         let config = PipelineConfig {
