@@ -17,6 +17,7 @@
 // Throughput/latency pipeline using QdpEngine and encode_batch. Full loop runs in Rust;
 // Python bindings release GIL during the run.
 
+use std::collections::VecDeque;
 use std::f64::consts::PI;
 use std::path::Path;
 use std::time::Instant;
@@ -318,8 +319,9 @@ impl<T: FloatElem + ToBatchData> BatchProducer for InMemoryProducer<T> {
 
 pub struct StreamingProducer<T: FloatElem = f64> {
     pub reader: ParquetStreamingReader<T>,
-    pub buffer: Vec<T>,
-    pub buffer_cursor: usize,
+    /// Ring buffer of not-yet-consumed elements. Discarding a consumed prefix is O(1): a
+    /// `VecDeque` advances its head instead of shifting the retained tail like `Vec::drain`.
+    pub buffer: VecDeque<T>,
     pub read_chunk_scratch: Vec<T>,
     pub sample_size: usize,
     pub batch_size: usize,
@@ -334,40 +336,46 @@ impl<T: FloatElem + ToBatchData> BatchProducer for StreamingProducer<T> {
             return Ok(None);
         }
         let required = self.batch_size * self.sample_size;
-        while (self.buffer.len() - self.buffer_cursor) < required {
+        while self.buffer.len() < required {
             let written = self.reader.read_chunk(&mut self.read_chunk_scratch)?;
             if written == 0 {
                 break;
             }
-            self.buffer
-                .extend_from_slice(&self.read_chunk_scratch[..written]);
+            // Extend from the slice itself, not `.iter().copied()`: `VecDeque` specializes
+            // `Extend<&T> for T: Copy` into a bulk `copy_slice`, while the by-value iterator
+            // falls back to element-wise writes.
+            self.buffer.extend(&self.read_chunk_scratch[..written]);
         }
-        let available = self.buffer.len() - self.buffer_cursor;
-        let available_samples = available / self.sample_size;
+        let available_samples = self.buffer.len() / self.sample_size;
 
         if available_samples == 0 {
             return Ok(None);
         }
 
         let batch_n = available_samples.min(self.batch_size);
-        let start = self.buffer_cursor;
-        let end = start + batch_n * self.sample_size;
-        self.buffer_cursor = end;
+        let take = batch_n * self.sample_size;
         self.batches_yielded += 1;
 
-        let data = match recycled.and_then(T::from_recycled) {
+        let mut buf = match recycled.and_then(T::from_recycled) {
             Some(mut buf) => {
                 buf.clear();
-                buf.extend_from_slice(&self.buffer[start..end]);
-                T::wrap(buf)
+                buf
             }
-            None => T::wrap(self.buffer[start..end].to_vec()),
+            None => Vec::with_capacity(take),
         };
-
-        if self.buffer_cursor >= self.buffer.len() / BUFFER_COMPACT_DENOM {
-            self.buffer.drain(..self.buffer_cursor);
-            self.buffer_cursor = 0;
+        // Copy the batch out of the ring's two slices, then drop the drain to discard the prefix.
+        // Copying via `as_slices` keeps the batch copy on `extend_from_slice`'s bulk path
+        // (`Drain` is not `TrustedLen`, so `extend(drain)` would copy element by element), and
+        // the front-anchored `drain(..take)` only advances the head — the retained tail is never
+        // shifted. Reusing a recycled Vec keeps the batch copy itself allocation-free.
+        let (front, back) = self.buffer.as_slices();
+        let n_front = take.min(front.len());
+        buf.extend_from_slice(&front[..n_front]);
+        if n_front < take {
+            buf.extend_from_slice(&back[..take - n_front]);
         }
+        drop(self.buffer.drain(..take));
+        let data = T::wrap(buf);
 
         Ok(Some(PrefetchedBatch {
             data,
@@ -417,9 +425,6 @@ fn spawn_producer(
 
 /// Default Parquet row group size for streaming reader (tunable).
 const DEFAULT_PARQUET_ROW_GROUP_SIZE: usize = 2048;
-
-/// When buffer_cursor >= buffer.len() / BUFFER_COMPACT_DENOM, compact by draining consumed prefix.
-const BUFFER_COMPACT_DENOM: usize = 2;
 
 /// Returns the path extension as lowercase ASCII (e.g. "parquet"), or None if missing/non-UTF8.
 fn path_extension_lower(path: &Path) -> Option<String> {
@@ -631,10 +636,17 @@ where
 
     buffer.truncate(written);
     let read_chunk_scratch = vec![T::default(); initial_cap];
+    // Pre-reserve the streaming steady state so the ring never reallocates mid-run. Each batch
+    // drains up to `required` elements from the front while a refill appends up to one
+    // `initial_cap` chunk to the back, so live length peaks at `required + initial_cap`.
+    // `VecDeque::from` reuses the Vec's existing `initial_cap` capacity (O(1), no realloc), so
+    // this only tops it up by `required` — making front-advance realloc-free from batch 0.
+    let required = config.batch_size * sample_size;
+    let mut buffer = VecDeque::from(buffer);
+    buffer.reserve((required + initial_cap).saturating_sub(buffer.len()));
     let producer = StreamingProducer::<T> {
         reader,
         buffer,
-        buffer_cursor: 0,
         read_chunk_scratch,
         sample_size,
         batch_size: config.batch_size,
@@ -1553,13 +1565,14 @@ mod tests {
         use std::fs;
         use std::sync::Arc;
 
-        fn write_f32_parquet(path: &std::path::Path) {
-            // 8 samples, each 4 features — matches amplitude encoding with 2 qubits (2^2=4)
+        /// Writes `n_samples` f32 samples of 4 features each — matches amplitude encoding with
+        /// 2 qubits (2^2=4).
+        fn write_f32_parquet_n(path: &std::path::Path, n_samples: usize) {
             let item_field = Arc::new(Field::new("item", DataType::Float32, true));
             let list_field = Field::new("data", DataType::FixedSizeList(item_field, 4), true);
             let schema = Arc::new(Schema::new(vec![list_field]));
             let mut builder = FixedSizeListBuilder::new(Float32Builder::new(), 4);
-            for _ in 0..8 {
+            for _ in 0..n_samples {
                 builder.values().append_slice(&[0.25_f32, 0.5, 0.75, 1.0]);
                 builder.append(true);
             }
@@ -1569,6 +1582,10 @@ mod tests {
             let mut writer = ArrowWriter::try_new(file, schema, None).unwrap();
             writer.write(&batch).unwrap();
             writer.close().unwrap();
+        }
+
+        fn write_f32_parquet(path: &std::path::Path) {
+            write_f32_parquet_n(path, 8);
         }
 
         static FILE_COUNTER: std::sync::atomic::AtomicUsize =
@@ -1776,8 +1793,7 @@ mod tests {
                 let scratch = vec![0.0_f32; CAP];
                 let mut producer = StreamingProducer::<f32> {
                     reader,
-                    buffer,
-                    buffer_cursor: 0,
+                    buffer: VecDeque::from(buffer),
                     read_chunk_scratch: scratch,
                     sample_size,
                     batch_size: 4,
@@ -1794,6 +1810,117 @@ mod tests {
                 matches!(result.unwrap(), BatchData::F32(_)),
                 "StreamingProducer::<f32>.produce() must yield BatchData::F32"
             );
+        }
+
+        /// #1436: the `VecDeque` ring buffer must not grow across a long stream. A deliberately
+        /// small `read_chunk_scratch` forces `produce()` to refill the ring on nearly every batch,
+        /// so the test exercises the real hot-path pattern — front-drain the consumed prefix while
+        /// new chunks are appended to the back. A correct ring reuses the freed front slots for the
+        /// appended tail, so capacity settles to a constant: front-advance is O(1) amortized with no
+        /// reallocation and no per-batch shift of the retained tail. The `refills_observed` assert
+        /// guards against a regression where the whole stream is slurped up front (which would make
+        /// the capacity check vacuous).
+        ///
+        /// The same loop also pins down the wrap-around batch copy: once the ring wraps, a batch
+        /// can straddle the physical end of the allocation, so `produce()` must stitch it together
+        /// from both halves of `as_slices()`. Reaching that case needs a read chunk that is *not*
+        /// a multiple of the batch stride: if every batch drained the ring empty, `VecDeque` would
+        /// reset the head to 0 on each refill and the ring would never wrap (`split_observed`
+        /// asserts the straddling case is actually reached).
+        #[test]
+        fn test_streaming_producer_buffer_capacity_constant_over_100_batches() {
+            const BATCH_SIZE: usize = 4;
+            const SAMPLE_LEN: usize = 4; // 2 qubits, amplitude encoding
+            const BATCHES: usize = 100;
+            // Elements consumed per batch.
+            const STRIDE: usize = BATCH_SIZE * SAMPLE_LEN;
+            // One sample more than a batch: produce() refills on nearly every batch and always
+            // leaves a remainder behind, so the head walks around the ring instead of resetting.
+            const READ_CHUNK: usize = STRIDE + SAMPLE_LEN;
+            // Each sample written by write_f32_parquet_n, repeated across the batch.
+            const SAMPLE: [f32; SAMPLE_LEN] = [0.25, 0.5, 0.75, 1.0];
+            let path = temp_parquet_path("streaming_cap");
+            // A few extra samples so the 100th produce() is a full batch, not EOF.
+            write_f32_parquet_n(&path, BATCH_SIZE * (BATCHES + 5));
+
+            let run = (|| -> Result<()> {
+                let reader = ParquetStreamingReader::<f32>::new(
+                    &path,
+                    Some(DEFAULT_PARQUET_ROW_GROUP_SIZE),
+                    NullHandling::FillZero,
+                )?;
+                // Exactly the steady-state peak the production build path reserves: one batch
+                // plus one refill chunk. Sized this tightly, the head wraps within the first few
+                // batches, so straddling batch copies are exercised early and often.
+                let mut producer = StreamingProducer::<f32> {
+                    reader,
+                    buffer: VecDeque::with_capacity(STRIDE + READ_CHUNK),
+                    read_chunk_scratch: vec![0.0_f32; READ_CHUNK],
+                    sample_size: SAMPLE_LEN,
+                    batch_size: BATCH_SIZE,
+                    num_qubits: 2,
+                    batches_yielded: 0,
+                    batch_limit: usize::MAX,
+                };
+
+                let assert_batch_values = |batch: &PrefetchedBatch, i: usize| match &batch.data {
+                    BatchData::F32(v) => {
+                        assert_eq!(v.len(), STRIDE, "batch {i} has the wrong length");
+                        for (j, x) in v.iter().enumerate() {
+                            assert_eq!(
+                                *x,
+                                SAMPLE[j % SAMPLE_LEN],
+                                "batch {i} element {j} corrupted",
+                            );
+                        }
+                    }
+                    other => panic!("batch {i} must be F32, got {other:?}"),
+                };
+
+                // Capacity after the first produce() is the steady-state baseline.
+                let first = producer.produce(None)?.expect("stream must yield a batch");
+                assert_batch_values(&first, 0);
+                let baseline_cap = producer.buffer.capacity();
+
+                let mut refills_observed = false;
+                let mut split_observed = false;
+                for i in 1..BATCHES {
+                    let len_before = producer.buffer.len();
+                    // The ring already holds a full batch that is split across the wrap boundary:
+                    // this produce() needs no refill, so it must copy the batch out of both
+                    // halves of as_slices().
+                    let (front, back) = producer.buffer.as_slices();
+                    if len_before >= STRIDE && !back.is_empty() && front.len() < STRIDE {
+                        split_observed = true;
+                    }
+
+                    let batch = producer.produce(None)?;
+                    let batch = batch.unwrap_or_else(|| panic!("batch {i} unexpectedly empty"));
+                    assert_batch_values(&batch, i);
+                    // A refill ran during this produce() iff the ring gained elements beyond the
+                    // one batch (STRIDE) it just drained from the front.
+                    if producer.buffer.len() + STRIDE > len_before {
+                        refills_observed = true;
+                    }
+                    assert_eq!(
+                        producer.buffer.capacity(),
+                        baseline_cap,
+                        "buffer capacity grew at batch {i}: front-advance must not reallocate",
+                    );
+                }
+                assert!(
+                    refills_observed,
+                    "test must exercise back-appends (ring wrap-around), not a single up-front slurp",
+                );
+                assert!(
+                    split_observed,
+                    "test must exercise a batch straddling the ring's wrap boundary",
+                );
+                Ok(())
+            })();
+
+            let _ = fs::remove_file(&path);
+            run.unwrap();
         }
 
         /// Direct unit test of the shared f64→f32 narrowing helper used by every
@@ -1908,6 +2035,530 @@ mod tests {
                 matches!(result.unwrap(), BatchData::F32(_)),
                 "build_streaming_producer::<f32> must deliver BatchData::F32 through the channel"
             );
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // #1462 before/after benchmark: `Vec` + cursor vs `VecDeque` ring buffer.
+    //
+    // `StreamingProducer::produce` is the streaming hot path — every batch copies one batch out
+    // of the buffer and discards it. Before #1462 the buffer was a `Vec` plus a read cursor,
+    // compacted with `drain(..cursor)` once the cursor passed the half-way mark; each compaction
+    // memmoves the entire retained tail, so per-batch cost scales with buffer size. The
+    // `VecDeque` advances its head instead, which is O(1) regardless of how much is retained.
+    //
+    // The benchmark runs both against the real `ParquetStreamingReader`, so the "after" side is
+    // the shipped `StreamingProducer` itself rather than a re-creation of it, and the numbers
+    // include the I/O the buffer work actually competes with. It is `#[ignore]`d: timings are
+    // too machine-dependent to gate CI, and the behavioural guarantee is already covered by
+    // `test_streaming_producer_buffer_capacity_constant_over_100_batches`.
+    //
+    // Override the workload with BENCH_REPEATS=<n> BENCH_BATCHES=<n>:
+    //
+    //     cargo test -p qdp-core --release --lib buffer_bench -- \
+    //         --ignored --nocapture --test-threads=1
+    // -------------------------------------------------------------------------
+    mod buffer_bench {
+        use super::*;
+        use arrow::array::{ArrayRef, FixedSizeListBuilder, Float32Builder, RecordBatch};
+        use arrow::datatypes::{DataType, Field, Schema};
+        use parquet::arrow::ArrowWriter;
+        use std::fs;
+        use std::sync::Arc;
+        use std::time::Duration;
+
+        /// Pre-#1462 compaction threshold: compact once the cursor reaches `buffer.len() / 2`.
+        const LEGACY_BUFFER_COMPACT_DENOM: usize = 2;
+
+        /// Frozen copy of the pre-#1462 `StreamingProducer` — a `Vec` plus a read cursor, with
+        /// the consumed prefix drained once the cursor passes the half-way mark. Kept verbatim
+        /// (only renamed) so the "before" column measures the code that actually shipped rather
+        /// than a paraphrase of it. Do not "fix" this to track `StreamingProducer`: it is the
+        /// benchmark's baseline, and changing it invalidates every recorded number.
+        struct LegacyStreamingProducer<T: FloatElem = f64> {
+            reader: ParquetStreamingReader<T>,
+            buffer: Vec<T>,
+            buffer_cursor: usize,
+            read_chunk_scratch: Vec<T>,
+            sample_size: usize,
+            batch_size: usize,
+            num_qubits: usize,
+            batches_yielded: usize,
+            batch_limit: usize,
+        }
+
+        impl<T: FloatElem + ToBatchData> BatchProducer for LegacyStreamingProducer<T> {
+            fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>> {
+                if self.batches_yielded >= self.batch_limit {
+                    return Ok(None);
+                }
+                let required = self.batch_size * self.sample_size;
+                while (self.buffer.len() - self.buffer_cursor) < required {
+                    let written = self.reader.read_chunk(&mut self.read_chunk_scratch)?;
+                    if written == 0 {
+                        break;
+                    }
+                    self.buffer
+                        .extend_from_slice(&self.read_chunk_scratch[..written]);
+                }
+                let available = self.buffer.len() - self.buffer_cursor;
+                let available_samples = available / self.sample_size;
+
+                if available_samples == 0 {
+                    return Ok(None);
+                }
+
+                let batch_n = available_samples.min(self.batch_size);
+                let start = self.buffer_cursor;
+                let end = start + batch_n * self.sample_size;
+                self.buffer_cursor = end;
+                self.batches_yielded += 1;
+
+                let data = match recycled.and_then(T::from_recycled) {
+                    Some(mut buf) => {
+                        buf.clear();
+                        buf.extend_from_slice(&self.buffer[start..end]);
+                        T::wrap(buf)
+                    }
+                    None => T::wrap(self.buffer[start..end].to_vec()),
+                };
+
+                if self.buffer_cursor >= self.buffer.len() / LEGACY_BUFFER_COMPACT_DENOM {
+                    self.buffer.drain(..self.buffer_cursor);
+                    self.buffer_cursor = 0;
+                }
+
+                Ok(Some(PrefetchedBatch {
+                    data,
+                    batch_n,
+                    sample_size: self.sample_size,
+                    num_qubits: self.num_qubits,
+                }))
+            }
+        }
+
+        /// One workload shape. `num_qubits` fixes the sample length under amplitude encoding
+        /// (`2^n`), and `read_chunk` is the refill granularity — `build_streaming_producer` uses
+        /// `max(64 KiB, vector_len)`, which is what these shapes reproduce.
+        struct Shape {
+            label: &'static str,
+            num_qubits: u32,
+            batch_size: usize,
+            batches: usize,
+        }
+
+        static BENCH_FILE_COUNTER: std::sync::atomic::AtomicUsize =
+            std::sync::atomic::AtomicUsize::new(0);
+
+        fn temp_parquet_path(tag: &str) -> std::path::PathBuf {
+            let n = BENCH_FILE_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            std::env::temp_dir().join(format!(
+                "mahout_bench_{tag}_{pid}_{n}.parquet",
+                pid = std::process::id(),
+            ))
+        }
+
+        /// Element `g` of the flattened file, chosen to vary across the stream so the checksum
+        /// catches a batch that is correct element-wise but misaligned or reordered.
+        fn element(g: usize) -> f32 {
+            (g % 4096) as f32 * (1.0 / 4096.0)
+        }
+
+        /// Writes `n_samples` samples of `n_features` f32 each, as a FixedSizeList column —
+        /// the layout `ParquetStreamingReader` expects.
+        fn write_parquet(path: &std::path::Path, n_samples: usize, n_features: usize) {
+            let item_field = Arc::new(Field::new("item", DataType::Float32, true));
+            let list_field = Field::new(
+                "data",
+                DataType::FixedSizeList(item_field, n_features as i32),
+                true,
+            );
+            let schema = Arc::new(Schema::new(vec![list_field]));
+            let mut builder = FixedSizeListBuilder::new(
+                Float32Builder::with_capacity(n_samples * n_features),
+                n_features as i32,
+            );
+            let mut sample = vec![0.0_f32; n_features];
+            for s in 0..n_samples {
+                for (j, v) in sample.iter_mut().enumerate() {
+                    *v = element(s * n_features + j);
+                }
+                builder.values().append_slice(&sample);
+                builder.append(true);
+            }
+            let array = Arc::new(builder.finish()) as ArrayRef;
+            let batch = RecordBatch::try_new(schema.clone(), vec![array]).unwrap();
+            let file = fs::File::create(path).unwrap();
+            let mut writer = ArrowWriter::try_new(file, schema, None).unwrap();
+            writer.write(&batch).unwrap();
+            writer.close().unwrap();
+        }
+
+        /// The producer state that both sides share: a reader positioned after its first chunk,
+        /// that chunk, the refill scratch buffer, and the sample size the reader detected.
+        struct Opened {
+            reader: ParquetStreamingReader<f32>,
+            first_chunk: Vec<f32>,
+            scratch: Vec<f32>,
+            sample_size: usize,
+        }
+
+        /// Opens the file and reads the first chunk, exactly as `build_streaming_producer` does,
+        /// so neither side gets a head start on the other.
+        fn open(path: &std::path::Path, read_chunk: usize) -> Result<Opened> {
+            let mut reader = ParquetStreamingReader::<f32>::new(
+                path,
+                Some(DEFAULT_PARQUET_ROW_GROUP_SIZE),
+                NullHandling::FillZero,
+            )?;
+            let mut buffer = vec![0.0_f32; read_chunk];
+            let written = reader.read_chunk(&mut buffer)?;
+            assert!(written > 0, "benchmark file must not be empty");
+            buffer.truncate(written);
+            let sample_size = reader
+                .get_sample_size()
+                .expect("sample_size after first chunk");
+            let scratch = vec![0.0_f32; read_chunk];
+            Ok(Opened {
+                reader,
+                first_chunk: buffer,
+                scratch,
+                sample_size,
+            })
+        }
+
+        /// Builds the "before" producer the way the pre-#1462 `build_streaming_producer` did.
+        fn legacy_producer(
+            path: &std::path::Path,
+            shape: &Shape,
+            read_chunk: usize,
+        ) -> Result<LegacyStreamingProducer<f32>> {
+            let opened = open(path, read_chunk)?;
+            Ok(LegacyStreamingProducer {
+                reader: opened.reader,
+                buffer: opened.first_chunk,
+                buffer_cursor: 0,
+                read_chunk_scratch: opened.scratch,
+                sample_size: opened.sample_size,
+                batch_size: shape.batch_size,
+                num_qubits: shape.num_qubits as usize,
+                batches_yielded: 0,
+                batch_limit: usize::MAX,
+            })
+        }
+
+        /// Builds the "after" producer the way the current `build_streaming_producer` does,
+        /// including the steady-state `reserve` that keeps front-advance realloc-free.
+        fn ring_producer(
+            path: &std::path::Path,
+            shape: &Shape,
+            read_chunk: usize,
+        ) -> Result<StreamingProducer<f32>> {
+            let opened = open(path, read_chunk)?;
+            let required = shape.batch_size * opened.sample_size;
+            let mut buffer = VecDeque::from(opened.first_chunk);
+            buffer.reserve((required + read_chunk).saturating_sub(buffer.len()));
+            Ok(StreamingProducer {
+                reader: opened.reader,
+                buffer,
+                read_chunk_scratch: opened.scratch,
+                sample_size: opened.sample_size,
+                batch_size: shape.batch_size,
+                num_qubits: shape.num_qubits as usize,
+                batches_yielded: 0,
+                batch_limit: usize::MAX,
+            })
+        }
+
+        /// Runs `batches` batches and returns the time spent inside `produce()` plus an
+        /// order-sensitive checksum of everything produced.
+        ///
+        /// Only the `produce()` calls are timed: the checksum runs between them, so it does not
+        /// dilute the measured difference. Each batch's buffer is handed back as the next call's
+        /// `recycled` argument, mirroring what `spawn_producer` does — without that, both sides
+        /// would allocate a fresh `Vec` per batch and the allocator noise would dominate.
+        fn drive(
+            producer: &mut impl BatchProducer,
+            batches: usize,
+        ) -> Result<(Duration, u64, usize)> {
+            let mut recycled: Option<BatchData> = None;
+            let mut checksum = 0u64;
+            let mut elements = 0usize;
+            let mut elapsed = Duration::ZERO;
+
+            for i in 0..batches {
+                let start = Instant::now();
+                let produced = producer.produce(recycled.take())?;
+                elapsed += start.elapsed();
+
+                let batch = produced.unwrap_or_else(|| {
+                    panic!("stream ran dry at batch {i}: benchmark file is too small")
+                });
+                match &batch.data {
+                    BatchData::F32(v) => {
+                        for x in v {
+                            checksum = checksum
+                                .wrapping_mul(0x100_0000_01b3)
+                                .wrapping_add(x.to_bits() as u64);
+                        }
+                        elements += v.len();
+                    }
+                    other => panic!("benchmark expects F32 batches, got {other:?}"),
+                }
+                recycled = Some(batch.data);
+            }
+            Ok((elapsed, checksum, elements))
+        }
+
+        fn env_usize(key: &str, default: usize) -> usize {
+            std::env::var(key)
+                .ok()
+                .and_then(|v| v.parse().ok())
+                .filter(|v| *v > 0)
+                .unwrap_or(default)
+        }
+
+        #[test]
+        #[ignore = "benchmark; run with `cargo test -p qdp-core --release --lib buffer_bench -- --ignored --nocapture`"]
+        fn bench_streaming_buffer_vec_cursor_vs_vecdeque() {
+            // Same 64 KiB refill granularity as build_streaming_producer's INITIAL_CHUNK_CAP.
+            const READ_CHUNK: usize = 64 * 1024;
+            let repeats = env_usize("BENCH_REPEATS", 5);
+            let shapes = [
+                // Smallest batch relative to the refill chunk (1:16), where the isolated
+                // benchmark below shows the legacy compaction paying the most.
+                Shape {
+                    label: "8 qubits (256 x 16)",
+                    num_qubits: 8,
+                    batch_size: 16,
+                    batches: env_usize("BENCH_BATCHES", 400),
+                },
+                Shape {
+                    label: "8 qubits (256 x 64)",
+                    num_qubits: 8,
+                    batch_size: 64,
+                    batches: env_usize("BENCH_BATCHES", 200),
+                },
+                Shape {
+                    label: "10 qubits (1024 x 64)",
+                    num_qubits: 10,
+                    batch_size: 64,
+                    batches: env_usize("BENCH_BATCHES", 100),
+                },
+                Shape {
+                    label: "12 qubits (4096 x 32)",
+                    num_qubits: 12,
+                    batch_size: 32,
+                    batches: env_usize("BENCH_BATCHES", 60),
+                },
+            ];
+
+            println!("\nStreamingProducer buffer strategy — {repeats} repeats, best of each");
+            println!("read chunk: {READ_CHUNK} elements; env: BENCH_REPEATS, BENCH_BATCHES\n");
+            println!(
+                "| shape | batches | before (Vec+cursor) | after (VecDeque) | speedup |\n\
+                 |---|---|---|---|---|"
+            );
+
+            for shape in &shapes {
+                let vector_len = vector_len(shape.num_qubits, Encoding::Amplitude);
+                let path = temp_parquet_path("bench_buffer");
+                // A few spare samples so the last produce() is a full batch, not a short EOF one.
+                write_parquet(&path, shape.batch_size * (shape.batches + 2), vector_len);
+
+                let run = (|| -> Result<(Duration, Duration)> {
+                    let mut best_legacy = Duration::MAX;
+                    let mut best_ring = Duration::MAX;
+                    let mut expected: Option<(u64, usize)> = None;
+
+                    // One untimed pass per side warms the page cache and the allocator, so the
+                    // first repeat is not systematically slower than the rest.
+                    drive(
+                        &mut legacy_producer(&path, shape, READ_CHUNK)?,
+                        shape.batches,
+                    )?;
+                    drive(&mut ring_producer(&path, shape, READ_CHUNK)?, shape.batches)?;
+
+                    // Interleaved so any drift in machine state (thermal, cache pressure) lands
+                    // on both sides rather than on whichever ran second.
+                    for _ in 0..repeats {
+                        for (slot, sample) in [
+                            (
+                                &mut best_legacy,
+                                drive(
+                                    &mut legacy_producer(&path, shape, READ_CHUNK)?,
+                                    shape.batches,
+                                )?,
+                            ),
+                            (
+                                &mut best_ring,
+                                drive(
+                                    &mut ring_producer(&path, shape, READ_CHUNK)?,
+                                    shape.batches,
+                                )?,
+                            ),
+                        ] {
+                            let (elapsed, checksum, elements) = sample;
+                            match expected {
+                                None => expected = Some((checksum, elements)),
+                                Some(want) => assert_eq!(
+                                    (checksum, elements),
+                                    want,
+                                    "both buffer strategies must produce an identical element \
+                                     stream for {}",
+                                    shape.label,
+                                ),
+                            }
+                            *slot = (*slot).min(elapsed);
+                        }
+                    }
+                    Ok((best_legacy, best_ring))
+                })();
+
+                let _ = fs::remove_file(&path);
+                let (legacy, ring) = run.unwrap();
+                let per_batch = |d: Duration| d.as_secs_f64() * 1e6 / shape.batches as f64;
+                println!(
+                    "| {} | {} | {:.2} ms ({:.1} us/batch) | {:.2} ms ({:.1} us/batch) | {:.2}x |",
+                    shape.label,
+                    shape.batches,
+                    legacy.as_secs_f64() * 1e3,
+                    per_batch(legacy),
+                    ring.as_secs_f64() * 1e3,
+                    per_batch(ring),
+                    legacy.as_secs_f64() / ring.as_secs_f64(),
+                );
+            }
+            println!();
+        }
+
+        // ---------------------------------------------------------------------
+        // Isolated buffer cost.
+        //
+        // The end-to-end bench above answers "what does the pipeline gain", and the answer is
+        // "nothing measurable" — Parquet decode is ~99% of produce(). To show what the change
+        // actually does, these two models run the *buffer half* of produce() with the reader
+        // replaced by a pre-filled scratch slice: refill-append, copy one batch out into a
+        // recycled Vec, discard the consumed prefix. They are identical except for the discard,
+        // which is the whole of #1462.
+        // ---------------------------------------------------------------------
+
+        /// Buffer half of the pre-#1462 `produce()`: consume via a cursor, then compact by
+        /// draining the consumed prefix once the cursor passes the half-way mark. The drain
+        /// memmoves every retained element.
+        fn legacy_buffer_loop(required: usize, chunk: &[f32], batches: usize) -> usize {
+            let mut buffer: Vec<f32> = Vec::with_capacity(required + chunk.len());
+            let mut cursor = 0usize;
+            let mut out: Vec<f32> = Vec::with_capacity(required);
+            let mut moved = 0usize;
+            for _ in 0..batches {
+                while (buffer.len() - cursor) < required {
+                    buffer.extend_from_slice(chunk);
+                }
+                out.clear();
+                out.extend_from_slice(&buffer[cursor..cursor + required]);
+                cursor += required;
+                // `out.len()` is a constant here, so without `black_box` the optimizer is free
+                // to delete the copy it is supposed to be measuring.
+                moved += std::hint::black_box(&out).len();
+                if cursor >= buffer.len() / LEGACY_BUFFER_COMPACT_DENOM {
+                    buffer.drain(..cursor);
+                    cursor = 0;
+                }
+            }
+            moved
+        }
+
+        /// Buffer half of the current `produce()`: copy the batch out of the ring's two slices,
+        /// then front-drain it, which only advances the head.
+        fn ring_buffer_loop(required: usize, chunk: &[f32], batches: usize) -> usize {
+            let mut buffer: VecDeque<f32> = VecDeque::with_capacity(required + chunk.len());
+            let mut out: Vec<f32> = Vec::with_capacity(required);
+            let mut moved = 0usize;
+            for _ in 0..batches {
+                while buffer.len() < required {
+                    buffer.extend(chunk);
+                }
+                out.clear();
+                let (front, back) = buffer.as_slices();
+                let n_front = required.min(front.len());
+                out.extend_from_slice(&front[..n_front]);
+                if n_front < required {
+                    out.extend_from_slice(&back[..required - n_front]);
+                }
+                drop(buffer.drain(..required));
+                // See the matching note in `legacy_buffer_loop`.
+                moved += std::hint::black_box(&out).len();
+            }
+            moved
+        }
+
+        #[test]
+        #[ignore = "benchmark; run with `cargo test -p qdp-core --release --lib buffer_bench -- --ignored --nocapture`"]
+        fn bench_buffer_strategy_isolated() {
+            const READ_CHUNK: usize = 64 * 1024;
+            let repeats = env_usize("BENCH_REPEATS", 5);
+            let batches = env_usize("BENCH_BATCHES", 2000);
+            let chunk = vec![1.0_f32; READ_CHUNK];
+
+            // The batch-to-chunk ratio is what drives the difference, not absolute size: legacy
+            // compaction memmoves whatever is retained past the cursor, and the smaller a batch
+            // is relative to a refill chunk, the more is retained at each compaction. At ratio
+            // 1:1 a compaction leaves nothing behind and both strategies do the same work.
+            println!("\nBuffer management only, reader replaced by a pre-filled slice");
+            println!("{repeats} repeats, best of each; {batches} batches per run");
+            println!("refill chunk fixed at {READ_CHUNK} elements\n");
+            println!(
+                "| batch elements | batch:chunk | before (Vec+cursor) | after (VecDeque) | speedup |\n\
+                 |---|---|---|---|---|"
+            );
+
+            for required in [4 * 1024_usize, 16 * 1024, 64 * 1024, 256 * 1024] {
+                let mut best_legacy = Duration::MAX;
+                let mut best_ring = Duration::MAX;
+                let mut expected: Option<usize> = None;
+
+                legacy_buffer_loop(required, &chunk, batches);
+                ring_buffer_loop(required, &chunk, batches);
+
+                for _ in 0..repeats {
+                    for (slot, run) in [
+                        (
+                            &mut best_legacy,
+                            &legacy_buffer_loop as &dyn Fn(usize, &[f32], usize) -> usize,
+                        ),
+                        (&mut best_ring, &ring_buffer_loop),
+                    ] {
+                        let start = Instant::now();
+                        let moved = run(required, &chunk, batches);
+                        let elapsed = start.elapsed();
+                        match expected {
+                            None => expected = Some(moved),
+                            Some(want) => assert_eq!(
+                                moved, want,
+                                "both strategies must move the same number of elements",
+                            ),
+                        }
+                        *slot = (*slot).min(elapsed);
+                    }
+                }
+
+                let per_batch = |d: Duration| d.as_secs_f64() * 1e9 / batches as f64;
+                let ratio = if required >= READ_CHUNK {
+                    format!("{}:1", required / READ_CHUNK)
+                } else {
+                    format!("1:{}", READ_CHUNK / required)
+                };
+                println!(
+                    "| {} | {} | {:.0} ns/batch | {:.0} ns/batch | {:.2}x |",
+                    required,
+                    ratio,
+                    per_batch(best_legacy),
+                    per_batch(best_ring),
+                    best_legacy.as_secs_f64() / best_ring.as_secs_f64(),
+                );
+            }
+            println!();
         }
     }
 }
