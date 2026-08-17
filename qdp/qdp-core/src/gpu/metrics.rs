@@ -21,12 +21,12 @@
 //! to the host and run on the CPU to produce a single scalar per sample.
 //! They are intended for **testing and validation**, not the hot path.
 
-#[cfg(target_os = "linux")]
-use cudarc::driver::CudaDevice;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
+use crate::gpu_rt::CudaDevice;
+#[cfg(qdp_gpu_platform)]
 use std::sync::Arc;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use qdp_kernels::{CuComplex, CuDoubleComplex};
 
 use crate::error::{MahoutError, Result};
@@ -152,7 +152,7 @@ pub fn trace_distance_cross_precision(state_f32: &[f32], state_f64: &[f64]) -> R
 /// Download f64 complex GPU data to host as interleaved (re, im) f64 vec.
 ///
 /// `gpu_ptr` must point to `num_elements` `CuDoubleComplex` values on device.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub fn download_complex_f64(
     device: &Arc<CudaDevice>,
     gpu_ptr: *const CuDoubleComplex,
@@ -168,15 +168,17 @@ pub fn download_complex_f64(
     let mut host_buf = vec![0.0_f64; num_elements * 2]; // interleaved re, im
 
     unsafe {
-        let ret = cudarc::driver::sys::lib().cuMemcpyDtoH_v2(
+        let ret = crate::gpu::cuda_ffi::cudaMemcpy(
             host_buf.as_mut_ptr() as *mut _,
-            gpu_ptr as u64,
+            gpu_ptr as *const _,
             byte_count,
+            crate::gpu::cuda_ffi::CUDA_MEMCPY_DEVICE_TO_HOST,
         );
-        if ret != cudarc::driver::sys::CUresult::CUDA_SUCCESS {
+        if ret != crate::gpu::cuda_ffi::CUDA_SUCCESS {
             return Err(MahoutError::Cuda(format!(
-                "cuMemcpyDtoH failed during f64 download: {:?}",
-                ret
+                "device-to-host copy failed during f64 download: {} ({})",
+                ret,
+                crate::error::cuda_error_to_string(ret)
             )));
         }
     }
@@ -185,7 +187,7 @@ pub fn download_complex_f64(
 }
 
 /// Download f32 complex GPU data to host as interleaved (re, im) f32 vec.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub fn download_complex_f32(
     device: &Arc<CudaDevice>,
     gpu_ptr: *const CuComplex,
@@ -201,15 +203,17 @@ pub fn download_complex_f32(
     let mut host_buf = vec![0.0_f32; num_elements * 2];
 
     unsafe {
-        let ret = cudarc::driver::sys::lib().cuMemcpyDtoH_v2(
+        let ret = crate::gpu::cuda_ffi::cudaMemcpy(
             host_buf.as_mut_ptr() as *mut _,
-            gpu_ptr as u64,
+            gpu_ptr as *const _,
             byte_count,
+            crate::gpu::cuda_ffi::CUDA_MEMCPY_DEVICE_TO_HOST,
         );
-        if ret != cudarc::driver::sys::CUresult::CUDA_SUCCESS {
+        if ret != crate::gpu::cuda_ffi::CUDA_SUCCESS {
             return Err(MahoutError::Cuda(format!(
-                "cuMemcpyDtoH failed during f32 download: {:?}",
-                ret
+                "device-to-host copy failed during f32 download: {} ({})",
+                ret,
+                crate::error::cuda_error_to_string(ret)
             )));
         }
     }

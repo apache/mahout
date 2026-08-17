@@ -53,7 +53,7 @@ pub enum MahoutError {
 pub type Result<T> = std::result::Result<T, MahoutError>;
 
 /// Convert CUDA error code to human-readable string
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub fn cuda_error_to_string(code: i32) -> &'static str {
     match code {
         0 => "cudaSuccess",

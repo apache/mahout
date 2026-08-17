@@ -20,10 +20,14 @@
 // but in CUDA builds, the extern "C" functions require unsafe blocks.
 // The compiler can't statically determine which path is taken.
 #![allow(unused_unsafe)]
+// The `stream.stream as *mut c_void` cast is a real conversion on the CUDA
+// backend (cudarc's CUstream is a distinct pointer type) but a no-op on HIP,
+// where the stream field is already *mut c_void; silence the HIP-only redundancy.
+#![cfg_attr(feature = "hip", allow(clippy::unnecessary_cast))]
 
-#[cfg(target_os = "linux")]
-use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
+use qdp_kernels::device::{CudaDevice, DevicePtr, DevicePtrMut};
+#[cfg(qdp_gpu_platform)]
 use qdp_kernels::{
     CuComplex, CuDoubleComplex, launch_amplitude_encode, launch_amplitude_encode_batch,
     launch_amplitude_encode_f32, launch_l2_norm, launch_l2_norm_batch, launch_l2_norm_batch_f32,
@@ -33,7 +37,7 @@ use qdp_kernels::{
 const EPSILON: f64 = 1e-10;
 const EPSILON_F32: f32 = 1e-5;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn assert_batch_state_matches_f64(
     state_h: &[CuDoubleComplex],
     input: &[f64],
@@ -70,7 +74,7 @@ fn assert_batch_state_matches_f64(
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_amplitude_encode_basic() {
     println!("Testing basic amplitude encoding...");
 
@@ -141,7 +145,7 @@ fn test_amplitude_encode_basic() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_amplitude_encode_basic_f32() {
     println!("Testing basic amplitude encoding (float32)...");
 
@@ -211,7 +215,7 @@ fn test_amplitude_encode_basic_f32() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_amplitude_encode_power_of_two() {
     println!("Testing amplitude encoding with power-of-two input...");
 
@@ -271,7 +275,7 @@ fn test_amplitude_encode_power_of_two() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_amplitude_encode_odd_input_length() {
     println!("Testing amplitude encoding with odd input length...");
 
@@ -320,7 +324,7 @@ fn test_amplitude_encode_odd_input_length() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_amplitude_encode_odd_input_length_f32() {
     println!("Testing amplitude encoding with odd input length (float32)...");
 
@@ -369,7 +373,7 @@ fn test_amplitude_encode_odd_input_length_f32() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_amplitude_encode_large_state() {
     println!("Testing amplitude encoding with large state vector...");
 
@@ -427,7 +431,7 @@ fn test_amplitude_encode_large_state() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_amplitude_encode_zero_norm_error() {
     println!("Testing amplitude encoding with zero norm (error case)...");
 
@@ -467,7 +471,7 @@ fn test_amplitude_encode_zero_norm_error() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_amplitude_encode_negative_norm_error() {
     println!("Testing amplitude encoding with negative norm (error case)...");
 
@@ -507,7 +511,7 @@ fn test_amplitude_encode_negative_norm_error() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_amplitude_encode_vectorized_load() {
     println!("Testing vectorized double2 memory access optimization...");
 
@@ -559,7 +563,7 @@ fn test_amplitude_encode_vectorized_load() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_amplitude_encode_small_input_large_state() {
     println!("Testing small input with large state vector...");
 
@@ -612,7 +616,7 @@ fn test_amplitude_encode_small_input_large_state() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_amplitude_encode_batch_odd_sample_length_handles_misaligned_samples() {
     println!("Testing batch amplitude encoding with odd sample length (float64)...");
 
@@ -658,7 +662,7 @@ fn test_amplitude_encode_batch_odd_sample_length_handles_misaligned_samples() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_l2_norm_single_kernel() {
     println!("Testing single-vector GPU norm reduction...");
 
@@ -698,7 +702,7 @@ fn test_l2_norm_single_kernel() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_l2_norm_batch_kernel_stream() {
     println!("Testing batched norm reduction on async stream...");
 
@@ -755,7 +759,7 @@ fn test_l2_norm_batch_kernel_stream() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_l2_norm_batch_kernel_odd_sample_len() {
     println!("Testing batched L2 norm reduction with odd sample length (float64)...");
 
@@ -804,7 +808,7 @@ fn test_l2_norm_batch_kernel_odd_sample_len() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_l2_norm_batch_kernel_zero_num_samples() {
     println!("Testing batched L2 norm rejection when num_samples==0 (float64)...");
 
@@ -838,7 +842,7 @@ fn test_l2_norm_batch_kernel_zero_num_samples() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_l2_norm_batch_kernel_zero_sample_len() {
     println!("Testing batched L2 norm rejection when sample_len==0 (float64)...");
 
@@ -872,7 +876,7 @@ fn test_l2_norm_batch_kernel_zero_sample_len() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_l2_norm_single_kernel_f32() {
     println!("Testing L2 norm reduction kernel (float32)...");
 
@@ -918,7 +922,7 @@ fn test_l2_norm_single_kernel_f32() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_l2_norm_batch_kernel_f32() {
     println!("Testing batched L2 norm reduction kernel (float32)...");
 
@@ -973,7 +977,7 @@ fn test_l2_norm_batch_kernel_f32() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_l2_norm_batch_kernel_f32_odd_sample_len() {
     println!("Testing batched L2 norm reduction with odd sample length (float32)...");
 
@@ -1022,7 +1026,7 @@ fn test_l2_norm_batch_kernel_f32_odd_sample_len() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_l2_norm_batch_kernel_zero_num_samples_f32() {
     println!("Testing batched L2 norm rejection when num_samples==0 (float32)...");
 
@@ -1056,7 +1060,7 @@ fn test_l2_norm_batch_kernel_zero_num_samples_f32() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_l2_norm_batch_kernel_zero_sample_len_f32() {
     println!("Testing batched L2 norm rejection when sample_len==0 (float32)...");
 
@@ -1090,7 +1094,7 @@ fn test_l2_norm_batch_kernel_zero_sample_len_f32() {
 }
 
 #[test]
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(qdp_gpu_platform))]
 fn test_amplitude_encode_dummy_non_linux() {
     println!("Testing dummy implementation on non-Linux platform...");
 

@@ -19,7 +19,7 @@
 // pipeline path.  The needs_staging_copy() unit test lives inside encoding/basis.rs
 // because BasisEncoder is pub(crate) and not accessible from here.
 
-#![cfg(target_os = "linux")]
+#![cfg(qdp_gpu_platform)]
 
 use qdp_core::MahoutError;
 

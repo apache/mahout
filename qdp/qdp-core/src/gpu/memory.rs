@@ -19,13 +19,13 @@
 #![allow(unused_unsafe)]
 
 use crate::error::{MahoutError, Result};
-use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr};
+use crate::gpu_rt::{CudaDevice, CudaSlice, DevicePtr};
 use qdp_kernels::{CuComplex, CuDoubleComplex};
 use std::ffi::c_void;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use std::sync::Arc;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::error::cuda_error_to_string;
 
 /// Precision of the GPU state vector.
@@ -42,15 +42,23 @@ pub enum GpuDeviceType {
     Rocm,
 }
 
-#[cfg(target_os = "linux")]
+/// The device type of the backend this build targets. Drives the DLPack
+/// `device_type` so exported tensors are tagged kDLCUDA on the NVIDIA build and
+/// kDLROCM on the HIP build (a ROCm PyTorch's `from_dlpack` rejects a CUDA tag).
+#[cfg(not(feature = "hip"))]
+pub(crate) const NATIVE_GPU_DEVICE_TYPE: GpuDeviceType = GpuDeviceType::Cuda;
+#[cfg(feature = "hip")]
+pub(crate) const NATIVE_GPU_DEVICE_TYPE: GpuDeviceType = GpuDeviceType::Rocm;
+
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::cuda_ffi::{cudaFreeHost, cudaHostAlloc, cudaMemGetInfo};
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn bytes_to_mib(bytes: usize) -> f64 {
     bytes as f64 / (1024.0 * 1024.0)
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn query_cuda_mem_info() -> Result<(usize, usize)> {
     unsafe {
         let mut free_bytes: usize = 0;
@@ -72,7 +80,7 @@ fn query_cuda_mem_info() -> Result<(usize, usize)> {
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn build_oom_message(
     context: &str,
     requested_bytes: usize,
@@ -96,7 +104,7 @@ fn build_oom_message(
 ///
 /// Returns a MemoryAllocation error with a helpful message when the request
 /// exceeds the currently reported free memory.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub(crate) fn ensure_device_memory_available(
     requested_bytes: usize,
     context: &str,
@@ -118,7 +126,7 @@ pub(crate) fn ensure_device_memory_available(
 }
 
 /// Wraps CUDA allocation errors with an OOM-aware MahoutError.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub(crate) fn map_allocation_error(
     requested_bytes: usize,
     context: &str,
@@ -231,7 +239,7 @@ impl GpuStateVector {
     /// Create GPU state vector for n qubits with the given precision.
     /// Allocates 2^n complex numbers (Float32 = CuComplex, Float64 = CuDoubleComplex).
     /// Default for most callers: use `Precision::Float64`.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     pub fn new(_device: &Arc<CudaDevice>, qubits: usize, precision: Precision) -> Result<Self> {
         let _size_elements: usize = 1usize << qubits;
 
@@ -299,11 +307,11 @@ impl GpuStateVector {
             size_elements: _size_elements,
             num_samples: None,
             device_id: _device.ordinal(),
-            device_type: GpuDeviceType::Cuda,
+            device_type: NATIVE_GPU_DEVICE_TYPE,
         })
     }
 
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(qdp_gpu_platform))]
     pub fn new(_device: &Arc<CudaDevice>, _qubits: usize, _precision: Precision) -> Result<Self> {
         Err(MahoutError::Cuda(
             "CUDA is only available on Linux. This build does not support GPU operations."
@@ -360,7 +368,7 @@ impl GpuStateVector {
             ))
         })?;
 
-        #[cfg(target_os = "linux")]
+        #[cfg(qdp_gpu_platform)]
         {
             let buffer = match precision {
                 Precision::Float32 => {
@@ -411,11 +419,11 @@ impl GpuStateVector {
                 size_elements: total_elements,
                 num_samples: Some(num_samples),
                 device_id: _device.ordinal(),
-                device_type: GpuDeviceType::Cuda,
+                device_type: NATIVE_GPU_DEVICE_TYPE,
             })
         }
 
-        #[cfg(not(target_os = "linux"))]
+        #[cfg(not(qdp_gpu_platform))]
         {
             Err(MahoutError::Cuda(
                 "CUDA is only available on Linux. This build does not support GPU operations."
@@ -434,7 +442,7 @@ impl GpuStateVector {
 
         match (self.precision(), target) {
             (Precision::Float32, Precision::Float64) => {
-                #[cfg(target_os = "linux")]
+                #[cfg(qdp_gpu_platform)]
                 {
                     let requested_bytes = self
                         .size_elements
@@ -502,7 +510,7 @@ impl GpuStateVector {
                     })
                 }
 
-                #[cfg(not(target_os = "linux"))]
+                #[cfg(not(qdp_gpu_platform))]
                 {
                     Err(MahoutError::Cuda(
                         "Precision conversion requires CUDA (Linux)".to_string(),
@@ -510,7 +518,7 @@ impl GpuStateVector {
                 }
             }
             (Precision::Float64, Precision::Float32) => {
-                #[cfg(target_os = "linux")]
+                #[cfg(qdp_gpu_platform)]
                 {
                     let requested_bytes = self
                         .size_elements
@@ -578,7 +586,7 @@ impl GpuStateVector {
                     })
                 }
 
-                #[cfg(not(target_os = "linux"))]
+                #[cfg(not(qdp_gpu_platform))]
                 {
                     Err(MahoutError::Cuda(
                         "Precision conversion requires CUDA (Linux)".to_string(),
@@ -597,13 +605,13 @@ impl GpuStateVector {
 /// Pinned Host Memory Buffer (owned allocation).
 ///
 /// Allocates page-locked memory to maximize H2D throughput in streaming IO paths.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub struct PinnedHostBuffer<T: Copy = f64> {
     ptr: *mut T,
     size_elements: usize,
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 impl<T: Copy> PinnedHostBuffer<T> {
     /// Allocate pinned memory holding `elements` values of type `T`.
     pub fn new(elements: usize) -> Result<Self> {
@@ -658,7 +666,7 @@ impl<T: Copy> PinnedHostBuffer<T> {
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 impl<T: Copy> Drop for PinnedHostBuffer<T> {
     fn drop(&mut self) {
         unsafe {
@@ -675,8 +683,8 @@ impl<T: Copy> Drop for PinnedHostBuffer<T> {
 }
 
 // Safety: Pinned memory is accessible from any thread
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 unsafe impl<T: Copy + Send> Send for PinnedHostBuffer<T> {}
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 unsafe impl<T: Copy + Sync> Sync for PinnedHostBuffer<T> {}

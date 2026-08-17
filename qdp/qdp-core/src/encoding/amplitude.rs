@@ -22,7 +22,7 @@
 
 use std::ffi::c_void;
 
-use cudarc::driver::{CudaSlice, DevicePtrMut};
+use crate::gpu_rt::{CudaSlice, DevicePtrMut};
 use qdp_kernels::{launch_amplitude_encode_batch, launch_l2_norm_batch};
 
 use super::{ChunkEncoder, STAGE_SIZE_ELEMENTS};
@@ -135,7 +135,7 @@ impl ChunkEncoder for AmplitudeEncoder {
 mod tests {
     use super::*;
     use crate::MahoutError;
-    use cudarc::driver::DeviceSlice;
+    use crate::gpu_rt::DeviceSlice;
 
     #[test]
     fn reject_sample_size_zero() {

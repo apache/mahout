@@ -14,20 +14,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cfg(not(qdp_gpu_platform))]
-mod fallback;
-#[cfg(qdp_gpu_platform)]
-mod linux;
-#[cfg(not(any(qdp_gpu_platform, target_os = "windows")))]
-mod other;
-// Windows non-GPU stub: used only on Windows without the hip feature.
-// When qdp_gpu_platform is set (Windows+hip), the linux module is used instead.
-#[cfg(all(target_os = "windows", not(qdp_gpu_platform)))]
-mod windows;
+// Cross-vendor kernel compatibility shims.
+//
+// Included by the kernel TUs that use warp intrinsics (amplitude.cu). On CUDA
+// it is inert. On HIP it supplies the one warp-intrinsic difference that does
+// not translate 1:1: the full-warp lane mask for __shfl_*_sync.
 
-#[cfg(qdp_gpu_platform)]
-pub(crate) use linux::encode_from_parquet;
-#[cfg(not(any(qdp_gpu_platform, target_os = "windows")))]
-pub(crate) use other::encode_from_parquet;
-#[cfg(all(target_os = "windows", not(qdp_gpu_platform)))]
-pub(crate) use windows::encode_from_parquet;
+#ifndef KERNEL_COMPAT_H
+#define KERNEL_COMPAT_H
+
+#if defined(__HIP_PLATFORM_AMD__)
+// ROCm's __shfl_*_sync static_asserts a 64-bit mask (sizeof(MaskT) == 8): the
+// 32-bit literal 0xffffffff every CUDA warp-sync uses fails to COMPILE,
+// independent of the active wave width. Use an all-lanes 64-bit mask.
+#define QDP_FULL_WARP_MASK 0xffffffffffffffffULL
+#else
+#define QDP_FULL_WARP_MASK 0xffffffffu
+#endif
+
+#endif // KERNEL_COMPAT_H

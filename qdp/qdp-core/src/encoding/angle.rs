@@ -130,9 +130,9 @@ mod tests {
     use crate::encoding::STAGE_SIZE_ELEMENTS;
     // chunk-size overflow checks
     #[test]
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     fn test_encode_chunk_overflow() {
-        use cudarc::driver::CudaDevice;
+        use crate::gpu_rt::CudaDevice;
         use std::sync::Arc;
 
         let device: Arc<CudaDevice> = match CudaDevice::new(0) {

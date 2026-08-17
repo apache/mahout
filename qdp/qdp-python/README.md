@@ -64,6 +64,13 @@ The public `QdpEngine` is a unified Python facade with explicit backend selectio
 - `backend="cuda"` routes to the Rust `_qdp.QdpEngine`
 - `backend="amd"` routes to the Triton AMD engine directly
 
+The native Rust `_qdp.QdpEngine` (the `backend="cuda"` route) also runs on AMD
+GPUs when the extension is built from source with the `hip` Cargo feature, which
+compiles the same kernels with `hipcc` and binds the AMD HIP runtime. This gives
+the native pipeline (pinned-buffer pool, dual-stream overlap, in-Rust DLPack
+ownership) on AMD without the Triton path. See `qdp/DEVELOPMENT.md` for the
+ROCm/HIP build steps.
+
 See `qdp/qdp-python/TRITON_AMD_BACKEND.md` for Triton AMD setup and validation details.
 
 ## Encoding Methods
