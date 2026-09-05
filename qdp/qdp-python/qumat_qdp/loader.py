@@ -300,7 +300,7 @@ class QuantumDataLoader:
         self._num_qubits = num_qubits
         self._batch_size = batch_size
         self._total_batches = total_batches
-        self._encoding_method = encoding_method
+        self._encoding_method = encoding_method.lower()
         self._seed = seed
         self._file_path: str | None = None
         self._streaming_requested = (
@@ -333,11 +333,11 @@ class QuantumDataLoader:
         """Set the quantum feature encoding method.
 
         Valid values are ``"amplitude"``, ``"angle"``, ``"basis"``,
-        ``"iqp"``, ``"iqp-z"``, and ``"phase"``.  Use these canonical
-        lowercase names because the selected backend receives the string exactly
-        as supplied.  The PyTorch reference backend supports the same methods as
-        ``qumat_qdp.torch_ref``; use the native backend for methods that are
-        not available in the reference path.
+        ``"iqp"``, ``"iqp-z"``, and ``"phase"``.  Names are matched
+        case-insensitively and normalized to the canonical lowercase spelling
+        before they reach the selected backend.  The PyTorch reference backend
+        supports the same methods as ``qumat_qdp.torch_ref``; use the native
+        backend for methods that are not available in the reference path.
 
         :param method: Encoding method name.
         :returns: ``self`` for fluent builder chaining.
@@ -353,7 +353,7 @@ class QuantumDataLoader:
                 f"Unknown encoding {method!r}. "
                 f"Valid options: {sorted(_VALID_ENCODINGS)}"
             )
-        self._encoding_method = method
+        self._encoding_method = method.lower()
         return self
 
     def batches(self, total: int, size: int = 64) -> QuantumDataLoader:
