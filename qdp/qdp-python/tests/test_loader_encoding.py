@@ -18,19 +18,32 @@ import pytest
 from qumat_qdp import QuantumDataLoader
 
 
-def test_encoding_setter_normalizes_case() -> None:
-    loader = QuantumDataLoader().encoding("Amplitude")
-    assert loader._encoding_method == "amplitude"
+@pytest.mark.parametrize(
+    "given, expected",
+    [
+        ("Amplitude", "amplitude"),
+        ("ANGLE", "angle"),
+        ("IQP-Z", "iqp-z"),
+        ("Basis", "basis"),
+    ],
+)
+def test_encoding_setter_normalizes_case(given: str, expected: str) -> None:
+    loader = QuantumDataLoader().encoding(given)
+    assert loader._encoding_method == expected
 
 
-def test_constructor_normalizes_encoding_case() -> None:
-    loader = QuantumDataLoader(encoding_method="ANGLE")
-    assert loader._encoding_method == "angle"
-
-
-def test_mixed_case_hyphenated_encoding_normalized() -> None:
-    loader = QuantumDataLoader().encoding("IQP-Z")
-    assert loader._encoding_method == "iqp-z"
+@pytest.mark.parametrize(
+    "given, expected",
+    [
+        ("Amplitude", "amplitude"),
+        ("ANGLE", "angle"),
+        ("IQP-Z", "iqp-z"),
+        ("Basis", "basis"),
+    ],
+)
+def test_constructor_normalizes_encoding_case(given: str, expected: str) -> None:
+    loader = QuantumDataLoader(encoding_method=given)
+    assert loader._encoding_method == expected
 
 
 def test_mixed_case_encoding_iterates_without_error() -> None:
@@ -46,6 +59,7 @@ def test_mixed_case_encoding_iterates_without_error() -> None:
     assert len(batches) == 1
 
 
-def test_unknown_encoding_still_rejected() -> None:
+@pytest.mark.parametrize("bad", ["not-an-encoding", "amplitud", "ANGL"])
+def test_unknown_encoding_still_rejected(bad: str) -> None:
     with pytest.raises(ValueError):
-        QuantumDataLoader().encoding("not-an-encoding")
+        QuantumDataLoader().encoding(bad)
