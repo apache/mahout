@@ -99,22 +99,102 @@ uv run pytest testing/qdp_python -v
 
 ### Pre-push sanity: no-CUDA build
 
-CI builds on a runner without `nvcc`, which activates the `qdp_no_cuda`
-cfg and swaps every `extern "C"` CUDA launcher for its stub. If you only
-ever build locally with CUDA, duplicate stubs or cfg mismatches can slip
-through unnoticed. Before pushing Rust / FFI changes, run:
+CI builds on a runner without `nvcc`. Without the toolkit no kernels are
+embedded and every kernel lookup reports `KernelError::Unavailable`; the
+CUDA Runtime symbols used for pinned memory and streams are stubbed. Before
+pushing Rust changes, make sure that configuration still compiles:
 
 ```bash
 cd qdp
-QDP_NO_CUDA=1 cargo build --workspace --lib --release
+QDP_NO_CUDA=1 CARGO_TARGET_DIR=target/nocuda cargo build --workspace --lib --release
 cargo check --workspace --tests
 cd ..
 ```
 
-The first command is what `maturin develop --release` runs on CI; the
-second verifies tests type-check in the CUDA build.
+The separate target directory keeps the no-CUDA build from invalidating
+your normal build cache.
 
-## 4. Benchmarks
+## 4. Architecture: one encode path
+
+QDP has three layers, and each has exactly one job:
+
+| Layer | Directory | Owns |
+|-------|-----------|------|
+| Python | `qdp-python/qumat_qdp/` | Loader and benchmark API, backend selection, the PyTorch reference (`torch_ref.py`) and the Triton AMD path |
+| Rust | `qdp-core/src/` | Readers, the pinned dual-stream upload pipeline, prefetching, state-vector memory, DLPack, and one small descriptor per encoding |
+| CUDA | `qdp-kernels/src/*.cu` | Device code only: `extern "C" __global__` kernels that take a batch |
+
+Every encoding is a `Kernel` (see `qdp-core/src/gpu/kernels/mod.rs`). The
+engine has a single entry point, `QdpEngine::encode(input, shape, num_qubits,
+encoding)`, and `input` says where the data lives: a host slice of `f64` or
+`f32`, or a pointer already on the device (from a CUDA tensor, on its stream).
+A single sample is a batch of one. Uploading, chunking, allocating the state
+vector, converting precision and wrapping DLPack are shared and never written
+per encoding.
+
+Kernels are compiled to device-only fatbins by `qdp-kernels/build.rs`,
+embedded in the crate, and loaded through the CUDA driver API on first use
+(`qdp_kernels::registry`). There are no host launchers, no `extern "C"`
+declarations to keep in sync by hand, and no stubs for builds without CUDA.
+
+### Which files do I touch?
+
+| I want to... | Edit | Language |
+|--------------|------|----------|
+| Add or change an encoding | `qdp-kernels/src/<name>.cu`, `qdp-core/src/gpu/kernels/<name>.rs`, `qumat_qdp/torch_ref.py` | CUDA, a little Rust, a little Python |
+| Speed up a kernel | the one `.cu` file | CUDA |
+| Add a data source or file format | `qdp-core/src/readers/` | Rust |
+| Tune copy overlap, prefetch, pooling | `qdp-core/src/gpu/pipeline.rs`, `pipeline_runner.rs` | Rust |
+| Add a loader option, benchmark, or API sugar | `qumat_qdp/` | Python |
+| Support AMD for an encoding | `qumat_qdp/triton_amd.py` | Python (Triton) |
+| Accept a new tensor type from Python | `qdp-python/src/input.rs` | Rust (PyO3) |
+
+### Adding an encoding
+
+1. **Device code.** Create `qdp-kernels/src/<name>.cu` with a batch kernel:
+
+   ```cuda
+   extern "C" __global__ void <name>_encode_batch_kernel(
+       const double* __restrict__ input,      // num_samples * sample_size
+       cuDoubleComplex* __restrict__ state,   // num_samples * (1 << num_qubits)
+       size_t num_samples, size_t state_len, unsigned int num_qubits) { ... }
+   ```
+
+   Add an `_f32` variant (`const float*`, `cuComplex*`) if you want the
+   float32 path. Add the file name to `KERNEL_SOURCES` in
+   `qdp-kernels/build.rs`. Nothing else in `qdp-kernels` changes.
+
+2. **Descriptor.** Create `qdp-core/src/gpu/kernels/<name>.rs` implementing
+   `Kernel`: `name`, `sample_size(num_qubits)`, `supports(dtype)`, and
+   `launch`, which names the symbol, picks a `LaunchConfig`, and passes
+   arguments with `kernel_args!`. Copy `angle.rs` (about 80 lines) as the
+   template. Override `validate_host` / `validate_device` only if the
+   default finite check is not the right rule. Register the module in
+   `kernels/mod.rs` and add a variant to `Encoding` in `types.rs`.
+
+3. **Reference and tests.** Add `<name>_encode` to
+   `qumat_qdp/torch_ref.py` and register it in `_ENCODERS`; add the name to
+   `ENCODINGS` in `testing/qdp/test_parity.py`. The parity grid then checks
+   every (precision, shape, input location) cell of your kernel against the
+   reference. Add the encoding to `ENCODINGS` in
+   `qdp-python/benchmark/baseline.py` so it is benchmarked.
+
+Run `make check-kernels` in `qdp/` to confirm every embedded kernel symbol
+resolves, and `make parity` from the repo root to run the grid.
+
+### Guarding performance
+
+Before an engine or pipeline change, capture a baseline; after it, compare:
+
+```bash
+uv run python qdp/qdp-python/benchmark/baseline.py capture --out /tmp/qdp-baseline.json
+uv run python qdp/qdp-python/benchmark/baseline.py compare /tmp/qdp-baseline.json --tolerance 0.05
+```
+
+`compare` exits non-zero when any encoding's throughput drops or latency
+rises by more than the tolerance.
+
+## 5. Benchmarks
 
 From the repo root, set up and prepare benchmarks:
 
@@ -151,7 +231,7 @@ uv sync --project qdp/qdp-python --group benchmark --active
 
 See [qdp/qdp-python/benchmark/README.md](qdp-python/benchmark/README.md) for detailed benchmark documentation.
 
-## 5. NVTX / nsys Profiling
+## 6. NVTX / nsys Profiling
 
 Build extension with observability feature:
 
@@ -172,7 +252,7 @@ Read profiling summary:
 nsys stats qdp-e2e.nsys-rep
 ```
 
-## 6. Common Issues
+## 7. Common Issues
 
 - `nvcc: command not found`
   - CUDA toolkit is not installed or not in `PATH`.
