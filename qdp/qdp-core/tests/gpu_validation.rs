@@ -17,7 +17,7 @@
 // Input validation and error handling tests
 
 use qdp_core::MahoutError;
-use qdp_core::gpu::encodings::MAX_QUBITS;
+use qdp_core::gpu::kernels::MAX_QUBITS;
 
 mod common;
 
@@ -32,7 +32,7 @@ fn test_input_validation_invalid_strategy() {
 
     let data = common::create_test_data(100);
 
-    let result = engine.encode(&data, 7, "invalid_strategy");
+    let result = engine.encode_single(&data, 7, "invalid_strategy");
     assert!(result.is_err(), "Should reject invalid strategy");
 
     match result {
@@ -59,7 +59,7 @@ fn test_input_validation_qubit_mismatch() {
     let data = common::create_test_data(100);
 
     // 100 elements need 7 qubits (2^7=128), but we request 6 (2^6=64)
-    let result = engine.encode(&data, 6, "amplitude");
+    let result = engine.encode_single(&data, 6, "amplitude");
     assert!(
         result.is_err(),
         "Should reject data larger than state vector"
@@ -88,7 +88,7 @@ fn test_input_validation_zero_qubits() {
 
     let data = common::create_test_data(10);
 
-    let result = engine.encode(&data, 0, "amplitude");
+    let result = engine.encode_single(&data, 0, "amplitude");
     assert!(result.is_err(), "Should reject zero qubits");
 
     match result {
@@ -114,7 +114,7 @@ fn test_input_validation_max_qubits() {
 
     let data = common::create_test_data(100);
 
-    let result = engine.encode(&data, MAX_QUBITS + 5, "amplitude");
+    let result = engine.encode_single(&data, MAX_QUBITS + 5, "amplitude");
     assert!(result.is_err(), "Should reject excessive qubits");
 
     match result {
@@ -175,7 +175,7 @@ fn test_empty_data() {
 
     let data: Vec<f64> = vec![];
 
-    let result = engine.encode(&data, 5, "amplitude");
+    let result = engine.encode_single(&data, 5, "amplitude");
     assert!(result.is_err(), "Should reject empty data");
 
     match result {
@@ -198,7 +198,7 @@ fn test_zero_norm_data() {
 
     let data = vec![0.0; 128];
 
-    let result = engine.encode(&data, 7, "amplitude");
+    let result = engine.encode_single(&data, 7, "amplitude");
     assert!(result.is_err(), "Should reject zero-norm data");
 
     match result {

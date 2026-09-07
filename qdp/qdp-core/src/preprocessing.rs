@@ -15,7 +15,7 @@
 // limitations under the License.
 
 use crate::error::{MahoutError, Result};
-use crate::gpu::encodings::validate_qubit_count;
+use crate::gpu::kernels::validate_qubit_count;
 use rayon::prelude::*;
 
 /// Shared CPU-based pre-processing pipeline for quantum encoding.
