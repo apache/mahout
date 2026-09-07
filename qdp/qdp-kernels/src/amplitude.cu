@@ -634,34 +634,44 @@ extern "C" __global__ void l2_norm_batch_kernel_f32(
 /// Kernel: converts accumulated sum-of-squares into inverse norms.
 extern "C" __global__ void finalize_inv_norm_kernel(
     double* __restrict__ norms,
-    size_t count
+    size_t count,
+    int* __restrict__ error_flag
 ) {
     const size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx >= count) return;
 
-    double sum = norms[idx];
-    // Guard against zero or NaN to avoid inf propagation
-    if (sum <= 0.0 || !isfinite(sum)) {
-        norms[idx] = 0.0;
+    // norms[idx] holds the sum of squares; turn it into the inverse norm.
+    // A zero or non-finite sum means the sample cannot be normalised: raise
+    // the flag and write 0 so the encode kernel emits a zero row rather
+    // than Inf/NaN.
+    const double sum = norms[idx];
+    if (sum > (double)0 && isfinite(sum)) {
+        norms[idx] = (double)1 / sqrt(sum);
     } else {
-        norms[idx] = rsqrt(sum);
+        norms[idx] = (double)0;
+        if (error_flag) atomicOr(error_flag, 1);
     }
 }
 
 /// Kernel: converts accumulated sum-of-squares into inverse norms (float32).
 extern "C" __global__ void finalize_inv_norm_kernel_f32(
     float* __restrict__ norms,
-    size_t count
+    size_t count,
+    int* __restrict__ error_flag
 ) {
     const size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx >= count) return;
 
-    float sum = norms[idx];
-    // Guard against zero or NaN to avoid inf propagation
-    if (sum <= 0.0f || !isfinite(sum)) {
-        norms[idx] = 0.0f;
+    // norms[idx] holds the sum of squares; turn it into the inverse norm.
+    // A zero or non-finite sum means the sample cannot be normalised: raise
+    // the flag and write 0 so the encode kernel emits a zero row rather
+    // than Inf/NaN.
+    const float sum = norms[idx];
+    if (sum > (float)0 && isfinite(sum)) {
+        norms[idx] = (float)1 / sqrtf(sum);
     } else {
-        norms[idx] = rsqrtf(sum);
+        norms[idx] = (float)0;
+        if (error_flag) atomicOr(error_flag, 1);
     }
 }
 
@@ -703,7 +713,8 @@ int launch_l2_norm(
     // Finalize: convert accumulated sum to inverse norm
     finalize_inv_norm_kernel<<<1, 32, 0, stream>>>(
         inv_norm_out_d,
-        1
+        1,
+        nullptr
     );
 
     return (int)cudaGetLastError();
@@ -747,7 +758,8 @@ int launch_l2_norm_f32(
     // Finalize: convert accumulated sum to inverse norm
     finalize_inv_norm_kernel_f32<<<1, 32, 0, stream>>>(
         inv_norm_out_d,
-        1
+        1,
+        nullptr
     );
 
     return (int)cudaGetLastError();
@@ -843,7 +855,8 @@ int launch_l2_norm_batch(
     const int finalizeGrid = (num_samples + finalizeBlock - 1) / finalizeBlock;
     finalize_inv_norm_kernel<<<finalizeGrid, finalizeBlock, 0, stream>>>(
         inv_norms_out_d,
-        num_samples
+        num_samples,
+        nullptr
     );
 
     return (int)cudaGetLastError();
@@ -907,7 +920,8 @@ int launch_l2_norm_batch_f32(
     const int finalizeGrid = (num_samples + finalizeBlock - 1) / finalizeBlock;
     finalize_inv_norm_kernel_f32<<<finalizeGrid, finalizeBlock, 0, stream>>>(
         inv_norms_out_d,
-        num_samples
+        num_samples,
+        nullptr
     );
 
     return (int)cudaGetLastError();

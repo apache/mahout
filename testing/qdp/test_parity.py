@@ -50,12 +50,6 @@ LOCATIONS = ("numpy", "torch_cpu", "cuda_f64", "cuda_f32")
 # input, which is covered by ``test_f32_cuda_rejected_without_kernel``.
 F32_DEVICE_ENCODINGS = ("amplitude", "angle", "basis")
 
-# Encodings the current engine cannot read from a CUDA tensor at all. Cells
-# for these are expected failures until the single generic encode path lands;
-# once a listed encoding succeeds the cell fails with a message asking for the
-# entry to be removed, so the list cannot go stale.
-NO_DEVICE_PATH_ENCODINGS = ("phase",)
-
 # A cell's tolerance follows the narrowest precision on its path: the engine's
 # output precision, or float32 when the input arrives as a float32 CUDA tensor
 # and is encoded by the float32 kernel before any widening.
@@ -139,15 +133,6 @@ def test_parity_grid(encoding, precision, shape, location):
         expected = expected[:1]
 
     inp = to_input(encoding, data, shape, location)
-    if location == "cuda_f64" and encoding in NO_DEVICE_PATH_ENCODINGS:
-        try:
-            engine.encode(inp, NUM_QUBITS, encoding)
-        except RuntimeError:
-            pytest.xfail(f"{encoding} has no device-pointer path yet")
-        pytest.fail(
-            f"{encoding} now encodes from a CUDA tensor; "
-            "remove it from NO_DEVICE_PATH_ENCODINGS"
-        )
     out = engine_output(engine.encode(inp, NUM_QUBITS, encoding))
 
     expected_dtype = torch.complex128 if precision == "float64" else torch.complex64

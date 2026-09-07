@@ -18,6 +18,7 @@
 // The compiler can't statically determine which path is taken.
 #![allow(unused_unsafe)]
 
+mod compat;
 pub mod dlpack;
 #[cfg(target_os = "linux")]
 mod encoding;
@@ -53,66 +54,14 @@ pub use pipeline_runner::{
     run_throughput_pipeline,
 };
 
-use std::ffi::c_void;
 use std::sync::Arc;
 
 use crate::dlpack::DLManagedTensor;
 use cudarc::driver::CudaDevice;
 
-#[cfg(target_os = "linux")]
-fn validate_cuda_input_ptr(device: &CudaDevice, ptr: *const c_void) -> Result<()> {
-    use crate::gpu::cuda_ffi::{
-        CUDA_MEMORY_TYPE_DEVICE, CUDA_MEMORY_TYPE_MANAGED, CudaPointerAttributes,
-        cudaPointerGetAttributes,
-    };
+pub use gpu::kernels::{DeviceDtype, DeviceInput, HostInput, Input, Kernel, Shape};
 
-    if ptr.is_null() {
-        return Err(MahoutError::InvalidInput(
-            "Input GPU pointer is null".to_string(),
-        ));
-    }
-
-    let mut attrs = CudaPointerAttributes {
-        memory_type: 0,
-        device: 0,
-        device_pointer: std::ptr::null_mut(),
-        host_pointer: std::ptr::null_mut(),
-        is_managed: 0,
-        allocation_flags: 0,
-    };
-
-    let ret = unsafe { cudaPointerGetAttributes(&mut attrs as *mut _, ptr) };
-    if ret != 0 {
-        return Err(MahoutError::InvalidInput(format!(
-            "cudaPointerGetAttributes failed for input pointer: {} ({})",
-            ret,
-            cuda_error_to_string(ret)
-        )));
-    }
-
-    if attrs.memory_type != CUDA_MEMORY_TYPE_DEVICE && attrs.memory_type != CUDA_MEMORY_TYPE_MANAGED
-    {
-        return Err(MahoutError::InvalidInput(format!(
-            "Input pointer is not CUDA device memory (memory_type={})",
-            attrs.memory_type
-        )));
-    }
-
-    let device_ordinal = device.ordinal() as i32;
-    if attrs.device >= 0 && attrs.device != device_ordinal {
-        return Err(MahoutError::InvalidInput(format!(
-            "Input pointer device mismatch: pointer on cuda:{}, engine on cuda:{}",
-            attrs.device, device_ordinal
-        )));
-    }
-
-    Ok(())
-}
-
-/// Main entry point for Mahout QDP
-///
-/// Manages GPU context and dispatches encoding tasks.
-/// Provides unified interface for device management, memory allocation, and DLPack.
+/// GPU encoding engine: owns a device and the output precision.
 #[derive(Clone)]
 pub struct QdpEngine {
     device: Arc<CudaDevice>,
@@ -120,15 +69,12 @@ pub struct QdpEngine {
 }
 
 impl QdpEngine {
-    /// Initialize engine on GPU device
-    ///
-    /// # Arguments
-    /// * `device_id` - CUDA device ID (typically 0)
+    /// Initialise on `device_id` with float32 output.
     pub fn new(device_id: usize) -> Result<Self> {
         Self::new_with_precision(device_id, Precision::Float32)
     }
 
-    /// Initialize engine with explicit precision.
+    /// Initialise on `device_id` with the given output precision.
     pub fn new_with_precision(device_id: usize, precision: Precision) -> Result<Self> {
         let device = CudaDevice::new(device_id).map_err(|e| {
             MahoutError::Cuda(format!(
@@ -136,52 +82,17 @@ impl QdpEngine {
                 device_id, e
             ))
         })?;
-        Ok(Self {
-            device, // CudaDevice::new already returns Arc<CudaDevice> in cudarc 0.11
-            precision,
-        })
+        Ok(Self { device, precision })
     }
 
-    /// Encode classical data into quantum state
-    ///
-    /// Selects encoding strategy, executes on GPU, returns DLPack pointer.
-    ///
-    /// # Arguments
-    /// * `data` - Input data
-    /// * `num_qubits` - Number of qubits
-    /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
-    ///
-    /// # Returns
-    /// DLPack pointer for zero-copy PyTorch integration
-    ///
-    /// # Safety
-    /// Pointer freed by DLPack deleter, do not free manually.
-    pub fn encode(
-        &self,
-        data: &[f64],
-        num_qubits: usize,
-        encoding_method: &str,
-    ) -> Result<*mut DLManagedTensor> {
-        crate::profile_scope!("Mahout::Encode");
-
-        let encoding = Encoding::from_str_ci(encoding_method)?;
-        let encoder = encoding.encoder();
-        let state_vector = encoder.encode(&self.device, data, num_qubits)?;
-        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
-        let dlpack_ptr = {
-            crate::profile_scope!("DLPack::Wrap");
-            state_vector.to_dlpack()
-        };
-        Ok(dlpack_ptr)
-    }
-
-    /// Get CUDA device reference for advanced operations
-    pub fn device(&self) -> &CudaDevice {
+    pub fn device(&self) -> &Arc<CudaDevice> {
         &self.device
     }
 
-    /// Block until all GPU work on the default stream has completed.
-    /// Used by the generic pipeline and other callers that need to sync before timing.
+    pub fn precision(&self) -> Precision {
+        self.precision
+    }
+
     #[cfg(target_os = "linux")]
     pub fn synchronize(&self) -> Result<()> {
         self.device
@@ -189,152 +100,58 @@ impl QdpEngine {
             .map_err(|e| MahoutError::Cuda(format!("CUDA device synchronize failed: {:?}", e)))
     }
 
-    /// Encode multiple samples in a single fused kernel (most efficient)
+    /// Encode a batch and hand it back as a DLPack tensor of shape
+    /// `[num_samples, 2^num_qubits]` in the engine's precision.
     ///
-    /// Allocates one large GPU buffer and launches a single batch kernel.
-    /// This is faster than encode_batch() as it reduces allocation and kernel launch overhead.
+    /// This is the one encode entry point. `input` may live on the host or
+    /// already on this device, as `f32` or `f64` (or `int64` basis indices);
+    /// a single sample is a batch of one.
     ///
-    /// # Arguments
-    /// * `batch_data` - Flattened batch data (all samples concatenated)
-    /// * `num_samples` - Number of samples in the batch
-    /// * `sample_size` - Size of each sample
-    /// * `num_qubits` - Number of qubits
-    /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
-    ///
-    /// # Returns
-    /// Single DLPack pointer containing all encoded states (shape: [num_samples, 2^num_qubits])
-    pub fn encode_batch(
+    /// For [`Input::Device`] the caller is responsible for the pointer
+    /// holding `shape.num_samples * shape.sample_size` elements on this
+    /// engine's device, valid on the given stream until the call returns.
+    /// The pointer is checked to be device memory on this device before use.
+    pub fn encode(
         &self,
-        batch_data: &[f64],
-        num_samples: usize,
-        sample_size: usize,
-        num_qubits: usize,
-        encoding_method: &str,
-    ) -> Result<*mut DLManagedTensor> {
-        let encoding = Encoding::from_str_ci(encoding_method)?;
-        self.encode_batch_for_pipeline(batch_data, num_samples, sample_size, num_qubits, encoding)
-    }
-
-    /// Same as [`encode_batch`](Self::encode_batch) with a resolved [`Encoding`] (no string parse).
-    pub(crate) fn encode_batch_for_pipeline(
-        &self,
-        batch_data: &[f64],
-        num_samples: usize,
-        sample_size: usize,
+        input: Input,
+        shape: Shape,
         num_qubits: usize,
         encoding: Encoding,
     ) -> Result<*mut DLManagedTensor> {
-        crate::profile_scope!("Mahout::EncodeBatch");
-
-        let encoder = encoding.encoder();
-        let state_vector = encoder.encode_batch(
-            &self.device,
-            batch_data,
-            num_samples,
-            sample_size,
-            num_qubits,
-        )?;
-
-        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
-        let dlpack_ptr = state_vector.to_dlpack();
+        let state = self.encode_state(input, shape, num_qubits, encoding)?;
+        let dlpack_ptr = {
+            crate::profile_scope!("DLPack::Wrap");
+            state.to_dlpack()
+        };
         Ok(dlpack_ptr)
     }
 
-    /// Encode multiple samples in a single fused kernel (most efficient) using f32 host input.
-    pub fn encode_batch_f32(
+    /// [`QdpEngine::encode`] without the DLPack wrapping.
+    pub fn encode_state(
         &self,
-        batch_data: &[f32],
-        num_samples: usize,
-        sample_size: usize,
-        num_qubits: usize,
-        encoding_method: &str,
-    ) -> Result<*mut DLManagedTensor> {
-        let encoding = Encoding::from_str_ci(encoding_method)?;
-        self.encode_batch_f32_for_pipeline(
-            batch_data,
-            num_samples,
-            sample_size,
-            num_qubits,
-            encoding,
-        )
-    }
-
-    /// Same as [`encode_batch_f32`](Self::encode_batch_f32) with a resolved [`Encoding`].
-    pub(crate) fn encode_batch_f32_for_pipeline(
-        &self,
-        batch_data: &[f32],
-        num_samples: usize,
-        sample_size: usize,
+        input: Input,
+        shape: Shape,
         num_qubits: usize,
         encoding: Encoding,
-    ) -> Result<*mut DLManagedTensor> {
-        crate::profile_scope!("Mahout::EncodeBatchF32");
-
-        let encoder = encoding.encoder();
-        let state_vector = encoder.encode_batch_f32(
-            &self.device,
-            batch_data,
-            num_samples,
-            sample_size,
-            num_qubits,
-        )?;
-
-        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
-        let dlpack_ptr = state_vector.to_dlpack();
-        Ok(dlpack_ptr)
-    }
-
-    /// Run dual-stream pipeline for encoding (H2D + kernel overlap). Exposes gpu::pipeline::run_dual_stream_pipeline.
-    /// Currently supports amplitude encoding (1D host_data). Does not return a tensor;
-    /// use for throughput measurement or when the encoded state is not needed.
-    ///
-    /// # Arguments
-    /// * `host_data` - 1D input data (e.g. single sample for amplitude)
-    /// * `num_qubits` - Number of qubits
-    /// * `encoding_method` - Strategy (currently only "amplitude" supported for this path)
-    #[cfg(target_os = "linux")]
-    pub fn run_dual_stream_encode(
-        &self,
-        host_data: &[f64],
-        num_qubits: usize,
-        encoding_method: &str,
-    ) -> Result<()> {
-        crate::profile_scope!("Mahout::RunDualStreamEncode");
-        let encoding = Encoding::from_str_ci(encoding_method)?;
-        match encoding {
-            Encoding::Amplitude => {
-                gpu::encodings::amplitude::AmplitudeEncoder::run_amplitude_dual_stream_pipeline(
-                    &self.device,
-                    host_data,
-                    num_qubits,
-                )
+    ) -> Result<gpu::GpuStateVector> {
+        crate::profile_scope!("Mahout::Encode");
+        // A float64 engine promises float64 accuracy: widen f32 host input on
+        // the CPU rather than encode it with the f32 kernel and up-convert.
+        // (Data already on the device is encoded at its own precision.)
+        let widened: Vec<f64>;
+        let input = match (input, self.precision) {
+            (Input::Host(HostInput::F32(s)), Precision::Float64) => {
+                widened = s.iter().map(|&v| v as f64).collect();
+                Input::Host(HostInput::F64(&widened))
             }
-            _ => Err(MahoutError::InvalidInput(format!(
-                "run_dual_stream_encode supports only 'amplitude' for now, got '{}'",
-                encoding.as_str()
-            ))),
-        }
+            (other, _) => other,
+        };
+        let state =
+            gpu::kernels::encode(&self.device, encoding.encoder(), input, shape, num_qubits)?;
+        state.to_precision(&self.device, self.precision)
     }
 
-    /// Streaming Parquet encoder with multi-threaded IO
-    ///
-    /// Uses Producer-Consumer pattern: IO thread reads Parquet while GPU processes data.
-    /// Double-buffered (ping-pong) for maximum pipeline overlap.
-    ///
-    /// # Arguments
-    /// * `path` - Path to Parquet file with List<Float64> column
-    /// * `num_qubits` - Number of qubits
-    /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
-    ///
-    /// # Null handling
-    ///
-    /// When reading from Parquet, the streaming encoder always uses
-    /// [`NullHandling::FillZero`] for the underlying `ParquetBlockReader`. This
-    /// replaces any null values with `0.0`, matching the behavior of the batch
-    /// readers and preserving backward compatibility.
-    ///
-    /// # Returns
-    /// DLPack pointer to encoded states [num_samples, 2^num_qubits]
+    /// Stream a Parquet file through the GPU, one chunk at a time.
     pub fn encode_from_parquet(
         &self,
         path: &str,
@@ -344,19 +161,6 @@ impl QdpEngine {
         platform::encode_from_parquet(self, path, num_qubits, encoding_method)
     }
 
-    /// Load data from Arrow IPC file and encode into quantum state
-    ///
-    /// Supports:
-    /// - FixedSizeList<Float64> - fastest, all samples same size
-    /// - List<Float64> - flexible, variable sample sizes
-    ///
-    /// # Arguments
-    /// * `path` - Path to Arrow IPC file (.arrow or .feather)
-    /// * `num_qubits` - Number of qubits
-    /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
-    ///
-    /// # Returns
-    /// Single DLPack pointer containing all encoded states (shape: [num_samples, 2^num_qubits])
     pub fn encode_from_arrow_ipc(
         &self,
         path: &str,
@@ -364,13 +168,11 @@ impl QdpEngine {
         encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
         crate::profile_scope!("Mahout::EncodeFromArrowIPC");
-
         let (batch_data, num_samples, sample_size) = {
             crate::profile_scope!("IO::ReadArrowIPCBatch");
             crate::io::read_arrow_ipc_batch(path)?
         };
-
-        self.encode_batch(
+        self.encode_host_f64(
             &batch_data,
             num_samples,
             sample_size,
@@ -379,17 +181,6 @@ impl QdpEngine {
         )
     }
 
-    /// Load data from NumPy .npy file and encode into quantum state
-    ///
-    /// Supports 2D arrays with shape `[num_samples, sample_size]` and dtype `float64`.
-    ///
-    /// # Arguments
-    /// * `path` - Path to NumPy .npy file
-    /// * `num_qubits` - Number of qubits
-    /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
-    ///
-    /// # Returns
-    /// Single DLPack pointer containing all encoded states (shape: [num_samples, 2^num_qubits])
     pub fn encode_from_numpy(
         &self,
         path: &str,
@@ -397,13 +188,11 @@ impl QdpEngine {
         encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
         crate::profile_scope!("Mahout::EncodeFromNumpy");
-
         let (batch_data, num_samples, sample_size) = {
             crate::profile_scope!("IO::ReadNumpyBatch");
             crate::io::read_numpy_batch(path)?
         };
-
-        self.encode_batch(
+        self.encode_host_f64(
             &batch_data,
             num_samples,
             sample_size,
@@ -412,18 +201,6 @@ impl QdpEngine {
         )
     }
 
-    /// Load data from PyTorch .pt/.pth file and encode into quantum state
-    ///
-    /// Supports 1D or 2D tensors saved with `torch.save`.
-    /// Requires the `pytorch` feature to be enabled.
-    ///
-    /// # Arguments
-    /// * `path` - Path to PyTorch tensor file (.pt/.pth)
-    /// * `num_qubits` - Number of qubits
-    /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
-    ///
-    /// # Returns
-    /// Single DLPack pointer containing all encoded states (shape: [num_samples, 2^num_qubits])
     pub fn encode_from_torch(
         &self,
         path: &str,
@@ -431,13 +208,11 @@ impl QdpEngine {
         encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
         crate::profile_scope!("Mahout::EncodeFromTorch");
-
         let (batch_data, num_samples, sample_size) = {
             crate::profile_scope!("IO::ReadTorchBatch");
             crate::io::read_torch_batch(path)?
         };
-
-        self.encode_batch(
+        self.encode_host_f64(
             &batch_data,
             num_samples,
             sample_size,
@@ -446,18 +221,6 @@ impl QdpEngine {
         )
     }
 
-    /// Load data from TensorFlow TensorProto file and encode into quantum state
-    ///
-    /// Supports Float64 tensors with shape [batch_size, feature_size] or [n].
-    /// Uses efficient parsing with tensor_content when available.
-    ///
-    /// # Arguments
-    /// * `path` - Path to TensorProto file (.pb)
-    /// * `num_qubits` - Number of qubits
-    /// * `encoding_method` - Strategy: "amplitude", "angle", or "basis"
-    ///
-    /// # Returns
-    /// Single DLPack pointer containing all encoded states (shape: [num_samples, 2^num_qubits])
     pub fn encode_from_tensorflow(
         &self,
         path: &str,
@@ -465,13 +228,11 @@ impl QdpEngine {
         encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
         crate::profile_scope!("Mahout::EncodeFromTensorFlow");
-
         let (batch_data, num_samples, sample_size) = {
             crate::profile_scope!("IO::ReadTensorFlowBatch");
             crate::io::read_tensorflow_batch(path)?
         };
-
-        self.encode_batch(
+        self.encode_host_f64(
             &batch_data,
             num_samples,
             sample_size,
@@ -480,584 +241,19 @@ impl QdpEngine {
         )
     }
 
-    /// Encode from existing GPU pointer (zero-copy for CUDA tensors)
-    ///
-    /// This method enables zero-copy encoding from PyTorch CUDA tensors by accepting
-    /// a raw GPU pointer directly, avoiding the GPU→CPU→GPU copy that would otherwise
-    /// be required.
-    ///
-    /// # Arguments
-    /// * `input_d` - Device pointer to input data (f64 for amplitude/angle, usize/int64 for basis)
-    /// * `input_len` - Number of elements in the input
-    /// * `num_qubits` - Number of qubits for encoding
-    /// * `encoding_method` - Strategy ("amplitude", "angle", or "basis")
-    ///
-    /// # Returns
-    /// DLPack pointer for zero-copy PyTorch integration
-    ///
-    /// # Safety
-    /// The input pointer must:
-    /// - Point to valid GPU memory on the same device as the engine
-    /// - Contain at least `input_len` elements of the expected dtype
-    /// - Remain valid for the duration of this call
-    #[cfg(target_os = "linux")]
-    pub unsafe fn encode_from_gpu_ptr(
+    fn encode_host_f64(
         &self,
-        input_d: *const std::ffi::c_void,
-        input_len: usize,
-        num_qubits: usize,
-        encoding_method: &str,
-    ) -> Result<*mut DLManagedTensor> {
-        unsafe {
-            self.encode_from_gpu_ptr_with_stream(
-                input_d,
-                input_len,
-                num_qubits,
-                encoding_method,
-                std::ptr::null_mut(),
-            )
-        }
-    }
-
-    /// Encode from existing GPU pointer with a specific CUDA stream.
-    ///
-    /// Same as [`encode_from_gpu_ptr`](Self::encode_from_gpu_ptr) but uses the given `stream`
-    /// for kernel launches. Pass null for default stream.
-    ///
-    /// # Safety
-    /// Same as [`encode_from_gpu_ptr`](Self::encode_from_gpu_ptr). Additionally, `stream` must
-    /// be a valid CUDA stream on the same device as the engine, or null.
-    #[cfg(target_os = "linux")]
-    pub unsafe fn encode_from_gpu_ptr_with_stream(
-        &self,
-        input_d: *const std::ffi::c_void,
-        input_len: usize,
-        num_qubits: usize,
-        encoding_method: &str,
-        stream: *mut std::ffi::c_void,
-    ) -> Result<*mut DLManagedTensor> {
-        crate::profile_scope!("Mahout::EncodeFromGpuPtr");
-        if input_len == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Input data cannot be empty".into(),
-            ));
-        }
-
-        validate_cuda_input_ptr(&self.device, input_d)?;
-
-        let encoding = Encoding::from_str_ci(encoding_method)?;
-        let encoder = encoding.encoder();
-        let state_vector = unsafe {
-            encoder.encode_from_gpu_ptr(&self.device, input_d, input_len, num_qubits, stream)
-        }?;
-        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
-        Ok(state_vector.to_dlpack())
-    }
-
-    /// Encode from existing GPU pointer (float32 input, **amplitude encoding only**).
-    ///
-    /// Zero-copy encoding from PyTorch CUDA float32 tensors. Uses the default CUDA stream.
-    /// For stream interop use `encode_from_gpu_ptr_f32_with_stream`.
-    ///
-    /// This method does **not** dispatch by `encoding_method` — it always runs amplitude.
-    /// For other encodings use the explicit variants
-    /// ([`encode_angle_from_gpu_ptr_f32`](Self::encode_angle_from_gpu_ptr_f32),
-    /// [`encode_basis_from_gpu_ptr_f32`](Self::encode_basis_from_gpu_ptr_f32)).
-    ///
-    /// # Arguments
-    /// * `input_d` - Device pointer to input data (f32 array on GPU)
-    /// * `input_len` - Number of f32 elements in the input
-    /// * `num_qubits` - Number of qubits for encoding
-    ///
-    /// # Returns
-    /// DLPack pointer (state vector in engine precision) for zero-copy PyTorch integration.
-    /// Internal computation is f32; output is converted to [`Precision`] of the engine.
-    ///
-    /// # Safety
-    /// The input pointer must:
-    /// - Point to valid GPU memory on the same device as the engine
-    /// - Contain at least `input_len` f32 elements
-    /// - Remain valid for the duration of this call
-    #[cfg(target_os = "linux")]
-    pub unsafe fn encode_from_gpu_ptr_f32(
-        &self,
-        input_d: *const f32,
-        input_len: usize,
-        num_qubits: usize,
-    ) -> Result<*mut DLManagedTensor> {
-        unsafe {
-            self.encode_from_gpu_ptr_f32_with_stream(
-                input_d,
-                input_len,
-                num_qubits,
-                std::ptr::null_mut(),
-            )
-        }
-    }
-
-    /// Encode from existing GPU pointer (float32) on a specified CUDA stream.
-    ///
-    /// # Returns
-    /// DLPack pointer (state vector in engine precision). Pass null for `stream` to use the default stream.
-    ///
-    /// # Safety
-    /// In addition to the `encode_from_gpu_ptr_f32` requirements, the stream pointer
-    /// must remain valid for the duration of this call.
-    #[cfg(target_os = "linux")]
-    pub unsafe fn encode_from_gpu_ptr_f32_with_stream(
-        &self,
-        input_d: *const f32,
-        input_len: usize,
-        num_qubits: usize,
-        stream: *mut c_void,
-    ) -> Result<*mut DLManagedTensor> {
-        crate::profile_scope!("Mahout::EncodeFromGpuPtrF32");
-
-        validate_cuda_input_ptr(&self.device, input_d as *const c_void)?;
-
-        // Delegate to `AmplitudeEncoder::encode_from_gpu_ptr_f32_with_stream` — the
-        // encoder-side workhorse. Keeping the kernel-launch + L2-norm sequence inside
-        // the encoder makes the trait surface symmetric (`QuantumEncoder::encode_from_gpu_ptr_f32`
-        // can override against it) and matches the angle / basis layout.
-        let state_vector = unsafe {
-            gpu::AmplitudeEncoder::encode_from_gpu_ptr_f32_with_stream(
-                &self.device,
-                input_d,
-                input_len,
-                num_qubits,
-                stream,
-            )?
-        };
-
-        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
-        Ok(state_vector.to_dlpack())
-    }
-
-    /// Encode angle from existing GPU pointer (float32 input only).
-    ///
-    /// Zero-copy encoding from CUDA float32 tensors. Uses the default CUDA stream.
-    /// For stream interop use `encode_angle_from_gpu_ptr_f32_with_stream`.
-    ///
-    /// # Safety
-    /// The input pointer must:
-    /// - Point to valid GPU memory on the same device as the engine
-    /// - Contain at least `input_len` f32 elements
-    /// - Remain valid for the duration of this call
-    #[cfg(target_os = "linux")]
-    pub unsafe fn encode_angle_from_gpu_ptr_f32(
-        &self,
-        input_d: *const f32,
-        input_len: usize,
-        num_qubits: usize,
-    ) -> Result<*mut DLManagedTensor> {
-        unsafe {
-            self.encode_angle_from_gpu_ptr_f32_with_stream(
-                input_d,
-                input_len,
-                num_qubits,
-                std::ptr::null_mut(),
-            )
-        }
-    }
-
-    /// Encode angle from existing GPU pointer (float32) on a specified CUDA stream.
-    ///
-    /// # Safety
-    /// In addition to the `encode_angle_from_gpu_ptr_f32` requirements, the stream pointer
-    /// must remain valid for the duration of this call.
-    #[cfg(target_os = "linux")]
-    pub unsafe fn encode_angle_from_gpu_ptr_f32_with_stream(
-        &self,
-        input_d: *const f32,
-        input_len: usize,
-        num_qubits: usize,
-        stream: *mut c_void,
-    ) -> Result<*mut DLManagedTensor> {
-        crate::profile_scope!("Mahout::EncodeAngleFromGpuPtrF32");
-
-        validate_cuda_input_ptr(&self.device, input_d as *const c_void)?;
-
-        let state_vector = unsafe {
-            gpu::AngleEncoder::encode_from_gpu_ptr_f32_with_stream(
-                &self.device,
-                input_d,
-                input_len,
-                num_qubits,
-                stream,
-            )
-        }?;
-        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
-        Ok(state_vector.to_dlpack())
-    }
-
-    /// Encode a batch from an existing GPU pointer (float32 input, **amplitude encoding only**).
-    ///
-    /// Zero-copy batch encoding from PyTorch CUDA float32 tensors. Uses the default CUDA stream.
-    /// For stream interop use `encode_batch_from_gpu_ptr_f32_with_stream`.
-    ///
-    /// This method does **not** dispatch by `encoding_method` — it always runs amplitude.
-    /// For other encodings use the explicit variants
-    /// ([`encode_angle_batch_from_gpu_ptr_f32`](Self::encode_angle_batch_from_gpu_ptr_f32),
-    /// [`encode_basis_batch_from_gpu_ptr_f32`](Self::encode_basis_batch_from_gpu_ptr_f32)).
-    ///
-    /// # Safety
-    /// The input pointer must:
-    /// - Point to valid GPU memory on the same device as the engine
-    /// - Contain at least `num_samples * sample_size` f32 elements
-    /// - Remain valid for the duration of this call
-    #[cfg(target_os = "linux")]
-    pub unsafe fn encode_batch_from_gpu_ptr_f32(
-        &self,
-        input_batch_d: *const f32,
-        num_samples: usize,
-        sample_size: usize,
-        num_qubits: usize,
-    ) -> Result<*mut DLManagedTensor> {
-        unsafe {
-            self.encode_batch_from_gpu_ptr_f32_with_stream(
-                input_batch_d,
-                num_samples,
-                sample_size,
-                num_qubits,
-                std::ptr::null_mut(),
-            )
-        }
-    }
-
-    /// Encode a float32 amplitude batch from an existing GPU pointer on a specified CUDA stream.
-    ///
-    /// # Safety
-    /// In addition to the `encode_batch_from_gpu_ptr_f32` requirements, the stream pointer
-    /// must remain valid for the duration of this call.
-    #[cfg(target_os = "linux")]
-    pub unsafe fn encode_batch_from_gpu_ptr_f32_with_stream(
-        &self,
-        input_batch_d: *const f32,
-        num_samples: usize,
-        sample_size: usize,
-        num_qubits: usize,
-        stream: *mut c_void,
-    ) -> Result<*mut DLManagedTensor> {
-        crate::profile_scope!("Mahout::EncodeBatchFromGpuPtrF32");
-
-        if num_samples == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Number of samples cannot be zero".into(),
-            ));
-        }
-        if sample_size == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Sample size cannot be zero".into(),
-            ));
-        }
-
-        validate_cuda_input_ptr(&self.device, input_batch_d as *const c_void)?;
-
-        let batch_state_vector = unsafe {
-            gpu::AmplitudeEncoder::encode_batch_from_gpu_ptr_f32_with_stream(
-                &self.device,
-                input_batch_d,
-                num_samples,
-                sample_size,
-                num_qubits,
-                stream,
-            )
-        }?;
-        let batch_state_vector = batch_state_vector.to_precision(&self.device, self.precision)?;
-        Ok(batch_state_vector.to_dlpack())
-    }
-
-    /// Encode an angle batch from an existing GPU pointer (float32 input only).
-    ///
-    /// Zero-copy batch encoding from CUDA float32 tensors. Uses the default CUDA stream.
-    /// For stream interop use `encode_angle_batch_from_gpu_ptr_f32_with_stream`.
-    ///
-    /// # Safety
-    /// The input pointer must:
-    /// - Point to valid GPU memory on the same device as the engine
-    /// - Contain at least `num_samples * sample_size` f32 elements
-    /// - Remain valid for the duration of this call
-    #[cfg(target_os = "linux")]
-    pub unsafe fn encode_angle_batch_from_gpu_ptr_f32(
-        &self,
-        input_batch_d: *const f32,
-        num_samples: usize,
-        sample_size: usize,
-        num_qubits: usize,
-    ) -> Result<*mut DLManagedTensor> {
-        unsafe {
-            self.encode_angle_batch_from_gpu_ptr_f32_with_stream(
-                input_batch_d,
-                num_samples,
-                sample_size,
-                num_qubits,
-                std::ptr::null_mut(),
-            )
-        }
-    }
-
-    /// Encode an angle batch from an existing GPU pointer (float32) on a specified CUDA stream.
-    ///
-    /// # Safety
-    /// In addition to the `encode_angle_batch_from_gpu_ptr_f32` requirements, the stream pointer
-    /// must remain valid for the duration of this call.
-    #[cfg(target_os = "linux")]
-    pub unsafe fn encode_angle_batch_from_gpu_ptr_f32_with_stream(
-        &self,
-        input_batch_d: *const f32,
-        num_samples: usize,
-        sample_size: usize,
-        num_qubits: usize,
-        stream: *mut c_void,
-    ) -> Result<*mut DLManagedTensor> {
-        crate::profile_scope!("Mahout::EncodeAngleBatchFromGpuPtrF32");
-
-        if num_samples == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Number of samples cannot be zero".into(),
-            ));
-        }
-        if sample_size == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Sample size cannot be zero".into(),
-            ));
-        }
-
-        validate_cuda_input_ptr(&self.device, input_batch_d as *const c_void)?;
-
-        let batch_state_vector = unsafe {
-            gpu::AngleEncoder::encode_batch_from_gpu_ptr_f32_with_stream(
-                &self.device,
-                input_batch_d,
-                num_samples,
-                sample_size,
-                num_qubits,
-                stream,
-            )
-        }?;
-        let batch_state_vector = batch_state_vector.to_precision(&self.device, self.precision)?;
-        Ok(batch_state_vector.to_dlpack())
-    }
-
-    /// Encode a single basis index from an existing GPU pointer (float32).
-    ///
-    /// The GPU validates the index (finite, non-negative, integer-valued,
-    /// `< 2^num_qubits`) before encoding. Uses the default CUDA stream.
-    ///
-    /// # Safety
-    /// The input pointer must:
-    /// - Point to one valid f32 in GPU memory on the same device as the engine
-    /// - Remain valid for the duration of this call
-    #[cfg(target_os = "linux")]
-    pub unsafe fn encode_basis_from_gpu_ptr_f32(
-        &self,
-        input_d: *const f32,
-        num_qubits: usize,
-    ) -> Result<*mut DLManagedTensor> {
-        unsafe {
-            self.encode_basis_from_gpu_ptr_f32_with_stream(
-                input_d,
-                num_qubits,
-                std::ptr::null_mut(),
-            )
-        }
-    }
-
-    /// Encode a single basis index from an existing GPU pointer (float32) on a
-    /// specified CUDA stream.
-    ///
-    /// # Safety
-    /// In addition to the `encode_basis_from_gpu_ptr_f32` requirements, the
-    /// stream pointer must remain valid for the duration of this call.
-    #[cfg(target_os = "linux")]
-    pub unsafe fn encode_basis_from_gpu_ptr_f32_with_stream(
-        &self,
-        input_d: *const f32,
-        num_qubits: usize,
-        stream: *mut c_void,
-    ) -> Result<*mut DLManagedTensor> {
-        crate::profile_scope!("Mahout::EncodeBasisFromGpuPtrF32");
-
-        validate_cuda_input_ptr(&self.device, input_d as *const c_void)?;
-
-        let state_vector = unsafe {
-            gpu::BasisEncoder::encode_from_gpu_ptr_f32_with_stream(
-                &self.device,
-                input_d,
-                num_qubits,
-                stream,
-            )
-        }?;
-        let state_vector = state_vector.to_precision(&self.device, self.precision)?;
-        Ok(state_vector.to_dlpack())
-    }
-
-    /// Encode a basis batch from an existing GPU pointer (float32 index input).
-    ///
-    /// Zero-copy batch encoding from CUDA float32 tensors. Each element is treated
-    /// as a basis index; the GPU validates (finite, non-negative, integer-valued,
-    /// `< 2^num_qubits`) and casts to `size_t` before encoding.
-    ///
-    /// Uses the default CUDA stream. For stream interop use
-    /// `encode_basis_batch_from_gpu_ptr_f32_with_stream`.
-    ///
-    /// # Safety
-    /// The input pointer must:
-    /// - Point to valid GPU memory on the same device as the engine
-    /// - Contain at least `num_samples` f32 elements
-    /// - Remain valid for the duration of this call
-    #[cfg(target_os = "linux")]
-    pub unsafe fn encode_basis_batch_from_gpu_ptr_f32(
-        &self,
-        input_batch_d: *const f32,
-        num_samples: usize,
-        sample_size: usize,
-        num_qubits: usize,
-    ) -> Result<*mut DLManagedTensor> {
-        unsafe {
-            self.encode_basis_batch_from_gpu_ptr_f32_with_stream(
-                input_batch_d,
-                num_samples,
-                sample_size,
-                num_qubits,
-                std::ptr::null_mut(),
-            )
-        }
-    }
-
-    /// Encode a basis batch from an existing GPU pointer (float32 index input)
-    /// on a specified CUDA stream.
-    ///
-    /// # Safety
-    /// In addition to the `encode_basis_batch_from_gpu_ptr_f32` requirements,
-    /// the stream pointer must remain valid for the duration of this call.
-    #[cfg(target_os = "linux")]
-    pub unsafe fn encode_basis_batch_from_gpu_ptr_f32_with_stream(
-        &self,
-        input_batch_d: *const f32,
-        num_samples: usize,
-        sample_size: usize,
-        num_qubits: usize,
-        stream: *mut c_void,
-    ) -> Result<*mut DLManagedTensor> {
-        crate::profile_scope!("Mahout::EncodeBasisBatchFromGpuPtrF32");
-
-        if num_samples == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Number of samples cannot be zero".into(),
-            ));
-        }
-        if sample_size == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Sample size cannot be zero".into(),
-            ));
-        }
-
-        validate_cuda_input_ptr(&self.device, input_batch_d as *const c_void)?;
-
-        let batch_state_vector = unsafe {
-            gpu::BasisEncoder::encode_batch_from_gpu_ptr_f32_with_stream(
-                &self.device,
-                input_batch_d,
-                num_samples,
-                sample_size,
-                num_qubits,
-                stream,
-            )
-        }?;
-        let batch_state_vector = batch_state_vector.to_precision(&self.device, self.precision)?;
-        Ok(batch_state_vector.to_dlpack())
-    }
-
-    /// Encode batch from existing GPU pointer (zero-copy for CUDA tensors)
-    ///
-    /// This method enables zero-copy batch encoding from PyTorch CUDA tensors.
-    ///
-    /// # Arguments
-    /// * `input_batch_d` - Device pointer to batch input data (f64 for amplitude/angle, usize/int64 for basis)
-    /// * `num_samples` - Number of samples in the batch
-    /// * `sample_size` - Size of each sample in elements
-    /// * `num_qubits` - Number of qubits for encoding
-    /// * `encoding_method` - Strategy ("amplitude", "angle", or "basis")
-    ///
-    /// # Returns
-    /// Single DLPack pointer containing all encoded states (shape: [num_samples, 2^num_qubits])
-    ///
-    /// # Safety
-    /// The input pointer must:
-    /// - Point to valid GPU memory on the same device as the engine
-    /// - Contain at least `num_samples * sample_size` elements of the expected dtype
-    /// - Remain valid for the duration of this call
-    #[cfg(target_os = "linux")]
-    pub unsafe fn encode_batch_from_gpu_ptr(
-        &self,
-        input_batch_d: *const std::ffi::c_void,
+        data: &[f64],
         num_samples: usize,
         sample_size: usize,
         num_qubits: usize,
         encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
-        unsafe {
-            self.encode_batch_from_gpu_ptr_with_stream(
-                input_batch_d,
-                num_samples,
-                sample_size,
-                num_qubits,
-                encoding_method,
-                std::ptr::null_mut(),
-            )
-        }
-    }
-
-    /// Encode batch from existing GPU pointer with a specific CUDA stream.
-    ///
-    /// Same as [`encode_batch_from_gpu_ptr`](Self::encode_batch_from_gpu_ptr) but uses the given
-    /// `stream` for kernel launches. Pass null for default stream.
-    ///
-    /// # Safety
-    /// Same as [`encode_batch_from_gpu_ptr`](Self::encode_batch_from_gpu_ptr). Additionally,
-    /// `stream` must be a valid CUDA stream on the same device as the engine, or null.
-    #[cfg(target_os = "linux")]
-    pub unsafe fn encode_batch_from_gpu_ptr_with_stream(
-        &self,
-        input_batch_d: *const std::ffi::c_void,
-        num_samples: usize,
-        sample_size: usize,
-        num_qubits: usize,
-        encoding_method: &str,
-        stream: *mut std::ffi::c_void,
-    ) -> Result<*mut DLManagedTensor> {
-        crate::profile_scope!("Mahout::EncodeBatchFromGpuPtr");
-        if num_samples == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Number of samples cannot be zero".into(),
-            ));
-        }
-
-        if sample_size == 0 {
-            return Err(MahoutError::InvalidInput(
-                "Sample size cannot be zero".into(),
-            ));
-        }
-
-        validate_cuda_input_ptr(&self.device, input_batch_d)?;
-
-        let encoding = Encoding::from_str_ci(encoding_method)?;
-        let encoder = encoding.encoder();
-        let batch_state_vector = unsafe {
-            encoder.encode_batch_from_gpu_ptr(
-                &self.device,
-                input_batch_d,
-                num_samples,
-                sample_size,
-                num_qubits,
-                stream,
-            )
-        }?;
-        let batch_state_vector = batch_state_vector.to_precision(&self.device, self.precision)?;
-        Ok(batch_state_vector.to_dlpack())
+        self.encode(
+            Input::Host(HostInput::F64(data)),
+            Shape::new(num_samples, sample_size),
+            num_qubits,
+            Encoding::from_str_ci(encoding_method)?,
+        )
     }
 }
-
-// Re-export key types for convenience
-pub use gpu::QuantumEncoder;
