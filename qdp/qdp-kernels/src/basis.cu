@@ -27,7 +27,7 @@
 /// Single sample basis encoding kernel
 ///
 /// Sets state[basis_index] = 1.0 + 0.0i, all others = 0.0 + 0.0i
-__global__ void basis_encode_kernel(
+extern "C" __global__ void basis_encode_kernel(
     size_t basis_index,
     cuDoubleComplex* __restrict__ state,
     size_t state_len
@@ -48,7 +48,7 @@ __global__ void basis_encode_kernel(
 /// Memory layout:
 /// - basis_indices: [idx0, idx1, ..., idxN]
 /// - state_batch: [sample0_state | sample1_state | ... | sampleN_state]
-__global__ void basis_encode_batch_kernel(
+extern "C" __global__ void basis_encode_batch_kernel(
     const size_t* __restrict__ basis_indices,
     cuDoubleComplex* __restrict__ state_batch,
     size_t num_samples,
@@ -83,7 +83,7 @@ __global__ void basis_encode_batch_kernel(
 /// Single sample basis encoding kernel (F32)
 ///
 /// Sets state[basis_index] = 1.0 + 0.0i, all others = 0.0 + 0.0i
-__global__ void basis_encode_kernel_f32(
+extern "C" __global__ void basis_encode_kernel_f32(
     size_t basis_index,
     cuComplex* __restrict__ state,
     size_t state_len
@@ -104,7 +104,7 @@ __global__ void basis_encode_kernel_f32(
 /// Memory layout:
 /// - basis_indices: [idx0, idx1, ..., idxN]
 /// - state_batch: [sample0_state | sample1_state | ... | sampleN_state]
-__global__ void basis_encode_batch_kernel_f32(
+extern "C" __global__ void basis_encode_batch_kernel_f32(
     const size_t* __restrict__ basis_indices,
     cuComplex* __restrict__ state_batch,
     size_t num_samples,
