@@ -18,8 +18,7 @@ use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use std::ffi::c_void;
 
-use crate::constants::format_supported_cuda_encoding_methods;
-use qdp_core::Encoding;
+use qdp_core::{DeviceDtype, Encoding};
 
 /// Helper to detect PyTorch tensor
 pub fn is_pytorch_tensor(obj: &Bound<'_, PyAny>) -> PyResult<bool> {
@@ -144,80 +143,49 @@ pub fn get_torch_cuda_stream_ptr(tensor: &Bound<'_, PyAny>) -> PyResult<*mut c_v
     })
 }
 
-/// Validate a CUDA tensor for direct GPU encoding and return the parsed `Encoding`.
+/// Check a CUDA tensor can feed `encoding` and return its element type.
 ///
-/// Checks dtype compatibility, contiguity, non-empty, and device match.
-/// Returns the parsed `Encoding` so the caller avoids re-parsing the same string.
+/// The accepted dtypes are whatever the encoding has device kernels for, so
+/// a new kernel variant is picked up here without a code change.
 pub fn validate_cuda_tensor_for_encoding(
     tensor: &Bound<'_, PyAny>,
     expected_device_id: usize,
-    encoding_method: &str,
-) -> PyResult<Encoding> {
-    let encoding = Encoding::from_str_ci(encoding_method)
-        .map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
-
-    // Phase encoding has no zero-copy CUDA tensor kernel yet; the user-facing
-    // error below tells callers to fall back to a CPU tensor.
-    if matches!(encoding, Encoding::Phase) {
-        return Err(PyRuntimeError::new_err(format!(
-            "CUDA tensor encoding currently only supports {} methods, got '{}'. \
-             Use tensor.cpu() to convert to CPU tensor for other encoding methods.",
-            format_supported_cuda_encoding_methods(),
-            encoding_method
-        )));
-    }
-
-    let dtype = tensor.getattr("dtype")?;
-    let dtype_str: String = dtype.str()?.extract()?;
-    let dtype_str_lower = dtype_str.to_ascii_lowercase();
-    match encoding {
-        Encoding::Amplitude | Encoding::Angle => {
-            if !(dtype_str_lower.contains("float64") || dtype_str_lower.contains("float32")) {
-                return Err(PyRuntimeError::new_err(format!(
-                    "CUDA tensor must have dtype float64 or float32 for {} encoding, got {}. \
-                     Use tensor.to(torch.float64) or tensor.to(torch.float32)",
-                    encoding.as_str(),
-                    dtype_str
-                )));
-            }
+    encoding: Encoding,
+) -> PyResult<DeviceDtype> {
+    let dtype_str: String = tensor.getattr("dtype")?.str()?.extract()?;
+    let lower = dtype_str.to_ascii_lowercase();
+    let dtype = if lower.contains("float64") {
+        Some(DeviceDtype::F64)
+    } else if lower.contains("float32") {
+        Some(DeviceDtype::F32)
+    } else if lower.contains("int64") {
+        Some(DeviceDtype::I64)
+    } else {
+        None
+    };
+    let dtype = match dtype {
+        Some(d) if encoding.encoder().supports(d) => d,
+        _ => {
+            return Err(PyRuntimeError::new_err(format!(
+                "CUDA tensor must have dtype {} for {} encoding, got {}. Use {}",
+                supported_dtypes(encoding),
+                encoding.as_str(),
+                dtype_str,
+                conversion_hint(encoding)
+            )));
         }
-        Encoding::Iqp | Encoding::IqpZ => {
-            if !dtype_str_lower.contains("float64") {
-                return Err(PyRuntimeError::new_err(format!(
-                    "CUDA tensor must have dtype float64 for {} encoding, got {}. \
-                     Use tensor.to(torch.float64)",
-                    encoding.as_str(),
-                    dtype_str
-                )));
-            }
-        }
-        Encoding::Basis => {
-            if !(dtype_str_lower.contains("int64") || dtype_str_lower.contains("float32")) {
-                return Err(PyRuntimeError::new_err(format!(
-                    "CUDA tensor must have dtype int64 or float32 for basis encoding, got {}. \
-                     Use tensor.to(torch.int64) or tensor.to(torch.float32)",
-                    dtype_str
-                )));
-            }
-        }
-        Encoding::Phase => unreachable!("Phase filtered above"),
-    }
+    };
 
-    // Check contiguous
     let is_contiguous: bool = tensor.call_method0("is_contiguous")?.extract()?;
     if !is_contiguous {
         return Err(PyRuntimeError::new_err(
             "CUDA tensor must be contiguous. Use tensor.contiguous()",
         ));
     }
-
-    // Check non-empty
     let numel: usize = tensor.call_method0("numel")?.extract()?;
     if numel == 0 {
         return Err(PyRuntimeError::new_err("CUDA tensor cannot be empty"));
     }
-
-    // Check device matches engine
     let tensor_device_id = get_tensor_device_id(tensor)?;
     if tensor_device_id as usize != expected_device_id {
         return Err(PyRuntimeError::new_err(format!(
@@ -226,11 +194,37 @@ pub fn validate_cuda_tensor_for_encoding(
             tensor_device_id, expected_device_id, expected_device_id
         )));
     }
-
-    Ok(encoding)
+    Ok(dtype)
 }
 
-/// Minimal CUDA tensor metadata extracted via PyTorch APIs.
+fn conversion_hint(encoding: Encoding) -> String {
+    let kernel = encoding.encoder();
+    let hints: Vec<&str> = [
+        (DeviceDtype::F64, "tensor.to(torch.float64)"),
+        (DeviceDtype::F32, "tensor.to(torch.float32)"),
+        (DeviceDtype::I64, "tensor.to(torch.int64)"),
+    ]
+    .into_iter()
+    .filter(|(d, _)| kernel.supports(*d))
+    .map(|(_, h)| h)
+    .collect();
+    hints.join(" or ")
+}
+
+fn supported_dtypes(encoding: Encoding) -> String {
+    let kernel = encoding.encoder();
+    let names: Vec<&str> = [DeviceDtype::F64, DeviceDtype::F32, DeviceDtype::I64]
+        .into_iter()
+        .filter(|d| kernel.supports(*d))
+        .map(|d| match d {
+            DeviceDtype::F64 => "float64",
+            DeviceDtype::F32 => "float32",
+            DeviceDtype::I64 => "int64",
+        })
+        .collect();
+    names.join(" or ")
+}
+
 pub struct CudaTensorInfo {
     pub data_ptr: *const f64,
     pub shape: Vec<i64>,

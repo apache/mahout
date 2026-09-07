@@ -35,7 +35,7 @@ fn test_memory_pressure() {
 
     for i in 0..100 {
         let ptr = engine
-            .encode(&data, 10, "amplitude")
+            .encode_single(&data, 10, "amplitude")
             .expect("Encoding should succeed");
 
         unsafe {
@@ -63,9 +63,9 @@ fn test_multiple_concurrent_states() {
     let data2 = common::create_test_data(512);
     let data3 = common::create_test_data(1024);
 
-    let ptr1 = engine.encode(&data1, 8, "amplitude").unwrap();
-    let ptr2 = engine.encode(&data2, 9, "amplitude").unwrap();
-    let ptr3 = engine.encode(&data3, 10, "amplitude").unwrap();
+    let ptr1 = engine.encode_single(&data1, 8, "amplitude").unwrap();
+    let ptr2 = engine.encode_single(&data2, 9, "amplitude").unwrap();
+    let ptr3 = engine.encode_single(&data3, 10, "amplitude").unwrap();
 
     println!("PASS: Created 3 concurrent state vectors");
 
@@ -90,7 +90,7 @@ fn test_dlpack_tensor_metadata_default() {
     };
 
     let data = common::create_test_data(1024);
-    let ptr = engine.encode(&data, 10, "amplitude").unwrap();
+    let ptr = engine.encode_single(&data, 10, "amplitude").unwrap();
 
     unsafe {
         let managed = &mut *ptr;
@@ -140,7 +140,7 @@ fn test_dlpack_tensor_metadata_f64() {
     };
 
     let data = common::create_test_data(1024);
-    let ptr = engine.encode(&data, 10, "amplitude").unwrap();
+    let ptr = engine.encode_single(&data, 10, "amplitude").unwrap();
 
     unsafe {
         let managed = &mut *ptr;
