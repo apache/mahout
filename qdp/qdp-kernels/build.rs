@@ -278,28 +278,6 @@ fn compile_fatbin(cuda_path: &str, flags: &[String], src: &Path, out: &Path) {
     );
 }
 
-/// Transitional: the hand-written `extern "C"` host launchers still linked by
-/// `qdp-core` are compiled and statically linked here. This goes away once every
-/// encoder launches through `qdp_kernels::registry`.
-fn compile_static_launchers(cuda_path: &str, flags: &[String]) {
-    println!("cargo:rustc-link-search=native={}/lib64", cuda_path);
-    println!("cargo:rustc-link-lib=cudart");
-    #[cfg(target_os = "macos")]
-    println!("cargo:rustc-link-search=native={}/lib", cuda_path);
-
-    let mut build = cc::Build::new();
-    build.include(format!("{}/include", cuda_path));
-    build.include("src");
-    build.cuda(true).flag("-cudart=shared").flag("-std=c++17");
-    for flag in flags {
-        build.flag(flag);
-    }
-    for name in KERNEL_SOURCES {
-        build.file(format!("src/{name}.cu"));
-    }
-    build.compile("kernels");
-}
-
 fn write_generated(out_dir: &Path, has_cuda: bool, fatbins: &[(String, PathBuf, Vec<String>)]) {
     let header = fs::read_to_string("src/kernel_config.h").expect("read kernel_config.h");
     let mut generated = String::new();
@@ -333,7 +311,6 @@ fn write_generated(out_dir: &Path, has_cuda: bool, fatbins: &[(String, PathBuf, 
 }
 
 fn main() {
-    println!("cargo::rustc-check-cfg=cfg(qdp_no_cuda)");
     for name in KERNEL_SOURCES {
         println!("cargo:rerun-if-changed=src/{name}.cu");
     }
@@ -362,7 +339,6 @@ fn main() {
             .unwrap_or(false);
 
     if !has_cuda {
-        println!("cargo:rustc-cfg=qdp_no_cuda");
         println!("cargo:warning=CUDA not found (nvcc not in PATH). Skipping kernel compilation.");
         println!("cargo:warning=This is expected on macOS or non-CUDA environments.");
         println!(
@@ -375,7 +351,6 @@ fn main() {
     // Priority: CUDA_PATH env var > /usr/local/cuda (default Linux location)
     let cuda_path = env::var("CUDA_PATH").unwrap_or_else(|_| "/usr/local/cuda".to_string());
     let flags = arch_flags();
-    compile_static_launchers(&cuda_path, &flags);
 
     let mut fatbins = Vec::new();
     for name in KERNEL_SOURCES {
