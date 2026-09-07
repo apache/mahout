@@ -91,7 +91,7 @@ __device__ cuDoubleComplex compute_amplitude_naive(
 // (kept as fallback for small n and verification)
 // ============================================================================
 
-__global__ void iqp_encode_kernel_naive(
+extern "C" __global__ void iqp_encode_kernel_naive(
     const double* __restrict__ data,
     cuDoubleComplex* __restrict__ state,
     size_t state_len,
@@ -115,7 +115,7 @@ __global__ void iqp_encode_kernel_naive(
 
 // Step 1: Compute f[x] = exp(i*theta(x)) for all x.
 // Uses a grid-stride loop so large state vectors can reuse a fixed launch size.
-__global__ void iqp_phase_kernel(
+extern "C" __global__ void iqp_phase_kernel(
     const double* __restrict__ data,
     cuDoubleComplex* __restrict__ state,
     size_t state_len,
@@ -138,7 +138,7 @@ __global__ void iqp_phase_kernel(
 // Step 2a: FWT butterfly stage for global memory (n > threshold)
 // Each thread handles one butterfly pair per stage
 // Walsh-Hadamard butterfly: (a, b) -> (a + b, a - b)
-__global__ void fwt_butterfly_stage_kernel(
+extern "C" __global__ void fwt_butterfly_stage_kernel(
     cuDoubleComplex* __restrict__ state,
     size_t state_len,
     unsigned int stage,  // 0 to n-1
@@ -181,7 +181,7 @@ __global__ void fwt_butterfly_stage_kernel(
 
 // Step 1 + 2 + 3 fused: phase computation, full shared-memory FWT, normalization
 // Used when the entire state fits in shared memory.
-__global__ void iqp_phase_fwt_shared_normalize_kernel(
+extern "C" __global__ void iqp_phase_fwt_shared_normalize_kernel(
     const double* __restrict__ data,
     cuDoubleComplex* __restrict__ state,
     size_t state_len,
@@ -241,7 +241,7 @@ __global__ void iqp_phase_fwt_shared_normalize_kernel(
 }
 
 // Step 3: Normalize the state by 1/state_len (= 1/2^n)
-__global__ void normalize_state_kernel(
+extern "C" __global__ void normalize_state_kernel(
     cuDoubleComplex* __restrict__ state,
     size_t state_len,
     double norm_factor
@@ -263,7 +263,7 @@ __global__ void normalize_state_kernel(
 // Naive O(4^n) Batch Implementation (kept as fallback)
 // ============================================================================
 
-__global__ void iqp_encode_batch_kernel_naive(
+extern "C" __global__ void iqp_encode_batch_kernel_naive(
     const double* __restrict__ data_batch,
     cuDoubleComplex* __restrict__ state_batch,
     size_t num_samples,
@@ -297,7 +297,7 @@ __global__ void iqp_encode_batch_kernel_naive(
 // ============================================================================
 
 // Step 1: Compute the normalized phase vector for all samples in batch.
-__global__ void iqp_phase_batch_kernel(
+extern "C" __global__ void iqp_phase_batch_kernel(
     const double* __restrict__ data_batch,
     cuDoubleComplex* __restrict__ state_batch,
     size_t num_samples,
@@ -331,7 +331,7 @@ __global__ void iqp_phase_batch_kernel(
 
 // Step 2: FWT butterfly stage for batch (global memory)
 // Processes all samples in parallel
-__global__ void fwt_butterfly_batch_kernel(
+extern "C" __global__ void fwt_butterfly_batch_kernel(
     cuDoubleComplex* __restrict__ state_batch,
     size_t num_samples,
     size_t state_len,
@@ -376,7 +376,7 @@ __global__ void fwt_butterfly_batch_kernel(
 }
 
 // Step 3: Normalize all samples in batch
-__global__ void normalize_batch_kernel(
+extern "C" __global__ void normalize_batch_kernel(
     cuDoubleComplex* __restrict__ state_batch,
     size_t total_elements,
     double norm_factor
