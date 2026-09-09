@@ -19,7 +19,7 @@ from qumat_qdp import QuantumDataLoader
 
 
 @pytest.mark.parametrize(
-    "given, expected",
+    ("given", "expected"),
     [
         ("Amplitude", "amplitude"),
         ("ANGLE", "angle"),
@@ -33,7 +33,7 @@ def test_encoding_setter_normalizes_case(given: str, expected: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "given, expected",
+    ("given", "expected"),
     [
         ("Amplitude", "amplitude"),
         ("ANGLE", "angle"),
