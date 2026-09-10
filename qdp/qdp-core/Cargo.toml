@@ -4,8 +4,8 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-cudarc = { workspace = true }
-qdp-kernels = { path = "../qdp-kernels" }
+cudarc = { workspace = true, optional = true }
+qdp-kernels = { path = "../qdp-kernels", default-features = false }
 thiserror = { workspace = true }
 rayon = { workspace = true }
 nvtx = { version = "1.3", optional = true }
@@ -30,7 +30,14 @@ protoc-bin-vendored = { workspace = true }
 name = "qdp_core"
 
 [features]
-default = []
+# `cuda` and `hip` are mutually exclusive; pick exactly one vendor backend.
+# If both end up enabled (e.g. via workspace feature unification), `hip` takes
+# precedence: kernels build for HIP and cudarc is compiled but unused.
+# NVIDIA CUDA via cudarc + nvcc kernels (default, unchanged behavior).
+default = ["cuda"]
+cuda = ["dep:cudarc", "qdp-kernels/cuda"]
+# AMD HIP: hipcc kernels + the qdp-kernels device shim; no cudarc.
+hip = ["qdp-kernels/hip"]
 observability = ["nvtx"]
 pytorch = ["tch"]
 remote-io = ["object_store", "tokio", "tempfile", "futures"]

@@ -18,9 +18,9 @@
 
 #![allow(unused_unsafe)]
 
-#[cfg(target_os = "linux")]
-use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
+use qdp_kernels::device::{CudaDevice, DevicePtr, DevicePtrMut};
+#[cfg(qdp_gpu_platform)]
 use qdp_kernels::{
     CuComplex, launch_angle_encode_batch_f32, launch_angle_encode_f32,
     launch_check_finite_batch_f32,
@@ -28,7 +28,7 @@ use qdp_kernels::{
 
 const EPSILON_F32: f32 = 1e-5;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn expected_amplitude_f32(angles: &[f32], basis_idx: usize) -> f32 {
     angles.iter().enumerate().fold(1.0f32, |acc, (bit, angle)| {
         let factor = if ((basis_idx >> bit) & 1) == 1 {
@@ -41,7 +41,7 @@ fn expected_amplitude_f32(angles: &[f32], basis_idx: usize) -> f32 {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_angle_encode_basic_f32() {
     let device = match CudaDevice::new(0) {
         Ok(d) => d,
@@ -86,7 +86,7 @@ fn test_angle_encode_basic_f32() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_angle_encode_matches_expected_product_state_f32() {
     let device = match CudaDevice::new(0) {
         Ok(d) => d,
@@ -136,7 +136,7 @@ fn test_angle_encode_matches_expected_product_state_f32() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_angle_encode_f32_rejects_zero_qubits() {
     let device = match CudaDevice::new(0) {
         Ok(d) => d,
@@ -164,7 +164,7 @@ fn test_angle_encode_f32_rejects_zero_qubits() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_angle_encode_batch_f32_matches_expected_product_states() {
     let device = match CudaDevice::new(0) {
         Ok(d) => d,
@@ -224,7 +224,7 @@ fn test_angle_encode_batch_f32_matches_expected_product_states() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_angle_encode_batch_f32_rejects_zero_samples() {
     let device = match CudaDevice::new(0) {
         Ok(d) => d,
@@ -252,7 +252,7 @@ fn test_angle_encode_batch_f32_rejects_zero_samples() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_check_finite_batch_f32_reports_non_finite() {
     let device = match CudaDevice::new(0) {
         Ok(d) => d,
@@ -282,7 +282,7 @@ fn test_check_finite_batch_f32_reports_non_finite() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_check_finite_batch_f32_reports_nan() {
     let device = match CudaDevice::new(0) {
         Ok(d) => d,
@@ -312,7 +312,7 @@ fn test_check_finite_batch_f32_reports_nan() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_check_finite_batch_f32_all_finite_stays_clear() {
     let device = match CudaDevice::new(0) {
         Ok(d) => d,
@@ -342,7 +342,7 @@ fn test_check_finite_batch_f32_all_finite_stays_clear() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_angle_encode_batch_f32_rejects_zero_state_len() {
     let device = match CudaDevice::new(0) {
         Ok(d) => d,
@@ -370,7 +370,7 @@ fn test_angle_encode_batch_f32_rejects_zero_state_len() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_angle_encode_batch_f32_rejects_zero_qubits() {
     let device = match CudaDevice::new(0) {
         Ok(d) => d,

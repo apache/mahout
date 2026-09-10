@@ -25,7 +25,7 @@ use std::sync::Arc;
 use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
 use std::thread::{self, JoinHandle};
 
-use cudarc::driver::{CudaDevice, DevicePtr};
+use crate::gpu_rt::{CudaDevice, DevicePtr};
 
 /// Guard that ensures GPU synchronization and IO thread cleanup on drop.
 /// Used to handle early returns in `stream_encode`.

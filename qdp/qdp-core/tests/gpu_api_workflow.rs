@@ -16,16 +16,16 @@
 
 // API workflow tests: Engine initialization and encoding
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use qdp_core::MahoutError;
 use qdp_core::QdpEngine;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use qdp_core::gpu::pipeline::run_dual_stream_pipeline_aligned;
 
 mod common;
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_engine_initialization() {
     println!("Testing QdpEngine initialization...");
 
@@ -46,7 +46,7 @@ fn test_engine_initialization() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_amplitude_encoding_workflow() {
     println!("Testing amplitude encoding workflow...");
 
@@ -72,7 +72,7 @@ fn test_amplitude_encoding_workflow() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_amplitude_encoding_async_pipeline() {
     println!("Testing amplitude encoding async pipeline path...");
 
@@ -98,7 +98,7 @@ fn test_amplitude_encoding_async_pipeline() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_angle_encoding_async_pipeline() {
     println!("Testing angle encoding async pipeline path...");
 
@@ -125,7 +125,7 @@ fn test_angle_encoding_async_pipeline() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_angle_async_alignment_error() {
     println!("Testing angle async pipeline alignment error...");
 
@@ -153,7 +153,7 @@ fn test_angle_async_alignment_error() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_batch_dlpack_2d_shape() {
     println!("Testing batch DLPack 2D shape...");
 
@@ -211,7 +211,7 @@ fn test_batch_dlpack_2d_shape() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_single_encode_dlpack_2d_shape() {
     println!("Testing single encode returns 2D shape...");
 
@@ -249,7 +249,7 @@ fn test_single_encode_dlpack_2d_shape() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_dlpack_device_id() {
     println!("Testing DLPack device_id propagation...");
 
@@ -275,12 +275,18 @@ fn test_dlpack_device_id() {
             "device_id should be 0 for device 0"
         );
 
-        // Verify device_type is CUDA (kDLCUDA = 2)
+        // Verify device_type matches the build's backend: kDLCUDA (2) on the
+        // NVIDIA build, kDLROCM (10) on the HIP build (a ROCm PyTorch's
+        // from_dlpack requires the ROCm tag).
         use qdp_core::dlpack::DLDeviceType;
-        match tensor.device.device_type {
-            DLDeviceType::kDLCUDA => println!("PASS: Device type is CUDA"),
-            _ => panic!("Expected CUDA device type"),
-        }
+        #[cfg(not(feature = "hip"))]
+        let expected = DLDeviceType::kDLCUDA;
+        #[cfg(feature = "hip")]
+        let expected = DLDeviceType::kDLROCM;
+        assert_eq!(
+            tensor.device.device_type, expected,
+            "DLPack device_type should match the build backend"
+        );
 
         println!(
             "PASS: DLPack device_id correctly set to {}",
