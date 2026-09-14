@@ -29,6 +29,12 @@ Numbers are machine-specific, so the JSON is meant to live outside the repo
 ``--tolerance`` (a fraction) or its latency rises by more than the same
 fraction. Each cell is measured ``--repeats`` times and the best run is kept,
 which removes most of the noise from a shared machine.
+
+An ``f32`` cell is only recorded for encodings with a native float32 pipeline
+path. The pipeline silently measures float64 for the others, so recording
+those under an ``f32`` key would make a future real f32 implementation compare
+against a float64 baseline. Skipped cells are listed in the JSON under
+``"skipped"`` and are ignored by ``compare``.
 """
 
 from __future__ import annotations
@@ -42,9 +48,31 @@ import time
 from typing import Any
 
 from qumat_qdp import QdpBenchmark
+from qumat_qdp._backend import get_qdp
 
 ENCODINGS = ("amplitude", "angle", "basis", "iqp", "iqp-z", "phase")
 DTYPES = ("f64", "f32")
+
+
+def supported_cells() -> tuple[list[str], list[str]]:
+    """Split the encoding x dtype grid into measurable and skipped cell keys.
+
+    A cell is skipped when the native pipeline has no float32 path for the
+    encoding and would silently measure float64 instead.
+    """
+    qdp = get_qdp()
+    if qdp is None:
+        raise RuntimeError("The _qdp extension is required to capture a baseline")
+    cells: list[str] = []
+    skipped: list[str] = []
+    for encoding in ENCODINGS:
+        for dtype in DTYPES:
+            key = f"{encoding}/{dtype}"
+            if dtype == "f32" and not qdp.encoding_supports_f32(encoding):
+                skipped.append(key)
+            else:
+                cells.append(key)
+    return cells, skipped
 
 
 def _gpu_name(device_id: int) -> str:
@@ -66,30 +94,32 @@ def _gpu_name(device_id: int) -> str:
 
 
 def measure(args: argparse.Namespace) -> dict[str, Any]:
+    keys, skipped = supported_cells()
     cells: dict[str, dict[str, float]] = {}
-    for encoding in ENCODINGS:
-        for dtype in DTYPES:
-            bench = (
-                QdpBenchmark(device_id=args.device)
-                .qubits(args.qubits)
-                .encoding(encoding)
-                .batches(args.batches, args.batch_size)
-                .warmup(args.warmup)
-                .dtype(dtype)
-            )
-            best_tp = 0.0
-            best_lat = float("inf")
-            for _ in range(args.repeats):
-                tp = bench.run_throughput()
-                lat = bench.run_latency()
-                best_tp = max(best_tp, tp.vectors_per_sec)
-                best_lat = min(best_lat, lat.latency_ms_per_vector)
-            key = f"{encoding}/{dtype}"
-            cells[key] = {"vectors_per_sec": best_tp, "latency_ms_per_vector": best_lat}
-            print(
-                f"{key:<16} {best_tp:>14,.0f} vec/s   {best_lat:>10.5f} ms/vec",
-                flush=True,
-            )
+    for key in keys:
+        encoding, dtype = key.split("/")
+        bench = (
+            QdpBenchmark(device_id=args.device)
+            .qubits(args.qubits)
+            .encoding(encoding)
+            .batches(args.batches, args.batch_size)
+            .warmup(args.warmup)
+            .dtype(dtype)
+        )
+        best_tp = 0.0
+        best_lat = float("inf")
+        for _ in range(args.repeats):
+            tp = bench.run_throughput()
+            lat = bench.run_latency()
+            best_tp = max(best_tp, tp.vectors_per_sec)
+            best_lat = min(best_lat, lat.latency_ms_per_vector)
+        cells[key] = {"vectors_per_sec": best_tp, "latency_ms_per_vector": best_lat}
+        print(
+            f"{key:<16} {best_tp:>14,.0f} vec/s   {best_lat:>10.5f} ms/vec",
+            flush=True,
+        )
+    for key in skipped:
+        print(f"{key:<16} {'skipped':>14}   no native f32 path (would measure f64)")
     return {
         "config": {
             "qubits": args.qubits,
@@ -102,6 +132,7 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
         "gpu": _gpu_name(args.device),
         "captured_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "cells": cells,
+        "skipped": skipped,
     }
 
 
