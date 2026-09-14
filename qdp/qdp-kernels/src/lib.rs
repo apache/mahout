@@ -20,6 +20,12 @@
 
 use std::ffi::c_void;
 
+pub mod registry;
+pub use registry::{
+    Function, KernelError, LaunchConfig, config, function, kernels_embedded, launch, module_names,
+    module_symbols,
+};
+
 // Complex number (matches CUDA's cuDoubleComplex)
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
