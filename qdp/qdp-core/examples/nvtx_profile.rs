@@ -57,7 +57,7 @@ fn main() {
     println!();
 
     // Perform encoding (this will trigger NVTX markers)
-    match engine.encode(&data, 18, "amplitude") {
+    match engine.encode_single(&data, 18, "amplitude") {
         Ok(ptr) => {
             println!("✓ Encoding succeeded");
             println!("✓ DLPack pointer: {:p}", ptr);

@@ -17,7 +17,7 @@
 // Unit tests for IQP (Instantaneous Quantum Polynomial) encoding
 
 use qdp_core::MahoutError;
-use qdp_core::gpu::encodings::MAX_QUBITS;
+use qdp_core::gpu::kernels::MAX_QUBITS;
 
 mod common;
 
@@ -45,7 +45,7 @@ fn test_iqp_zero_qubits_rejected() {
     };
 
     let data = vec![0.5; 1];
-    let result = engine.encode(&data, 0, "iqp");
+    let result = engine.encode_single(&data, 0, "iqp");
     assert!(result.is_err(), "Should reject zero qubits");
 
     match result {
@@ -71,7 +71,7 @@ fn test_iqp_max_qubits_exceeded() {
 
     let requested_qubits = MAX_QUBITS + 1;
     let data = vec![0.5; iqp_full_data_len(requested_qubits)];
-    let result = engine.encode(&data, requested_qubits, "iqp");
+    let result = engine.encode_single(&data, requested_qubits, "iqp");
     assert!(result.is_err(), "Should reject qubits above MAX_QUBITS");
 
     match result {
@@ -100,7 +100,7 @@ fn test_iqp_wrong_data_length() {
 
     // Provide wrong length (too few)
     let data = vec![0.5; expected_len - 1];
-    let result = engine.encode(&data, num_qubits, "iqp");
+    let result = engine.encode_single(&data, num_qubits, "iqp");
     assert!(result.is_err(), "Should reject wrong data length");
 
     match result {
@@ -116,7 +116,7 @@ fn test_iqp_wrong_data_length() {
 
     // Provide wrong length (too many)
     let data = vec![0.5; expected_len + 1];
-    let result = engine.encode(&data, num_qubits, "iqp");
+    let result = engine.encode_single(&data, num_qubits, "iqp");
     assert!(
         result.is_err(),
         "Should reject wrong data length (too many)"
@@ -137,7 +137,7 @@ fn test_iqp_z_wrong_data_length() {
 
     // Provide wrong length
     let data = vec![0.5; expected_len + 2];
-    let result = engine.encode(&data, num_qubits, "iqp-z");
+    let result = engine.encode_single(&data, num_qubits, "iqp-z");
     assert!(result.is_err(), "Should reject wrong data length for IQP-Z");
 
     match result {
@@ -165,7 +165,7 @@ fn test_iqp_nan_value_rejected() {
     let mut data = vec![0.5; iqp_full_data_len(num_qubits)];
     data[2] = f64::NAN;
 
-    let result = engine.encode(&data, num_qubits, "iqp");
+    let result = engine.encode_single(&data, num_qubits, "iqp");
     assert!(result.is_err(), "Should reject NaN values");
 
     match result {
@@ -193,7 +193,7 @@ fn test_iqp_infinity_value_rejected() {
     let mut data = vec![0.5; iqp_full_data_len(num_qubits)];
     data[1] = f64::INFINITY;
 
-    let result = engine.encode(&data, num_qubits, "iqp");
+    let result = engine.encode_single(&data, num_qubits, "iqp");
     assert!(result.is_err(), "Should reject infinity values");
 
     match result {
@@ -227,7 +227,7 @@ fn test_iqp_full_encoding_workflow() {
         .map(|i| (i as f64) * 0.1)
         .collect();
 
-    let result = engine.encode(&data, num_qubits, "iqp");
+    let result = engine.encode_single(&data, num_qubits, "iqp");
     let dlpack_ptr = result.expect("IQP encoding should succeed");
     assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
     println!("PASS: IQP full encoding succeeded");
@@ -273,7 +273,7 @@ fn test_iqp_z_encoding_workflow() {
         .map(|i| (i as f64) * 0.2)
         .collect();
 
-    let result = engine.encode(&data, num_qubits, "iqp-z");
+    let result = engine.encode_single(&data, num_qubits, "iqp-z");
     let dlpack_ptr = result.expect("IQP-Z encoding should succeed");
     assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
     println!("PASS: IQP-Z encoding succeeded");
@@ -317,7 +317,7 @@ fn test_iqp_single_qubit() {
     let num_qubits = 1;
     let data = vec![std::f64::consts::PI / 4.0]; // 1 param for n=1
 
-    let result = engine.encode(&data, num_qubits, "iqp");
+    let result = engine.encode_single(&data, num_qubits, "iqp");
     let dlpack_ptr = result.expect("Single qubit IQP encoding should succeed");
     assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
 
@@ -586,7 +586,7 @@ fn test_iqp_fwt_threshold_boundary() {
         .map(|i| (i as f64) * 0.1)
         .collect();
 
-    let result = engine.encode(&data, num_qubits, "iqp");
+    let result = engine.encode_single(&data, num_qubits, "iqp");
     let dlpack_ptr = result.expect("IQP encoding at FWT threshold should succeed");
     assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
 
@@ -628,7 +628,7 @@ fn test_iqp_fwt_larger_qubit_counts() {
             .map(|i| (i as f64) * 0.05)
             .collect();
 
-        let result = engine.encode(&data, num_qubits, "iqp");
+        let result = engine.encode_single(&data, num_qubits, "iqp");
         let dlpack_ptr = result
             .unwrap_or_else(|_| panic!("IQP encoding for {} qubits should succeed", num_qubits));
         assert!(!dlpack_ptr.is_null());
@@ -675,7 +675,7 @@ fn test_iqp_z_fwt_correctness() {
             .map(|i| (i as f64) * 0.15)
             .collect();
 
-        let result = engine.encode(&data, num_qubits, "iqp-z");
+        let result = engine.encode_single(&data, num_qubits, "iqp-z");
         let dlpack_ptr = result
             .unwrap_or_else(|_| panic!("IQP-Z encoding for {} qubits should succeed", num_qubits));
         assert!(!dlpack_ptr.is_null());
@@ -765,7 +765,7 @@ fn test_iqp_fwt_zero_parameters_identity() {
     for num_qubits in [4, 5, 6] {
         let data: Vec<f64> = vec![0.0; iqp_full_data_len(num_qubits)];
 
-        let result = engine.encode(&data, num_qubits, "iqp");
+        let result = engine.encode_single(&data, num_qubits, "iqp");
         let dlpack_ptr = result.expect("IQP encoding with zero params should succeed");
         assert!(!dlpack_ptr.is_null());
 
@@ -808,10 +808,10 @@ fn test_iqp_encoder_via_factory() {
     let num_qubits = 2;
     let data: Vec<f64> = vec![0.1, 0.2, 0.3]; // 2 + 1 = 3 params
 
-    let result1 = engine.encode(&data, num_qubits, "iqp");
+    let result1 = engine.encode_single(&data, num_qubits, "iqp");
     assert!(result1.is_ok(), "lowercase 'iqp' should work");
 
-    let result2 = engine.encode(&data, num_qubits, "IQP");
+    let result2 = engine.encode_single(&data, num_qubits, "IQP");
     assert!(result2.is_ok(), "uppercase 'IQP' should work");
 
     // Clean up
@@ -846,7 +846,7 @@ fn test_iqp_z_encoder_via_factory() {
     let num_qubits = 3;
     let data: Vec<f64> = vec![0.1, 0.2, 0.3]; // 3 params for IQP-Z
 
-    let result = engine.encode(&data, num_qubits, "iqp-z");
+    let result = engine.encode_single(&data, num_qubits, "iqp-z");
     assert!(result.is_ok(), "'iqp-z' should work");
 
     unsafe {

@@ -469,20 +469,16 @@ impl GpuStateVector {
                         )
                     })?;
 
-                    let ret = unsafe {
-                        qdp_kernels::convert_state_to_double(
-                            src_ptr as *const CuComplex,
-                            *slice.device_ptr() as *mut CuDoubleComplex,
-                            self.size_elements,
-                            std::ptr::null_mut(),
-                        )
-                    };
-
-                    if ret != 0 {
-                        return Err(MahoutError::KernelLaunch(format!(
-                            "Precision conversion kernel failed: {}",
-                            ret
-                        )));
+                    let dst = *slice.device_ptr() as *mut CuDoubleComplex;
+                    let len = self.size_elements;
+                    // SAFETY: argument list matches `convert_state_to_complex128_kernel`.
+                    unsafe {
+                        crate::gpu::kernels::LaunchCtx::default_stream(device).launch(
+                            "amplitude",
+                            "convert_state_to_complex128_kernel",
+                            qdp_kernels::LaunchConfig::grid_1d(len),
+                            &mut qdp_kernels::kernel_args![src_ptr as *const CuComplex, dst, len],
+                        )?;
                     }
 
                     device.synchronize().map_err(|e| {
@@ -545,20 +541,20 @@ impl GpuStateVector {
                         )
                     })?;
 
-                    let ret = unsafe {
-                        qdp_kernels::convert_state_to_float(
-                            src_ptr as *const CuDoubleComplex,
-                            *slice.device_ptr() as *mut CuComplex,
-                            self.size_elements,
-                            std::ptr::null_mut(),
-                        )
-                    };
-
-                    if ret != 0 {
-                        return Err(MahoutError::KernelLaunch(format!(
-                            "Precision conversion kernel failed: {}",
-                            ret
-                        )));
+                    let dst = *slice.device_ptr() as *mut CuComplex;
+                    let len = self.size_elements;
+                    // SAFETY: argument list matches `convert_state_to_complex64_kernel`.
+                    unsafe {
+                        crate::gpu::kernels::LaunchCtx::default_stream(device).launch(
+                            "amplitude",
+                            "convert_state_to_complex64_kernel",
+                            qdp_kernels::LaunchConfig::grid_1d(len),
+                            &mut qdp_kernels::kernel_args![
+                                src_ptr as *const CuDoubleComplex,
+                                dst,
+                                len
+                            ],
+                        )?;
                     }
 
                     device.synchronize().map_err(|e| {
