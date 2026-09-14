@@ -289,7 +289,7 @@ class QdpBenchmark:
 
         if encoding_method == "basis":
             sample_dim = 1
-        elif encoding_method in {"angle", "iqp-z"}:
+        elif encoding_method in {"angle", "iqp-z", "phase"}:
             sample_dim = num_qubits
         elif encoding_method == "iqp":
             sample_dim = num_qubits + num_qubits * (num_qubits - 1) // 2
@@ -305,7 +305,7 @@ class QdpBenchmark:
                 data = torch.randint(
                     0, 1 << num_qubits, (batch_size,), device=device
                 ).to(torch.float64)
-            elif encoding_method in {"angle", "iqp", "iqp-z"}:
+            elif encoding_method in {"angle", "iqp", "iqp-z", "phase"}:
                 data = (
                     torch.rand(batch_size, sample_dim, device=device) * (2.0 * torch.pi)
                 ).to(torch.float64)
