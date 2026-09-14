@@ -1,4 +1,4 @@
-.PHONY: install install_profile install_benchmark build build_nvtx_profile run_nvtx_profile test test_python test_rust benchmark clean help
+.PHONY: install install_profile install_benchmark build build_nvtx_profile run_nvtx_profile test test_python test_rust check-kernels parity benchmark clean help
 
 help:
 	@echo "Available targets:"
@@ -6,6 +6,8 @@ help:
 	@echo "  make build_nvtx_profile  - Build qdp-core with observability features"
 	@echo "  make run_nvtx_profile    - Build example, run with nsys, and show stats (EXAMPLE=nvtx_profile)"
 	@echo "  make test_rust           - Run Rust unit tests only"
+	@echo "  make check-kernels       - Resolve every embedded CUDA kernel symbol and smoke-launch one"
+	@echo "  make parity              - Run the cross-backend parity grid against the PyTorch reference"
 	@echo "  make clean               - Clean build artifacts"
 
 build:
@@ -19,6 +21,14 @@ build_nvtx_profile:
 test_rust:
 	@echo "Running Rust unit tests..."
 	cargo test --workspace
+
+check-kernels:
+	@echo "Checking embedded CUDA kernels..."
+	cargo test -p qdp-kernels --release --test registry
+
+parity:
+	@echo "Running the parity grid (needs the _qdp extension built into the root .venv)..."
+	cd .. && uv run --active pytest testing/qdp/test_parity.py -q
 
 run_nvtx_profile:
 	$(eval EXAMPLE ?= nvtx_profile)
