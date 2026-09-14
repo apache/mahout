@@ -30,7 +30,14 @@ from __future__ import annotations
 import torch
 import torch.nn.functional as F
 
-__all__ = ["amplitude_encode", "angle_encode", "basis_encode", "encode", "iqp_encode"]
+__all__ = [
+    "amplitude_encode",
+    "angle_encode",
+    "basis_encode",
+    "encode",
+    "iqp_encode",
+    "phase_encode",
+]
 
 _COMPLEX_DTYPE_MAP = {
     torch.float32: torch.complex64,
@@ -320,6 +327,54 @@ def iqp_encode(
 
 
 # ---------------------------------------------------------------------------
+# Phase encoding
+# ---------------------------------------------------------------------------
+
+
+def phase_encode(
+    data: torch.Tensor,
+    num_qubits: int,
+    *,
+    device: torch.device | str | None = None,
+) -> torch.Tensor:
+    """Phase encoding: uniform magnitude, data-dependent phase per basis state.
+
+    Circuit ``H^⊗n`` followed by ``P(x_k)`` on each qubit. For state index
+    *b* with bits b_{n-1}...b_0::
+
+        amplitude_b = (1/√2)^n · exp(i · Σ_k x_k · b_k)
+
+    Args:
+        data: Real tensor of shape ``(batch, num_qubits)`` or ``(num_qubits,)``.
+        num_qubits: Number of qubits.
+        device: Target device.
+
+    Returns:
+        Complex tensor of shape ``(batch, 2**num_qubits)``.
+    """
+    _check_float_dtype(data)
+    if device is not None:
+        data = data.to(device=torch.device(device))
+    data = _ensure_2d(data)
+    batch, width = data.shape
+    if width != num_qubits:
+        raise ValueError(
+            f"Phase encoding expects sample size {num_qubits} (=num_qubits), got {width}"
+        )
+
+    state_dim = 1 << num_qubits
+    idx = torch.arange(state_dim, device=data.device)
+    bit_pos = torch.arange(num_qubits, device=data.device)
+    # bits[b, k] = (b >> k) & 1
+    bits = ((idx.unsqueeze(1) >> bit_pos.unsqueeze(0)) & 1).to(data.dtype)
+
+    phi = torch.matmul(data, bits.T)  # (batch, state_dim)
+    norm = (0.5**0.5) ** num_qubits
+    out = torch.complex(torch.cos(phi) * norm, torch.sin(phi) * norm)
+    return out.to(_complex_dtype(data.dtype))
+
+
+# ---------------------------------------------------------------------------
 # Dispatcher
 # ---------------------------------------------------------------------------
 
@@ -328,6 +383,7 @@ _ENCODERS = {
     "angle": angle_encode,
     "basis": basis_encode,
     "iqp": iqp_encode,
+    "phase": phase_encode,
 }
 
 _SUPPORTED_ENCODINGS = tuple(sorted((*_ENCODERS.keys(), "iqp-z")))
@@ -346,7 +402,8 @@ def encode(
     Args:
         data: Input tensor.
         num_qubits: Number of qubits.
-        encoding_method: One of ``"amplitude"``, ``"angle"``, ``"basis"``, ``"iqp"``, ``"iqp-z"``.
+        encoding_method: One of ``"amplitude"``, ``"angle"``, ``"basis"``, ``"iqp"``,
+            ``"iqp-z"``, ``"phase"``.
         device: Target device.
         enable_zz: Whether IQP encoding includes ZZ interaction terms. Ignored for
             non-IQP encodings. ``"iqp-z"`` always forces this to ``False``.
