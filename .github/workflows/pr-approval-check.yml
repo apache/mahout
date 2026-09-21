@@ -1,0 +1,66 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Enforces the PR policy (docs/community/pr-policy-and-review-guidelines.md):
+# a pull request needs at least one approving review from a committer before
+# it can be merged, unless it was opened by a PMC member
+# (.github/pmc-members.txt). The "Committer approval" job is a required status
+# check on main via .asf.yaml, mirroring Airflow's
+# required_approving_review_count: 1 but with the PMC exemption.
+#
+name: PR Approval Check
+
+on:
+  # Runs with the base repository's workflow definition, also for fork PRs.
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+  # Re-evaluate whenever a review is submitted, edited or dismissed.
+  pull_request_review:
+    types: [submitted, edited, dismissed]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: pr-approval-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  committer-approval:
+    # This job name is the status check context referenced in .asf.yaml.
+    name: Committer approval
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      # Always take the script and the PMC list from the base branch so a PR
+      # cannot change the rule it is being checked against. No code from the
+      # PR head is executed.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          persist-credentials: false
+          sparse-checkout: |
+            .github/pmc-members.txt
+            .github/scripts/check_pr_approval.py
+          sparse-checkout-cone-mode: false
+
+      - name: Check for a committer approval
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: python3 .github/scripts/check_pr_approval.py

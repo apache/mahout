@@ -59,6 +59,17 @@ github:
     main:
       required_linear_history: true
       required_signatures: false
+      # PR policy (docs/community/pr-policy-and-review-guidelines.md): a PR needs
+      # at least one approving review from a committer before it can be merged,
+      # unless it was opened by a PMC member (.github/pmc-members.txt).
+      # GitHub's own required_approving_review_count (as used by Airflow) cannot
+      # exempt PMC members, so the rule is enforced through this required status
+      # check produced by .github/workflows/pr-approval-check.yml.
+      required_status_checks:
+        strict: false
+        checks:
+          - context: "Committer approval"
+            app_id: 15368  # GitHub Actions
   environments:
     pypi:
       required_reviewers:
@@ -81,4 +92,4 @@ notifications:
   commits: commits@mahout.apache.org
   issues: issues@mahout.apache.org
   pullrequests: commits@mahout.apache.org
-  discussions: commits@mahout.apache.org
+  discussions: dev@mahout.apache.org
