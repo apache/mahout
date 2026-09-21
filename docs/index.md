@@ -1,33 +1,49 @@
 ---
-title: QuMat Documentation
+title: Mahout Documentation
+sidebar_label: Mahout Documentation
 ---
 
-![QuMat Logo](assets/mascot_with_text.png)
+![Qumat Logo](assets/mascot_with_text.png)
 
-# QuMat
+# Apache Mahout Documentation
 
-QuMat is a high level Python library for interfacing with multiple
-quantum computing backends. It is designed to be easy to use and to abstract
-the particularities of each backend, so that you may 'write once, run
-anywhere.'
+Apache Mahout is an Apache Software Foundation project for quantum computing in Python. It ships two components:
 
-## Documentation
+- **Qumat** is a high-level library for building quantum circuits with standard gates and running them on Qiskit, Cirq, or Amazon Braket through one unified API. Write once, execute anywhere.
+- **QDP (Quantum Data Plane)** is a GPU-accelerated engine for encoding classical data into quantum states, with zero-copy tensor transfer to and from PyTorch, NumPy, and TensorFlow via DLPack.
 
-### Getting Started
-- [Getting Started with QuMat](./qumat/getting-started) - Introduction and setup guide
+New here? Start with [Getting Started](./qumat/getting-started), which covers installation and your first circuit.
 
-### Core Concepts
-- [Basic Gates](./qumat/basic-gates) - Introduction to fundamental quantum gates (NOT, Hadamard, CNOT, Toffoli, SWAP, Pauli gates, CSWAP, U gate)
-- [Parameterized Quantum Circuits and Rotation Gates](./qumat/parameterized-circuits) - Rotation gates (Rx, Ry, Rz) and creating/optimizing parameterized circuits
+## Qumat (Circuits)
 
-### Python API Reference
-- [Qumat API](./qumat/api) - Generated reference for quantum circuits
-- [QDP API](./qdp/api) - Generated reference for quantum data encoding
+- [Overview](./qumat) - What Qumat is and which backends it supports
+- [Basic Gates](./qumat/basic-gates) - NOT, Hadamard, CNOT, Toffoli, SWAP, Pauli, CSWAP, and U gates
+- [Parameterized Circuits](./qumat/parameterized-circuits) - Rotation gates (Rx, Ry, Rz) and building circuits with tunable parameters
+- [API Reference](./qumat/api) - Generated reference for the `qumat` package
+- [Core Concepts](./qumat/concepts) - The ideas behind the circuit abstraction
+- [Examples](./qumat/examples) - Worked examples across backends
 
-### Additional Resources
-- [Parameterized Quantum Circuits: Developer's Guide](./advanced/pqc) - In-depth guide to PQCs
-- [Qumat Gap Analysis for PQC](./advanced/gap-analysis) - Analysis of PQC capabilities
+## QDP (Data Encoding)
 
-### Qumat Components
-- [Qumat (Circuits)](./qumat) - Quantum circuit abstraction layer
-- [QDP (Quantum Data Plane)](./qdp) - GPU-accelerated data encoding
+- [Overview](./qdp) - What QDP is and how it fits with Qumat
+- [Getting Started with QDP](./qdp/getting-started) - Installation, GPU requirements, and a first encoding
+- [Core Concepts](./qdp/concepts) - Encoding methods, tensors, and the execution model
+- [API Reference](./qdp/api) - Generated reference for the `qumat_qdp` package
+- [Python API](./qdp/python-api) - The user-facing Python facade, loaders, and backend selection
+- [Examples](./qdp/examples) - End-to-end encoding examples
+- Internals: [Readers](./qdp/readers), [Observability](./qdp/observability), [Testing](./qdp/testing)
+
+## Resources
+
+- [PQC Guides](./advanced) - Developer's guide and gap analysis for parameterized quantum circuits
+- [Quantum Computing Primer](./learning/quantum-computing-primer) - A ten-chapter introduction to quantum computing using Qumat
+- [Research Papers](./learning/papers) - Papers and publications related to Qumat and quantum computing
+
+## Community
+
+- [Community Overview](./community) - How the project communicates and makes decisions
+- [Who We Are](./community/who-we-are) - PMC members and committers
+- [Mailing Lists](./community/mailing-lists) - Subscribe to the user, dev, and commits lists
+- [How to Contribute](./about/how-to-contribute) - Getting involved and submitting changes
+- [PR Policy and Review Guidelines](./community/pr-policy-and-review-guidelines) - What reviewers expect
+- [Code of Conduct](./community/code-of-conduct) - Community standards
