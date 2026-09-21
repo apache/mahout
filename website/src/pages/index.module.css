@@ -226,3 +226,11 @@
     padding: 0.5rem 1rem;
   }
 }
+
+.legacyNote {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-700);
+}

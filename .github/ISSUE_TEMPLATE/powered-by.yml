@@ -1,0 +1,120 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: "Powered By Mahout submission"
+description: "Add your organization or project to mahout.apache.org/powered-by"
+title: "[Powered By] <organization or project name>"
+labels: ["powered-by"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for telling the community what you are building with Apache Mahout.
+
+        Only the first three fields are required. An entry that is just a name
+        and a link is perfectly fine.
+
+        **This issue is public.** Only include things you are happy to see on a
+        public website. A committer will review the submission and add it to
+        the Powered By page.
+
+  - type: input
+    id: name
+    attributes:
+      label: Organization or project name
+      description: Exactly as it should be printed.
+      placeholder: Acme Inc
+    validations:
+      required: true
+
+  - type: input
+    id: website
+    attributes:
+      label: Website
+      placeholder: https://example.com
+    validations:
+      required: true
+
+  - type: dropdown
+    id: deployment_stage
+    attributes:
+      label: Deployment stage
+      description: >-
+        Recorded for the project's own understanding of adoption. The Powered
+        By page does not sort or label organizations by this.
+      options:
+        - Production
+        - Pilot / proof of concept
+        - Research / academic
+        - Evaluating
+        - Integration / community project
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Which parts of Mahout do you use?
+      multiple: true
+      options:
+        - Qumat (quantum circuits)
+        - QDP (quantum data encoding)
+        - Mahout Classic (Samsara / MapReduce)
+
+  - type: input
+    id: use_case
+    attributes:
+      label: What are you using Apache Mahout for?
+      description: >-
+        A short phrase. Becomes the category shown above your description.
+      placeholder: Quantum kernel methods
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Short description
+      description: >-
+        One to three sentences, in the third person. This is published as
+        written, so phrase it the way you want to be quoted. Leave it blank
+        and your entry appears in the organization list without a write-up.
+      placeholder: >-
+        Acme Inc uses Qumat to prototype variational circuits once and run
+        them on Qiskit and Braket without rewriting the circuit code.
+
+  - type: textarea
+    id: logo
+    attributes:
+      label: Logo
+      description: >-
+        Optional. Attach or link an SVG (preferred) or a transparent PNG at
+        least 400px wide. The site has a light and a dark theme, so a logo
+        that works on both is ideal. Without a logo your name is shown as text.
+
+  - type: input
+    id: case_study
+    attributes:
+      label: Public case study, paper, or blog post
+      description: Optional. A link we can point readers at.
+      placeholder: https://example.com/blog/quantum-kernels-with-qumat
+
+  - type: input
+    id: contact
+    attributes:
+      label: Contact for follow-up
+      description: >-
+        Optional, and never published on the website. This issue itself is
+        public, so if you would rather not post an address, leave this blank.
+        A committer will reply in the thread, or you can email
+        dev@mahout.apache.org.

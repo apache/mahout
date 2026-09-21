@@ -71,26 +71,5 @@ engine = qdp.QdpEngine(device_id=0)
 qtensor = engine.encode([1.0, 2.0, 3.0, 4.0], num_qubits=2, encoding_method="amplitude")
 ```
 
-## Roadmap
-
-### 2024
-- [x] Transition of Classic to maintenance mode
-- [x] Integration of Qumat with hardened (tests, docs, CI/CD) Cirq, Qiskit, and Braket backends
-- [x] Integration with Amazon Braket
-- [x] [Public talk about Qumat](https://2024.fossy.us/schedule/presentation/265/)
-
-### 2025
-- [x] [FOSDEM talk](https://fosdem.org/2025/schedule/event/fosdem-2025-5298-introducing-qumat-an-apache-mahout-joint-/)
-- [x] QDP: Foundation & Infrastructure (Rust workspace, build configuration)
-- [x] QDP: Core Implementation (CUDA kernels, CPU preprocessing, GPU memory management)
-- [x] QDP: Zero-copy and Safety (DLManagedTensor, DLPack structures)
-- [x] QDP: Python Binding (PyO3 wrapping, DLPack protocol)
-
-### Q1 2026
-- [ ] QDP: Input Format Support (PyTorch, NumPy, TensorFlow integration)
-- [ ] QDP: Verification and Testing (device testing, benchmarking)
-- [ ] QDP: Additional Encoders (angle/basis encoding, multi-GPU optimization)
-- [ ] QDP: Integration & Release (documentation, example notebooks, PyPI publishing)
-
 ## Legal
 Please see the `NOTICE.txt` included in this directory for more information.

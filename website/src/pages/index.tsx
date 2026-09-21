@@ -13,7 +13,7 @@ const latestReleasedVersion = releasedVersions[0] ?? 'next';
 const siteUrl = 'https://mahout.apache.org';
 const pageTitle = 'Apache Mahout';
 const pageDescription =
-  'Apache Mahout builds an environment for quickly creating scalable, performant machine learning applications.';
+  'Apache Mahout builds an environment for quickly creating scalable, performant machine learning applications. Its current focus is Qumat, a backend-agnostic quantum circuit library, and QDP, a GPU-accelerated quantum data encoding engine.';
 const logoUrl = `${siteUrl}/img/mahout-favicon.png`;
 const socialImageUrl = `${siteUrl}/img/mascot_with_text.png`;
 
@@ -104,8 +104,14 @@ function Sidebar() {
       <div className={styles.sidebarCard}>
         <div className={styles.cardHeader}>Qumat {latestReleasedVersion} Released!</div>
         <div className={styles.cardBody}>
-          <p>Mahout's new quantum computing layer for building ML circuits on simulators and real quantum hardware.</p>
-          <Link to="/docs/qumat/getting-started">Download Qumat {latestReleasedVersion} →</Link>
+          <p>
+            First-class AMD ROCm support, six QDP encodings with parity across
+            CUDA and ROCm, and faster zero-copy GPU paths.
+          </p>
+          <p>
+            <Link to="/blog/2026/06/01/Qumat-0.6.0-Release">Read the release notes →</Link>
+          </p>
+          <Link to="/docs/qumat/getting-started">Get Qumat {latestReleasedVersion} →</Link>
         </div>
       </div>
 
@@ -140,6 +146,16 @@ function Sidebar() {
         <div className={styles.cardBody}>
           <ul className={styles.linkList}>
             <li>
+              Community Over Code Asia 2026 -{' '}
+              <a
+                href="https://asia.communityovercode.org/sessions/general-1194670.html"
+                target="_blank"
+                rel="noopener noreferrer">
+                Accelerating Quantum Machine Learning: Building a
+                GPU-Accelerated Data Plane in Apache Mahout
+              </a>
+            </li>
+            <li>
               FOSDEM 2025 -{' '}
               <a
                 href="https://mirrors.dotsrc.org/fosdem/2025/k4401/fosdem-2025-5298-introducing-qumat-an-apache-mahout-joint-.av1.webm"
@@ -172,6 +188,14 @@ function MainContent() {
         The goal of the Apache Mahout™ project is to build an environment for
         quickly creating scalable, performant machine learning applications.
       </p>
+      <p>
+        Today that work centers on quantum machine learning in Python, with two
+        components: <strong>Qumat</strong>, a library for writing quantum
+        circuits once and running them on any supported backend, and{' '}
+        <strong>QDP</strong>, a GPU-accelerated data plane that turns classical
+        data into quantum states without simulating state-preparation
+        circuits.
+      </p>
 
       <Heading as="h2">Qumat</Heading>
       <div className={styles.mascotContainer}>
@@ -184,22 +208,65 @@ function MainContent() {
 
       <p>
         <strong>Qumat</strong> is a high-level Python library for quantum
-        computing that provides:
+        computing. Build a circuit with standard and parameterized gates, then
+        execute it on Qiskit, Cirq, or Amazon Braket through one unified API,
+        on simulators or real quantum hardware.
       </p>
       <ul>
         <li>
-          <strong>Qumat Core</strong> - Build quantum circuits with standard
-          gates and run them on Qiskit, Cirq, or Amazon Braket with a single
-          unified API
+          <strong>One API, three backends</strong> - Switch between Qiskit,
+          Cirq, and Amazon Braket by changing a config value, not your circuit
+          code
         </li>
         <li>
-          <strong>QDP (Quantum Data Plane)</strong> - Encode classical data
-          into quantum states using GPU-accelerated kernels with zero-copy
-          tensor transfer
+          <strong>Standard and parameterized gates</strong> - Hadamard, Pauli,
+          CNOT, Toffoli, SWAP, and rotation gates with parameter binding for
+          variational circuits
+        </li>
+        <li>
+          <strong>Python 3.10+</strong> - Installable from PyPI with{' '}
+          <code>pip install qumat</code>
         </li>
       </ul>
       <p>
         <Link to="/docs/qumat">Learn more about Qumat →</Link>
+      </p>
+
+      <Heading as="h2">QDP (Quantum Data Plane)</Heading>
+      <p>
+        <strong>QDP</strong> removes the data-loading bottleneck in quantum
+        machine learning. Instead of simulating a state-preparation circuit,
+        it constructs the state vector directly in GPU memory and hands it to
+        your training or kernel pipeline.
+      </p>
+      <ul>
+        <li>
+          <strong>Six encodings</strong> - Amplitude, angle, basis, phase, IQP,
+          and IQP-Z, with the same coverage on every GPU backend
+        </li>
+        <li>
+          <strong>NVIDIA CUDA and AMD ROCm</strong> - Native CUDA kernels and
+          hand-written Triton kernels for ROCm, selectable from the same API
+        </li>
+        <li>
+          <strong>Zero-copy interop</strong> - DLPack handoff to and from
+          PyTorch, NumPy, and TensorFlow, plus GPU-pointer paths that skip the
+          host round trip
+        </li>
+        <li>
+          <strong>Benchmarked on real workloads</strong> - SVHN IQP training,
+          quantum kernel SVM, and data-to-state latency benchmarks ship with
+          the project
+        </li>
+      </ul>
+      <p>
+        <Link to="/docs/qdp">Learn more about QDP →</Link>
+      </p>
+
+      <p className={styles.legacyNote}>
+        Looking for the earlier Mahout Classic (Samsara and MapReduce)
+        codebase? It is in maintenance mode. The community's current work is
+        on Qumat and QDP.
       </p>
     </div>
   );
@@ -210,7 +277,7 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title="Home"
-      description="Apache Mahout - Distributed Linear Algebra and Quantum Computing for Machine Learning">
+      description={pageDescription}>
       <Head>
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />

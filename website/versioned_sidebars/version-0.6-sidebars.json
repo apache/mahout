@@ -52,8 +52,9 @@
     },
     {
       "type": "category",
-      "label": "Advanced Topics",
+      "label": "PQC Guides",
       "collapsed": true,
+      "link": {"type": "doc", "id": "advanced/index"},
       "items": [
         "advanced/pqc",
         "advanced/gap-analysis"
