@@ -38,6 +38,9 @@ New here? Start with [Getting Started](./qumat/getting-started), which covers in
 - [PQC Guides](./advanced) - Developer's guide and gap analysis for parameterized quantum circuits
 - [Quantum Computing Primer](./learning/quantum-computing-primer) - A ten-chapter introduction to quantum computing using Qumat
 - [Research Papers](./learning/papers) - Papers and publications related to Qumat and quantum computing
+- [Books, Tutorials and Talks](./learning/books-tutorials-and-talks) - Reading, articles, lectures, and conference talks
+- [Reference Reading](./learning/reference-reading) - Background material on linear algebra, statistics, and machine learning
+- [Professional Support](./learning/professional-support) - People and companies offering Mahout support and talks
 
 ## Community
 

@@ -33,7 +33,7 @@
 
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.25rem;
 }
 
@@ -52,16 +52,48 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
-.cardHeader {
+.logoBox {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  height: 96px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  background: #fff;
+  text-decoration: none;
+}
+
+[data-theme='dark'] .logoBox {
+  border: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.logoBox:hover {
+  text-decoration: none;
+}
+
+.cardLogo {
+  height: 56px;
+  width: auto;
+  max-width: 85%;
+  object-fit: contain;
+}
+
+.logoFallback {
+  font-family: var(--ifm-heading-font-family);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1c1e21;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.cardHeader {
+  margin-bottom: 0.5rem;
 }
 
 .cardName {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 700;
   margin: 0;
 }
@@ -89,28 +121,6 @@
   color: var(--ifm-color-primary);
 }
 
-.cardLogo {
-  height: 44px;
-  width: auto;
-  max-width: 160px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.logoTile {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  background: #fff;
-  flex-shrink: 0;
-}
-
-[data-theme='dark'] .logoTile {
-  border: 1px solid var(--ifm-color-emphasis-200);
-}
-
 .cardBody {
   flex: 1;
   margin: 0;
@@ -120,53 +130,6 @@
 .cardSource {
   margin-top: 1rem;
   font-size: 0.9rem;
-}
-
-.wall {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1rem;
-}
-
-.wallItem {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  min-height: 120px;
-  padding: 1rem;
-  border: 1px solid var(--ifm-color-emphasis-200);
-  border-radius: 12px;
-  background: #fff;
-  color: var(--ifm-color-emphasis-800);
-  font-weight: 600;
-  font-size: 0.9rem;
-  text-align: center;
-  text-decoration: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-[data-theme='dark'] .wallItem {
-  color: #1c1e21;
-}
-
-.wallItem:hover {
-  border-color: var(--ifm-color-primary);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  text-decoration: none;
-  color: var(--ifm-color-primary-darker);
-}
-
-.wallLogo {
-  height: 64px;
-  width: auto;
-  max-width: 160px;
-  object-fit: contain;
-}
-
-.wallName {
-  font-size: 1.1rem;
 }
 
 .cta {

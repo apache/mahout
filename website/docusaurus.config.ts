@@ -237,6 +237,16 @@ const config: Config = {
               docId: 'learning/papers/index',
               label: 'Research Papers',
             },
+            {
+              type: 'doc',
+              docId: 'learning/books-tutorials-and-talks',
+              label: 'Books, Tutorials & Talks',
+            },
+            {
+              type: 'doc',
+              docId: 'learning/professional-support',
+              label: 'Professional Support',
+            },
           ],
         },
         // Community dropdown

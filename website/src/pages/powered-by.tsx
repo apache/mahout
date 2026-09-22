@@ -10,6 +10,7 @@ import styles from './powered-by.module.css';
 type Entry = {
   name: string;
   url: string;
+  type: 'commercial' | 'academic';
   category?: string;
   description?: string;
   source?: string;
@@ -22,10 +23,12 @@ const DATA_FILE_URL =
   'https://github.com/apache/mahout/blob/main/website/src/data/powered-by.json';
 
 const allEntries = entries as Entry[];
-const featured = allEntries.filter((entry) => entry.description);
-const everyone = [...allEntries].sort((a, b) =>
-  a.name.localeCompare(b.name, 'en', {sensitivity: 'base'}),
-);
+const byName = (a: Entry, b: Entry) =>
+  a.name.localeCompare(b.name, 'en', {sensitivity: 'base'});
+const commercial = allEntries
+  .filter((e) => e.type === 'commercial')
+  .sort(byName);
+const academic = allEntries.filter((e) => e.type === 'academic').sort(byName);
 
 function Logo({entry, className}: {entry: Entry; className: string}) {
   const src = useBaseUrl(entry.logo ?? '');
@@ -35,25 +38,27 @@ function Logo({entry, className}: {entry: Entry; className: string}) {
   return <img className={className} src={src} alt={`${entry.name} logo`} />;
 }
 
-function FeaturedCard({entry}: {entry: Entry}) {
+function Card({entry}: {entry: Entry}) {
   return (
     <article className={styles.card}>
+      <Link className={styles.logoBox} href={entry.url} title={entry.name}>
+        {entry.logo ? (
+          <Logo entry={entry} className={styles.cardLogo} />
+        ) : (
+          <span className={styles.logoFallback}>{entry.name}</span>
+        )}
+      </Link>
       <div className={styles.cardHeader}>
-        <div>
-          <h3 className={styles.cardName}>
-            <Link href={entry.url}>{entry.name}</Link>
-          </h3>
-          {entry.category && (
-            <span className={styles.cardCategory}>{entry.category}</span>
-          )}
-        </div>
-        {entry.logo && (
-          <span className={styles.logoTile}>
-            <Logo entry={entry} className={styles.cardLogo} />
-          </span>
+        <h3 className={styles.cardName}>
+          <Link href={entry.url}>{entry.name}</Link>
+        </h3>
+        {entry.category && (
+          <span className={styles.cardCategory}>{entry.category}</span>
         )}
       </div>
-      <p className={styles.cardBody}>{entry.description}</p>
+      {entry.description && (
+        <p className={styles.cardBody}>{entry.description}</p>
+      )}
       {entry.source && (
         <p className={styles.cardSource}>
           <Link href={entry.source}>Source</Link>
@@ -63,15 +68,29 @@ function FeaturedCard({entry}: {entry: Entry}) {
   );
 }
 
-function WallItem({entry}: {entry: Entry}) {
+function UseSection({
+  title,
+  subtitle,
+  items,
+}: {
+  title: string;
+  subtitle: string;
+  items: Entry[];
+}) {
   return (
-    <Link className={styles.wallItem} href={entry.url} title={entry.name}>
-      {entry.logo ? (
-        <Logo entry={entry} className={styles.wallLogo} />
-      ) : (
-        <span className={styles.wallName}>{entry.name}</span>
-      )}
-    </Link>
+    <section className={styles.section}>
+      <div className="container">
+        <Heading as="h2" className={styles.sectionTitle}>
+          {title}
+        </Heading>
+        <p className={styles.sectionSubtitle}>{subtitle}</p>
+        <div className={styles.cards}>
+          {items.map((entry) => (
+            <Card key={entry.name} entry={entry} />
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -95,8 +114,9 @@ export default function PoweredBy(): ReactNode {
               quantum states.
             </p>
             <p className={styles.lead}>
-              See how organizations, developers, and researchers have built with
-              Mahout, and add your own story.
+              See how companies, developers, and researchers have built with
+              Mahout, and add your own story. Entries are listed alphabetically
+              within each section.
             </p>
             <Link className="button button--primary button--lg" href={SUBMIT_URL}>
               Add your organization
@@ -106,40 +126,16 @@ export default function PoweredBy(): ReactNode {
       </header>
 
       <main>
-        {featured.length > 0 && (
-          <section className={styles.section}>
-            <div className="container">
-              <Heading as="h2" className={styles.sectionTitle}>
-                How Mahout is being used
-              </Heading>
-              <p className={styles.sectionSubtitle}>
-                Use cases the community has shared.
-              </p>
-              <div className={styles.cards}>
-                {featured.map((entry) => (
-                  <FeaturedCard key={entry.name} entry={entry} />
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        <section className={styles.section}>
-          <div className="container">
-            <Heading as="h2" className={styles.sectionTitle}>
-              Organizations building with Mahout
-            </Heading>
-            <p className={styles.sectionSubtitle}>
-              Companies, projects, and research groups that have told the
-              community they use or have used Apache Mahout.
-            </p>
-            <div className={styles.wall}>
-              {everyone.map((entry) => (
-                <WallItem key={entry.name} entry={entry} />
-              ))}
-            </div>
-          </div>
-        </section>
+        <UseSection
+          title="Commercial Use"
+          subtitle="Companies and products that have built on Apache Mahout."
+          items={commercial}
+        />
+        <UseSection
+          title="Academic Use"
+          subtitle="Universities, research institutes, and funded research projects using Mahout."
+          items={academic}
+        />
 
         <section className={styles.cta}>
           <div className="container">
