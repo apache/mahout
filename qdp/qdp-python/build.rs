@@ -14,20 +14,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cfg(not(qdp_gpu_platform))]
-mod fallback;
-#[cfg(qdp_gpu_platform)]
-mod linux;
-#[cfg(not(any(qdp_gpu_platform, target_os = "windows")))]
-mod other;
-// Windows non-GPU stub: used only on Windows without the hip feature.
-// When qdp_gpu_platform is set (Windows+hip), the linux module is used instead.
-#[cfg(all(target_os = "windows", not(qdp_gpu_platform)))]
-mod windows;
-
-#[cfg(qdp_gpu_platform)]
-pub(crate) use linux::encode_from_parquet;
-#[cfg(not(any(qdp_gpu_platform, target_os = "windows")))]
-pub(crate) use other::encode_from_parquet;
-#[cfg(all(target_os = "windows", not(qdp_gpu_platform)))]
-pub(crate) use windows::encode_from_parquet;
+fn main() {
+    // Emit qdp_gpu_platform when building for a GPU-capable OS (Linux always;
+    // Windows when the hip feature is on via QDP_USE_HIP=1 / TheRock ROCm).
+    println!("cargo::rustc-check-cfg=cfg(qdp_gpu_platform)");
+    let is_linux = std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("linux");
+    let hip_feature = std::env::var("CARGO_FEATURE_HIP").is_ok();
+    let is_windows = std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows");
+    if is_linux || (is_windows && hip_feature) {
+        println!("cargo::rustc-cfg=qdp_gpu_platform");
+    }
+}

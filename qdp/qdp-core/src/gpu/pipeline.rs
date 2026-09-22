@@ -24,34 +24,34 @@
 #![allow(unused_unsafe)]
 
 use crate::error::{MahoutError, Result};
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::buffer_pool::{PinnedBufferHandle, PinnedBufferPool};
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::cuda_ffi::{
     CUDA_EVENT_DISABLE_TIMING, CUDA_MEMCPY_HOST_TO_DEVICE, cudaEventCreateWithFlags,
     cudaEventDestroy, cudaEventRecord, cudaMemcpyAsync, cudaStreamWaitEvent,
 };
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::cuda_sync::sync_cuda_stream;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::memory::{ensure_device_memory_available, map_allocation_error};
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::overlap_tracker::OverlapTracker;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::pool_metrics::PoolMetrics;
-use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, DeviceRepr, safe::CudaStream};
+use crate::gpu_rt::{CudaDevice, CudaSlice, CudaStream, DevicePtr, DeviceRepr};
 use std::ffi::c_void;
 use std::sync::Arc;
 
 /// Dual-stream context coordinating copy/compute with an event.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub struct PipelineContext {
     pub stream_compute: CudaStream,
     pub stream_copy: CudaStream,
     events_copy_done: Vec<*mut c_void>,
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn validate_event_slot(events: &[*mut c_void], slot: usize) -> Result<()> {
     if slot >= events.len() {
         return Err(MahoutError::InvalidInput(format!(
@@ -63,7 +63,7 @@ fn validate_event_slot(events: &[*mut c_void], slot: usize) -> Result<()> {
     Ok(())
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 impl PipelineContext {
     pub fn new(device: &Arc<CudaDevice>, event_slots: usize) -> Result<Self> {
         let stream_compute = device
@@ -188,7 +188,7 @@ impl PipelineContext {
     }
 }
 
-#[cfg(all(test, target_os = "linux"))]
+#[cfg(all(test, qdp_gpu_platform))]
 mod tests {
     use super::validate_event_slot;
 
@@ -207,7 +207,7 @@ mod tests {
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 impl Drop for PipelineContext {
     fn drop(&mut self) {
         unsafe {
@@ -249,7 +249,7 @@ impl Drop for PipelineContext {
 ///     Ok(())
 /// })?;
 /// ```
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub fn run_dual_stream_pipeline<F>(
     device: &Arc<CudaDevice>,
     host_data: &[f64],
@@ -273,7 +273,7 @@ where
 ///
 /// `align_elements` must evenly divide the host data length and ensures chunks do not
 /// split logical records (e.g., per-sample data in batch encoding).
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 #[allow(clippy::manual_is_multiple_of)]
 pub fn run_dual_stream_pipeline_aligned<F>(
     device: &Arc<CudaDevice>,
@@ -293,7 +293,7 @@ where
 }
 
 /// f32 variant of `run_dual_stream_pipeline_aligned`.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 #[allow(clippy::manual_is_multiple_of)]
 pub fn run_dual_stream_pipeline_aligned_f32<F>(
     device: &Arc<CudaDevice>,
@@ -312,7 +312,7 @@ where
     )
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 #[allow(clippy::manual_is_multiple_of)]
 fn run_dual_stream_pipeline_aligned_typed<T, F>(
     device: &Arc<CudaDevice>,
@@ -354,7 +354,7 @@ where
     )
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn run_dual_stream_pipeline_with_chunk_size<T, F>(
     device: &Arc<CudaDevice>,
     host_data: &[T],

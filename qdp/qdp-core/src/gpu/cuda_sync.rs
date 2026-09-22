@@ -16,7 +16,7 @@
 
 //! Shared CUDA stream synchronization with unified error reporting.
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use std::ffi::c_void;
 
 use crate::error::{MahoutError, Result, cuda_error_to_string};
@@ -32,7 +32,7 @@ use crate::error::{MahoutError, Result, cuda_error_to_string};
 ///
 /// # Safety
 /// The stream pointer must be valid for the duration of this call.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub(crate) fn sync_cuda_stream(stream: *mut c_void, context: &str) -> Result<()> {
     let ret = unsafe { crate::gpu::cuda_ffi::cudaStreamSynchronize(stream) };
     if ret != 0 {
@@ -46,7 +46,7 @@ pub(crate) fn sync_cuda_stream(stream: *mut c_void, context: &str) -> Result<()>
     Ok(())
 }
 
-#[cfg(all(test, target_os = "linux"))]
+#[cfg(all(test, qdp_gpu_platform))]
 mod tests {
     use super::*;
     use std::ffi::c_void;

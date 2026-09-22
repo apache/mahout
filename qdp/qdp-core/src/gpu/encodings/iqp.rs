@@ -17,19 +17,19 @@
 // IQP (Instantaneous Quantum Polynomial) encoding: entangled quantum states via diagonal phases.
 
 use super::{QuantumEncoder, validate_qubit_count};
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::{GpuStateVector, Precision};
-use cudarc::driver::CudaDevice;
+use crate::gpu_rt::CudaDevice;
 use std::sync::Arc;
 use std::sync::OnceLock;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::memory::map_allocation_error;
-#[cfg(target_os = "linux")]
-use cudarc::driver::DevicePtr;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
+use crate::gpu_rt::DevicePtr;
+#[cfg(qdp_gpu_platform)]
 use std::ffi::c_void;
 
 /// IQP encoding: creates entangled quantum states using diagonal phase gates.
@@ -69,15 +69,15 @@ impl IqpEncoder {
 impl QuantumEncoder for IqpEncoder {
     fn encode(
         &self,
-        #[cfg(target_os = "linux")] device: &Arc<CudaDevice>,
-        #[cfg(not(target_os = "linux"))] _device: &Arc<CudaDevice>,
+        #[cfg(qdp_gpu_platform)] device: &Arc<CudaDevice>,
+        #[cfg(not(qdp_gpu_platform))] _device: &Arc<CudaDevice>,
         data: &[f64],
         num_qubits: usize,
     ) -> Result<GpuStateVector> {
         self.validate_input(data, num_qubits)?;
         let state_len = 1 << num_qubits;
 
-        #[cfg(target_os = "linux")]
+        #[cfg(qdp_gpu_platform)]
         {
             let input_bytes = std::mem::size_of_val(data);
             let data_gpu = {
@@ -130,7 +130,7 @@ impl QuantumEncoder for IqpEncoder {
             Ok(state_vector)
         }
 
-        #[cfg(not(target_os = "linux"))]
+        #[cfg(not(qdp_gpu_platform))]
         {
             Err(MahoutError::Cuda(
                 "CUDA unavailable (non-Linux stub)".to_string(),
@@ -139,7 +139,7 @@ impl QuantumEncoder for IqpEncoder {
     }
 
     /// Encode multiple IQP samples in a single GPU allocation and kernel launch
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     fn encode_batch(
         &self,
         device: &Arc<CudaDevice>,
@@ -238,7 +238,7 @@ impl QuantumEncoder for IqpEncoder {
         Ok(batch_state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_from_gpu_ptr(
         &self,
         device: &Arc<CudaDevice>,
@@ -302,7 +302,7 @@ impl QuantumEncoder for IqpEncoder {
         Ok(state_vector)
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_batch_from_gpu_ptr(
         &self,
         device: &Arc<CudaDevice>,

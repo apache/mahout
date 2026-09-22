@@ -23,17 +23,17 @@ use std::time::Instant;
 
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::PinnedHostBuffer;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::pool_metrics::PoolMetrics;
 
 /// Handle that automatically returns a buffer to the pool on drop.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub struct PinnedBufferHandle<T: Copy = f64> {
     buffer: Option<PinnedHostBuffer<T>>,
     pool: Arc<PinnedBufferPool<T>>,
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 impl<T: Copy> std::ops::Deref for PinnedBufferHandle<T> {
     type Target = PinnedHostBuffer<T>;
 
@@ -44,7 +44,7 @@ impl<T: Copy> std::ops::Deref for PinnedBufferHandle<T> {
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 impl<T: Copy> std::ops::DerefMut for PinnedBufferHandle<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.buffer
@@ -53,7 +53,7 @@ impl<T: Copy> std::ops::DerefMut for PinnedBufferHandle<T> {
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 impl<T: Copy> Drop for PinnedBufferHandle<T> {
     fn drop(&mut self) {
         if let Some(buf) = self.buffer.take() {
@@ -65,7 +65,7 @@ impl<T: Copy> Drop for PinnedBufferHandle<T> {
 }
 
 /// Pool of pinned host buffers sized for a fixed batch shape.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub struct PinnedBufferPool<T: Copy = f64> {
     free: Mutex<Vec<PinnedHostBuffer<T>>>,
     available_cv: Condvar,
@@ -73,7 +73,7 @@ pub struct PinnedBufferPool<T: Copy = f64> {
     elements_per_buffer: usize,
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 impl<T: Copy> PinnedBufferPool<T> {
     /// Create a pool with `pool_size` pinned buffers, each sized for `elements_per_buffer` values of `T`.
     pub fn new(pool_size: usize, elements_per_buffer: usize) -> Result<Arc<Self>> {

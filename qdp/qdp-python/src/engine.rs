@@ -24,7 +24,7 @@ use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use qdp_core::{Dtype, Encoding, QdpEngine as CoreEngine};
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::loader::{
     PyQuantumLoader, config_from_args, parse_dtype, parse_null_handling, path_from_py,
 };
@@ -524,7 +524,7 @@ impl QdpEngine {
     }
 
     // --- Loader factory methods (Linux only) ---
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     /// Create a synthetic-data pipeline iterator (for QuantumDataLoader.source_synthetic()).
     #[pyo3(signature = (total_batches, batch_size, num_qubits, encoding_method, seed=None, null_handling=None))]
     fn create_synthetic_loader(
@@ -557,7 +557,7 @@ impl QdpEngine {
         Ok(PyQuantumLoader::new(Some(iter)))
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     /// Create a file-backed pipeline iterator (full read then batch; for QuantumDataLoader.source_file(path)).
     #[allow(clippy::too_many_arguments)]
     #[pyo3(signature = (path, batch_size, num_qubits, encoding_method, batch_limit=None, null_handling=None, dtype=None))]
@@ -608,7 +608,7 @@ impl QdpEngine {
         Ok(PyQuantumLoader::new(Some(iter)))
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     /// Create a streaming Parquet pipeline iterator (for QuantumDataLoader.source_file(path, streaming=True)).
     #[allow(clippy::too_many_arguments)]
     #[pyo3(signature = (path, batch_size, num_qubits, encoding_method, batch_limit=None, null_handling=None, dtype=None))]
