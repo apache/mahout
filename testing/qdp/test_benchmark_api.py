@@ -113,3 +113,51 @@ def test_qdp_benchmark_device_id_propagated():
     )
     assert hasattr(result, "vectors_per_sec")
     assert result.vectors_per_sec >= 0
+
+
+def _qdp_module():
+    """The compiled extension, typed as a plain module so ty accepts its members."""
+    from qumat_qdp._backend import get_qdp
+
+    qdp = get_qdp()
+    assert qdp is not None
+    return qdp
+
+
+@requires_qdp
+@pytest.mark.parametrize(
+    "encoding", ["amplitude", "angle", "basis", "iqp", "iqp-z", "phase"]
+)
+def test_encoding_supports_f32_matches_parity_grid(encoding):
+    """``_qdp.encoding_supports_f32`` agrees with the f32 kernels the parity grid checks."""
+    from .test_parity import F32_DEVICE_ENCODINGS
+
+    assert _qdp_module().encoding_supports_f32(encoding) == (
+        encoding in F32_DEVICE_ENCODINGS
+    )
+
+
+@requires_qdp
+def test_encoding_supports_f32_rejects_unknown():
+    with pytest.raises(RuntimeError, match="Invalid encoding"):
+        _qdp_module().encoding_supports_f32("nope")
+
+
+@requires_qdp
+def test_baseline_skips_f32_cells_without_native_path():
+    """baseline.py records no ``f32`` cell the pipeline would silently run as f64."""
+    import baseline
+
+    qdp = _qdp_module()
+    cells, skipped = baseline.supported_cells()
+    assert set(cells) | set(skipped) == {
+        f"{e}/{d}" for e in baseline.ENCODINGS for d in baseline.DTYPES
+    }
+    assert all(
+        key.endswith("/f64") or qdp.encoding_supports_f32(key.split("/")[0])
+        for key in cells
+    )
+    assert all(
+        key.endswith("/f32") and not qdp.encoding_supports_f32(key.split("/")[0])
+        for key in skipped
+    )

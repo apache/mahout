@@ -80,6 +80,18 @@ fn cuda_available() -> bool {
     qdp_core::cuda_runtime_available()
 }
 
+/// Returns ``True`` if ``encoding`` has a native float32 pipeline path.
+///
+/// The benchmark pipeline silently falls back to float64 for encodings without
+/// one (see ``PipelineConfig::normalize``), so callers that label measurements
+/// by dtype should consult this first.
+#[pyfunction]
+fn encoding_supports_f32(encoding: &str) -> PyResult<bool> {
+    qdp_core::Encoding::from_str_ci(encoding)
+        .map(qdp_core::Encoding::supports_f32)
+        .map_err(|e| PyRuntimeError::new_err(format!("Invalid encoding: {e}")))
+}
+
 /// Quantum Data Plane (QDP) Python module
 ///
 /// GPU-accelerated quantum data encoding with DLPack integration.
@@ -91,6 +103,7 @@ fn _qdp(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<QdpEngine>()?;
     m.add_class::<QuantumTensor>()?;
     m.add_function(wrap_pyfunction!(cuda_available, m)?)?;
+    m.add_function(wrap_pyfunction!(encoding_supports_f32, m)?)?;
     #[cfg(target_os = "linux")]
     m.add_class::<PyQuantumLoader>()?;
     #[cfg(target_os = "linux")]
