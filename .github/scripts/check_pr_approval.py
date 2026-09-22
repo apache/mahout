@@ -230,8 +230,7 @@ def main(argv: list[str] | None = None) -> int:
             summary.writelines(f"- {line}\n" for line in lines)
     if not ok:
         print(
-            f"::error::{verdict} "
-            "See docs/community/pr-policy-and-review-guidelines.md."
+            f"::error::{verdict} See docs/community/pr-policy-and-review-guidelines.md."
         )
     return 0 if ok else 1
 
