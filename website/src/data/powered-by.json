@@ -2,6 +2,7 @@
   {
     "name": "Adobe",
     "url": "https://www.adobe.com",
+    "type": "commercial",
     "category": "User targeting",
     "description": "Adobe AMP used Mahout's clustering algorithms to increase video consumption through better user targeting.",
     "source": "http://nosql.mypopescu.com/post/2082712431/hbase-and-hadoop-at-adobe",
@@ -10,6 +11,7 @@
   {
     "name": "AOL",
     "url": "https://www.aol.com",
+    "type": "commercial",
     "category": "Recommendations",
     "description": "AOL used Mahout for shopping recommendations.",
     "source": "https://www.slideshare.net/kryton/the-data-layer",
@@ -18,6 +20,7 @@
   {
     "name": "Booz Allen Hamilton",
     "url": "https://www.boozallen.com",
+    "type": "commercial",
     "category": "Clustering",
     "description": "Booz Allen Hamilton used Mahout's clustering algorithms for large-scale biometric analysis.",
     "source": "https://www.slideshare.net/ydn/3-biometric-hadoopsummit2010",
@@ -26,6 +29,7 @@
   {
     "name": "Drupal",
     "url": "https://www.drupal.org/project/recommender",
+    "type": "commercial",
     "category": "Content recommendation",
     "description": "The Drupal Recommender API module used Mahout to provide open source content recommendation for Drupal sites.",
     "logo": "/img/powered-by/drupal.svg"
@@ -33,6 +37,7 @@
   {
     "name": "Foursquare",
     "url": "https://foursquare.com",
+    "type": "commercial",
     "category": "Recommendations",
     "description": "Foursquare used Mahout for its venue recommendation engine.",
     "source": "https://engineering.foursquare.com/2011/03/22/building-a-recommendation-engine-foursquare-style/",
@@ -41,6 +46,7 @@
   {
     "name": "Intel",
     "url": "https://www.intel.com",
+    "type": "commercial",
     "category": "Distribution",
     "description": "Intel shipped Mahout as part of its Distribution for Apache Hadoop Software.",
     "logo": "/img/powered-by/intel.svg"
@@ -48,6 +54,7 @@
   {
     "name": "LinkedIn",
     "url": "https://www.linkedin.com",
+    "type": "commercial",
     "category": "Model training",
     "description": "LinkedIn experimented with Mahout for model training as an alternative to R-based workflows.",
     "logo": "/img/powered-by/linkedin.svg"
@@ -55,6 +62,7 @@
   {
     "name": "LucidWorks",
     "url": "https://www.lucidworks.com",
+    "type": "commercial",
     "category": "Search and text analytics",
     "description": "LucidWorks Big Data used Mahout for clustering, duplicate document detection, phrase extraction, and classification.",
     "logo": "/img/powered-by/lucidworks.png"
@@ -62,6 +70,7 @@
   {
     "name": "Mendeley",
     "url": "https://www.mendeley.com",
+    "type": "commercial",
     "category": "Recommendations",
     "description": "Mendeley used Mahout to power Mendeley Suggest, a research article recommendation service.",
     "logo": "/img/powered-by/mendeley.png"
@@ -69,6 +78,7 @@
   {
     "name": "NewsCred",
     "url": "https://www.newscred.com",
+    "type": "commercial",
     "category": "News clustering",
     "description": "NewsCred used Mahout to cluster news articles and surface the important stories of the day.",
     "logo": "/img/powered-by/newscred.png"
@@ -76,6 +86,7 @@
   {
     "name": "ResearchGate",
     "url": "https://www.researchgate.net",
+    "type": "commercial",
     "category": "Recommendations",
     "description": "ResearchGate, the professional network for scientists and researchers, used Mahout's recommendation algorithms.",
     "logo": "/img/powered-by/researchgate.svg"
@@ -83,6 +94,7 @@
   {
     "name": "Sematext",
     "url": "https://sematext.com",
+    "type": "commercial",
     "category": "Recommendations",
     "description": "Sematext used Mahout for its recommendation engine.",
     "logo": "/img/powered-by/sematext.png"
@@ -90,13 +102,15 @@
   {
     "name": "Twitter",
     "url": "https://twitter.com",
+    "type": "commercial",
     "category": "Topic modeling",
-    "description": "Twitter used Mahout's LDA implementation for user interest modeling.",
+    "description": "Twitter used Mahout's LDA implementation for user interest modeling, and maintained a fork of Mahout on GitHub that was periodically synced with Apache trunk.",
     "logo": "/img/powered-by/twitter.svg"
   },
   {
     "name": "Yahoo! Mail",
     "url": "https://mail.yahoo.com",
+    "type": "commercial",
     "category": "Anti-spam",
     "description": "Yahoo! Mail used Mahout's frequent pattern set mining in its anti-spam pipeline.",
     "source": "https://www.slideshare.net/hadoopusergroup/mail-antispam",
@@ -105,6 +119,7 @@
   {
     "name": "TU Berlin",
     "url": "https://www.dima.tu-berlin.de",
+    "type": "academic",
     "category": "Teaching",
     "description": "The Large Scale Data Analysis and Data Mining course at TU Berlin used Mahout to teach students how to parallelize data mining problems.",
     "logo": "/img/powered-by/tu-berlin.svg"
@@ -112,6 +127,7 @@
   {
     "name": "Carnegie Mellon University",
     "url": "https://www.cmu.edu",
+    "type": "academic",
     "category": "Research",
     "description": "Carnegie Mellon University used Mahout as a comparison platform in GraphLab research.",
     "logo": "/img/powered-by/carnegie-mellon-university.svg"
@@ -119,6 +135,7 @@
   {
     "name": "Nagoya Institute of Technology",
     "url": "https://www.nitech.ac.jp",
+    "type": "academic",
     "category": "Research",
     "description": "Nagoya Institute of Technology used Mahout for research and data processing in a large-scale citizen participation platform funded by the Ministry of Interior of Japan.",
     "logo": "/img/powered-by/nagoya-institute-of-technology.png"
@@ -126,6 +143,7 @@
   {
     "name": "DERI, NUI Galway",
     "url": "https://www.universityofgalway.ie",
+    "type": "academic",
     "category": "Research",
     "description": "Researchers at the Digital Enterprise Research Institute used Mahout for topic mining and modelling of large corpora.",
     "logo": "/img/powered-by/deri-nui-galway.png"
@@ -133,75 +151,167 @@
   {
     "name": "Accenture",
     "url": "https://www.accenture.com",
+    "type": "commercial",
+    "category": "Consulting",
+    "description": "Accenture used Mahout as the typical example in its Hadoop Deployment Comparison Study.",
+    "source": "https://www.accenture.com/SiteCollectionDocuments/PDF/Accenture-Hadoop-Deployment-Comparison-Study.pdf",
     "logo": "/img/powered-by/accenture.svg"
   },
   {
     "name": "Buzzlogic",
-    "url": "https://www.buzzlogic.com"
+    "url": "https://www.buzzlogic.com",
+    "type": "commercial",
+    "category": "Ad targeting",
+    "description": "Buzzlogic used Mahout's clustering algorithms to improve ad targeting."
   },
   {
     "name": "DataMine Lab",
     "url": "https://dataminelab.com",
+    "type": "commercial",
+    "category": "Ad targeting",
+    "description": "DataMine Lab used Mahout's recommendation and clustering algorithms to improve its clients' ad targeting.",
     "logo": "/img/powered-by/datamine-lab.jpg"
   },
   {
     "name": "Idealo",
     "url": "https://www.idealo.de",
+    "type": "commercial",
+    "category": "Recommendations",
+    "description": "Idealo used Mahout's recommendation engine.",
     "logo": "/img/powered-by/idealo.svg"
   },
   {
     "name": "InfoGlutton",
-    "url": "https://www.infoglutton.com"
+    "url": "https://www.infoglutton.com",
+    "type": "commercial",
+    "category": "Consulting",
+    "description": "InfoGlutton used Mahout's clustering and classification for various consulting projects."
   },
   {
     "name": "Intela",
-    "url": "https://www.intela.com"
+    "url": "https://www.intela.com",
+    "type": "commercial",
+    "category": "Recommendations",
+    "description": "Intela implemented Mahout's recommendation algorithms to select new offers to send to customers and to recommend potential customers for current offers, and used the clustering algorithms to enhance its offer categories."
   },
   {
     "name": "iOffer",
     "url": "https://www.ioffer.com",
+    "type": "commercial",
+    "category": "Recommendations",
+    "description": "iOffer used Mahout's frequent pattern mining and collaborative filtering to recommend items to users.",
     "logo": "/img/powered-by/ioffer.gif"
   },
   {
     "name": "Kauli",
     "url": "https://kau.li",
+    "type": "commercial",
+    "category": "Ad targeting",
+    "description": "Kauli, a Japanese ad network, used Mahout's clustering to handle clickstream data for predicting audience interests and intents.",
     "logo": "/img/powered-by/kauli.gif"
   },
   {
     "name": "Mobage",
     "url": "https://mbga.jp",
+    "type": "commercial",
+    "category": "Analytics",
+    "description": "Mobage used Mahout in its analysis pipeline.",
+    "source": "https://www.slideshare.net/hamadakoichi/mobage-prmu-2011-mahout-hadoop",
     "logo": "/img/powered-by/mobage.png"
   },
   {
     "name": "Myrrix",
     "url": "https://myrrix.com",
+    "type": "commercial",
+    "category": "Recommender product",
+    "description": "Myrrix was a recommender system product built on Mahout.",
     "logo": "/img/powered-by/myrrix.png"
   },
   {
     "name": "Predixion Software",
     "url": "https://predixionsoftware.com",
+    "type": "commercial",
+    "category": "Predictive modeling",
+    "description": "Predixion Software used Mahout's algorithms to build predictive models on big data.",
     "logo": "/img/powered-by/predixion-software.png"
   },
   {
     "name": "Radoop",
-    "url": "https://radoop.eu"
+    "url": "https://radoop.eu",
+    "type": "commercial",
+    "category": "Analytics platform",
+    "description": "Radoop provided a drag-and-drop interface for big data analytics, including Mahout clustering and classification algorithms."
   },
   {
     "name": "SpeedDate",
-    "url": "https://www.speeddate.com"
+    "url": "https://www.speeddate.com",
+    "type": "commercial",
+    "category": "Recommendations",
+    "description": "SpeedDate.com used Mahout's collaborative filtering engine to recommend member profiles."
   },
   {
     "name": "365Media",
     "url": "https://365media.com",
+    "type": "commercial",
+    "category": "Classification",
+    "description": "365Media used Mahout's classification and collaborative filtering algorithms in its real-time system UPTIME and in 365Media/Social.",
     "logo": "/img/powered-by/365media.jpg"
   },
   {
     "name": "Dicode project",
     "url": "https://www.dicode-project.eu",
+    "type": "academic",
+    "category": "Research",
+    "description": "The Dicode project used Mahout's clustering and classification algorithms on top of HBase.",
     "logo": "/img/powered-by/dicode-project.png"
   },
   {
     "name": "ROBUST project",
-    "url": "https://www.robust-project.eu"
+    "url": "https://www.robust-project.eu",
+    "type": "academic",
+    "category": "Research",
+    "description": "The ROBUST project, co-funded by the European Commission, employed Mahout in the large-scale analysis of online community data."
+  },
+  {
+    "name": "Amazon",
+    "url": "https://www.amazon.com",
+    "type": "commercial",
+    "category": "Personalization",
+    "description": "Amazon's Personalization Platform used Mahout."
+  },
+  {
+    "name": "Cull.tv",
+    "url": "http://cull.tv/",
+    "type": "commercial",
+    "category": "Content recommendation",
+    "description": "Cull.tv used modified Mahout algorithms for content recommendations."
+  },
+  {
+    "name": "Evolv",
+    "url": "http://www.evolvondemand.com",
+    "type": "commercial",
+    "category": "Workforce analytics",
+    "description": "Evolv used Mahout for its Workforce Predictive Analytics platform."
+  },
+  {
+    "name": "Mippin",
+    "url": "http://mippin.com",
+    "type": "commercial",
+    "category": "Recommendations",
+    "description": "Mippin used Mahout's collaborative filtering engine to recommend news feeds."
+  },
+  {
+    "name": "Next Glass",
+    "url": "http://nextglass.co/",
+    "type": "commercial",
+    "category": "Recommendations",
+    "description": "Next Glass used Mahout."
+  },
+  {
+    "name": "NoTube project",
+    "url": "http://notube.tv/",
+    "type": "academic",
+    "category": "Research",
+    "description": "The NoTube EU project used Mahout's Taste recommender in its applications."
   }
 ]

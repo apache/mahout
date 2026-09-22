@@ -92,6 +92,9 @@ const sidebars: SidebarsConfig = {
             'learning/papers/Unleashing-the-Potential-of-LLMs-for-Quantum-Computing',
           ],
         },
+        'learning/books-tutorials-and-talks',
+        'learning/reference-reading',
+        'learning/professional-support',
       ],
     },
     {
