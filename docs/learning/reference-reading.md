@@ -33,7 +33,7 @@ the Mahout community. And unlike learning some particular software tool,
 these are skills that will remain useful decades later.
 * [Gilbert Strang](http://www-math.mit.edu/~gs)
 's [Introduction to Linear Algebra](http://math.mit.edu/linearalgebra/). His [lectures](http://ocw.mit.edu/courses/mathematics/18-06-linear-algebra-spring-2010/) are also [available online](http://web.mit.edu/18.06/www/)
- and are strongly recommended. 
+ and are strongly recommended.
 * [Mathematical Tools for Applied Mulitvariate Analysis](http://www.amazon.com/Mathematical-Tools-Applied-Multivariate-Analysis/dp/0121609553/ref=sr_1_1?ie=UTF8&qid=1299602805&sr=8-1) by J.Douglass
 Carroll.
 * [Stanford Machine Learning online courseware](http://www.stanford.edu/class/cs229/)
@@ -48,22 +48,22 @@ Some good introductory alternatives here are:
 
 Once you have a grasp of the basics then there are a slew of great texts that you might consult:
 * [Statistical Inference](http://www.amazon.com/Statistical-Inference-George-Casella/dp/0534243126), Casell and Berger, Duxbury/Thomson Learning.
-* [Introduction to Bayesian Statistics](http://www.amazon.com/Introduction-Bayesian-Statistics-William-Bolstad/dp/0471270202), William H. Bolstad, Wiley. 
+* [Introduction to Bayesian Statistics](http://www.amazon.com/Introduction-Bayesian-Statistics-William-Bolstad/dp/0471270202), William H. Bolstad, Wiley.
 * [Understanding Computational Bayesian Statistics](http://www.amazon.com/Understanding-Computational-Bayesian-Statistics-Wiley/dp/0470046090), Bolstadt
 * [Bayesian Data Analysis, Gelman et al.](http://www.stat.columbia.edu/~gelman/book/)
 
 ### For statistics related to machine learning, these are particularly helpful:
 
 * [Pattern Recognition and Machine Learning by Chris Bishop](http://research.microsoft.com/en-us/um/people/cmbishop/PRML/index.htm)
-* [Elements of Statistical Learning](http://www-stat.stanford.edu/~tibs/ElemStatLearn/) by Trevor Hastie, Robert Tibshirani, Jerome Friedman 
+* [Elements of Statistical Learning](http://www-stat.stanford.edu/~tibs/ElemStatLearn/) by Trevor Hastie, Robert Tibshirani, Jerome Friedman
 * [http://research.microsoft.com/en-us/um/people/cmbishop/PRML/index.htm](http://research.microsoft.com/en-us/um/people/cmbishop/PRML/index.htm)
- 
+
 
 ### For matrix computations/decomposition/factorization etc.:
 
 * Peter V. O'Neil [Introduction to Linear Algebra](http://www.amazon.com/Introduction-Linear-Algebra-Theory-Applications/dp/053400606X), great book for beginners (with some knowledge in calculus). It is not comprehensive, but, it will be a good place to start and the author starts by explaining the concepts with regards to vector spaces which I found to be a more natural way of explaining.
 * David S. Watkins [Fundamentals of Matrix Computations](http://www.amazon.com/Fundamentals-Matrix-Computations-Applied-Mathematics/dp/0470528338/)
-* [Matrix Computations](http://www.amazon.com/Computations-Hopkins-Studies-Mathematical-Sciences/dp/0801854148/ref=sr_1_2?s=books&ie=UTF8&qid=1394307676&sr=1-2&keywords=golub+van+loan) is the classic text for numerical linear algebra. Can't go wrong with it - great for researchers.  
+* [Matrix Computations](http://www.amazon.com/Computations-Hopkins-Studies-Mathematical-Sciences/dp/0801854148/ref=sr_1_2?s=books&ie=UTF8&qid=1394307676&sr=1-2&keywords=golub+van+loan) is the classic text for numerical linear algebra. Can't go wrong with it - great for researchers.
 * Nick Trefethen's [Numerical Linear Algebra](http://people.maths.ox.ac.uk/trefethen/books.html).  It's a bit more approachable for practitioners. Many chapters on SVD, there are even chapters on Lanczos.
 
 ### Books specifically on R:

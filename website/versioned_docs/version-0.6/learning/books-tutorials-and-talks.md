@@ -64,7 +64,7 @@ For general background on linear algebra, statistics, and machine learning, see 
 
 ### Mahout Classic
 
-* [Mahout 0.10.x: first Mahout release as a programming environment](http://www.weatheringthroughtechdays.com/2015/04/mahout-010x-first-mahout-release-as.html)   
+* [Mahout 0.10.x: first Mahout release as a programming environment](http://www.weatheringthroughtechdays.com/2015/04/mahout-010x-first-mahout-release-as.html)
 * [Comparing Document Classification Functions of Lucene and Mahout](http://soleami.com/blog/comparing-document-classification-functions-of-lucene-and-mahout.html)
 * [Apache Mahout: Scalable Machine Learning for Everyone](http://www.ibm.com/developerworks/java/library/j-mahout-scaling/)
 * [How to build a spam filter server with Mahout](http://emmaespina.wordpress.com/2011/04/26/ham-spam-and-elephants-or-how-to-build-a-spam-filter-server-with-mahout/) - Applying classification on a live server - April 2011
@@ -101,11 +101,11 @@ In reverse chronological order, so that most recent talks are at the top.
 * Distributed Machine Learning with Apache Mahout - Suneel Marthi at Apache Big Data North America, Vancouver, Canada, May 11, 2016 and MapR Washington DC Big Data Everywhere, Tysons, VA, June 2 2016
 * [Declarative Machine Learning with the Samsara DSL](http://www.slideshare.net/FlinkForward/sebastian-schelter-distributed-machine-learing-with-the-samsara-dsl) Sebastian Schelter at Flink Forward Conference, Berlin Germany, October 2015.
 * [Bringing Algebraic Semantics to Mahout](http://www.slideshare.net/sscdotopen/bringing-algebraic-semantics-to-mahout) Sebastian Schelter at HPI Infolunch, Potsdam Germany, May 2014
-* Mahout Spark and Scala bindings: Bringing Algebraic Semantics ([slides](http://www.slideshare.net/DmitriyLyubimov/mahout-scala-and-spark-bindings)/[video](http://youtu.be/h9dpmvNW1Dw)) - Dmitriy Lyubimov at Mahout Meetup, April 17, 2014. 
+* Mahout Spark and Scala bindings: Bringing Algebraic Semantics ([slides](http://www.slideshare.net/DmitriyLyubimov/mahout-scala-and-spark-bindings)/[video](http://youtu.be/h9dpmvNW1Dw)) - Dmitriy Lyubimov at Mahout Meetup, April 17, 2014.
 * Mahout Future Directions - Ted Dunning, Suneel Marthi, Sebastian Schelter at Hadoop Summit Europe 2014, Amsterdam, April 3, 2014
 * Building Recommender Systems for Mere-Mortals - Sebastian Schelter at Researchgate Developer Day, Berlin, November 2013
 * Recommendations with Apache Mahout - Sebastian Schelter at IBM Almaden Research Center, San Jose, September 2013
-* [Next Directions in Mahout’s Recommenders](http://de.slideshare.net/sscdotopen/next-directions-in-mahouts-recommenders) - Sebastian Schelter at Bay Area Mahout Meetup, Redwood City, August 2013 
+* [Next Directions in Mahout’s Recommenders](http://de.slideshare.net/sscdotopen/next-directions-in-mahouts-recommenders) - Sebastian Schelter at Bay Area Mahout Meetup, Redwood City, August 2013
 * [New Directions in Mahout’s Recommenders](http://de.slideshare.net/sscdotopen/new-directions-in-mahouts-recommenders) - Sebastian Schelter at Recommender Systems Get Together Berlin, April 2013
 * [Introduction to Mahout and Machine Learning](http://www.slideshare.net/VaradMeru/introduction-to-mahout-and-machine-learning) - Slides by Varad Meru, Software Development Engineer at Orzota. July 27th, 2013.
 * [An Introduction to Collaborative Filtering with Apache Mahout](http://de.slideshare.net/sscdotopen/introduction-to-collaborative-filtering-with-apache-mahout) - Sebastian Schelter at Recommender Systems Challenge Workshop in conjunction with ACM RecSys 2012, Dublin, September 2012
@@ -118,7 +118,7 @@ In reverse chronological order, so that most recent talks are at the top.
 * First Mahout Hackathon, Berlin, March 2011
 * [Mahout meetup](http://blog.jteam.nl/2011/01/13/announcement-lucene-nl-mahout-meetup-with-isabel-drost-feb-7/) - there were two talks at the Apache Mahout meetup at JTeam in Amsterdam, February 2011. [intro slides](http://isabel-drost.de/hadoop/slides/jteam.pdf)
 * [Mahout clustering](http://www.fosdem.org/2011/schedule/event/mahoutclustering.html) - Talk on Mahout clustering at data dev room FOSDEM, February 2011.
-* Scaling Data Analysis with Apache Mahout - talk on Mahout at O'Reilly Strata, February 2011. 
+* Scaling Data Analysis with Apache Mahout - talk on Mahout at O'Reilly Strata, February 2011.
 * [Practical Machine Learning](http://www.slideshare.net/jaganadhg/mahout-tutorial-fossmeet-nitc) - Slides from Biju B and Jaganadh G, FOSSMEET-NITC, Calicut, India, February 2011.
 * [Mahout at AlphaCSPs The Edge 2010 (pdf)](http://www.javaedge.com/jedge/pdf/Mahout.pdf) - [slideshare](http://www.slideshare.net/arikogan/mahouts-presentation-at-alphacsps-the-edge-2010) - Slides from [Ariel Kogan](http://il.linkedin.com/in/arielkogan) AlphaCSP's The Edge, December 2010.
 * [Intelligent data analysis with Apache Mahout](http://isabel-drost.de/hadoop/slides/devoxx.pdf) - Slides from Isabel Drost, Devoxx Antwerp, November 2010.
@@ -148,7 +148,7 @@ In reverse chronological order, so that most recent talks are at the top.
 * [BI Over Petabytes: Meet Apache Mahout](http://cwiki.apache.org/confluence/download/attachments/88410/SDForum.pdf) - Slides from a talk by Jeff Eastman on April 21, 2009 at the Bay Area SD Forum Business Intelligence SIG meeting at SAP in Palo Alto, CA.
 * Lucene Meetup and Apache Barcamp in Amsterdam, March 2009.
 * BarCampRDU - (Raleigh) on Aug. 2, 2008
-* Introducing Mahout: Apache Machine Learning - Committer Grant Ingersoll gave a gentle introduction to Mahout and Machine Learning at ApacheCon in November (3rd through 7th) in New Orleans, USA. 
+* Introducing Mahout: Apache Machine Learning - Committer Grant Ingersoll gave a gentle introduction to Mahout and Machine Learning at ApacheCon in November (3rd through 7th) in New Orleans, USA.
 * Mahout: Scaling Machine Learning - Introduction to Mahout and machine learning at FrOSCon in Sankt Augustin/Germany, Isabel Drost, August 2008.  ([slides](http://cwiki.apache.org/confluence/download/attachments/88410/froscon.pdf))
 * Mahout: Scalable Machine Learning - An introduction to Mahout and machine learning at the first German Hadoop gathering in newthinking store/ Berlin, Isabel Drost, July 2008.
 * Apache Mahout: Industrial Strength Machine Learning - Committer Jeff Eastman gave an introduction to Mahout at Yahoo!, May 2008
