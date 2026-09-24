@@ -86,10 +86,7 @@ __device__ cuDoubleComplex compute_amplitude_naive(
     return make_cuDoubleComplex(real_sum, imag_sum);
 }
 
-// ============================================================================
-// Naive Implementation: O(2^n) per amplitude, O(4^n) for the full state
-// (kept as fallback for small n and verification)
-// ============================================================================
+// Naive O(2^n) per amplitude; fallback when FWT overhead dominates.
 
 __global__ void iqp_encode_kernel_naive(
     const double* __restrict__ data,
@@ -109,9 +106,7 @@ __global__ void iqp_encode_kernel_naive(
 }
 
 
-// ============================================================================
-// FWT O(n * 2^n) Implementation
-// ============================================================================
+// FWT O(n * 2^n) path.
 
 // Step 1: Compute f[x] = exp(i*theta(x)) for all x.
 // Uses a grid-stride loop so large state vectors can reuse a fixed launch size.
@@ -259,9 +254,7 @@ __global__ void normalize_state_kernel(
     }
 }
 
-// ============================================================================
-// Naive O(4^n) Batch Implementation (kept as fallback)
-// ============================================================================
+// Naive batch fallback for small n.
 
 __global__ void iqp_encode_batch_kernel_naive(
     const double* __restrict__ data_batch,
@@ -275,7 +268,6 @@ __global__ void iqp_encode_batch_kernel_naive(
     const size_t total_elements = num_samples * state_len;
     const size_t stride = gridDim.x * blockDim.x;
     const size_t state_mask = state_len - 1;
-    // Normalize by 1/2^n (state_len = 2^n) - hoisted outside the loop
     const double norm = 1.0 / (double)state_len;
 
     for (size_t global_idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -292,9 +284,7 @@ __global__ void iqp_encode_batch_kernel_naive(
 }
 
 
-// ============================================================================
-// FWT O(n * 2^n) Batch Implementation
-// ============================================================================
+// FWT batch path.
 
 // Step 1: Compute the normalized phase vector for all samples in batch.
 __global__ void iqp_phase_batch_kernel(
