@@ -56,8 +56,8 @@
 // Threshold for shared memory FWT optimization
 // For n <= this threshold, use shared memory FWT (single kernel launch)
 // For n > threshold, use global memory FWT (multiple kernel launches)
-// 10 qubits = 2^10 * 16 bytes (cuDoubleComplex) = 16KB shared memory
-#define FWT_SHARED_MEM_THRESHOLD 10
+// 12 qubits = 2^12 * 16 bytes (cuDoubleComplex) = 64KB shared memory
+#define FWT_SHARED_MEM_THRESHOLD 12
 
 // Minimum qubits to use FWT optimization (below this, naive is competitive)
 #define FWT_MIN_QUBITS 4
