@@ -22,7 +22,7 @@ mod pytorch;
 mod tensor;
 
 use engine::QdpEngine;
-use pyo3::exceptions::PyRuntimeError;
+use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
 use tensor::QuantumTensor;
 
@@ -68,6 +68,49 @@ fn run_throughput_pipeline_py(
     ))
 }
 
+/// Estimate the host and device memory a pipeline configuration would need.
+///
+/// Returns ``(cpu_prefetch_bytes, gpu_state_bytes, total_bytes)``. Pure config
+/// arithmetic: allocates nothing, touches no device, and is therefore callable on a
+/// stub build or a host with no GPU -- which is the point, since the intended use is
+/// sizing a configuration before building a loader that would reject it.
+///
+/// ``gpu_state_bytes`` is the figure the loader's memory guard compares against free
+/// VRAM when iteration starts, with one caveat worth stating here: the guard budgets
+/// the *wider* of this ``dtype`` and the engine's precision (and always f64 for
+/// ``basis`` read from a file, whose inputs are integer state indices read as f64;
+/// synthetic basis data is budgeted at the requested ``dtype``). Pass the
+/// engine's precision as ``dtype`` when the two differ, or the estimate will be half
+/// what the guard uses.
+///
+/// Every failure the estimator itself reports is a bad argument -- an unknown encoding
+/// or dtype name, a ``num_qubits`` whose 2^n state vector is not representable, or a
+/// product that overflows -- and raises ``ValueError``. Arguments that cannot be
+/// converted at the boundary fail earlier and differently: a negative ``num_qubits`` or
+/// ``batch_size`` raises ``OverflowError``, a non-integer raises ``TypeError``.
+#[pyfunction]
+#[pyo3(signature = (num_qubits, batch_size, encoding_method="amplitude", dtype="f64", prefetch_depth=16))]
+fn estimate_memory(
+    num_qubits: u32,
+    batch_size: usize,
+    encoding_method: &str,
+    dtype: &str,
+    prefetch_depth: usize,
+) -> PyResult<(u64, u64, u64)> {
+    let encoding = qdp_core::Encoding::from_str_ci(encoding_method)
+        .map_err(|e| PyValueError::new_err(format!("Invalid encoding_method: {e}")))?;
+    let dtype = qdp_core::Dtype::from_str_ci(dtype)
+        .map_err(|e| PyValueError::new_err(format!("Invalid dtype: {e}")))?;
+    let estimate =
+        qdp_core::estimate_memory(encoding, num_qubits, batch_size, dtype, prefetch_depth)
+            .map_err(|e| PyValueError::new_err(e.to_string()))?;
+    Ok((
+        estimate.cpu_prefetch_bytes,
+        estimate.gpu_state_bytes,
+        estimate.total(),
+    ))
+}
+
 /// Returns ``True`` if a usable CUDA device is available to the native engine.
 ///
 /// This reflects whether GPU work can actually run -- it is ``False`` for a
@@ -91,6 +134,7 @@ fn _qdp(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<QdpEngine>()?;
     m.add_class::<QuantumTensor>()?;
     m.add_function(wrap_pyfunction!(cuda_available, m)?)?;
+    m.add_function(wrap_pyfunction!(estimate_memory, m)?)?;
     #[cfg(target_os = "linux")]
     m.add_class::<PyQuantumLoader>()?;
     #[cfg(target_os = "linux")]

@@ -62,12 +62,25 @@ jobs:
       # GPU fidelity cases self-skip when the probe finds no functional GPU
       # (stub build: kernel launch returns Err; no driver: cudarc panics and
       # catch_unwind treats it as skip). Reader-level assertions still run.
-      # Scoped to these two binaries — other gpu_*.rs tests lack probe-skip.
+      # pipeline_vram_guard (issue #1430) uses the same catch_unwind probe via
+      # common::qdp_engine_probed, so it skips rather than fails here.
+      # Scoped to these binaries — other gpu_*.rs tests lack probe-skip.
       - name: Cargo test (f32 Parquet CPU smoke)
         working-directory: qdp
         env:
           QDP_NO_CUDA: "1"
-        run: cargo test -p qdp-core --test parquet_f32 --test parquet_f32_fidelity
+        run: cargo test -p qdp-core --test parquet_f32 --test parquet_f32_fidelity --test pipeline_vram_guard
+
+      # The pipeline_vram_guard cases above all self-skip without a device, so the
+      # memory-guard logic (issue #1430) is covered here instead: these unit tests
+      # are pure and need no GPU. Scoped to the module rather than a bare `--lib`
+      # because other qdp-core unit tests (e.g. encoding::amplitude's stream
+      # end-to-end case) do require a device and fail on the stub build.
+      - name: Cargo test (pipeline_runner CPU unit tests)
+        working-directory: qdp
+        env:
+          QDP_NO_CUDA: "1"
+        run: cargo test -p qdp-core --lib pipeline_runner::tests
 
   test:
     needs: rust-check
