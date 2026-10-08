@@ -209,131 +209,255 @@ fn compute_optimal_prefetch_depth(
     }
 }
 
-pub struct SyntheticProducer {
-    pub config: PipelineConfig,
-    pub vector_len: usize,
-    pub batch_index: usize,
-    pub total_batches: usize,
+/// Return a `len`-element buffer for the next batch, reusing `recycled` when it holds the
+/// right element type and allocating a fresh zeroed one otherwise.
+///
+/// A reused buffer keeps whatever it held before (it is only resized), so callers must
+/// overwrite all `len` elements; every [`SourceAdapter::write_batch`] does.
+fn reuse_or_alloc<T: ToBatchData>(recycled: Option<BatchData>, len: usize) -> Vec<T> {
+    match recycled.and_then(T::from_recycled) {
+        Some(mut buf) => {
+            buf.resize(len, T::default());
+            buf
+        }
+        None => vec![T::default(); len],
+    }
+}
+
+/// The source-specific half of a batch producer: where samples come from.
+///
+/// [`AdapterBackedProducer`] owns everything the sources have in common (the batch limit,
+/// buffer recycling, and building the [`PrefetchedBatch`]) and asks the adapter only two
+/// questions: how big is the next batch, and what goes in it.
+pub(crate) trait SourceAdapter: Send + 'static {
+    type Elem: ToBatchData;
+
+    /// Number of elements in one sample.
+    fn sample_size(&self) -> usize;
+
+    /// Number of samples in the next batch (at most `max_samples`), or `None` once the
+    /// source is exhausted. May read ahead (e.g. refill a streaming buffer) but must not
+    /// consume anything; [`Self::write_batch`] does that.
+    fn next_batch_samples(&mut self, max_samples: usize) -> Result<Option<usize>>;
+
+    /// Overwrite all of `out` (exactly `batch_n * sample_size` elements) with the next
+    /// `batch_n` samples and advance past them. `batch_n` is the value just returned by
+    /// [`Self::next_batch_samples`].
+    fn write_batch(&mut self, batch_n: usize, out: &mut [Self::Elem]);
+}
+
+/// A [`BatchProducer`] built from a [`SourceAdapter`]: the one `produce` implementation
+/// shared by the synthetic, in-memory and streaming sources.
+pub(crate) struct AdapterBackedProducer<A> {
+    pub(crate) adapter: A,
+    pub(crate) batch_size: usize,
+    pub(crate) num_qubits: usize,
+    pub(crate) batches_yielded: usize,
+    /// Stop after this many batches even if the adapter has more; `usize::MAX` = no cap.
+    pub(crate) batch_limit: usize,
+}
+
+impl<A: SourceAdapter> AdapterBackedProducer<A> {
+    pub(crate) fn new(
+        adapter: A,
+        batch_size: usize,
+        num_qubits: usize,
+        batch_limit: usize,
+    ) -> Self {
+        Self {
+            adapter,
+            batch_size,
+            num_qubits,
+            batches_yielded: 0,
+            batch_limit,
+        }
+    }
+}
+
+impl<A: SourceAdapter> BatchProducer for AdapterBackedProducer<A> {
+    fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>> {
+        if self.batches_yielded >= self.batch_limit {
+            return Ok(None);
+        }
+        let Some(batch_n) = self.adapter.next_batch_samples(self.batch_size)? else {
+            return Ok(None);
+        };
+        let sample_size = self.adapter.sample_size();
+        let mut buf = reuse_or_alloc::<A::Elem>(recycled, batch_n * sample_size);
+        self.adapter.write_batch(batch_n, &mut buf);
+        self.batches_yielded += 1;
+        Ok(Some(PrefetchedBatch {
+            data: A::Elem::wrap(buf),
+            batch_n,
+            sample_size,
+            num_qubits: self.num_qubits,
+        }))
+    }
+}
+
+/// Element types the synthetic generator can fill (f32 math for f32, f64 math for f64,
+/// so f32 batches are *not* just f64 batches cast down).
+pub(crate) trait SyntheticElem: ToBatchData {
+    fn fill_batch(config: &PipelineConfig, batch_idx: usize, vector_len: usize, buf: &mut [Self]);
+}
+
+impl SyntheticElem for f32 {
+    fn fill_batch(config: &PipelineConfig, batch_idx: usize, vector_len: usize, buf: &mut [f32]) {
+        fill_batch_inplace_f32(config, batch_idx, vector_len, buf);
+    }
+}
+
+impl SyntheticElem for f64 {
+    fn fill_batch(config: &PipelineConfig, batch_idx: usize, vector_len: usize, buf: &mut [f64]) {
+        fill_batch_inplace(config, batch_idx, vector_len, buf);
+    }
+}
+
+/// Deterministic generated samples (see `fill_sample`). Never runs dry on its own; the
+/// producer's `batch_limit` (= `config.total_batches`) ends the stream.
+pub(crate) struct SyntheticAdapter<T> {
+    config: PipelineConfig,
+    vector_len: usize,
+    batch_index: usize,
+    _elem: std::marker::PhantomData<T>,
+}
+
+impl<T: SyntheticElem> SourceAdapter for SyntheticAdapter<T> {
+    type Elem = T;
+
+    fn sample_size(&self) -> usize {
+        self.vector_len
+    }
+
+    fn next_batch_samples(&mut self, max_samples: usize) -> Result<Option<usize>> {
+        // Synthetic batches are always full; the seed layout assumes config.batch_size.
+        debug_assert_eq!(max_samples, self.config.batch_size);
+        Ok(Some(max_samples))
+    }
+
+    fn write_batch(&mut self, _batch_n: usize, out: &mut [T]) {
+        T::fill_batch(&self.config, self.batch_index, self.vector_len, out);
+        self.batch_index += 1;
+    }
+}
+
+fn synthetic_producer<T: SyntheticElem>(
+    config: PipelineConfig,
+    vector_len: usize,
+) -> AdapterBackedProducer<SyntheticAdapter<T>> {
+    let (batch_size, num_qubits) = (config.batch_size, config.num_qubits as usize);
+    let total_batches = config.total_batches;
+    let adapter = SyntheticAdapter {
+        config,
+        vector_len,
+        batch_index: 0,
+        _elem: std::marker::PhantomData,
+    };
+    AdapterBackedProducer::new(adapter, batch_size, num_qubits, total_batches)
+}
+
+/// Synthetic producer whose element type follows `config.dtype`, chosen at run time.
+/// A thin dtype switch; all batching logic lives in [`AdapterBackedProducer`].
+pub(crate) enum SyntheticProducer {
+    F32(AdapterBackedProducer<SyntheticAdapter<f32>>),
+    F64(AdapterBackedProducer<SyntheticAdapter<f64>>),
 }
 
 impl SyntheticProducer {
-    pub fn new(config: PipelineConfig, vector_len: usize) -> Self {
-        let total_batches = config.total_batches;
-        Self {
-            config,
-            vector_len,
-            batch_index: 0,
-            total_batches,
+    pub(crate) fn new(config: PipelineConfig, vector_len: usize) -> Self {
+        if matches!(config.dtype, Precision::Float32) {
+            Self::F32(synthetic_producer(config, vector_len))
+        } else {
+            Self::F64(synthetic_producer(config, vector_len))
         }
     }
 }
 
 impl BatchProducer for SyntheticProducer {
     fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>> {
-        if self.batch_index >= self.total_batches {
-            return Ok(None);
+        match self {
+            Self::F32(p) => p.produce(recycled),
+            Self::F64(p) => p.produce(recycled),
         }
-
-        let mut data = match recycled {
-            Some(BatchData::F32(mut buf)) if matches!(self.config.dtype, Precision::Float32) => {
-                buf.resize(self.config.batch_size * self.vector_len, 0.0);
-                BatchData::F32(buf)
-            }
-            Some(BatchData::F64(mut buf)) if matches!(self.config.dtype, Precision::Float64) => {
-                buf.resize(self.config.batch_size * self.vector_len, 0.0);
-                BatchData::F64(buf)
-            }
-            _ => {
-                if matches!(self.config.dtype, Precision::Float32) {
-                    BatchData::F32(vec![0.0f32; self.config.batch_size * self.vector_len])
-                } else {
-                    BatchData::F64(vec![0.0f64; self.config.batch_size * self.vector_len])
-                }
-            }
-        };
-
-        match &mut data {
-            BatchData::F32(buf) => {
-                fill_batch_inplace_f32(&self.config, self.batch_index, self.vector_len, buf)
-            }
-            BatchData::F64(buf) => {
-                fill_batch_inplace(&self.config, self.batch_index, self.vector_len, buf)
-            }
-        }
-
-        self.batch_index += 1;
-        Ok(Some(PrefetchedBatch {
-            data,
-            batch_n: self.config.batch_size,
-            sample_size: self.vector_len,
-            num_qubits: self.config.num_qubits as usize,
-        }))
     }
 }
 
-pub struct InMemoryProducer<T: FloatElem = f64> {
-    pub data: Vec<T>,
-    pub cursor: usize,
-    pub sample_size: usize,
-    pub batch_size: usize,
-    pub num_qubits: usize,
-    pub batches_yielded: usize,
-    pub batch_limit: usize,
+/// A fully loaded file, sliced into consecutive batches.
+pub(crate) struct InMemoryAdapter<T> {
+    data: Vec<T>,
+    cursor: usize,
+    sample_size: usize,
 }
 
-impl<T: FloatElem + ToBatchData> BatchProducer for InMemoryProducer<T> {
-    fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>> {
-        if self.batches_yielded >= self.batch_limit {
-            return Ok(None);
+impl<T> InMemoryAdapter<T> {
+    pub(crate) fn new(data: Vec<T>, sample_size: usize) -> Self {
+        Self {
+            data,
+            cursor: 0,
+            sample_size,
         }
+    }
+}
+
+impl<T: ToBatchData> SourceAdapter for InMemoryAdapter<T> {
+    type Elem = T;
+
+    fn sample_size(&self) -> usize {
+        self.sample_size
+    }
+
+    fn next_batch_samples(&mut self, max_samples: usize) -> Result<Option<usize>> {
         let remaining = (self.data.len() - self.cursor) / self.sample_size;
-        if remaining == 0 {
-            return Ok(None);
-        }
+        Ok((remaining > 0).then(|| remaining.min(max_samples)))
+    }
 
-        let batch_n = remaining.min(self.batch_size);
-        let start = self.cursor;
-        let end = start + batch_n * self.sample_size;
+    fn write_batch(&mut self, batch_n: usize, out: &mut [T]) {
+        let end = self.cursor + batch_n * self.sample_size;
+        out.copy_from_slice(&self.data[self.cursor..end]);
         self.cursor = end;
-        self.batches_yielded += 1;
-        let slice = &self.data[start..end];
-
-        let data = match recycled.and_then(T::from_recycled) {
-            Some(mut buf) => {
-                buf.clear();
-                buf.extend_from_slice(slice);
-                T::wrap(buf)
-            }
-            None => T::wrap(slice.to_vec()),
-        };
-
-        Ok(Some(PrefetchedBatch {
-            data,
-            batch_n,
-            sample_size: self.sample_size,
-            num_qubits: self.num_qubits,
-        }))
     }
 }
 
-pub struct StreamingProducer<T: FloatElem = f64> {
-    pub reader: ParquetStreamingReader<T>,
-    pub buffer: Vec<T>,
-    pub buffer_cursor: usize,
-    pub read_chunk_scratch: Vec<T>,
-    pub sample_size: usize,
-    pub batch_size: usize,
-    pub num_qubits: usize,
-    pub batches_yielded: usize,
-    pub batch_limit: usize,
+pub(crate) type InMemoryProducer<T = f64> = AdapterBackedProducer<InMemoryAdapter<T>>;
+
+/// A Parquet file read chunk by chunk into a buffer that is compacted as it is consumed.
+pub(crate) struct StreamingAdapter<T: FloatElem> {
+    pub(crate) reader: ParquetStreamingReader<T>,
+    /// Elements read but not yet emitted live in `buffer[buffer_cursor..]`.
+    pub(crate) buffer: Vec<T>,
+    pub(crate) buffer_cursor: usize,
+    pub(crate) read_chunk_scratch: Vec<T>,
+    pub(crate) sample_size: usize,
 }
 
-impl<T: FloatElem + ToBatchData> BatchProducer for StreamingProducer<T> {
-    fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>> {
-        if self.batches_yielded >= self.batch_limit {
-            return Ok(None);
+impl<T: FloatElem> StreamingAdapter<T> {
+    /// `buffer` holds data already read (e.g. the first chunk used to discover
+    /// `sample_size`); `read_chunk_scratch.len()` is the size of every later read.
+    pub(crate) fn new(
+        reader: ParquetStreamingReader<T>,
+        buffer: Vec<T>,
+        read_chunk_scratch: Vec<T>,
+        sample_size: usize,
+    ) -> Self {
+        Self {
+            reader,
+            buffer,
+            buffer_cursor: 0,
+            read_chunk_scratch,
+            sample_size,
         }
-        let required = self.batch_size * self.sample_size;
+    }
+}
+
+impl<T: FloatElem + ToBatchData> SourceAdapter for StreamingAdapter<T> {
+    type Elem = T;
+
+    fn sample_size(&self) -> usize {
+        self.sample_size
+    }
+
+    fn next_batch_samples(&mut self, max_samples: usize) -> Result<Option<usize>> {
+        let required = max_samples * self.sample_size;
         while (self.buffer.len() - self.buffer_cursor) < required {
             let written = self.reader.read_chunk(&mut self.read_chunk_scratch)?;
             if written == 0 {
@@ -342,41 +466,24 @@ impl<T: FloatElem + ToBatchData> BatchProducer for StreamingProducer<T> {
             self.buffer
                 .extend_from_slice(&self.read_chunk_scratch[..written]);
         }
-        let available = self.buffer.len() - self.buffer_cursor;
-        let available_samples = available / self.sample_size;
+        let available_samples = (self.buffer.len() - self.buffer_cursor) / self.sample_size;
+        Ok((available_samples > 0).then(|| available_samples.min(max_samples)))
+    }
 
-        if available_samples == 0 {
-            return Ok(None);
-        }
-
-        let batch_n = available_samples.min(self.batch_size);
+    fn write_batch(&mut self, batch_n: usize, out: &mut [T]) {
         let start = self.buffer_cursor;
         let end = start + batch_n * self.sample_size;
+        out.copy_from_slice(&self.buffer[start..end]);
         self.buffer_cursor = end;
-        self.batches_yielded += 1;
-
-        let data = match recycled.and_then(T::from_recycled) {
-            Some(mut buf) => {
-                buf.clear();
-                buf.extend_from_slice(&self.buffer[start..end]);
-                T::wrap(buf)
-            }
-            None => T::wrap(self.buffer[start..end].to_vec()),
-        };
 
         if self.buffer_cursor >= self.buffer.len() / BUFFER_COMPACT_DENOM {
             self.buffer.drain(..self.buffer_cursor);
             self.buffer_cursor = 0;
         }
-
-        Ok(Some(PrefetchedBatch {
-            data,
-            batch_n,
-            sample_size: self.sample_size,
-            num_qubits: self.num_qubits,
-        }))
     }
 }
+
+pub(crate) type StreamingProducer<T = f64> = AdapterBackedProducer<StreamingAdapter<T>>;
 
 type ProducerHandles = (
     std::sync::mpsc::Receiver<Result<PrefetchedBatch>>,
@@ -574,18 +681,13 @@ fn build_inmemory_producer<T>(
 where
     T: FloatElem + ToBatchData,
 {
-    spawn_producer(
-        InMemoryProducer::<T> {
-            data,
-            cursor: 0,
-            sample_size,
-            batch_size: config.batch_size,
-            num_qubits: config.num_qubits as usize,
-            batches_yielded: 0,
-            batch_limit,
-        },
-        config.prefetch_depth,
-    )
+    let producer: InMemoryProducer<T> = AdapterBackedProducer::new(
+        InMemoryAdapter::new(data, sample_size),
+        config.batch_size,
+        config.num_qubits as usize,
+        batch_limit,
+    );
+    spawn_producer(producer, config.prefetch_depth)
 }
 
 fn build_streaming_producer<T>(
@@ -631,17 +733,12 @@ where
 
     buffer.truncate(written);
     let read_chunk_scratch = vec![T::default(); initial_cap];
-    let producer = StreamingProducer::<T> {
-        reader,
-        buffer,
-        buffer_cursor: 0,
-        read_chunk_scratch,
-        sample_size,
-        batch_size: config.batch_size,
-        num_qubits: config.num_qubits as usize,
-        batches_yielded: 0,
+    let producer: StreamingProducer<T> = AdapterBackedProducer::new(
+        StreamingAdapter::new(reader, buffer, read_chunk_scratch, sample_size),
+        config.batch_size,
+        config.num_qubits as usize,
         batch_limit,
-    };
+    );
     spawn_producer(producer, config.prefetch_depth)
 }
 
@@ -1385,15 +1482,12 @@ mod tests {
         let sample_size = 4; // 2^2
         let data = vec![0.0f64; 16]; // 16 elements = 4 samples
 
-        let mut producer = InMemoryProducer {
-            data,
-            cursor: 0,
-            sample_size,
-            batch_size: config.batch_size,
-            num_qubits: config.num_qubits as usize,
-            batches_yielded: 0,
-            batch_limit: 10,
-        };
+        let mut producer: InMemoryProducer = AdapterBackedProducer::new(
+            InMemoryAdapter::new(data, sample_size),
+            config.batch_size,
+            config.num_qubits as usize,
+            10,
+        );
 
         let batch1 = producer.produce(None).unwrap().unwrap();
         assert_eq!(batch1.batch_n, 4);
@@ -1818,15 +1912,8 @@ mod tests {
         #[test]
         fn test_inmemory_producer_f32_produce_yields_f32_batch_data() {
             let data = vec![0.25_f32, 0.5, 0.75, 1.0, 0.1, 0.2, 0.3, 0.4]; // 2 samples × 4
-            let mut producer = InMemoryProducer::<f32> {
-                data,
-                cursor: 0,
-                sample_size: 4,
-                batch_size: 2,
-                num_qubits: 2,
-                batches_yielded: 0,
-                batch_limit: 10,
-            };
+            let mut producer: InMemoryProducer<f32> =
+                AdapterBackedProducer::new(InMemoryAdapter::new(data, 4), 2, 2, 10);
             let batch = producer.produce(None).unwrap().unwrap();
             assert!(
                 matches!(batch.data, BatchData::F32(_)),
@@ -1857,17 +1944,12 @@ mod tests {
                 let sample_size = reader.get_sample_size().unwrap();
                 buffer.truncate(written);
                 let scratch = vec![0.0_f32; CAP];
-                let mut producer = StreamingProducer::<f32> {
-                    reader,
-                    buffer,
-                    buffer_cursor: 0,
-                    read_chunk_scratch: scratch,
-                    sample_size,
-                    batch_size: 4,
-                    num_qubits: 2,
-                    batches_yielded: 0,
-                    batch_limit: 10,
-                };
+                let mut producer: StreamingProducer<f32> = AdapterBackedProducer::new(
+                    StreamingAdapter::new(reader, buffer, scratch, sample_size),
+                    4,
+                    2,
+                    10,
+                );
                 let batch = producer.produce(None)?.unwrap();
                 Ok(batch.data)
             })();
