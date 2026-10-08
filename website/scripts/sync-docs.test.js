@@ -67,6 +67,98 @@ test('parseFrontmatter strips matching quotes', () => {
   assert.equal(frontmatter.title, "Summary of 'A: B'");
 });
 
+test('parseFrontmatter handles real YAML, not just key: value lines', () => {
+  // Each of these was misparsed by the old split(':') parser (#1308).
+  const { frontmatter } = parseFrontmatter(
+    [
+      '---',
+      'title: "Ratio: 3:1 # not a comment"',
+      'tags: [release, qumat, qdp]',
+      'authors:',
+      '  - jiekaichang',
+      '  - mahout-team',
+      'description: >',
+      '  Folded text that',
+      '  spans two lines.',
+      'sidebar_custom_props:',
+      '  badge: new',
+      'sidebar_position: 3',
+      'custom_edit_url: null',
+      '---',
+      'body',
+    ].join('\n'),
+  );
+  assert.deepEqual(frontmatter, {
+    title: 'Ratio: 3:1 # not a comment',
+    tags: ['release', 'qumat', 'qdp'],
+    authors: ['jiekaichang', 'mahout-team'],
+    description: 'Folded text that spans two lines.\n',
+    sidebar_custom_props: { badge: 'new' },
+    sidebar_position: 3,
+    custom_edit_url: null,
+  });
+});
+
+test('parseFrontmatter accepts CRLF line endings', () => {
+  const { frontmatter, body } = parseFrontmatter(
+    '---\r\ntitle: Windows\r\n---\r\nbody\r\n',
+  );
+  assert.deepEqual(frontmatter, { title: 'Windows' });
+  assert.equal(body, 'body\r\n');
+});
+
+test('parseFrontmatter treats an empty block as no frontmatter', () => {
+  assert.deepEqual(parseFrontmatter('---\n---\nbody\n'), {
+    frontmatter: {},
+    body: 'body\n',
+  });
+});
+
+test('processMarkdown reports invalid YAML with the file name', () => {
+  assert.throws(
+    () => processMarkdown('---\ntitle: [oops\n---\nx\n', 'docs/bad.md'),
+    /Invalid YAML frontmatter in docs\/bad\.md/,
+  );
+});
+
+test('generateFrontmatter round-trips through parseFrontmatter', () => {
+  const data = {
+    title: "Summary of 'A: B' #1",
+    sidebar_label: 'PR Policy & Review',
+    date: new Date('2026-02-02T00:00:00Z'),
+    tags: ['release', 'qumat'],
+    sidebar_position: 2,
+    custom_edit_url: null,
+    sidebar_custom_props: { badge: 'new' },
+    yes_string: 'yes',
+    number_string: '0.6',
+  };
+  const out = generateFrontmatter(data);
+  assert.deepEqual(parseFrontmatter(`${out}body`).frontmatter, data);
+});
+
+test('generateFrontmatter keeps the existing on-disk style', () => {
+  // Matches how the docs are written today, so the synced files diff
+  // cleanly against the old script's output.
+  assert.equal(
+    generateFrontmatter({
+      title: "Summary of 'X: Y'",
+      date: new Date('2024-03-04T00:00:00Z'),
+      tags: ['release', 'qumat', 'qdp'],
+      toc_min_heading_level: 2,
+    }),
+    [
+      '---',
+      'title: "Summary of \'X: Y\'"',
+      'date: 2024-03-04',
+      'tags: [release, qumat, qdp]',
+      'toc_min_heading_level: 2',
+      '---',
+      '',
+    ].join('\n'),
+  );
+});
+
 test('generateFrontmatter quotes values containing a colon', () => {
   assert.equal(
     generateFrontmatter({ title: 'A: B', sidebar_label: 'B' }),

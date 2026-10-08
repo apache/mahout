@@ -39,6 +39,8 @@
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
+const matter = require('@11ty/gray-matter');
+const yaml = require('js-yaml');
 
 // Configuration
 const REPO_ROOT = path.resolve(__dirname, '../..');
@@ -101,52 +103,61 @@ function cleanDestination(destDir) {
 }
 
 /**
- * Parse YAML frontmatter from markdown content
+ * js-yaml schema used when writing frontmatter back out.
+ *
+ * Identical to the default schema except that a date with no time part
+ * (e.g. `date: 2024-03-04`, which YAML parses into a Date at midnight UTC)
+ * is written back as `2024-03-04` rather than `2024-03-04T00:00:00.000Z`,
+ * so blog post dates round-trip unchanged.
+ */
+const timestampType = yaml.DEFAULT_SCHEMA.compiledImplicit.find(
+  type => type.tag === 'tag:yaml.org,2002:timestamp',
+);
+const FRONTMATTER_SCHEMA = yaml.DEFAULT_SCHEMA.extend({
+  implicit: [
+    new yaml.Type('tag:yaml.org,2002:timestamp', {
+      kind: 'scalar',
+      resolve: timestampType.resolve,
+      construct: timestampType.construct,
+      instanceOf: Date,
+      represent: date => {
+        const iso = date.toISOString();
+        return iso.endsWith('T00:00:00.000Z') ? iso.slice(0, 10) : iso;
+      },
+    }),
+  ],
+});
+
+/**
+ * Parse YAML frontmatter from markdown content.
+ *
+ * Uses the same parser as Docusaurus itself (@11ty/gray-matter, which
+ * uses js-yaml), so lists, nested maps, multi-line strings, quoted
+ * values containing `:` and CRLF line endings are handled exactly as
+ * Docusaurus would handle them in the source file.
+ *
+ * @returns {{frontmatter: object, body: string}}
  */
 function parseFrontmatter(content) {
-  const frontmatterRegex = /^---\n([\s\S]*?)\n---\n/;
-  const match = content.match(frontmatterRegex);
-
-  if (!match) {
-    return { frontmatter: {}, body: content };
-  }
-
-  const frontmatterStr = match[1];
-  const body = content.slice(match[0].length);
-
-  // Simple YAML parsing (key: value pairs)
-  const frontmatter = {};
-  frontmatterStr.split('\n').forEach(line => {
-    const colonIndex = line.indexOf(':');
-    if (colonIndex > 0) {
-      const key = line.slice(0, colonIndex).trim();
-      let value = line.slice(colonIndex + 1).trim();
-      // Remove quotes if present
-      if ((value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'"))) {
-        value = value.slice(1, -1);
-      }
-      frontmatter[key] = value;
-    }
-  });
-
-  return { frontmatter, body };
+  // Passing an options object (even an empty one) disables gray-matter's
+  // module-level cache, which would otherwise hand back shared objects.
+  const { data, content: body } = matter(content, {});
+  return { frontmatter: data, body };
 }
 
 /**
- * Generate YAML frontmatter string
+ * Generate a YAML frontmatter block (including the `---` delimiters and
+ * a trailing newline) from a frontmatter object.
  */
 function generateFrontmatter(frontmatter) {
-  const lines = ['---'];
-  for (const [key, value] of Object.entries(frontmatter)) {
-    if (typeof value === 'string' && (value.includes(':') || value.includes('#'))) {
-      lines.push(`${key}: "${value}"`);
-    } else {
-      lines.push(`${key}: ${value}`);
-    }
-  }
-  lines.push('---\n');
-  return lines.join('\n');
+  const yamlText = yaml.dump(frontmatter, {
+    schema: FRONTMATTER_SCHEMA,
+    lineWidth: -1, // never fold long titles
+    noRefs: true,
+    quotingType: '"',
+    flowLevel: 1, // keep lists inline: `tags: [news, release]`
+  });
+  return `---\n${yamlText}---\n`;
 }
 
 /**
@@ -185,7 +196,14 @@ function transformFrontmatter(frontmatter, filePath) {
  * stripping `.md` here caused the 404s in #1301 (fixed by #1305).
  */
 function processMarkdown(content, filePath) {
-  const { frontmatter, body } = parseFrontmatter(content);
+  let parsed;
+  try {
+    parsed = parseFrontmatter(content);
+  } catch (err) {
+    // Fail the sync (and so the build) loudly, naming the file to fix.
+    throw new Error(`Invalid YAML frontmatter in ${filePath}: ${err.message}`);
+  }
+  const { frontmatter, body } = parsed;
   const transformedFrontmatter = transformFrontmatter(frontmatter, filePath);
 
   // Only add frontmatter if there's something to add
