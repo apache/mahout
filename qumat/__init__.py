@@ -22,10 +22,24 @@ from .optimize import (
     parameter_shift_gradient,
 )
 from .qumat import QuMat
+from .trainer import (
+    AngleEncodedClassifier,
+    QMLModel,
+    QMLTrainer,
+    TrainerCallback,
+    TrainingArguments,
+    TrainOutput,
+)
 
 __all__: list[str] = [
+    "AngleEncodedClassifier",
     "OptimizationResult",
+    "QMLModel",
+    "QMLTrainer",
     "QuMat",
+    "TrainOutput",
+    "TrainerCallback",
+    "TrainingArguments",
     "expectation_z",
     "optimize_parameters",
     "parameter_shift_gradient",
