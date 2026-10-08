@@ -493,3 +493,157 @@ def test_encode_cpu_tensor_rejects_transposed():
         engine.encode(t, 3)
     tensor = torch.from_dlpack(engine.encode(t.contiguous(), 3))
     _verify_tensor(tensor, (4, 8), check_normalization=True)
+
+
+# ---------------------------------------------------------------------------
+# Input contract (#723): dtype, shape and value checks, and .npy files, with
+# the messages documented in docs/qdp/numpy-input.md.
+# ---------------------------------------------------------------------------
+
+
+@requires_qdp
+@pytest.mark.gpu
+@pytest.mark.parametrize(
+    "dtype",
+    [np.float32, np.int64, np.dtype(">f8")],
+    ids=["float32", "int64", "big-endian-f8"],
+)
+@pytest.mark.parametrize("ndim", [1, 2])
+def test_encode_numpy_rejects_non_float64(dtype, ndim):
+    """Only native float64 arrays are accepted; nothing is converted."""
+    from _qdp import QdpEngine
+
+    engine = QdpEngine(device_id=0)
+    data = np.ones(4 if ndim == 1 else (2, 4)).astype(dtype)
+    with pytest.raises(RuntimeError, match=f"Failed to extract {ndim}D NumPy array"):
+        engine.encode(data, 2)
+
+
+@requires_qdp
+@pytest.mark.gpu
+@pytest.mark.parametrize("shape", [(), (1, 2, 2), (1, 1, 2, 2)], ids=["0d", "3d", "4d"])
+def test_encode_numpy_rejects_unsupported_ndim(shape):
+    from _qdp import QdpEngine
+
+    engine = QdpEngine(device_id=0)
+    data = np.ones(shape, dtype=np.float64)
+    with pytest.raises(RuntimeError, match=r"Unsupported array shape: \d+D"):
+        engine.encode(data, 2)
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_encode_numpy_readonly_array():
+    """Read-only buffers (e.g. np.load(mmap_mode='r')) can be encoded."""
+    from _qdp import QdpEngine
+
+    engine = QdpEngine(device_id=0)
+    data = np.array([1.0, 1.0, 1.0, 1.0])
+    data.setflags(write=False)
+    tensor = torch.from_dlpack(engine.encode(data, 2))
+    _verify_tensor(tensor, (1, 4), check_normalization=True)
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_encode_numpy_amplitude_zero_pads_short_input():
+    """Amplitude input shorter than 2**n is normalised then zero-padded."""
+    from _qdp import QdpEngine
+
+    engine = QdpEngine(device_id=0, precision="float64")
+    tensor = torch.from_dlpack(engine.encode(np.array([3.0, 4.0]), 3))
+    expected = np.array([0.6, 0.8, 0, 0, 0, 0, 0, 0])
+    np.testing.assert_allclose(tensor.real.cpu().numpy()[0], expected, atol=1e-12)
+
+
+@requires_qdp
+@pytest.mark.gpu
+@pytest.mark.parametrize(
+    ("data", "num_qubits"),
+    [
+        pytest.param(np.zeros(4), 2, id="zero-norm"),
+        pytest.param(np.array([1.0, np.nan, 0.0, 0.0]), 2, id="nan"),
+        pytest.param(np.array([1.0, np.inf, 0.0, 0.0]), 2, id="inf"),
+        pytest.param(np.ones(5), 2, id="too-long"),
+        pytest.param(np.array([], dtype=np.float64), 2, id="empty"),
+        pytest.param(np.array([[1.0, 1.0], [0.0, 0.0]]), 1, id="batch-zero-row"),
+    ],
+)
+def test_encode_numpy_amplitude_rejects_bad_values(data, num_qubits):
+    from _qdp import QdpEngine
+
+    engine = QdpEngine(device_id=0)
+    with pytest.raises(RuntimeError, match="Encoding failed"):
+        engine.encode(data, num_qubits, encoding_method="amplitude")
+
+
+@requires_qdp
+@pytest.mark.gpu
+@pytest.mark.parametrize("encoding_method", ["amplitude", "angle", "basis"])
+def test_encode_numpy_file_matches_in_memory(tmp_path, encoding_method):
+    """A 2D .npy file and the same in-memory array encode identically."""
+    from _qdp import QdpEngine
+
+    engine = QdpEngine(device_id=0, precision="float64")
+    num_qubits = 3
+    rng = np.random.default_rng(7)
+    if encoding_method == "amplitude":
+        data = rng.standard_normal((5, 2**num_qubits))
+    elif encoding_method == "angle":
+        data = rng.uniform(0, np.pi, size=(5, num_qubits))
+    else:
+        data = rng.integers(0, 2**num_qubits, size=(5, 1)).astype(np.float64)
+
+    path = tmp_path / "data.npy"
+    np.save(path, data)
+    from_file = torch.from_dlpack(engine.encode(str(path), num_qubits, encoding_method))
+    from_array = torch.from_dlpack(engine.encode(data, num_qubits, encoding_method))
+    assert torch.allclose(from_file, from_array)
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_encode_numpy_file_fortran_order(tmp_path):
+    """Fortran-ordered .npy files are read row by row (one row = one sample)."""
+    from _qdp import QdpEngine
+
+    engine = QdpEngine(device_id=0, precision="float64")
+    rows = np.array([[3.0, 4.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0]])
+    path = tmp_path / "fortran.npy"
+    np.save(path, np.asfortranarray(rows))
+    states = torch.from_dlpack(engine.encode(path, 2))  # pathlib.Path
+    expected = rows / np.linalg.norm(rows, axis=1, keepdims=True)
+    np.testing.assert_allclose(states.real.cpu().numpy(), expected, atol=1e-12)
+
+
+@requires_qdp
+@pytest.mark.gpu
+@pytest.mark.parametrize(
+    ("array", "message"),
+    [
+        pytest.param(
+            np.ones((2, 4), dtype=np.float32), "incorrect descriptor", id="float32"
+        ),
+        pytest.param(np.ones(4), "ndim 1", id="1d"),
+        pytest.param(np.ones((1, 2, 2)), "ndim 3", id="3d"),
+        pytest.param(np.ones((0, 4)), "Both dimensions must be > 0", id="empty"),
+    ],
+)
+def test_encode_numpy_file_errors(tmp_path, array, message):
+    from _qdp import QdpEngine
+
+    engine = QdpEngine(device_id=0)
+    path = tmp_path / "bad.npy"
+    np.save(path, array)
+    with pytest.raises(RuntimeError, match=f"Encoding from NumPy failed.*{message}"):
+        engine.encode(str(path), 2)
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_encode_numpy_file_missing(tmp_path):
+    from _qdp import QdpEngine
+
+    engine = QdpEngine(device_id=0)
+    with pytest.raises(RuntimeError, match="NumPy file not found"):
+        engine.encode(str(tmp_path / "missing.npy"), 2)

@@ -23,6 +23,7 @@ The PyTorch reference backend must be explicitly selected via
 
 from __future__ import annotations
 
+import numpy as np
 import pytest
 
 torch = pytest.importorskip("torch")
@@ -281,6 +282,88 @@ class TestLoaderPytorchBackend:
         for b in batches:
             assert isinstance(b, torch.Tensor)
             assert b.shape == (2, 4)
+
+    @pytest.mark.parametrize(
+        "make_array",
+        [
+            lambda a: a,
+            lambda a: np.asfortranarray(a),
+            lambda a: a.astype(np.float32),
+            lambda a: a.astype(np.int64),
+        ],
+        ids=["c-float64", "fortran", "float32", "int64"],
+    )
+    def test_file_npy_pytorch_layouts_and_dtypes(self, tmp_path, make_array):
+        """The PyTorch reference loader converts any numeric .npy to float64
+        and keeps one row per sample regardless of memory order."""
+        from qumat_qdp.loader import QuantumDataLoader
+
+        rows = np.array([[3.0, 4.0, 0.0, 0.0], [0.0, 0.0, 2.0, 2.0]])
+        npy_path = str(tmp_path / "rows.npy")
+        np.save(npy_path, make_array(rows))
+
+        loader = (
+            QuantumDataLoader(device_id=0)
+            .backend("pytorch")
+            .qubits(2)
+            .encoding("amplitude")
+            .batches(1, size=2)
+            .source_file(npy_path)
+        )
+        (batch,) = list(loader)
+        probs = batch.abs().pow(2).cpu().numpy()
+        expected = np.array([[0.36, 0.64, 0.0, 0.0], [0.0, 0.0, 0.5, 0.5]])
+        np.testing.assert_allclose(probs, expected, atol=1e-6)
+
+    def test_file_npy_pytorch_big_endian_raises(self, tmp_path):
+        """Unlike the Rust reader, torch.tensor() cannot take '>f8' arrays."""
+        from qumat_qdp.loader import QuantumDataLoader
+
+        npy_path = str(tmp_path / "be.npy")
+        np.save(npy_path, np.ones((2, 4), dtype=">f8"))
+        loader = (
+            QuantumDataLoader(device_id=0)
+            .backend("pytorch")
+            .qubits(2)
+            .encoding("amplitude")
+            .batches(1, size=2)
+            .source_file(npy_path)
+        )
+        with pytest.raises(ValueError, match="byte order"):
+            list(loader)
+
+    def test_file_npy_pytorch_1d_is_one_sample(self, tmp_path):
+        from qumat_qdp.loader import QuantumDataLoader
+
+        npy_path = str(tmp_path / "one.npy")
+        np.save(npy_path, np.array([3.0, 4.0, 0.0, 0.0]))
+        loader = (
+            QuantumDataLoader(device_id=0)
+            .backend("pytorch")
+            .qubits(2)
+            .encoding("amplitude")
+            .batches(3, size=4)
+            .source_file(npy_path)
+        )
+        batches = list(loader)
+        assert len(batches) == 1
+        assert batches[0].shape == (1, 4)
+
+    def test_file_npy_pytorch_3d_raises(self, tmp_path):
+        from qumat_qdp.loader import QuantumDataLoader
+
+        npy_path = str(tmp_path / "cube.npy")
+        np.save(npy_path, np.ones((2, 2, 4)))
+        loader = (
+            QuantumDataLoader(device_id=0)
+            .backend("pytorch")
+            .qubits(2)
+            .encoding("amplitude")
+            .batches(1, size=2)
+            .source_file(npy_path)
+        )
+        with pytest.raises(ValueError, match="Expected 1-D or 2-D tensor, got 3-D"):
+            list(loader)
 
     def test_streaming_raises(self):
         from qumat_qdp.loader import QuantumDataLoader
