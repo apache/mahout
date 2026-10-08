@@ -52,117 +52,160 @@ unsafe impl cudarc::driver::DeviceRepr for CuComplex {}
 #[cfg(target_os = "linux")]
 unsafe impl cudarc::driver::ValidAsZeroBits for CuComplex {}
 
-// CUDA kernel FFI (Linux only; stubbed when built without nvcc/CUDA)
-#[cfg(all(target_os = "linux", not(qdp_no_cuda)))]
-unsafe extern "C" {
-    /// Launch amplitude encoding kernel
-    /// Returns CUDA error code (0 = success)
+/// Return code of every no-CUDA stub ("CUDA unavailable"); qdp-core's
+/// `cuda_error_to_string` maps it to a readable message.
+#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+const CUDA_UNAVAILABLE: i32 = 999;
+
+/// Declares one CUDA launcher (or an f64/f32 pair) for *both* build modes.
+///
+/// * CUDA build (`target_os = "linux"` and not `qdp_no_cuda`): an
+///   `unsafe extern "C"` declaration resolved against the nvcc-built
+///   `libkernels.a`.
+/// * No-CUDA build: a safe `#[unsafe(no_mangle)] extern "C"` stub with the
+///   same symbol name that returns [`CUDA_UNAVAILABLE`], so dependents link.
+///
+/// Forms:
+/// * `pub fn name(args);` - a single symbol written with concrete types
+///   (f64-only kernels such as IQP and phase, converters, validators).
+/// * `pub fn f64_name / f32_name as Alias<Real>(args);` - a precision pair.
+///   `Real` in `args` is `f64` for the first symbol and `f32` for the second,
+///   and `Alias<T>` names the shared `unsafe extern "C"` fn-pointer type
+///   (used by [`KernelElem`]).
+/// * `pub fn f64_name / f32_name as Alias(args);` - a pair whose signature
+///   does not mention `Real` (basis encoding: only the output differs).
+macro_rules! define_stub {
+    (
+        $(#[$doc:meta])*
+        pub fn $f64:ident / $f32:ident as $alias:ident<Real>(
+            $($arg:ident: $ty:ty),* $(,)?
+        );
+    ) => {
+        define_stub!(@pair [$(#[$doc])*] $f64 / $f32 ($($arg: $ty),*));
+        #[doc = concat!("Signature shared by [`", stringify!($f64), "`] (`Real = f64`) and [`", stringify!($f32), "`] (`Real = f32`).")]
+        pub type $alias<Real> = unsafe extern "C" fn($($ty),*) -> i32;
+    };
+    (
+        $(#[$doc:meta])*
+        pub fn $f64:ident / $f32:ident as $alias:ident(
+            $($arg:ident: $ty:ty),* $(,)?
+        );
+    ) => {
+        define_stub!(@pair [$(#[$doc])*] $f64 / $f32 ($($arg: $ty),*));
+        #[doc = concat!("Signature shared by [`", stringify!($f64), "`] and [`", stringify!($f32), "`].")]
+        pub type $alias = unsafe extern "C" fn($($ty),*) -> i32;
+    };
+    (
+        $(#[$doc:meta])*
+        pub fn $name:ident($($arg:ident: $ty:ty),* $(,)?);
+    ) => {
+        #[cfg(all(target_os = "linux", not(qdp_no_cuda)))]
+        unsafe extern "C" {
+            $(#[$doc])*
+            pub fn $name($($arg: $ty),*) -> i32;
+        }
+
+        #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
+        $(#[$doc])*
+        #[unsafe(no_mangle)]
+        #[allow(unused_variables)]
+        pub extern "C" fn $name($($arg: $ty),*) -> i32 {
+            $crate::CUDA_UNAVAILABLE
+        }
+    };
+    (@pair [$(#[$doc:meta])*] $f64:ident / $f32:ident ($($arg:ident: $ty:ty),*)) => {
+        define_stub!(@real f64, [$(#[$doc])*] $f64($($arg: $ty),*));
+        define_stub!(
+            @real f32,
+            [$(#[$doc])* #[doc = ""] #[doc = "Single-precision (`f32` / `CuComplex`) variant."]]
+            $f32($($arg: $ty),*)
+        );
+    };
+    // Each symbol lives in a private module so `Real` can be aliased to a
+    // different type per symbol; the fn is re-exported at the crate root,
+    // so the Rust path and the (unmangled) C symbol name are unchanged.
+    (@real $real:ty, [$(#[$doc:meta])*] $name:ident($($arg:ident: $ty:ty),*)) => {
+        mod $name {
+            #[allow(unused_imports)]
+            use super::*;
+            #[allow(dead_code)]
+            type Real = $real;
+            define_stub! {
+                $(#[$doc])*
+                pub fn $name($($arg: $ty),*);
+            }
+        }
+        pub use self::$name::$name;
+    };
+}
+
+mod elem;
+pub use elem::KernelElem;
+
+define_stub! {
+    /// Launch amplitude encoding kernel.
+    /// Returns CUDA error code (0 = success).
     ///
     /// # Safety
-    /// Requires valid GPU pointers, must sync before freeing
-    pub fn launch_amplitude_encode(
-        input_d: *const f64,
+    /// Requires valid GPU pointers, must sync before freeing.
+    pub fn launch_amplitude_encode / launch_amplitude_encode_f32 as AmplitudeEncodeFn<Real>(
+        input_d: *const Real,
         state_d: *mut c_void,
         input_len: usize,
         state_len: usize,
-        inv_norm: f64,
+        inv_norm: Real,
         stream: *mut c_void,
-    ) -> i32;
+    );
+}
 
-    /// Launch amplitude encoding kernel (float32 input/output)
-    /// Returns CUDA error code (0 = success)
+define_stub! {
+    /// Launch batch amplitude encoding kernel.
+    /// Returns CUDA error code (0 = success).
     ///
     /// # Safety
-    /// Requires valid GPU pointers, must sync before freeing
-    pub fn launch_amplitude_encode_f32(
-        input_d: *const f32,
-        state_d: *mut c_void,
-        input_len: usize,
-        state_len: usize,
-        inv_norm: f32,
-        stream: *mut c_void,
-    ) -> i32;
-
-    /// Launch batch amplitude encoding kernel
-    /// Returns CUDA error code (0 = success)
-    ///
-    /// # Safety
-    /// Requires valid GPU pointers, must sync before freeing
-    pub fn launch_amplitude_encode_batch(
-        input_batch_d: *const f64,
+    /// Requires valid GPU pointers, must sync before freeing.
+    pub fn launch_amplitude_encode_batch / launch_amplitude_encode_batch_f32
+        as AmplitudeEncodeBatchFn<Real>(
+        input_batch_d: *const Real,
         state_batch_d: *mut c_void,
-        inv_norms_d: *const f64,
+        inv_norms_d: *const Real,
         num_samples: usize,
         input_len: usize,
         state_len: usize,
         stream: *mut c_void,
-    ) -> i32;
+    );
+}
 
-    /// Launch batch amplitude encoding kernel (float32 input/output)
-    /// Returns CUDA error code (0 = success)
-    ///
-    /// # Safety
-    /// Requires valid GPU pointers, must sync before freeing
-    pub fn launch_amplitude_encode_batch_f32(
-        input_batch_d: *const f32,
-        state_batch_d: *mut c_void,
-        inv_norms_d: *const f32,
-        num_samples: usize,
-        input_len: usize,
-        state_len: usize,
-        stream: *mut c_void,
-    ) -> i32;
-
-    /// Launch L2 norm reduction (returns inverse norm)
-    /// Returns CUDA error code (0 = success)
+define_stub! {
+    /// Launch L2 norm reduction (returns inverse norm).
+    /// Returns CUDA error code (0 = success).
     ///
     /// # Safety
     /// Pointers must reference valid device memory on the provided stream.
-    pub fn launch_l2_norm(
-        input_d: *const f64,
+    pub fn launch_l2_norm / launch_l2_norm_f32 as L2NormFn<Real>(
+        input_d: *const Real,
         input_len: usize,
-        inv_norm_out_d: *mut f64,
+        inv_norm_out_d: *mut Real,
         stream: *mut c_void,
-    ) -> i32;
+    );
+}
 
-    /// Launch L2 norm reduction (returns inverse norm) for float32
-    /// Returns CUDA error code (0 = success)
+define_stub! {
+    /// Launch batched L2 norm reduction (returns inverse norms per sample).
+    /// Returns CUDA error code (0 = success).
     ///
     /// # Safety
     /// Pointers must reference valid device memory on the provided stream.
-    pub fn launch_l2_norm_f32(
-        input_d: *const f32,
-        input_len: usize,
-        inv_norm_out_d: *mut f32,
-        stream: *mut c_void,
-    ) -> i32;
-
-    /// Launch batched L2 norm reduction (returns inverse norms per sample)
-    /// Returns CUDA error code (0 = success)
-    ///
-    /// # Safety
-    /// Pointers must reference valid device memory on the provided stream.
-    pub fn launch_l2_norm_batch(
-        input_batch_d: *const f64,
+    pub fn launch_l2_norm_batch / launch_l2_norm_batch_f32 as L2NormBatchFn<Real>(
+        input_batch_d: *const Real,
         num_samples: usize,
         sample_len: usize,
-        inv_norms_out_d: *mut f64,
+        inv_norms_out_d: *mut Real,
         stream: *mut c_void,
-    ) -> i32;
+    );
+}
 
-    /// Launch batched L2 norm reduction (returns inverse norms per sample) for float32
-    /// Returns CUDA error code (0 = success)
-    ///
-    /// # Safety
-    /// Pointers must reference valid device memory on the provided stream.
-    pub fn launch_l2_norm_batch_f32(
-        input_batch_d: *const f32,
-        num_samples: usize,
-        sample_len: usize,
-        inv_norms_out_d: *mut f32,
-        stream: *mut c_void,
-    ) -> i32;
-
+define_stub! {
     /// Convert a complex128 state vector to complex64 on GPU.
     /// Returns CUDA error code (0 = success).
     ///
@@ -173,8 +216,10 @@ unsafe extern "C" {
         output_state_d: *mut CuComplex,
         len: usize,
         stream: *mut c_void,
-    ) -> i32;
+    );
+}
 
+define_stub! {
     /// Convert a complex64 state vector to complex128 on GPU.
     /// Returns CUDA error code (0 = success).
     ///
@@ -185,140 +230,88 @@ unsafe extern "C" {
         output_state_d: *mut CuDoubleComplex,
         len: usize,
         stream: *mut c_void,
-    ) -> i32;
+    );
+}
 
+define_stub! {
     /// Launch basis encoding kernel.
     /// Maps an integer index to a computational basis state.
-    /// Returns CUDA error code (0 = success)
+    /// Returns CUDA error code (0 = success).
     ///
     /// # Safety
     /// Requires valid GPU pointer; must sync before freeing.
-    pub fn launch_basis_encode(
+    pub fn launch_basis_encode / launch_basis_encode_f32 as BasisEncodeFn(
         basis_index: usize,
         state_d: *mut c_void,
         state_len: usize,
         stream: *mut c_void,
-    ) -> i32;
+    );
+}
 
+define_stub! {
     /// Launch batch basis encoding kernel.
-    /// Returns CUDA error code (0 = success)
+    /// Returns CUDA error code (0 = success).
     ///
     /// # Safety
     /// Requires valid GPU pointers; must sync before freeing.
-    pub fn launch_basis_encode_batch(
+    pub fn launch_basis_encode_batch / launch_basis_encode_batch_f32 as BasisEncodeBatchFn(
         basis_indices_d: *const usize,
         state_batch_d: *mut c_void,
         num_samples: usize,
         state_len: usize,
         num_qubits: u32,
         stream: *mut c_void,
-    ) -> i32;
+    );
+}
 
-    /// Launch basis encoding kernel (float32).
-    /// Maps an integer index to a computational basis state.
-    /// Returns CUDA error code (0 = success)
-    ///
-    /// # Safety
-    /// Requires valid GPU pointer; must sync before freeing.
-    pub fn launch_basis_encode_f32(
-        basis_index: usize,
-        state_d: *mut c_void,
-        state_len: usize,
-        stream: *mut c_void,
-    ) -> i32;
-
-    /// Launch batch basis encoding kernel (float32).
-    /// Returns CUDA error code (0 = success)
-    ///
-    /// # Safety
-    /// Requires valid GPU pointers; must sync before freeing.
-    pub fn launch_basis_encode_batch_f32(
-        basis_indices_d: *const usize,
-        state_batch_d: *mut c_void,
-        num_samples: usize,
-        state_len: usize,
-        num_qubits: u32,
-        stream: *mut c_void,
-    ) -> i32;
-
+define_stub! {
     /// Launch angle encoding kernel.
-    /// Returns CUDA error code (0 = success)
+    /// Returns CUDA error code (0 = success).
     ///
     /// # Safety
     /// Requires valid GPU pointers; must sync before freeing.
-    pub fn launch_angle_encode(
-        angles_d: *const f64,
+    pub fn launch_angle_encode / launch_angle_encode_f32 as AngleEncodeFn<Real>(
+        angles_d: *const Real,
         state_d: *mut c_void,
         state_len: usize,
         num_qubits: u32,
         stream: *mut c_void,
-    ) -> i32;
+    );
+}
 
+define_stub! {
     /// Launch batch angle encoding kernel.
-    /// Returns CUDA error code (0 = success)
+    /// Returns CUDA error code (0 = success).
     ///
     /// # Safety
     /// Requires valid GPU pointers; must sync before freeing.
-    pub fn launch_angle_encode_batch(
-        angles_batch_d: *const f64,
+    pub fn launch_angle_encode_batch / launch_angle_encode_batch_f32
+        as AngleEncodeBatchFn<Real>(
+        angles_batch_d: *const Real,
         state_batch_d: *mut c_void,
         num_samples: usize,
         state_len: usize,
         num_qubits: u32,
         stream: *mut c_void,
-    ) -> i32;
+    );
+}
 
-    /// Launch angle encoding kernel (float32).
-    /// Returns CUDA error code (0 = success)
-    ///
-    /// # Safety
-    /// Requires valid GPU pointers; must sync before freeing.
-    pub fn launch_angle_encode_f32(
-        angles_d: *const f32,
-        state_d: *mut c_void,
-        state_len: usize,
-        num_qubits: u32,
-        stream: *mut c_void,
-    ) -> i32;
-
-    /// Launch batch angle encoding kernel (float32).
-    /// Returns CUDA error code (0 = success)
-    ///
-    /// # Safety
-    /// Requires valid GPU pointers; must sync before freeing.
-    pub fn launch_angle_encode_batch_f32(
-        angles_batch_d: *const f32,
-        state_batch_d: *mut c_void,
-        num_samples: usize,
-        state_len: usize,
-        num_qubits: u32,
-        stream: *mut c_void,
-    ) -> i32;
-
-    /// Launch float32 batch finite-value validation.
-    /// Returns CUDA error code (0 = success)
+define_stub! {
+    /// Launch batch finite-value validation (NaN/Inf check).
+    /// Returns CUDA error code (0 = success).
     ///
     /// # Safety
     /// Requires valid GPU pointers, must sync before reading the output flag.
-    pub fn launch_check_finite_batch_f32(
-        input_batch_d: *const f32,
-        total_angles: usize,
-        has_non_finite_d: *mut i32,
-        stream: *mut c_void,
-    ) -> i32;
-
-    /// Launch float64 batch finite-value validation.
-    /// Returns CUDA error code (0 = success)
-    ///
-    /// # Safety
-    /// Requires valid GPU pointers, must sync before reading the output flag.
-    pub fn launch_check_finite_batch_f64(
-        input_batch_d: *const f64,
+    pub fn launch_check_finite_batch_f64 / launch_check_finite_batch_f32
+        as CheckFiniteBatchFn<Real>(
+        input_batch_d: *const Real,
         total_values: usize,
         has_non_finite_d: *mut i32,
         stream: *mut c_void,
-    ) -> i32;
+    );
+}
 
+define_stub! {
     /// Launch combined validation + cast for float32 basis indices.
     /// `error_flags_d` receives a bitmask (0 = all indices valid); `indices_out_d`
     /// receives the truncated `size_t` indices (0 for invalid slots).
@@ -332,8 +325,10 @@ unsafe extern "C" {
         indices_out_d: *mut usize,
         error_flags_d: *mut i32,
         stream: *mut c_void,
-    ) -> i32;
+    );
+}
 
+define_stub! {
     /// Launch bounds-check for an existing `size_t` basis-index buffer.
     ///
     /// # Safety
@@ -344,13 +339,17 @@ unsafe extern "C" {
         state_len: usize,
         error_flags_d: *mut i32,
         stream: *mut c_void,
-    ) -> i32;
+    );
+}
 
-    /// Launch IQP encoding kernel
-    /// Returns CUDA error code (0 = success)
+// IQP and phase encoding only have f64 kernels.
+
+define_stub! {
+    /// Launch IQP encoding kernel.
+    /// Returns CUDA error code (0 = success).
     ///
     /// # Safety
-    /// Requires valid GPU pointers, must sync before freeing
+    /// Requires valid GPU pointers, must sync before freeing.
     pub fn launch_iqp_encode(
         data_d: *const f64,
         state_d: *mut c_void,
@@ -358,13 +357,15 @@ unsafe extern "C" {
         num_qubits: u32,
         enable_zz: i32,
         stream: *mut c_void,
-    ) -> i32;
+    );
+}
 
-    /// Launch batch IQP encoding kernel
-    /// Returns CUDA error code (0 = success)
+define_stub! {
+    /// Launch batch IQP encoding kernel.
+    /// Returns CUDA error code (0 = success).
     ///
     /// # Safety
-    /// Requires valid GPU pointers, must sync before freeing
+    /// Requires valid GPU pointers, must sync before freeing.
     pub fn launch_iqp_encode_batch(
         data_batch_d: *const f64,
         state_batch_d: *mut c_void,
@@ -374,26 +375,30 @@ unsafe extern "C" {
         data_len: u32,
         enable_zz: i32,
         stream: *mut c_void,
-    ) -> i32;
+    );
+}
 
-    /// Launch phase encoding kernel
-    /// Returns CUDA error code (0 = success)
+define_stub! {
+    /// Launch phase encoding kernel.
+    /// Returns CUDA error code (0 = success).
     ///
     /// # Safety
-    /// Requires valid GPU pointers, must sync before freeing
+    /// Requires valid GPU pointers, must sync before freeing.
     pub fn launch_phase_encode(
         phases_d: *const f64,
         state_d: *mut c_void,
         state_len: usize,
         num_qubits: u32,
         stream: *mut c_void,
-    ) -> i32;
+    );
+}
 
-    /// Launch batch phase encoding kernel
-    /// Returns CUDA error code (0 = success)
+define_stub! {
+    /// Launch batch phase encoding kernel.
+    /// Returns CUDA error code (0 = success).
     ///
     /// # Safety
-    /// Requires valid GPU pointers, must sync before freeing
+    /// Requires valid GPU pointers, must sync before freeing.
     pub fn launch_phase_encode_batch(
         phases_batch_d: *const f64,
         state_batch_d: *mut c_void,
@@ -401,326 +406,5 @@ unsafe extern "C" {
         state_len: usize,
         num_qubits: u32,
         stream: *mut c_void,
-    ) -> i32;
-}
-
-// Dummy implementation for non-Linux and Linux builds without CUDA (allows linking)
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_amplitude_encode(
-    _input_d: *const f64,
-    _state_d: *mut c_void,
-    _input_len: usize,
-    _state_len: usize,
-    _inv_norm: f64,
-    _stream: *mut c_void,
-) -> i32 {
-    999 // Error: CUDA unavailable
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_amplitude_encode_f32(
-    _input_d: *const f32,
-    _state_d: *mut c_void,
-    _input_len: usize,
-    _state_len: usize,
-    _inv_norm: f32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_amplitude_encode_batch(
-    _input_batch_d: *const f64,
-    _state_batch_d: *mut c_void,
-    _inv_norms_d: *const f64,
-    _num_samples: usize,
-    _input_len: usize,
-    _state_len: usize,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_amplitude_encode_batch_f32(
-    _input_batch_d: *const f32,
-    _state_batch_d: *mut c_void,
-    _inv_norms_d: *const f32,
-    _num_samples: usize,
-    _input_len: usize,
-    _state_len: usize,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_l2_norm(
-    _input_d: *const f64,
-    _input_len: usize,
-    _inv_norm_out_d: *mut f64,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_l2_norm_batch(
-    _input_batch_d: *const f64,
-    _num_samples: usize,
-    _sample_len: usize,
-    _inv_norms_out_d: *mut f64,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_l2_norm_f32(
-    _input_d: *const f32,
-    _input_len: usize,
-    _inv_norm_out_d: *mut f32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_l2_norm_batch_f32(
-    _input_batch_d: *const f32,
-    _num_samples: usize,
-    _sample_len: usize,
-    _inv_norms_out_d: *mut f32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn convert_state_to_float(
-    _input_state_d: *const CuDoubleComplex,
-    _output_state_d: *mut CuComplex,
-    _len: usize,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn convert_state_to_double(
-    _input_state_d: *const CuComplex,
-    _output_state_d: *mut CuDoubleComplex,
-    _len: usize,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_basis_encode(
-    _basis_index: usize,
-    _state_d: *mut c_void,
-    _state_len: usize,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_basis_encode_batch(
-    _basis_indices_d: *const usize,
-    _state_batch_d: *mut c_void,
-    _num_samples: usize,
-    _state_len: usize,
-    _num_qubits: u32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_basis_encode_f32(
-    _basis_index: usize,
-    _state_d: *mut c_void,
-    _state_len: usize,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_basis_encode_batch_f32(
-    _basis_indices_d: *const usize,
-    _state_batch_d: *mut c_void,
-    _num_samples: usize,
-    _state_len: usize,
-    _num_qubits: u32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_angle_encode(
-    _angles_d: *const f64,
-    _state_d: *mut c_void,
-    _state_len: usize,
-    _num_qubits: u32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_angle_encode_batch(
-    _angles_batch_d: *const f64,
-    _state_batch_d: *mut c_void,
-    _num_samples: usize,
-    _state_len: usize,
-    _num_qubits: u32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_angle_encode_f32(
-    _angles_d: *const f32,
-    _state_d: *mut c_void,
-    _state_len: usize,
-    _num_qubits: u32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_angle_encode_batch_f32(
-    _angles_batch_d: *const f32,
-    _state_batch_d: *mut c_void,
-    _num_samples: usize,
-    _state_len: usize,
-    _num_qubits: u32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_check_finite_batch_f32(
-    _input_batch_d: *const f32,
-    _total_angles: usize,
-    _has_non_finite_d: *mut i32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_check_finite_batch_f64(
-    _input_batch_d: *const f64,
-    _total_values: usize,
-    _has_non_finite_d: *mut i32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_validate_and_cast_basis_indices_f32(
-    _input_batch_d: *const f32,
-    _num_samples: usize,
-    _state_len: usize,
-    _indices_out_d: *mut usize,
-    _error_flags_d: *mut i32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_check_basis_indices_usize(
-    _indices_d: *const usize,
-    _num_samples: usize,
-    _state_len: usize,
-    _error_flags_d: *mut i32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_iqp_encode(
-    _data_d: *const f64,
-    _state_d: *mut c_void,
-    _state_len: usize,
-    _num_qubits: u32,
-    _enable_zz: i32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_iqp_encode_batch(
-    _data_batch_d: *const f64,
-    _state_batch_d: *mut c_void,
-    _num_samples: usize,
-    _state_len: usize,
-    _num_qubits: u32,
-    _data_len: u32,
-    _enable_zz: i32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_phase_encode(
-    _phases_d: *const f64,
-    _state_d: *mut c_void,
-    _state_len: usize,
-    _num_qubits: u32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
-}
-
-#[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
-#[unsafe(no_mangle)]
-pub extern "C" fn launch_phase_encode_batch(
-    _phases_batch_d: *const f64,
-    _state_batch_d: *mut c_void,
-    _num_samples: usize,
-    _state_len: usize,
-    _num_qubits: u32,
-    _stream: *mut c_void,
-) -> i32 {
-    999
+    );
 }
