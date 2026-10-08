@@ -262,6 +262,19 @@ def apply_u_gate(
     circuit.u(theta, phi, lambd, qubit_index)
 
 
+def count_parameter_occurrences(circuit: qiskit.QuantumCircuit) -> dict[str, int]:
+    """Count how many gates in ``circuit`` depend on each named parameter."""
+    counts: dict[str, int] = {}
+    for instruction in circuit.data:
+        names: set[str] = set()
+        for value in instruction.operation.params:
+            if isinstance(value, qiskit.circuit.ParameterExpression):
+                names.update(param.name for param in value.parameters)
+        for name in names:
+            counts[name] = counts.get(name, 0) + 1
+    return counts
+
+
 def calculate_prob_zero(
     results: dict[str, int] | list[dict[str, int]],
     ancilla_qubit: int,
