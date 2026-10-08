@@ -1,5 +1,22 @@
 #!/usr/bin/env node
 
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Documentation Sync Script for Apache Mahout
  *
@@ -12,6 +29,10 @@
  *
  * /docs is the SINGLE SOURCE OF TRUTH for all documentation and blog posts.
  * website/docs and website/blog are build artifacts that should not be edited directly.
+ *
+ * The markdown transforms are pure functions (string in, string out) and are
+ * exported so they can be unit tested; see scripts/sync-docs.test.js.
+ * Running this file directly performs the sync.
  */
 
 const fs = require('fs');
@@ -174,24 +195,29 @@ function transformLinks(content) {
 }
 
 /**
- * Process a single markdown file
+ * Transform the full text of a markdown file for Docusaurus.
+ *
+ * Pure function: no file system access. `filePath` is only used to derive
+ * a fallback title from the file name.
  */
-function processMarkdownFile(srcPath, destPath) {
-  let content = fs.readFileSync(srcPath, 'utf-8');
-
+function processMarkdown(content, filePath) {
   const { frontmatter, body } = parseFrontmatter(content);
-  const transformedFrontmatter = transformFrontmatter(frontmatter, srcPath);
+  const transformedFrontmatter = transformFrontmatter(frontmatter, filePath);
   const transformedBody = transformLinks(body);
 
   // Only add frontmatter if there's something to add
-  let finalContent;
   if (Object.keys(transformedFrontmatter).length > 0) {
-    finalContent = generateFrontmatter(transformedFrontmatter) + transformedBody;
-  } else {
-    finalContent = transformedBody;
+    return generateFrontmatter(transformedFrontmatter) + transformedBody;
   }
+  return transformedBody;
+}
 
-  fs.writeFileSync(destPath, finalContent);
+/**
+ * Process a single markdown file
+ */
+function processMarkdownFile(srcPath, destPath) {
+  const content = fs.readFileSync(srcPath, 'utf-8');
+  fs.writeFileSync(destPath, processMarkdown(content, srcPath));
 }
 
 /**
@@ -330,5 +356,18 @@ function main() {
   console.log(`  Blog: ${blogStats.files} files, ${blogStats.dirs} directories`);
 }
 
-// Run the sync
-main();
+module.exports = {
+  shouldExclude,
+  parseFrontmatter,
+  generateFrontmatter,
+  transformFrontmatter,
+  transformLinks,
+  processMarkdown,
+  syncDirectory,
+  cleanDestination,
+};
+
+// Run the sync only when executed directly (not when required by tests).
+if (require.main === module) {
+  main();
+}
