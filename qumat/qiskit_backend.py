@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, MutableMapping
+from functools import lru_cache
 from typing import Any
 
 import qiskit
@@ -159,7 +160,17 @@ def execute_circuit(
         return result.get_counts()
 
 
-# placeholder method for use in the testing suite
+@lru_cache(maxsize=1)
+def _statevector_simulator() -> tuple[AerSimulator, Any]:
+    """Return a shared statevector simulator and its transpiler target.
+
+    Building ``AerSimulator.target`` dominates the cost of a state-vector
+    call, so it is built once and reused.
+    """
+    simulator = AerSimulator(method="statevector")
+    return simulator, simulator.target
+
+
 def get_final_state_vector(
     circuit: qiskit.QuantumCircuit,
     backend: AerSimulator,
@@ -167,7 +178,7 @@ def get_final_state_vector(
 ) -> Any:
     working_circuit = circuit.copy()
 
-    simulator = AerSimulator(method="statevector")
+    simulator, target = _statevector_simulator()
 
     # Add save_statevector instruction
     working_circuit.save_statevector()
@@ -180,8 +191,13 @@ def get_final_state_vector(
         }
         working_circuit = working_circuit.assign_parameters(parameter_bindings)
 
-    # Simulate the circuit
-    transpiled_circuit = qiskit.transpile(working_circuit, simulator)
+    # Simulate the circuit. Keep optimization_level at 1: levels 2 and 3
+    # (the default is 2) run ElidePermutations, which replaces a SWAP with
+    # a virtual qubit relabelling that save_statevector does not undo, so
+    # the reported amplitudes would be those *before* the SWAP.
+    transpiled_circuit = qiskit.transpile(
+        working_circuit, target=target, optimization_level=1
+    )
     job = simulator.run(transpiled_circuit)
     result = job.result()
 
