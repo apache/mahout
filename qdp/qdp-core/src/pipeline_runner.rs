@@ -793,6 +793,10 @@ impl PipelineIterator {
     }
 
     /// Synthetic-data iterator; `config.total_batches` and `config.seed` select the data.
+    #[deprecated(
+        since = "0.3.0",
+        note = "use `PipelineIterator::new(engine, Source::Synthetic { total_batches, seed }, config)`"
+    )]
     pub fn new_synthetic(engine: QdpEngine, config: PipelineConfig) -> Result<Self> {
         let source = Source::Synthetic {
             total_batches: config.total_batches,
@@ -806,6 +810,10 @@ impl PipelineIterator {
     ///
     /// Supported extensions: .parquet, .arrow, .feather, .ipc, .npy, .pt, .pth, .pb.
     /// For file source, `batch_limit` caps batches yielded (e.g. for testing); use `usize::MAX` to iterate until EOF.
+    #[deprecated(
+        since = "0.3.0",
+        note = "use `PipelineIterator::new(engine, Source::File { path, batch_limit }, config)`"
+    )]
     pub fn new_from_file<P: AsRef<Path>>(
         engine: QdpEngine,
         path: P,
@@ -822,6 +830,10 @@ impl PipelineIterator {
     /// Create a pipeline iterator from a Parquet file using streaming read (Phase 2b).
     /// Only `.parquet` is supported; reduces memory for large files by reading in chunks.
     /// Validates sample_size == vector_len after the first chunk.
+    #[deprecated(
+        since = "0.3.0",
+        note = "use `PipelineIterator::new(engine, Source::FileStreaming { path, batch_limit }, config)`"
+    )]
     pub fn new_from_file_streaming<P: AsRef<Path>>(
         engine: QdpEngine,
         path: P,
