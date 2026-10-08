@@ -16,6 +16,7 @@
 
 from unittest.mock import MagicMock, patch
 
+import pytest
 from braket.circuits import FreeParameter
 
 from qumat.amazon_braket_backend import (
@@ -244,8 +245,8 @@ def test_execute_circuit_with_parameters():
 
 def test_get_final_state_vector_without_parameters():
     circuit = MagicMock()
-    circuit.parameters = []
-    circuit.state_vector = MagicMock()
+    working = circuit.copy.return_value
+    working.parameters = []
 
     mock_backend = MagicMock()
     mock_task = MagicMock()
@@ -259,17 +260,19 @@ def test_get_final_state_vector_without_parameters():
 
     result = get_final_state_vector(circuit, mock_backend, config)
 
-    circuit.state_vector.assert_called_once()
+    working.state_vector.assert_called_once()
+    circuit.state_vector.assert_not_called()
+    mock_backend.run.assert_called_once_with(working, shots=0)
     assert result == [1, 0]
 
 
 def test_get_final_state_vector_with_parameters_full_branch():
     circuit = MagicMock()
-    circuit.state_vector = MagicMock()
+    working = circuit.copy.return_value
 
     param = MagicMock()
     param.name = "theta"
-    circuit.parameters = [param]
+    working.parameters = [param]
 
     mock_backend = MagicMock()
     mock_task = MagicMock()
@@ -286,13 +289,41 @@ def test_get_final_state_vector_with_parameters_full_branch():
 
     result = get_final_state_vector(circuit, mock_backend, config)
 
-    circuit.state_vector.assert_called_once()
+    working.state_vector.assert_called_once()
+    circuit.state_vector.assert_not_called()
 
     args, kwargs = mock_backend.run.call_args
+    assert args == (working,)
     assert kwargs["shots"] == 0
     assert kwargs["inputs"] == {"theta": 0.5}
 
     assert result == [1, 0]
+
+
+def test_get_final_state_vector_does_not_block_later_shot_runs():
+    """Regression: the state-vector query must not leave a StateVector
+    result type on the user's circuit, or the next shot-based run fails."""
+    from qumat import QuMat
+
+    qumat = QuMat(
+        {
+            "backend_name": "amazon_braket",
+            "backend_options": {"simulator_type": "local", "shots": 50},
+        }
+    )
+    qumat.create_empty_circuit(num_qubits=2)
+    qumat.apply_not_gate(0)
+
+    state = qumat.get_final_state_vector()
+    assert abs(state[2]) == pytest.approx(1.0)  # |10>, qubit 0 is leftmost
+    assert qumat.circuit.result_types == []
+
+    counts = qumat.execute_circuit()
+    assert dict(counts) == {"10": 50}
+
+    # And the other order, twice, still works.
+    qumat.get_final_state_vector()
+    assert qumat.circuit.result_types == []
 
 
 # calculate_prob_zero
