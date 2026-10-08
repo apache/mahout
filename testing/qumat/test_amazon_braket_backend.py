@@ -16,6 +16,7 @@
 
 from unittest.mock import MagicMock, patch
 
+import numpy as np
 import pytest
 from braket.circuits import FreeParameter
 
@@ -186,6 +187,51 @@ def test_apply_u_gate_sequence():
     circuit.rz.assert_any_call(0, 0.3)
 
 
+@pytest.mark.parametrize(
+    ("apply_fn", "method"),
+    [(apply_rx_gate, "rx"), (apply_ry_gate, "ry"), (apply_rz_gate, "rz")],
+)
+@pytest.mark.parametrize("angle", [np.float32(0.5), np.float64(0.5), np.int64(2), 2])
+def test_rotation_gates_accept_numpy_scalars(apply_fn, method, angle):
+    circuit = MagicMock()
+    apply_fn(circuit, 0, angle)
+    passed = getattr(circuit, method).call_args[0][1]
+    assert type(passed) is float
+    assert passed == pytest.approx(float(angle))
+
+
+def test_apply_u_gate_accepts_numpy_scalars():
+    circuit = MagicMock()
+    apply_u_gate(circuit, 0, np.float32(0.5), np.int64(1), np.float64(0.1))
+    angles = [c[0][1] for c in circuit.rz.call_args_list]
+    angles += [c[0][1] for c in circuit.ry.call_args_list]
+    assert all(type(a) is float for a in angles)
+
+
+def test_numpy_scalar_parameter_values_execute_on_local_simulator():
+    """np.float32 bound values used to fail with
+    "Cannot wrap ... into literal type"."""
+    from qumat import QuMat
+
+    def run(value):
+        qumat = QuMat(
+            {
+                "backend_name": "amazon_braket",
+                "backend_options": {"simulator_type": "local", "shots": 10},
+            }
+        )
+        qumat.create_empty_circuit(num_qubits=1)
+        qumat.apply_rx_gate(0, "theta")
+        counts = qumat.execute_circuit({"theta": value})
+        state = qumat.get_final_state_vector()
+        return counts, np.asarray(state)
+
+    counts, state32 = run(np.float32(np.pi))
+    assert dict(counts) == {"1": 10}
+    _, state64 = run(np.pi)
+    np.testing.assert_allclose(state32, state64, atol=1e-6)
+
+
 # execute_circuit
 
 
@@ -316,6 +362,7 @@ def test_get_final_state_vector_does_not_block_later_shot_runs():
 
     state = qumat.get_final_state_vector()
     assert abs(state[2]) == pytest.approx(1.0)  # |10>, qubit 0 is leftmost
+    assert qumat.circuit is not None
     assert qumat.circuit.result_types == []
 
     counts = qumat.execute_circuit()
@@ -323,6 +370,7 @@ def test_get_final_state_vector_does_not_block_later_shot_runs():
 
     # And the other order, twice, still works.
     qumat.get_final_state_vector()
+    assert qumat.circuit is not None
     assert qumat.circuit.result_types == []
 
 
