@@ -35,7 +35,7 @@ This starts a local development server at `http://localhost:3000` with hot reloa
 ├── community/                  # Community pages
 ├── about/                      # About pages
 ├── download/                   # Download pages
-└── api.md, basic-gates.md...   # API reference docs
+└── api/                        # API reference generator config (see below)
 
 /website/docs/              ← BUILD ARTIFACT (auto-synced, don't edit!)
 ├── .gitignore                  # Only tracked file
@@ -336,10 +336,10 @@ npm run serve    # Serve production build locally
 
 GitHub Actions automatically deploys to `asf-site` branch when changes are pushed to `main`.
 
-Triggers:
+Triggers (see `.github/workflows/website.yml`):
 - Changes to `website/**`
 - Changes to `docs/**`
-- Changes to `qdp/docs/**`
+- Manual `workflow_dispatch` run
 
 ## Troubleshooting
 

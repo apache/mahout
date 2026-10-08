@@ -136,14 +136,17 @@ See [testing/README.md](testing/README.md) for more options and details.
 
 ## API Documentation
 
-API reference documentation is generated from source code. To update the Python API reference content, edit the relevant Python docstrings. Use `docs/api/` only for generation settings, page metadata, or other API documentation structure changes. The generated pages are written under `website/docs/api/` for the Docusaurus site.
+API reference documentation is generated from source code. To update the Python API reference content, edit the relevant Python docstrings. Use `docs/api/` only for generation settings, page metadata, or other API documentation structure changes. The generated pages are written to `website/docs/qumat/api.md` and `website/docs/qdp/api.md` (gitignored) when the website is synced, and are served at `/docs/master/qumat/api` and `/docs/master/qdp/api`.
 
 **Preview documentation locally:**
 
 ```bash
 cd website
-npm run start
+npm run start          # regenerates the API pages (needs uv)
+npm run start:no-api   # faster: skips API generation
 ```
+
+Neither command needs a GPU or a compiled QDP extension. See [website/README.md](website/README.md#api-reference-docs) for the full workflow, the Rust API docs, versioning and troubleshooting.
 
 ---
 
