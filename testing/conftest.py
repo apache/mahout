@@ -18,13 +18,17 @@
 Shared pytest configuration and fixtures for all tests.
 
 This module provides:
-- Custom pytest markers (gpu, slow)
+- Custom pytest markers (gpu, gpu_torch, slow)
 - Auto-skip logic for QDP tests when the native extension is not built
+- Auto-skip logic for ``gpu`` tests when no CUDA device is usable, and for
+  ``gpu_torch`` tests when PyTorch cannot run kernels on the GPU
 - Shared fixtures for QDP availability checking
 
 QDP tests are automatically skipped if the _qdp extension is not available,
 allowing contributors without CUDA to run the qumat test suite.
 """
+
+import warnings
 
 import pytest
 
@@ -70,23 +74,85 @@ def _gpu_available() -> bool:
 _GPU_AVAILABLE = _gpu_available()
 
 
+def _torch_cuda_skip_reason(device_id: int = 0) -> str | None:
+    """Return why PyTorch cannot run CUDA kernels on ``device_id``, or None.
+
+    ``torch.cuda.is_available()`` is True whenever a driver and a GPU are
+    present, but the PyTorch wheel only ships kernels for the compute
+    capabilities in ``torch.cuda.get_arch_list()``.  On other GPUs (e.g.
+    Pascal ``sm_61`` with a recent wheel) the first kernel launch fails with
+    ``cudaErrorNoKernelImageForDevice``.
+
+    This delegates to ``qumat_qdp.loader._select_torch_device`` -- the check
+    production code uses (PR #1323) -- so tests skip exactly when the loader
+    would fall back to CPU.  It needs only PyTorch and the pure-Python
+    ``qumat_qdp`` package, not the ``_qdp`` extension.
+    """
+    try:
+        import torch
+    except Exception as e:
+        return f"PyTorch not available: {e}"
+    try:
+        if not torch.cuda.is_available():
+            return "CUDA not available to PyTorch"
+        from qumat_qdp.loader import _select_torch_device
+
+        with warnings.catch_warnings():
+            # _select_torch_device warns before falling back to CPU; the skip
+            # reason below carries the same information.
+            warnings.simplefilter("ignore")
+            device = _select_torch_device(torch, device_id)
+        if device.startswith("cuda"):
+            return None
+        major, minor = torch.cuda.get_device_capability(device_id)
+        return (
+            "GPU arch not supported by this PyTorch build: "
+            f"sm_{major}{minor} not in {sorted(torch.cuda.get_arch_list())}"
+        )
+    except Exception as e:
+        # ValueError for an out-of-range device_id, ImportError if qumat_qdp
+        # is not installed, RuntimeError from a broken CUDA install, ...
+        return f"PyTorch CUDA probe failed: {e}"
+
+
+def _cuda_compatible_with_torch(device_id: int = 0) -> bool:
+    """Return True iff PyTorch can launch CUDA kernels on ``device_id``.
+
+    Mirrors ``qumat_qdp.loader._select_torch_device`` (device capability
+    intersected with ``torch.cuda.get_arch_list()``); see
+    ``_torch_cuda_skip_reason`` for details.
+    """
+    return _torch_cuda_skip_reason(device_id) is None
+
+
 def pytest_configure(config):
     """Register custom pytest markers."""
     config.addinivalue_line(
         "markers", "gpu: marks tests as requiring GPU and _qdp extension"
     )
+    config.addinivalue_line(
+        "markers",
+        "gpu_torch: marks tests that run PyTorch CUDA ops (device='cuda'); "
+        "skipped unless PyTorch supports the GPU's compute capability",
+    )
     config.addinivalue_line("markers", "slow: marks tests as slow running")
 
 
 def pytest_collection_modifyitems(config, items):
-    """Auto-skip QDP tests when the extension is missing, and GPU tests when
-    no CUDA device is available.
+    """Auto-skip QDP tests when the extension is missing, GPU tests when no
+    CUDA device is available, and PyTorch-on-CUDA tests when the GPU's arch
+    is not supported by the installed PyTorch build.
 
     ``_qdp`` can now build/import without a GPU (stub CUDA symbols), so
-    extension availability alone no longer implies a usable device.  GPU tests
-    are therefore skipped whenever ``torch.cuda.is_available()`` is False, even
-    when the extension imports -- otherwise they execute against the stub
-    runtime and abort the worker process.
+    extension availability alone no longer implies a usable device.  ``gpu``
+    tests are therefore skipped whenever the native engine reports no device
+    (see ``_gpu_available``), even when the extension imports -- otherwise
+    they execute against the stub runtime and abort the worker process.
+
+    ``gpu_torch`` is independent of ``gpu``: it guards tests that create
+    tensors on ``device="cuda"`` or run PyTorch ops on GPU tensors.  A test
+    that needs both the native engine and PyTorch CUDA kernels carries both
+    markers; the ``gpu`` skip reason wins when both apply.
     """
     skip_no_qdp = pytest.mark.skip(
         reason=f"QDP extension not available: {_QDP_IMPORT_ERROR}. "
@@ -103,7 +169,13 @@ def pytest_collection_modifyitems(config, items):
         "test_fallback.py",
         "test_benchmark_utils.py",
         "test_benchmark_cli_validation.py",
+        "test_gpu_guards.py",
     }
+
+    # Computed lazily: importing torch is slow, and most runs (e.g. the qumat
+    # suite) contain no gpu_torch tests at all.
+    torch_cuda_reason: str | None = None
+    torch_cuda_probed = False
 
     for item in items:
         is_gpu = "gpu" in item.keywords
@@ -113,13 +185,18 @@ def pytest_collection_modifyitems(config, items):
             "testing/qdp" in fspath_str or "testing\\qdp" in fspath_str
         ) and not any(name in fspath_str for name in _NO_QDP_OK)
 
-        if not _QDP_AVAILABLE:
+        if not _QDP_AVAILABLE and (is_gpu or needs_qdp):
             # No extension at all: skip GPU tests and everything needing _qdp.
-            if is_gpu or needs_qdp:
-                item.add_marker(skip_no_qdp)
+            item.add_marker(skip_no_qdp)
         elif is_gpu and not _GPU_AVAILABLE:
             # Extension built (possibly with CUDA stubs) but no usable device.
             item.add_marker(skip_no_gpu)
+        elif item.get_closest_marker("gpu_torch") is not None:
+            if not torch_cuda_probed:
+                torch_cuda_reason = _torch_cuda_skip_reason()
+                torch_cuda_probed = True
+            if torch_cuda_reason is not None:
+                item.add_marker(pytest.mark.skip(reason=torch_cuda_reason))
 
 
 @pytest.fixture
