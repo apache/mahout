@@ -2077,6 +2077,517 @@ mod tests {
     }
 
     // -------------------------------------------------------------------------
+    // AdapterBackedProducer vs. the pre-#1435 producers (#1435)
+    //
+    // `legacy` is a verbatim copy of SyntheticProducer / InMemoryProducer /
+    // StreamingProducer as they were before the refactor (only renamed). Every test
+    // below runs the old and the new producer side by side on the same input and the
+    // same sequence of recycled buffers, and requires bit-identical output. Delete
+    // `legacy` once the refactor has shipped in a release.
+    // -------------------------------------------------------------------------
+
+    mod adapter_equivalence_tests {
+        use super::*;
+        use arrow::array::{ArrayRef, FixedSizeListBuilder, Float32Builder, Float64Builder};
+        use arrow::datatypes::{DataType, Field, Schema};
+        use arrow::record_batch::RecordBatch;
+        use parquet::arrow::ArrowWriter;
+        use parquet::file::properties::WriterProperties;
+        use std::sync::Arc;
+
+        #[allow(dead_code)]
+        mod legacy {
+            use super::super::super::*;
+
+            pub struct LegacySyntheticProducer {
+                pub config: PipelineConfig,
+                pub vector_len: usize,
+                pub batch_index: usize,
+                pub total_batches: usize,
+            }
+
+            impl LegacySyntheticProducer {
+                pub fn new(config: PipelineConfig, vector_len: usize) -> Self {
+                    let total_batches = config.total_batches;
+                    Self {
+                        config,
+                        vector_len,
+                        batch_index: 0,
+                        total_batches,
+                    }
+                }
+            }
+
+            impl BatchProducer for LegacySyntheticProducer {
+                fn produce(
+                    &mut self,
+                    recycled: Option<BatchData>,
+                ) -> Result<Option<PrefetchedBatch>> {
+                    if self.batch_index >= self.total_batches {
+                        return Ok(None);
+                    }
+
+                    let mut data = match recycled {
+                        Some(BatchData::F32(mut buf))
+                            if matches!(self.config.dtype, Precision::Float32) =>
+                        {
+                            buf.resize(self.config.batch_size * self.vector_len, 0.0);
+                            BatchData::F32(buf)
+                        }
+                        Some(BatchData::F64(mut buf))
+                            if matches!(self.config.dtype, Precision::Float64) =>
+                        {
+                            buf.resize(self.config.batch_size * self.vector_len, 0.0);
+                            BatchData::F64(buf)
+                        }
+                        _ => {
+                            if matches!(self.config.dtype, Precision::Float32) {
+                                BatchData::F32(vec![
+                                    0.0f32;
+                                    self.config.batch_size * self.vector_len
+                                ])
+                            } else {
+                                BatchData::F64(vec![
+                                    0.0f64;
+                                    self.config.batch_size * self.vector_len
+                                ])
+                            }
+                        }
+                    };
+
+                    match &mut data {
+                        BatchData::F32(buf) => fill_batch_inplace_f32(
+                            &self.config,
+                            self.batch_index,
+                            self.vector_len,
+                            buf,
+                        ),
+                        BatchData::F64(buf) => {
+                            fill_batch_inplace(&self.config, self.batch_index, self.vector_len, buf)
+                        }
+                    }
+
+                    self.batch_index += 1;
+                    Ok(Some(PrefetchedBatch {
+                        data,
+                        batch_n: self.config.batch_size,
+                        sample_size: self.vector_len,
+                        num_qubits: self.config.num_qubits as usize,
+                    }))
+                }
+            }
+
+            pub struct LegacyInMemoryProducer<T: FloatElem = f64> {
+                pub data: Vec<T>,
+                pub cursor: usize,
+                pub sample_size: usize,
+                pub batch_size: usize,
+                pub num_qubits: usize,
+                pub batches_yielded: usize,
+                pub batch_limit: usize,
+            }
+
+            impl<T: FloatElem + ToBatchData> BatchProducer for LegacyInMemoryProducer<T> {
+                fn produce(
+                    &mut self,
+                    recycled: Option<BatchData>,
+                ) -> Result<Option<PrefetchedBatch>> {
+                    if self.batches_yielded >= self.batch_limit {
+                        return Ok(None);
+                    }
+                    let remaining = (self.data.len() - self.cursor) / self.sample_size;
+                    if remaining == 0 {
+                        return Ok(None);
+                    }
+
+                    let batch_n = remaining.min(self.batch_size);
+                    let start = self.cursor;
+                    let end = start + batch_n * self.sample_size;
+                    self.cursor = end;
+                    self.batches_yielded += 1;
+                    let slice = &self.data[start..end];
+
+                    let data = match recycled.and_then(T::from_recycled) {
+                        Some(mut buf) => {
+                            buf.clear();
+                            buf.extend_from_slice(slice);
+                            T::wrap(buf)
+                        }
+                        None => T::wrap(slice.to_vec()),
+                    };
+
+                    Ok(Some(PrefetchedBatch {
+                        data,
+                        batch_n,
+                        sample_size: self.sample_size,
+                        num_qubits: self.num_qubits,
+                    }))
+                }
+            }
+
+            pub struct LegacyStreamingProducer<T: FloatElem = f64> {
+                pub reader: ParquetStreamingReader<T>,
+                pub buffer: Vec<T>,
+                pub buffer_cursor: usize,
+                pub read_chunk_scratch: Vec<T>,
+                pub sample_size: usize,
+                pub batch_size: usize,
+                pub num_qubits: usize,
+                pub batches_yielded: usize,
+                pub batch_limit: usize,
+            }
+
+            impl<T: FloatElem + ToBatchData> BatchProducer for LegacyStreamingProducer<T> {
+                fn produce(
+                    &mut self,
+                    recycled: Option<BatchData>,
+                ) -> Result<Option<PrefetchedBatch>> {
+                    if self.batches_yielded >= self.batch_limit {
+                        return Ok(None);
+                    }
+                    let required = self.batch_size * self.sample_size;
+                    while (self.buffer.len() - self.buffer_cursor) < required {
+                        let written = self.reader.read_chunk(&mut self.read_chunk_scratch)?;
+                        if written == 0 {
+                            break;
+                        }
+                        self.buffer
+                            .extend_from_slice(&self.read_chunk_scratch[..written]);
+                    }
+                    let available = self.buffer.len() - self.buffer_cursor;
+                    let available_samples = available / self.sample_size;
+
+                    if available_samples == 0 {
+                        return Ok(None);
+                    }
+
+                    let batch_n = available_samples.min(self.batch_size);
+                    let start = self.buffer_cursor;
+                    let end = start + batch_n * self.sample_size;
+                    self.buffer_cursor = end;
+                    self.batches_yielded += 1;
+
+                    let data = match recycled.and_then(T::from_recycled) {
+                        Some(mut buf) => {
+                            buf.clear();
+                            buf.extend_from_slice(&self.buffer[start..end]);
+                            T::wrap(buf)
+                        }
+                        None => T::wrap(self.buffer[start..end].to_vec()),
+                    };
+
+                    if self.buffer_cursor >= self.buffer.len() / BUFFER_COMPACT_DENOM {
+                        self.buffer.drain(..self.buffer_cursor);
+                        self.buffer_cursor = 0;
+                    }
+
+                    Ok(Some(PrefetchedBatch {
+                        data,
+                        batch_n,
+                        sample_size: self.sample_size,
+                        num_qubits: self.num_qubits,
+                    }))
+                }
+            }
+        }
+        use legacy::{LegacyInMemoryProducer, LegacyStreamingProducer, LegacySyntheticProducer};
+
+        /// Bit pattern of a batch, so -0.0 vs 0.0 or NaN payloads would also be caught.
+        fn bits(d: &BatchData) -> (bool, Vec<u64>) {
+            match d {
+                BatchData::F32(v) => (true, v.iter().map(|x| x.to_bits() as u64).collect()),
+                BatchData::F64(v) => (false, v.iter().map(|x| x.to_bits()).collect()),
+            }
+        }
+
+        /// How the test feeds `recycled` back into `produce`, mimicking `spawn_producer`.
+        #[derive(Clone, Copy, Debug)]
+        enum Recycle {
+            /// Consumer never returns buffers: every batch allocates.
+            Never,
+            /// Consumer returns each batch's buffer (the steady state).
+            Previous,
+            /// Consumer returns a buffer of the *other* dtype, longer than needed and full
+            /// of garbage: must be ignored or fully overwritten, never leak into output.
+            Garbage,
+        }
+
+        fn garbage(prev: &BatchData) -> BatchData {
+            match prev {
+                BatchData::F32(_) => BatchData::F64(vec![f64::NAN; 4096]),
+                BatchData::F64(_) => BatchData::F32(vec![f32::NAN; 4096]),
+            }
+        }
+
+        fn dirty_same_dtype(prev: &BatchData) -> BatchData {
+            match prev {
+                BatchData::F32(v) => BatchData::F32(vec![-7.5; v.len() + 13]),
+                BatchData::F64(v) => BatchData::F64(vec![-7.5; v.len() + 13]),
+            }
+        }
+
+        /// Drive both producers to exhaustion and require identical batches.
+        fn assert_same_output(
+            mut old: impl BatchProducer,
+            mut new: impl BatchProducer,
+            recycle: Recycle,
+        ) -> usize {
+            let (mut rec_old, mut rec_new) = (None, None);
+            let mut n = 0;
+            loop {
+                let a = old.produce(rec_old.take()).unwrap();
+                let b = new.produce(rec_new.take()).unwrap();
+                let (a, b) = match (a, b) {
+                    (None, None) => return n,
+                    (Some(a), Some(b)) => (a, b),
+                    (a, b) => panic!(
+                        "batch {n}: legacy is_some={} new is_some={}",
+                        a.is_some(),
+                        b.is_some()
+                    ),
+                };
+                assert_eq!(bits(&a.data), bits(&b.data), "batch {n} data differs");
+                assert_eq!(
+                    (a.batch_n, a.sample_size, a.num_qubits),
+                    (b.batch_n, b.sample_size, b.num_qubits),
+                    "batch {n} metadata differs"
+                );
+                match recycle {
+                    Recycle::Never => {}
+                    Recycle::Previous => {
+                        rec_old = Some(a.data);
+                        rec_new = Some(b.data);
+                    }
+                    // Alternate wrong-dtype garbage and same-dtype dirty buffers.
+                    Recycle::Garbage if n % 2 == 0 => {
+                        rec_old = Some(garbage(&a.data));
+                        rec_new = Some(garbage(&b.data));
+                    }
+                    Recycle::Garbage => {
+                        rec_old = Some(dirty_same_dtype(&a.data));
+                        rec_new = Some(dirty_same_dtype(&b.data));
+                    }
+                }
+                n += 1;
+            }
+        }
+
+        const RECYCLES: [Recycle; 3] = [Recycle::Never, Recycle::Previous, Recycle::Garbage];
+
+        #[test]
+        fn synthetic_matches_legacy_bit_for_bit() {
+            let encodings = [
+                Encoding::Amplitude,
+                Encoding::Angle,
+                Encoding::Basis,
+                Encoding::Iqp,
+                Encoding::IqpZ,
+                Encoding::Phase,
+            ];
+            let mut cases = 0;
+            for encoding in encodings {
+                for dtype in [Precision::Float32, Precision::Float64] {
+                    // Seeds near u64::MAX overflow `seed + i` inside fill_sample in debug
+                    // builds (pre-existing, legacy panics too), so stay well below it.
+                    for seed in [None, Some(0), Some(123), Some(1 << 40)] {
+                        for recycle in RECYCLES {
+                            let mut config = PipelineConfig {
+                                num_qubits: 4,
+                                batch_size: 3,
+                                total_batches: 6,
+                                encoding,
+                                seed,
+                                dtype,
+                                ..Default::default()
+                            };
+                            config.normalize();
+                            let vl = super::vector_len(config.num_qubits, encoding);
+                            let old = LegacySyntheticProducer::new(config.clone(), vl);
+                            let new = SyntheticProducer::new(config, vl);
+                            assert_eq!(assert_same_output(old, new, recycle), 6);
+                            cases += 1;
+                        }
+                    }
+                }
+            }
+            assert_eq!(cases, 6 * 2 * 4 * 3);
+        }
+
+        #[test]
+        fn inmemory_matches_legacy_bit_for_bit() {
+            // 23 samples of 4: batch sizes 1, 5, 23, 40 cover full, partial-last and
+            // single-batch cases; batch_limit 2 covers the cap.
+            let data64: Vec<f64> = (0..23 * 4).map(|i| (i as f64).sin()).collect();
+            let data32: Vec<f32> = data64.iter().map(|&x| x as f32).collect();
+            for batch_size in [1, 5, 23, 40] {
+                for batch_limit in [usize::MAX, 2] {
+                    for recycle in RECYCLES {
+                        let old = LegacyInMemoryProducer::<f64> {
+                            data: data64.clone(),
+                            cursor: 0,
+                            sample_size: 4,
+                            batch_size,
+                            num_qubits: 2,
+                            batches_yielded: 0,
+                            batch_limit,
+                        };
+                        let new: InMemoryProducer<f64> = AdapterBackedProducer::new(
+                            InMemoryAdapter::new(data64.clone(), 4),
+                            batch_size,
+                            2,
+                            batch_limit,
+                        );
+                        let n = assert_same_output(old, new, recycle);
+                        assert_eq!(n, 23usize.div_ceil(batch_size).min(batch_limit));
+
+                        let old = LegacyInMemoryProducer::<f32> {
+                            data: data32.clone(),
+                            cursor: 0,
+                            sample_size: 4,
+                            batch_size,
+                            num_qubits: 2,
+                            batches_yielded: 0,
+                            batch_limit,
+                        };
+                        let new: InMemoryProducer<f32> = AdapterBackedProducer::new(
+                            InMemoryAdapter::new(data32.clone(), 4),
+                            batch_size,
+                            2,
+                            batch_limit,
+                        );
+                        assert_same_output(old, new, recycle);
+                    }
+                }
+            }
+        }
+
+        /// `n` rows of `sample` distinct values, written in row groups of 7 so the
+        /// streaming reader crosses many record-batch boundaries.
+        fn write_stream_parquet(path: &std::path::Path, n: usize, sample: usize, f32_col: bool) {
+            let dt = if f32_col {
+                DataType::Float32
+            } else {
+                DataType::Float64
+            };
+            let item = Arc::new(Field::new("item", dt.clone(), true));
+            let field = Field::new("data", DataType::FixedSizeList(item, sample as i32), true);
+            let schema = Arc::new(Schema::new(vec![field]));
+            let value = |i: usize| (i as f64) * 0.001 - 0.37;
+            let array: ArrayRef = if f32_col {
+                let mut b = FixedSizeListBuilder::new(Float32Builder::new(), sample as i32);
+                for r in 0..n {
+                    for c in 0..sample {
+                        b.values().append_value(value(r * sample + c) as f32);
+                    }
+                    b.append(true);
+                }
+                Arc::new(b.finish())
+            } else {
+                let mut b = FixedSizeListBuilder::new(Float64Builder::new(), sample as i32);
+                for r in 0..n {
+                    for c in 0..sample {
+                        b.values().append_value(value(r * sample + c));
+                    }
+                    b.append(true);
+                }
+                Arc::new(b.finish())
+            };
+            let batch = RecordBatch::try_new(schema.clone(), vec![array]).unwrap();
+            let props = WriterProperties::builder()
+                .set_max_row_group_size(7)
+                .build();
+            let file = std::fs::File::create(path).unwrap();
+            let mut w = ArrowWriter::try_new(file, schema, Some(props)).unwrap();
+            w.write(&batch).unwrap();
+            w.close().unwrap();
+        }
+
+        /// Build legacy and new streaming producers over the same file, primed the same
+        /// way `build_streaming_producer` primes them (first chunk read up front).
+        fn streaming_pair<T: FloatElem + ToBatchData>(
+            path: &std::path::Path,
+            chunk: usize,
+            batch_size: usize,
+            batch_limit: usize,
+        ) -> (LegacyStreamingProducer<T>, StreamingProducer<T>) {
+            let prime = || {
+                let mut r = ParquetStreamingReader::<T>::new(path, Some(5), NullHandling::FillZero)
+                    .unwrap();
+                let mut buf = vec![T::default(); chunk];
+                let written = r.read_chunk(&mut buf).unwrap();
+                buf.truncate(written);
+                let ss = r.get_sample_size().unwrap();
+                (r, buf, ss)
+            };
+            let (r, buffer, ss) = prime();
+            let old = LegacyStreamingProducer::<T> {
+                reader: r,
+                buffer,
+                buffer_cursor: 0,
+                read_chunk_scratch: vec![T::default(); chunk],
+                sample_size: ss,
+                batch_size,
+                num_qubits: 2,
+                batches_yielded: 0,
+                batch_limit,
+            };
+            let (r, buffer, ss) = prime();
+            let new = AdapterBackedProducer::new(
+                StreamingAdapter::new(r, buffer, vec![T::default(); chunk], ss),
+                batch_size,
+                2,
+                batch_limit,
+            );
+            (old, new)
+        }
+
+        #[test]
+        fn streaming_matches_legacy_bit_for_bit() {
+            // 101 samples of 4. Chunk sizes smaller than, equal to, and larger than a
+            // batch force refills, buffer compaction, and partial final batches.
+            let path64 = dtype_file_tests::temp_parquet_path("equiv_stream_f64");
+            let path32 = dtype_file_tests::temp_parquet_path("equiv_stream_f32");
+            write_stream_parquet(&path64, 101, 4, false);
+            write_stream_parquet(&path32, 101, 4, true);
+            let result = std::panic::catch_unwind(|| {
+                for chunk in [4, 12, 20, 64, 1024] {
+                    for batch_size in [1, 3, 5, 200] {
+                        for batch_limit in [usize::MAX, 4] {
+                            for recycle in RECYCLES {
+                                let (old, new) =
+                                    streaming_pair::<f64>(&path64, chunk, batch_size, batch_limit);
+                                let n = assert_same_output(old, new, recycle);
+                                assert_eq!(n, 101usize.div_ceil(batch_size).min(batch_limit));
+                                let (old, new) =
+                                    streaming_pair::<f32>(&path32, chunk, batch_size, batch_limit);
+                                assert_same_output(old, new, recycle);
+                            }
+                        }
+                    }
+                }
+            });
+            let _ = std::fs::remove_file(&path64);
+            let _ = std::fs::remove_file(&path32);
+            result.unwrap();
+        }
+
+        #[test]
+        fn reuse_or_alloc_reuses_matching_dtype_and_ignores_other() {
+            let v = reuse_or_alloc::<f32>(Some(BatchData::F32(Vec::with_capacity(100))), 10);
+            assert_eq!(v.len(), 10);
+            assert!(v.capacity() >= 100, "matching dtype buffer must be reused");
+            let v = reuse_or_alloc::<f64>(Some(BatchData::F32(vec![1.0; 100])), 3);
+            assert_eq!(
+                v,
+                vec![0.0; 3],
+                "wrong dtype must fall back to a fresh zeroed Vec"
+            );
+            let v = reuse_or_alloc::<f64>(None, 2);
+            assert_eq!(v, vec![0.0; 2]);
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Source enum (#1434)
     //
     // `PipelineIterator::new` = `spawn_source` + storing a `QdpEngine`. Creating an
