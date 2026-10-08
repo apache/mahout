@@ -143,13 +143,17 @@ def qdp_engine(qdp_available):
     """
     Fixture that provides a QDP engine instance.
 
-    Automatically skips if QDP is not available.
+    Automatically skips if QDP is not available, or if the extension is
+    importable but no CUDA device is usable (e.g. a stub build), since
+    constructing ``QdpEngine`` would then fail or abort the process.
 
     Usage:
         def test_encoding(qdp_engine):
             qtensor = qdp_engine.encode([1.0, 2.0], num_qubits=1, encoding_method="amplitude")
             ...
     """
+    if not _GPU_AVAILABLE:
+        pytest.skip("GPU required: no CUDA device available for QdpEngine")
     from _qdp import QdpEngine
 
     return QdpEngine(0)

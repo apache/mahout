@@ -22,6 +22,13 @@ torch = pytest.importorskip("torch")
 _qdp = pytest.importorskip("_qdp")
 QdpEngine = _qdp.QdpEngine
 
+# Every test here constructs a native QdpEngine, so gate the module on the
+# shared ``gpu`` marker: testing/conftest.py skips it using the engine's own
+# CUDA probe (qumat_qdp.is_cuda_available()). The per-test torch check below
+# is not enough on its own -- on a GPU host where _qdp was built against CUDA
+# stubs, torch reports a device but QdpEngine(0) cannot initialise.
+pytestmark = pytest.mark.gpu
+
 
 def _cuda_available():
     return torch.cuda.is_available()
