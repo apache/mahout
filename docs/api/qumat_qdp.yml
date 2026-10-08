@@ -23,6 +23,7 @@ loaders:
       - qumat_qdp.backend
       - qumat_qdp.tensor
       - qumat_qdp.loader
+      - qumat_qdp.preprocessing
       - qumat_qdp.triton_amd
 
 # Generated QDP docs intentionally load implementation modules so pydoc-markdown

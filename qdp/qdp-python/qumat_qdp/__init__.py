@@ -19,12 +19,14 @@ QDP (Quantum Data Processing) Python API.
 
 Public API: QdpEngine (unified router), QdpTensor/QuantumTensor (DLPack facade),
 QdpBenchmark, ThroughputResult, LatencyResult (benchmark API),
-QuantumDataLoader (data loader iterator).
+QuantumDataLoader (data loader iterator), Preprocessor (CPU input
+validation and L2 norms).
 
 Usage:
     from qumat_qdp import QdpEngine, QuantumTensor
     from qumat_qdp import QdpBenchmark, ThroughputResult, LatencyResult
     from qumat_qdp import QuantumDataLoader
+    from qumat_qdp import Preprocessor
 """
 
 from __future__ import annotations
@@ -72,6 +74,7 @@ from qumat_qdp.api import (
 )
 from qumat_qdp.backend import QdpEngine
 from qumat_qdp.loader import QuantumDataLoader
+from qumat_qdp.preprocessing import Preprocessor
 from qumat_qdp.tensor import QdpTensor, QuantumTensor
 from qumat_qdp.triton_amd import TritonAmdEngine, is_triton_amd_available
 
@@ -80,6 +83,7 @@ __all__ = [
     "Backend",
     "LatencyResult",
     "NativeQuantumTensor",
+    "Preprocessor",
     "QdpBenchmark",
     "QdpEngine",
     "QdpTensor",
