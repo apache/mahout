@@ -209,12 +209,27 @@ def draw_circuit(circuit: qiskit.QuantumCircuit) -> Any:
     return circuit.draw()
 
 
+def _resolve_angle(
+    circuit: qiskit.QuantumCircuit,
+    angle: float | str | qiskit.circuit.Parameter,
+) -> Any:
+    """Return a Qiskit angle, reusing an existing Parameter with the same name.
+
+    Qiskit refuses two distinct ``Parameter`` objects with the same name in
+    one circuit, so a name used by several gates must map to one object.
+    """
+    if not isinstance(angle, str):
+        return angle
+    existing = circuit.get_parameter(angle, None)
+    return existing if existing is not None else qiskit.circuit.Parameter(angle)
+
+
 def apply_rx_gate(
     circuit: qiskit.QuantumCircuit,
     qubit_index: int,
     angle: float | str | qiskit.circuit.Parameter,
 ) -> None:
-    param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
+    param = _resolve_angle(circuit, angle)
     circuit.rx(param, qubit_index)
 
 
@@ -223,7 +238,7 @@ def apply_ry_gate(
     qubit_index: int,
     angle: float | str | qiskit.circuit.Parameter,
 ) -> None:
-    param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
+    param = _resolve_angle(circuit, angle)
     circuit.ry(param, qubit_index)
 
 
@@ -232,7 +247,7 @@ def apply_rz_gate(
     qubit_index: int,
     angle: float | str | qiskit.circuit.Parameter,
 ) -> None:
-    param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
+    param = _resolve_angle(circuit, angle)
     circuit.rz(param, qubit_index)
 
 
