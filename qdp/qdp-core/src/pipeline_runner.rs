@@ -923,6 +923,10 @@ fn fill_batch_inplace_f32(
 }
 
 /// Release DLPack tensor (call deleter so GPU memory is freed).
+///
+/// # Safety
+/// `ptr` must be null or a live `DLManagedTensor` returned by a
+/// `QdpEngine::encode*` call that no one else will free or use again.
 unsafe fn release_dlpack(ptr: *mut DLManagedTensor) {
     if ptr.is_null() {
         return;

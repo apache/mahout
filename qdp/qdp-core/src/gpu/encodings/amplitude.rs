@@ -1053,6 +1053,11 @@ impl AmplitudeEncoder {
         }
     }
 
+    /// Same as [`Self::calculate_inv_norm_gpu`], on an explicit CUDA stream.
+    ///
+    /// # Safety
+    /// Same as [`Self::calculate_inv_norm_gpu`]. Additionally, `stream` must
+    /// be null or a valid CUDA stream on `device`.
     #[cfg(target_os = "linux")]
     pub(crate) unsafe fn calculate_inv_norm_gpu_with_stream(
         device: &Arc<CudaDevice>,
