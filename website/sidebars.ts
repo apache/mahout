@@ -20,6 +20,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'qumat/basic-gates',
         'qumat/parameterized-circuits',
+        'qumat/trainer',
         'qumat/api',
         'qumat/concepts',
         'qumat/examples',

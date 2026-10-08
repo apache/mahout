@@ -20,6 +20,7 @@ loaders:
     modules:
       - qumat.qumat
       - qumat.optimize
+      - qumat.trainer
 
 # TODO: Trim this filter once the Python package exposes a cleaner public
 # surface for documentation generation.
@@ -31,6 +32,7 @@ processors:
       (not name.startswith('_') or name == '__init__')
       and name not in ('annotations', 'Mapping', 'import_module', 'ModuleType', 'Any')
       and name not in ('math', 'np', 'Callable', 'Sequence', 'dataclass', 'field', 'cache', 'TYPE_CHECKING')
+      and not (obj.location.filename.endswith('trainer.py') and name in ('logging', 'logger', 'Protocol', 'runtime_checkable', 'QuMat', 'Dataset', 'LossFunction', 'MetricsFunction', 'expectation_z', 'finite_difference_gradient', 'parameter_shift_gradient'))
       and default()
   - type: smart
 
