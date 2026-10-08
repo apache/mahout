@@ -161,24 +161,70 @@ function generateFrontmatter(frontmatter) {
 }
 
 /**
- * Transform frontmatter for Docusaurus compatibility
+ * Words that must keep a specific spelling when a title is derived from a
+ * file name. Keys are lower case; values are the canonical spelling.
+ * Without this, `qdp-api.md` became "Qdp Api" instead of "QDP API".
  */
-function transformFrontmatter(frontmatter, filePath) {
+const TITLE_WORDS = new Map(
+  [
+    'ADR', 'AI', 'AMD', 'API', 'APIs', 'CI', 'CLI', 'CPU', 'CUDA', 'DLPack',
+    'FAQ', 'GPU', 'GPUs', 'HTML', 'I/O', 'IO', 'IRC', 'JSON', 'LLM', 'LLMs',
+    'ML', 'NumPy', 'NVTX', 'PQC', 'PR', 'PyTorch', 'QAOA', 'QDP', 'QFT',
+    'QML', 'QPU', 'ROCm', 'SDK', 'URL', 'VQE', 'YAML',
+  ].map(word => [word.toLowerCase(), word]),
+);
+
+/**
+ * Derive a human-readable title from a file name, e.g.
+ * `qdp-gpu_faq.md` -> "QDP GPU FAQ". A leading number prefix such as
+ * `001-` is dropped, as Docusaurus does for doc IDs.
+ */
+function titleFromFilename(filePath) {
+  return path
+    .basename(filePath, path.extname(filePath))
+    .replace(/^\d+\s*[-_.]+\s*(?=[^-_.\s])/, '')
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map(word => {
+      const known = TITLE_WORDS.get(word.toLowerCase());
+      return known ?? word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
+}
+
+/**
+ * True if the markdown body starts with a level-1 heading, which
+ * Docusaurus uses as the page title when frontmatter has none.
+ */
+function hasLeadingH1(body) {
+  return /^\s*#[ \t]+\S/.test(body) || /^\s*[^\n]+\r?\n=+[ \t]*(\r?\n|$)/.test(body);
+}
+
+/**
+ * Transform frontmatter for Docusaurus compatibility.
+ *
+ * Pure function: returns a new object and never mutates its input.
+ *
+ * - Drops Jekyll-only fields (`layout`, `permalink`).
+ * - Never touches a `title` the author wrote, including an intentionally
+ *   empty one (`title: ""` is valid Docusaurus frontmatter).
+ * - If there is no title, and the body has no leading `# Heading` for
+ *   Docusaurus to use, derives one from the file name (keeping acronyms
+ *   such as QDP and GPU in their canonical form). Index pages are skipped
+ *   because their file name says nothing about the page.
+ */
+function transformFrontmatter(frontmatter, filePath, body = '') {
   const transformed = { ...frontmatter };
 
   // Remove Jekyll-specific fields
   delete transformed.layout;
   delete transformed.permalink;
 
-  // Generate title from filename if not present
-  if (!transformed.title) {
-    const basename = path.basename(filePath, '.md');
-    if (basename !== 'index') {
-      transformed.title = basename
-        .replace(/_/g, ' ')
-        .replace(/-/g, ' ')
-        .replace(/\b\w/g, c => c.toUpperCase());
-    }
+  const hasTitle = Object.prototype.hasOwnProperty.call(transformed, 'title')
+    && transformed.title !== null;
+  const basename = path.basename(filePath, path.extname(filePath));
+  if (!hasTitle && basename !== 'index' && !hasLeadingH1(body)) {
+    transformed.title = titleFromFilename(filePath);
   }
 
   return transformed;
@@ -204,7 +250,7 @@ function processMarkdown(content, filePath) {
     throw new Error(`Invalid YAML frontmatter in ${filePath}: ${err.message}`);
   }
   const { frontmatter, body } = parsed;
-  const transformedFrontmatter = transformFrontmatter(frontmatter, filePath);
+  const transformedFrontmatter = transformFrontmatter(frontmatter, filePath, body);
 
   // Only add frontmatter if there's something to add
   if (Object.keys(transformedFrontmatter).length > 0) {
@@ -362,6 +408,7 @@ module.exports = {
   parseFrontmatter,
   generateFrontmatter,
   transformFrontmatter,
+  titleFromFilename,
   processMarkdown,
   syncDirectory,
   cleanDestination,

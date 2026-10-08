@@ -29,6 +29,7 @@ const {
   parseFrontmatter,
   generateFrontmatter,
   transformFrontmatter,
+  titleFromFilename,
   processMarkdown,
   syncDirectory,
   cleanDestination,
@@ -176,6 +177,72 @@ test('transformFrontmatter drops Jekyll-only fields', () => {
 
 test('transformFrontmatter does not add a title to index pages', () => {
   assert.deepEqual(transformFrontmatter({}, 'docs/qdp/index.md'), {});
+});
+
+test('titleFromFilename keeps known acronyms (#1308)', () => {
+  const cases = {
+    'docs/qdp/qdp-api.md': 'QDP API',
+    'docs/gpu_faq.md': 'GPU FAQ',
+    'docs/cuda-and-rocm-setup.md': 'CUDA And ROCm Setup',
+    'docs/advanced/pqc.md': 'PQC',
+    'docs/qml-with-pytorch.md': 'QML With PyTorch',
+    'docs/llms-for-quantum.md': 'LLMs For Quantum',
+    'docs/pr-policy-and-review-guidelines.md':
+      'PR Policy And Review Guidelines',
+    'docs/qumat/getting-started.md': 'Getting Started',
+    'docs/papers/Quantum-Kernel-Estimation.md': 'Quantum Kernel Estimation',
+    'docs/adr/001-sync-docs.md': 'Sync Docs',
+  };
+  for (const [file, title] of Object.entries(cases)) {
+    assert.equal(titleFromFilename(file), title, file);
+  }
+});
+
+test('titleFromFilename does not split words that contain an acronym', () => {
+  // Only whole words are matched: "apis" is mapped, "rapid" is not.
+  assert.equal(titleFromFilename('rapid-apis.md'), 'Rapid APIs');
+});
+
+test('transformFrontmatter never overwrites an explicit title', () => {
+  for (const title of ['qdp api', '', 0, 2024]) {
+    assert.deepEqual(
+      transformFrontmatter({ title }, 'docs/qdp-api.md'),
+      { title },
+      JSON.stringify(title),
+    );
+  }
+});
+
+test('transformFrontmatter derives a title only when one is missing', () => {
+  assert.deepEqual(transformFrontmatter({}, 'docs/qdp/gpu-faq.md'), {
+    title: 'GPU FAQ',
+  });
+  assert.deepEqual(
+    transformFrontmatter({ title: null }, 'docs/qdp/gpu-faq.md'),
+    { title: 'GPU FAQ' },
+  );
+});
+
+test('transformFrontmatter leaves the title to a leading H1', () => {
+  // Docusaurus already uses the first `# Heading` as the title, which is
+  // better than anything we can guess from the file name.
+  for (const body of ['# QDP: GPU FAQ\n', '\nQDP FAQ\n=======\n']) {
+    assert.deepEqual(
+      transformFrontmatter({}, 'docs/qdp/gpu-faq.md', body),
+      {},
+      JSON.stringify(body),
+    );
+  }
+  assert.deepEqual(
+    transformFrontmatter({}, 'docs/qdp/gpu-faq.md', '## Not a title\n'),
+    { title: 'GPU FAQ' },
+  );
+});
+
+test('transformFrontmatter does not mutate its input', () => {
+  const input = { layout: 'page' };
+  transformFrontmatter(input, 'docs/x.md');
+  assert.deepEqual(input, { layout: 'page' });
 });
 
 test('processMarkdown leaves relative .md links untouched (#1301, #1305)', () => {
