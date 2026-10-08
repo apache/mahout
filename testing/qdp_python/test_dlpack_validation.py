@@ -22,23 +22,17 @@ torch = pytest.importorskip("torch")
 _qdp = pytest.importorskip("_qdp")
 QdpEngine = _qdp.QdpEngine
 
-# Every test here constructs a native QdpEngine, so gate the module on the
-# shared ``gpu`` marker: testing/conftest.py skips it using the engine's own
-# CUDA probe (qumat_qdp.is_cuda_available()). The per-test torch check below
-# is not enough on its own -- on a GPU host where _qdp was built against CUDA
-# stubs, torch reports a device but QdpEngine(0) cannot initialise.
-pytestmark = pytest.mark.gpu
-
-
-def _cuda_available():
-    return torch.cuda.is_available()
+# Every test here constructs a native QdpEngine (``gpu``: skipped unless the
+# engine's own CUDA probe finds a device) and builds input tensors on
+# device="cuda" (``gpu_torch``: skipped unless PyTorch ships kernels for the
+# GPU's compute capability). Both are enforced by testing/conftest.py.
+pytestmark = [pytest.mark.gpu, pytest.mark.gpu_torch]
 
 
 def _engine():
     return QdpEngine(0)
 
 
-@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
 def test_cuda_float32_amplitude_supported() -> None:
     """1D float32 CUDA tensor should be supported for amplitude encoding via GPU pointer f32 path."""
     engine = _engine()
@@ -54,7 +48,6 @@ def test_cuda_float32_amplitude_supported() -> None:
     assert qt.dtype in (torch.complex64, torch.complex128)
 
 
-@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
 def test_cuda_float32_amplitude_2d_supported() -> None:
     """2D float32 CUDA tensor should use the batch GPU-pointer float32 amplitude path."""
     engine = _engine()
@@ -88,7 +81,6 @@ def test_cuda_float32_amplitude_2d_supported() -> None:
     assert torch.allclose(qt, expected)
 
 
-@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
 def test_cuda_float32_amplitude_2d_respects_engine_precision() -> None:
     """2D float32 CUDA amplitude batch should still honor float64 engine output precision."""
     engine = QdpEngine(0, precision="float64")
@@ -122,7 +114,6 @@ def test_cuda_float32_amplitude_2d_respects_engine_precision() -> None:
     assert torch.allclose(qt, expected)
 
 
-@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
 def test_cuda_float32_angle_supported_single_sample() -> None:
     """1D float32 CUDA tensor should be supported for single-sample angle encoding."""
     engine = _engine()
@@ -144,7 +135,6 @@ def test_cuda_float32_angle_supported_single_sample() -> None:
     assert torch.allclose(qt, expected, atol=1e-6, rtol=1e-6)
 
 
-@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
 def test_cuda_float32_angle_2d_batch_supported() -> None:
     """Float32 CUDA angle batch encoding (2D) is supported via the
     f32 zero-copy batch path."""
@@ -174,7 +164,6 @@ def test_cuda_float32_angle_2d_batch_supported() -> None:
     assert torch.allclose(qt, expected, atol=1e-6, rtol=1e-6)
 
 
-@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
 def test_cuda_float32_angle_non_contiguous_rejected() -> None:
     """1D float32 CUDA angle tensor must still be contiguous."""
     engine = _engine()
@@ -185,7 +174,6 @@ def test_cuda_float32_angle_non_contiguous_rejected() -> None:
         engine.encode(t, num_qubits=2, encoding_method="angle")
 
 
-@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
 def test_cuda_float16_angle_rejected() -> None:
     """Angle encoding should not accept float16 CUDA tensors."""
     engine = _engine()
@@ -195,7 +183,6 @@ def test_cuda_float16_angle_rejected() -> None:
         engine.encode(t, num_qubits=2, encoding_method="angle")
 
 
-@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
 def test_stride_1d_non_contiguous_rejected() -> None:
     """Non-contiguous 1D CUDA tensor (stride != 1) should fail with contiguous requirement."""
     engine = _engine()
@@ -210,7 +197,6 @@ def test_stride_1d_non_contiguous_rejected() -> None:
     assert "stride" in msg or "contiguous()" in msg or "expected" in msg
 
 
-@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
 def test_stride_2d_non_contiguous_rejected() -> None:
     """Non-contiguous 2D CUDA tensor should fail with contiguous requirement."""
     engine = _engine()
@@ -229,7 +215,6 @@ def test_stride_2d_non_contiguous_rejected() -> None:
     assert "stride" in msg or "contiguous()" in msg or "expected" in msg
 
 
-@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
 def test_valid_cuda_float64_1d_succeeds() -> None:
     """Valid 1D float64 contiguous CUDA tensor should encode successfully."""
     engine = _engine()
@@ -238,7 +223,6 @@ def test_valid_cuda_float64_1d_succeeds() -> None:
     assert result is not None
 
 
-@pytest.mark.skipif(not _cuda_available(), reason="CUDA not available")
 def test_valid_cuda_float64_2d_succeeds() -> None:
     """Valid 2D float64 contiguous CUDA tensor should encode successfully."""
     engine = _engine()
