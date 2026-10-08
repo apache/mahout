@@ -2193,6 +2193,7 @@ dependencies = [
  "prost",
  "prost-build",
  "protoc-bin-vendored",
+ "py_literal",
  "qdp-kernels",
  "rayon",
  "tch",
