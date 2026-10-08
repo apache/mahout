@@ -25,7 +25,8 @@
  * 1. Cleans the destination (preserving only .gitignore)
  * 2. Copies all markdown files from /docs to website/docs
  * 3. Copies all blog posts from /docs/blog to website/blog
- * 4. Transforms frontmatter for Docusaurus compatibility
+ * 4. Transforms frontmatter for Docusaurus compatibility (the markdown
+ *    body, including links, is copied unchanged)
  *
  * /docs is the SINGLE SOURCE OF TRUTH for all documentation and blog posts.
  * website/docs and website/blog are build artifacts that should not be edited directly.
@@ -173,43 +174,25 @@ function transformFrontmatter(frontmatter, filePath) {
 }
 
 /**
- * Transform markdown links for Docusaurus
- */
-function transformLinks(content) {
-  // Match markdown links: [text](url)
-  const linkRegex = /\[([^\]]*)\]\(([^)]+)\)/g;
-
-  return content.replace(linkRegex, (match, text, url) => {
-    // Skip external links
-    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) {
-      return match;
-    }
-
-    // Skip anchor links
-    if (url.startsWith('#')) {
-      return match;
-    }
-
-    return `[${text}](${url})`;
-  });
-}
-
-/**
  * Transform the full text of a markdown file for Docusaurus.
  *
  * Pure function: no file system access. `filePath` is only used to derive
  * a fallback title from the file name.
+ *
+ * Only the frontmatter is rewritten. The markdown body is passed through
+ * byte for byte: links are deliberately NOT rewritten, because Docusaurus
+ * resolves relative `./page.md` links to version-aware URLs itself, and
+ * stripping `.md` here caused the 404s in #1301 (fixed by #1305).
  */
 function processMarkdown(content, filePath) {
   const { frontmatter, body } = parseFrontmatter(content);
   const transformedFrontmatter = transformFrontmatter(frontmatter, filePath);
-  const transformedBody = transformLinks(body);
 
   // Only add frontmatter if there's something to add
   if (Object.keys(transformedFrontmatter).length > 0) {
-    return generateFrontmatter(transformedFrontmatter) + transformedBody;
+    return generateFrontmatter(transformedFrontmatter) + body;
   }
-  return transformedBody;
+  return body;
 }
 
 /**
@@ -361,7 +344,6 @@ module.exports = {
   parseFrontmatter,
   generateFrontmatter,
   transformFrontmatter,
-  transformLinks,
   processMarkdown,
   syncDirectory,
   cleanDestination,

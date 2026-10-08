@@ -96,6 +96,28 @@ test('processMarkdown leaves relative .md links untouched (#1301, #1305)', () =>
   assert.equal(out, `---\ntitle: T\n---\n${body}`);
 });
 
+test('processMarkdown passes every link form through unchanged', () => {
+  // The old regex-based transformLinks() only saw inline [text](url)
+  // links and missed the forms below; the body is now never rewritten.
+  const body = [
+    'Inline [a](./a.md), [b](../b/index.md#x), [c](https://x.org/c.md).',
+    'Autolink <https://mahout.apache.org/docs/>.',
+    'Reference [guide][g] and [g].',
+    '',
+    '[g]: ./guide.md "Guide"',
+    '',
+    '<a href="./html.md">HTML link</a>',
+    '<Link to="./jsx.md">JSX link</Link>',
+    '![img](./assets/pic.png)',
+    '```md',
+    '[not a link](./code.md)',
+    '```',
+    '',
+  ].join('\n');
+  const out = processMarkdown(`---\ntitle: T\n---\n${body}`, 'docs/t.md');
+  assert.equal(out, `---\ntitle: T\n---\n${body}`);
+});
+
 test('processMarkdown removes frontmatter left empty after transforms', () => {
   const out = processMarkdown('---\nlayout: page\n---\n# Home\n', 'index.md');
   assert.equal(out, '# Home\n');
