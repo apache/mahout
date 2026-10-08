@@ -422,3 +422,74 @@ def test_encode_numpy_errors(data, error_match):
 
     with pytest.raises((RuntimeError, TypeError)):
         engine.encode(data, num_qubits)
+
+
+# ---------------------------------------------------------------------------
+# Memory layout (#723): Fortran-ordered, transposed and strided inputs must be
+# rejected. NumPy reports a transposed C array as F-contiguous, and reading it
+# as a flat buffer would treat columns as samples.
+# ---------------------------------------------------------------------------
+
+
+@requires_qdp
+@pytest.mark.gpu
+@pytest.mark.parametrize(
+    "make_view",
+    [
+        lambda a: a[::2],  # strided rows
+        lambda a: a[:, ::2],  # strided columns
+        lambda a: np.asfortranarray(a),  # column-major copy
+        lambda a: a.T.copy().T,  # transposed view of a C array
+    ],
+    ids=["row-step", "col-step", "fortran", "transpose"],
+)
+def test_encode_numpy_rejects_non_c_contiguous(make_view):
+    """Non-C-contiguous 2D arrays must be rejected, not silently reordered."""
+    from _qdp import QdpEngine
+
+    engine = QdpEngine(device_id=0)
+    base = np.arange(1.0, 33.0, dtype=np.float64).reshape(4, 8)
+    view = make_view(base)
+    assert not view.flags["C_CONTIGUOUS"]
+    with pytest.raises(RuntimeError, match="must be C-contiguous"):
+        engine.encode(view, 3)
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_encode_numpy_rejects_strided_1d():
+    from _qdp import QdpEngine
+
+    engine = QdpEngine(device_id=0)
+    view = np.arange(1.0, 9.0, dtype=np.float64)[::2]
+    with pytest.raises(RuntimeError, match="must be C-contiguous"):
+        engine.encode(view, 2)
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_encode_numpy_ascontiguousarray_matches_original():
+    """The documented fix (np.ascontiguousarray) gives the expected states."""
+    from _qdp import QdpEngine
+
+    engine = QdpEngine(device_id=0, precision="float64")
+    rows = np.array([[3.0, 4.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0]])
+    fortran = np.asfortranarray(rows)
+    states = torch.from_dlpack(engine.encode(np.ascontiguousarray(fortran), 2))
+    expected = rows / np.linalg.norm(rows, axis=1, keepdims=True)
+    np.testing.assert_allclose(states.real.cpu().numpy(), expected, atol=1e-12)
+
+
+@requires_qdp
+@pytest.mark.gpu
+def test_encode_cpu_tensor_rejects_transposed():
+    """A transposed CPU tensor has an F-contiguous NumPy view; reject it."""
+    from _qdp import QdpEngine
+
+    engine = QdpEngine(device_id=0)
+    t = torch.arange(1.0, 33.0, dtype=torch.float64).reshape(8, 4).t()
+    assert not t.is_contiguous()
+    with pytest.raises(RuntimeError, match="must be contiguous"):
+        engine.encode(t, 3)
+    tensor = torch.from_dlpack(engine.encode(t.contiguous(), 3))
+    _verify_tensor(tensor, (4, 8), check_normalization=True)
