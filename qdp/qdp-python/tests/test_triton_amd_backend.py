@@ -18,7 +18,7 @@ import math
 
 import pytest
 import torch
-from qumat_qdp import QdpEngine, is_triton_amd_available
+from qumat_qdp import QdpEngine, QdpTensor, is_triton_amd_available
 from qumat_qdp.torch_ref import iqp_encode as _torch_ref_iqp
 from qumat_qdp.triton_amd import TritonAmdEngine
 
@@ -198,13 +198,16 @@ def test_triton_amd_direct_engine_returns_dlpack_contract() -> None:
     not is_triton_amd_available(), reason="Triton AMD backend unavailable"
 )
 @pytest.mark.rocm
-def test_unified_router_contract_returns_torch_tensor() -> None:
+def test_unified_router_contract_returns_qdp_tensor() -> None:
     router = QdpEngine(backend="amd", device_id=0, precision="float32")
     x = torch.randn(2, 4, device="cuda", dtype=torch.float32)
     qt = router.encode(x, 2, "amplitude")
-    assert isinstance(qt, torch.Tensor)
-    assert qt.shape == (2, 4)
-    assert qt.dtype == torch.complex64
+    assert isinstance(qt, QdpTensor)
+    assert qt.backend == "amd"
+    assert isinstance(qt.value, torch.Tensor)
+    out = torch.from_dlpack(qt)
+    assert out.shape == (2, 4)
+    assert out.dtype == torch.complex64
 
 
 @pytest.mark.skipif(
@@ -356,9 +359,9 @@ def test_unified_router_iqp_and_phase_routes() -> None:
     n = 3
     data_iqp = torch.randn(2, n + n * (n - 1) // 2, device="cuda", dtype=torch.float32)
     qt = router.encode(data_iqp, n, "iqp")
-    assert isinstance(qt, torch.Tensor)
-    assert qt.shape == (2, 1 << n)
+    assert isinstance(qt, QdpTensor)
+    assert torch.from_dlpack(qt).shape == (2, 1 << n)
     qt_z = router.encode(torch.randn(2, n, device="cuda"), n, "iqp-z")
-    assert qt_z.shape == (2, 1 << n)
+    assert torch.from_dlpack(qt_z).shape == (2, 1 << n)
     qt_p = router.encode(torch.randn(2, n, device="cuda"), n, "phase")
     assert qt_p.shape == (2, 1 << n)

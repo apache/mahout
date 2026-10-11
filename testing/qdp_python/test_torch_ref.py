@@ -43,9 +43,9 @@ def _torch_cuda_usable(device_id: int = 0) -> bool:
     ``torch.cuda.is_available()`` alone is not enough: on GPUs whose compute
     capability isn't in the wheel's compiled arch list (e.g. Pascal sm_61
     against a recent wheel that ships sm_70+), it returns True but every
-    kernel launch fails with ``cudaErrorNoKernelImageForDevice``. Mirror
-    ``qumat_qdp.loader._select_torch_device``'s capability check so the
-    GPU-only tests skip cleanly instead of erroring.
+    kernel launch fails with ``cudaErrorNoKernelImageForDevice``. Check the
+    capability against the arch list so the GPU-only tests skip cleanly
+    instead of erroring.
     """
     if not torch.cuda.is_available():
         return False

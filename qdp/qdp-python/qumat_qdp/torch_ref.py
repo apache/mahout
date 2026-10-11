@@ -19,7 +19,7 @@ Pure-PyTorch reference implementations of QDP quantum encoding methods.
 
 Serves two purposes:
 1. Speed benchmark reference (compare QDP Rust+CUDA vs PyTorch GPU).
-2. Fallback when the ``_qdp`` Rust extension is unavailable.
+2. Correctness reference for cross-checking the Rust pipeline.
 
 All functions are fully vectorized (no Python loops over batch/state dims)
 and return complex tensors of shape ``(batch_size, 2**num_qubits)``.
