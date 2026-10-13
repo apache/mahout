@@ -19,7 +19,7 @@ version = "0.7.0.dev0"
 description = "A library for composing quantum machine learning."
 authors = [{ name = "Apache Mahout", email = "dev@mahout.apache.org" }]
 license = "Apache-2.0"
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.10,<3.14"
 readme = "README.md"
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -31,6 +31,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Rust",
     "Topic :: Scientific/Engineering",
@@ -47,7 +48,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-qdp = ["qumat-qdp"]
+# qumat-qdp (Rust + CUDA) has no Python 3.13 build yet, so the extra is only
+# available on the versions it declares support for.
+qdp = ["qumat-qdp; python_version < '3.13'"]
 
 [dependency-groups]
 dev = [
@@ -59,19 +62,14 @@ dev = [
     "maturin>=1.10.2",
     "patchelf>=0.17.2.4",
     "torch>=2.2,<=2.13.0",
-    "numpy>=1.24,<2.0",
+    # numpy 1.x has no Python 3.13 wheels, and tensorflow (via ml-dtypes)
+    # requires numpy>=2.1 on 3.13. Keep the 1.x pin for older versions only.
+    "numpy>=1.24,<2.0; python_version < '3.13'",
+    "numpy>=2.1; python_version >= '3.13'",
     "setuptools>=80.9.0",
     "tensorflow>=2.20",
     "pytest-cov>=7.0.0",
     "pydoc-markdown>=4.8.2",
-]
-
-[tool.uv]
-# Override to fix amazon-braket-default-simulator dependency on old numba/llvmlite
-# The simulator v1.32.1 requires numba 0.53.1 which doesn't support Python 3.10+
-override-dependencies = [
-    "numba>=0.60.0",
-    "llvmlite>=0.43.0",
 ]
 
 [tool.uv.sources]

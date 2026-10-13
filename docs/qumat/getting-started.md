@@ -31,7 +31,7 @@ uv sync --extra qdp         # With QDP (requires NVIDIA GPU + CUDA)
 ```
 
 :::note Why uv?
-The project uses `uv` to handle dependency overrides required for Python 3.10+ compatibility with some backend dependencies.
+The project uses `uv` to manage the lock file and per-Python-version dependency markers for the backend dependencies.
 :::
 
 ## Basic Usage
@@ -52,7 +52,7 @@ print(result)
 
 ## Dependencies
 
-Prior to installation, ensure Python 3.10-3.12 is installed. Dependencies such as Qiskit, Cirq, and Amazon Braket SDK are managed automatically.
+Prior to installation, ensure Python 3.10-3.13 is installed. Dependencies such as Qiskit, Cirq, and Amazon Braket SDK are managed automatically.
 
 ## Apache Release
 
