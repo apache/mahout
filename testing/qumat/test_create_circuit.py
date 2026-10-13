@@ -208,6 +208,72 @@ class TestBackendConfigValidation:
         assert qumat.backend is not None
         assert qumat.backend.options.method == "matrix_product_state"
 
+    @pytest.mark.parametrize(
+        ("backend_name", "simulator_type", "supported"),
+        [
+            ("qiskit", "not_a_method", "'aer_simulator'"),
+            ("cirq", "density_matrix", "'default'"),
+            ("amazon_braket", "sv1", "'local'"),
+        ],
+    )
+    def test_unsupported_simulator_type_raises(
+        self, capsys, backend_name, simulator_type, supported
+    ):
+        """Every backend rejects an unknown simulator_type the same way (#1507).
+
+        It raises ValueError naming the bad value and the supported ones, and
+        prints nothing (the old behaviour printed a notice and carried on).
+        """
+        config = {
+            "backend_name": backend_name,
+            "backend_options": {"simulator_type": simulator_type, "shots": 10},
+        }
+
+        with pytest.raises(ValueError, match="Unsupported simulator_type") as excinfo:
+            QuMat(config)
+
+        message = str(excinfo.value)
+        assert repr(simulator_type) in message
+        assert supported in message
+        assert capsys.readouterr().out == ""
+
+    def test_qiskit_unsupported_simulator_type_chains_aer_error(self):
+        """The Qiskit ValueError keeps Aer's error as its cause and lists Aer methods."""
+        from qiskit_aer import AerError
+
+        config = {
+            "backend_name": "qiskit",
+            "backend_options": {"simulator_type": "bogus"},
+        }
+
+        with pytest.raises(ValueError) as excinfo:
+            QuMat(config)
+
+        assert isinstance(excinfo.value.__cause__, AerError)
+        assert "'matrix_product_state'" in str(excinfo.value)
+
+    @pytest.mark.parametrize("backend_options", [{}, {"simulator_type": "default"}])
+    def test_cirq_default_simulator_type_accepted(self, capsys, backend_options):
+        """Cirq still accepts 'default' or no simulator_type, without printing."""
+        qumat = QuMat({"backend_name": "cirq", "backend_options": backend_options})
+
+        assert qumat.backend is not None
+        assert capsys.readouterr().out == ""
+
+    def test_braket_local_simulator_type_accepted(self, capsys):
+        """'local' still selects Braket's offline simulator, without printing."""
+        from braket.devices import LocalSimulator
+
+        qumat = QuMat(
+            {
+                "backend_name": "amazon_braket",
+                "backend_options": {"simulator_type": "local", "shots": 10},
+            }
+        )
+
+        assert isinstance(qumat.backend, LocalSimulator)
+        assert capsys.readouterr().out == ""
+
 
 @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
 class TestCircuitDrawing:
