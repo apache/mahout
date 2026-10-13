@@ -65,8 +65,9 @@ pre-commit: setup-test-python
 setup-benchmark: setup-test-python
 ifeq ($(HAS_NVIDIA),yes)
 	@echo "[INFO] Setting up benchmark environment..."
-	uv sync --group dev --extra qdp
-	uv sync --project qdp/qdp-python --group benchmark --active
+	# QDP supports Python 3.10-3.12 only; the qdp extra installs nothing on 3.13
+	uv sync --python 3.12 --group dev --extra qdp
+	uv sync --python 3.12 --project qdp/qdp-python --group benchmark --active
 	unset CONDA_PREFIX && uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml
 	@echo "[INFO] Benchmark environment ready. The following benchmarks are available:"
 	@echo "[INFO] Available benchmark scripts:"
@@ -83,6 +84,6 @@ ifeq ($(HAS_NVIDIA),yes)
 else
 	@echo "[SKIP] No NVIDIA GPU detected, skipping maturin develop"
 	@echo "[INFO] Setting up benchmark environment (CPU-only)..."
-	uv sync --project qdp/qdp-python --group benchmark --active
+	uv sync --python 3.12 --project qdp/qdp-python --group benchmark --active
 	@echo "[INFO] Benchmarks require NVIDIA GPU. Setup completed for manual execution."
 endif

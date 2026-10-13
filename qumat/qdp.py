@@ -33,7 +33,8 @@ from typing import Any, NoReturn
 
 _INSTALL_MSG = (
     "QDP requires the qumat-qdp native extension. "
-    "Build and install it with: cd qdp/qdp-python && maturin develop --release"
+    "Build and install it with: cd qdp/qdp-python && maturin develop --release. "
+    "Note: qumat-qdp supports Python 3.10-3.12 only."
 )
 
 

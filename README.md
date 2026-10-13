@@ -50,6 +50,8 @@ with QDP (Quantum Data Plane) support
 pip install qumat[qdp]
 ```
 
+QDP requires Python 3.10-3.12; on Python 3.13 the `qdp` extra installs nothing.
+
 ### Qumat: Run a Quantum Circuit
 
 ```python

@@ -53,9 +53,9 @@ For QDP environment and command-level setup (including root `.venv` workflow), s
    git clone https://github.com/apache/mahout.git
    cd mahout
    uv sync --group dev              # Core Qumat (no GPU required)
-   # uv sync --group dev --extra qdp  # With QDP extension (requires CUDA GPU)
+   # uv sync --python 3.12 --group dev --extra qdp  # With QDP extension (requires CUDA GPU)
    ```
-   Add `--extra qdp` if you need GPU-accelerated encoding or want to run QDP tests. QDP tests are auto-skipped if the extension is not installed.
+   Add `--python 3.12 --extra qdp` if you need GPU-accelerated encoding or want to run QDP tests. QDP supports Python 3.10-3.12 only, so pin `--python 3.12`: on Python 3.13 the `qdp` extra installs nothing. QDP tests are auto-skipped if the extension is not installed.
 
 3. **Set up pre-commit hooks:**
    ```bash

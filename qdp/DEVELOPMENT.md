@@ -52,7 +52,8 @@ Use one venv at repo root (`mahout/.venv`):
 
 ```bash
 cd mahout
-uv sync --group dev --extra qdp
+# QDP supports Python 3.10-3.12 only; pin it, otherwise uv may pick 3.13 where the qdp extra installs nothing
+uv sync --python 3.12 --group dev --extra qdp
 source .venv/bin/activate
 ```
 
@@ -146,7 +147,7 @@ For manual setup (if `make setup-benchmark` is not available):
 
 ```bash
 source .venv/bin/activate
-uv sync --project qdp/qdp-python --group benchmark --active
+uv sync --python 3.12 --project qdp/qdp-python --group benchmark --active
 ```
 
 See [qdp/qdp-python/benchmark/README.md](qdp-python/benchmark/README.md) for detailed benchmark documentation.
