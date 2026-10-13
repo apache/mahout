@@ -75,17 +75,17 @@ The notebook follows the same order as the talk:
 
 Every task is sized for one to two hours, needs no GPU, and ends in a pull request with a test. Claim a task by commenting on its issue. Full details, including reproduction steps, are in the [task sheet](pathname:///hackathon/mahout-hackathon-tasks.md).
 
-**Track A: Qumat (Python only).** All reproduced on `main` and on `qumat` 0.6.0.
+**Track A: Qumat (Python only).** All reproduced on `main` and on `qumat` 0.6.0. Each issue has the reproduction steps.
 
-| # | Task |
-|---|---|
-| A1 | Clear `ValueError` for an unknown backend name (today a `ModuleNotFoundError` leaks) |
-| A2 | Unsupported `simulator_type` should raise instead of `print()` and silently continuing |
-| A3 | Cirq backend ignores the initialized simulator and creates its own `cirq.Simulator()` |
-| A4 | Bug: reusing a parameter name on two gates fails on Qiskit only (`name conflict adding parameter 't'`) |
-| A5 | `create_empty_circuit()` without `num_qubits`: Qiskit raises, Cirq and Braket allocate on demand |
-| A6 | Add **one** missing gate per person: S, S-dagger, T-dagger, CZ or Phase, on all three backends with a test |
-| A7 | Python 3.13 support: lift the `<3.13` cap in `pyproject.toml` and add 3.13 to CI |
+| # | Issue | Task |
+|---|---|---|
+| A1 | [#1506](https://github.com/apache/mahout/issues/1506) | Clear `ValueError` for an unknown backend name (today a `ModuleNotFoundError` leaks) |
+| A2 | [#1507](https://github.com/apache/mahout/issues/1507) | Unsupported `simulator_type` should raise instead of `print()` and silently continuing |
+| A3 | [#1508](https://github.com/apache/mahout/issues/1508) | Cirq backend ignores the initialized simulator and creates its own `cirq.Simulator()` |
+| A4 | [#1509](https://github.com/apache/mahout/issues/1509) | Bug: reusing a parameter name on two gates fails on Qiskit only (`name conflict adding parameter 't'`) |
+| A5 | [#1510](https://github.com/apache/mahout/issues/1510) | `create_empty_circuit()` without `num_qubits`: Qiskit raises, Cirq and Braket allocate on demand |
+| A6 | [#1511](https://github.com/apache/mahout/issues/1511) | Add **one** missing gate per person: S, S-dagger, T-dagger, CZ or Phase, on all three backends with a test |
+| A7 | [#1512](https://github.com/apache/mahout/issues/1512) | Python 3.13 support: lift the `<3.13` cap in `pyproject.toml` and add 3.13 to CI |
 
 **Track B: QDP.** B1 to B3 are pure Python. B4 to B6 are Rust: take one only if `cargo` is already installed, and start the first `cargo build` right away (5 to 10 minutes). No CUDA needed, the build uses stubs like CI does.
 

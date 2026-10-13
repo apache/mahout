@@ -17,9 +17,9 @@ Setup for every task: `git clone` your fork, `pip install uv`, `uv sync`, `uv ru
 
 ## Track A: Qumat (Python only)
 
-All items reproduced on 2026-10-09 against `main` (commit `bbce3c392`) and PyPI `qumat` 0.6.0. Code: `qumat/qumat.py` and `qumat/{qiskit,cirq,amazon_braket}_backend.py`. Tests: `testing/qumat/`. No GitHub issues exist yet; the text under each task is ready to paste into one.
+All items reproduced on 2026-10-09 against `main` (commit `bbce3c392`) and PyPI `qumat` 0.6.0. Code: `qumat/qumat.py` and `qumat/{qiskit,cirq,amazon_braket}_backend.py`. Tests: `testing/qumat/`. Each task has a GitHub issue; comment on it to claim the task.
 
-### A1 Clear error for an unknown backend name
+### A1 Clear error for an unknown backend name ([#1506](https://github.com/apache/mahout/issues/1506))
 
 ```python
 QuMat({"backend_name": "pennylane", "backend_options": {}})
@@ -28,7 +28,7 @@ QuMat({"backend_name": "pennylane", "backend_options": {}})
 
 `QuMat.__init__` builds the module path from `backend_name` and lets the import error leak. Raise a `ValueError` listing the supported backends (`qiskit`, `cirq`, `amazon_braket`) and add a test.
 
-### A2 Unsupported `simulator_type` should raise, not `print()`
+### A2 Unsupported `simulator_type` should raise, not `print()` ([#1507](https://github.com/apache/mahout/issues/1507))
 
 ```python
 QuMat({"backend_name": "cirq", "backend_options": {"simulator_type": "density_matrix"}})
@@ -40,11 +40,11 @@ QuMat({"backend_name": "amazon_braket", "backend_options": {"simulator_type": "s
 
 `cirq_backend.py:34` and `amazon_braket_backend.py:51` `print()` and continue. Replace with a `ValueError` (or `warnings.warn`), add tests for the error path.
 
-### A3 Cirq backend ignores the initialized simulator
+### A3 Cirq backend ignores the initialized simulator ([#1508](https://github.com/apache/mahout/issues/1508))
 
 `cirq_backend.initialize_backend` returns a simulator, but `execute_circuit` and `get_final_state_vector` create a fresh `cirq.Simulator()` and never use the `backend` argument. Make the backend object the one that runs the circuit. (Density-matrix support is a follow-up, see appendix.)
 
-### A4 Bug: reusing a parameter name on two gates fails on Qiskit only
+### A4 Bug: reusing a parameter name on two gates fails on Qiskit only ([#1509](https://github.com/apache/mahout/issues/1509))
 
 ```python
 qc = QuMat(qiskit_config); qc.create_empty_circuit(2)
@@ -56,7 +56,7 @@ qc.apply_rx_gate(0, "t"); qc.apply_rx_gate(1, "t")
 
 Cache one `qiskit.circuit.Parameter` per name in the Qiskit backend and add a cross-backend test for shared parameters.
 
-### A5 `create_empty_circuit()` without `num_qubits` behaves differently per backend
+### A5 `create_empty_circuit()` without `num_qubits` behaves differently per backend ([#1510](https://github.com/apache/mahout/issues/1510))
 
 ```python
 qc.create_empty_circuit(); qc.apply_hadamard_gate(0)
@@ -66,9 +66,13 @@ qc.create_empty_circuit(); qc.apply_hadamard_gate(0)
 
 Pick one behavior (a clear `ValueError` from `QuMat` when `num_qubits` is missing is the quick option) and make all three backends match, with tests.
 
-### A6 Add one missing gate (one gate per person)
+### A6 Add one missing gate (one gate per person) ([#1511](https://github.com/apache/mahout/issues/1511))
 
 `QuMat` exposes exactly `not, hadamard, cnot, toffoli, swap, cswap, pauli_x, pauli_y, pauli_z, t, rx, ry, rz, u`. Pick **one** of: **S**, **S-dagger**, **T-dagger**, **CZ**, **Phase P(λ)**. Add `QuMat.apply_<gate>_gate`, implement it in all three backends (copy the pattern of `apply_t_gate`), add a row to `docs/qumat/basic-gates.md`, and a test in `testing/qumat/test_single_qubit_gates.py` or `test_multi_qubit_gates.py` that checks the state vector on all backends.
+
+### A7 Python 3.13 support ([#1512](https://github.com/apache/mahout/issues/1512))
+
+Lift the `<3.13` cap in `pyproject.toml` and add 3.13 to the CI matrix. All dependencies already ship 3.13 wheels.
 
 ---
 
