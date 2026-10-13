@@ -21,6 +21,13 @@
 # Rust extension just won't be GPU-functional at runtime).
 HAS_NVIDIA := $(shell command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/dev/null 2>&1 && echo yes || echo no)
 
+# qumat-qdp supports Python 3.10-3.12 only; keep uv on that range when QDP is built
+ifeq ($(HAS_NVIDIA),yes)
+UV_PY := --python '>=3.10,<3.13'
+else
+UV_PY :=
+endif
+
 # Detect CUDA Toolkit. Required for `test_rust` because the qdp-core
 # integration tests link against libcudart from the toolkit. PyTorch's
 # bundled cudart inside its wheel does *not* satisfy this; the toolkit
@@ -28,7 +35,7 @@ HAS_NVIDIA := $(shell command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/d
 HAS_NVCC := $(shell command -v nvcc >/dev/null 2>&1 && echo yes || echo no)
 
 setup-test-python:
-	uv sync --group dev
+	uv sync $(UV_PY) --group dev
 
 install-llvm-cov:
 	@cargo llvm-cov --version >/dev/null 2>&1 || (echo "[INFO] Installing cargo-llvm-cov..." && cargo install cargo-llvm-cov)
@@ -65,9 +72,8 @@ pre-commit: setup-test-python
 setup-benchmark: setup-test-python
 ifeq ($(HAS_NVIDIA),yes)
 	@echo "[INFO] Setting up benchmark environment..."
-	# QDP supports Python 3.10-3.12 only; the qdp extra installs nothing on 3.13
-	uv sync --python 3.12 --group dev --extra qdp
-	uv sync --python 3.12 --project qdp/qdp-python --group benchmark --active
+	uv sync $(UV_PY) --group dev --extra qdp
+	uv sync --project qdp/qdp-python --group benchmark --active
 	unset CONDA_PREFIX && uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml
 	@echo "[INFO] Benchmark environment ready. The following benchmarks are available:"
 	@echo "[INFO] Available benchmark scripts:"
@@ -84,6 +90,6 @@ ifeq ($(HAS_NVIDIA),yes)
 else
 	@echo "[SKIP] No NVIDIA GPU detected, skipping maturin develop"
 	@echo "[INFO] Setting up benchmark environment (CPU-only)..."
-	uv sync --python 3.12 --project qdp/qdp-python --group benchmark --active
+	uv sync --project qdp/qdp-python --group benchmark --active
 	@echo "[INFO] Benchmarks require NVIDIA GPU. Setup completed for manual execution."
 endif

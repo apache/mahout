@@ -69,7 +69,9 @@ except ImportError as e:
         warnings.warn(
             f"QDP module not available: {e}. "
             "QDP requires the qumat-qdp package or native extension to be built. "
-            "See qdp/qdp-python/README.md for installation instructions.",
+            "qumat-qdp supports Python 3.10-3.12; on those versions install it with: "
+            'pip install "qumat[qdp]". '
+            "See qdp/qdp-python/README.md to build the extension from source.",
             ImportWarning,
         )
 
