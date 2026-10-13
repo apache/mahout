@@ -196,6 +196,18 @@ class TestBackendConfigValidation:
         with pytest.raises(KeyError, match="missing required key.*backend_options"):
             QuMat(config)
 
+    def test_unknown_backend_name_raises_valueerror(self):
+        """Unknown backend_name raises ValueError listing supported backends."""
+        config = {"backend_name": "pennylane", "backend_options": {}}
+
+        with pytest.raises(ValueError, match="Unsupported backend_name") as exc_info:
+            QuMat(config)
+
+        message = str(exc_info.value)
+        assert "amazon_braket" in message
+        assert "cirq" in message
+        assert "qiskit" in message
+
     def test_qiskit_custom_simulator_fallback(self):
         """Test that Qiskit backend accepts simulator types outside the legacy map."""
         config = {
