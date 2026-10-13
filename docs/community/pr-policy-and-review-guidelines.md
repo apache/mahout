@@ -73,9 +73,37 @@ For non-trivial code contributions, contributors are expected to have an ASF ICL
 
 When deciding whether to merge, committers should verify all of the following:
 
-- Required CI checks are green.
+- Required CI checks are green (enforced automatically, see below).
 - At least one committer approves (enforced automatically, see below).
 - All blocking comments are resolved.
+
+#### Auto-merge and CI
+
+GitHub auto-merge only waits for *required* status checks, and the CI jobs are
+deliberately **not** required on `main`: a required check would also stop a
+committer from merging manually when a failure is judged acceptable. Instead
+the `Auto-merge gate` status check ([`automerge-gate.yml`](https://github.com/apache/mahout/blob/main/.github/workflows/automerge-gate.yml))
+is required. It is re-evaluated every time a CI workflow of the PR finishes:
+
+- While any CI workflow is still running, the gate is red ("waiting"), so
+  auto-merge cannot fire early.
+- When every CI workflow passed (or was skipped), the gate passes and
+  auto-merge, if enabled, merges the PR.
+- When a CI workflow failed, the gate **disables auto-merge** on the PR, leaves
+  a comment, and then passes. The PR is not merged automatically, but a
+  committer can still merge it manually. Auto-merge has to be enabled again by
+  hand after a fix.
+- **Urgent changes (PMC only):** PMC members are bypass actors of the `main`
+  branch ruleset in [`.asf.yaml`](https://github.com/apache/mahout/blob/main/.asf.yaml).
+  On any pull request they can choose "Merge without waiting for requirements
+  to be met (bypass rules)" and merge immediately, without waiting for CI or
+  for the status checks above (for example when the ASF runner queue is
+  stuck). The change must still come as a pull request, and every bypass is
+  recorded in the repository's audit log. Use it deliberately.
+
+"Required CI checks are green" above therefore remains a committer
+responsibility: merging over a red CI job is possible and must be a deliberate
+decision.
 
 #### Enforced Committer Approval
 
