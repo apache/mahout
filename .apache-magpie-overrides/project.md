@@ -101,7 +101,7 @@ produces.
 
 | Key | Value | Notes |
 |---|---|---|
-| `security_list` | `security@mahout.apache.org` | Inbound reports; **not** publicly archived (auto-sourced default) |
+| `security_list` | `private@mahout.apache.org` | Inbound reports; **not** publicly archived. Mahout has no dedicated security@ list, so reports go to the PMC list |
 | `private_list` | `private@mahout.apache.org` | PMC escalation; **not** publicly archived (auto-sourced default) |
 | `users_list` | `user@mahout.apache.org` | Public advisories end up here; publicly archived (auto-sourced from `.asf.yaml` or default) |
 | `dev_list` | `dev@mahout.apache.org` | Release `[RESULT][VOTE]` threads; publicly archived (auto-sourced from `.asf.yaml` or default) |
