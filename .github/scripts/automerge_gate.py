@@ -22,16 +22,25 @@ This backs the ``Auto-merge gate`` required status check on ``main`` (see
 Background: GitHub auto-merge only waits for *required* status checks. Making
 every CI job required would also block committers from merging manually when
 they decide a failure is acceptable (e.g. a flaky external check), which is
-not what the project wants. So instead a single required check waits for the
-``pull_request`` workflows of the head commit and then:
+not what the project wants. So instead a single required check, run by a
+``pull_request`` job on the PR itself, polls the other ``pull_request``
+workflows of the head commit until all of them have completed and then:
 
-* while any of them is still running -> exit 1 ("waiting"); the check is
-  re-evaluated every time one of them completes (``workflow_run`` trigger);
 * if every one of them passed (or was skipped) -> exit 0; auto-merge, if
   enabled, merges the PR;
 * if any of them failed -> **disable auto-merge** on the PR (if it was
   enabled) and leave a comment, then exit 0 so that a committer can still
   merge manually. The failed CI job stays visible on the PR.
+
+While it is polling the check is "in progress", so auto-merge cannot fire
+early. It gives up after ``MAX_WAIT_MINUTES`` (exit 1; re-run the job).
+
+The job runs on a ``pull_request`` event (not ``workflow_run``) so that its
+check run is attached to the PR head commit; a ``workflow_run`` job's check
+run lands on the default branch commit and never satisfies the required
+check. The price is that ``GITHUB_TOKEN`` is read-only for pull requests from
+forks: if auto-merge cannot be disabled there, the gate fails instead, which
+equally keeps auto-merge from merging.
 
 Urgent changes do not go through this script at all: PMC members are bypass
 actors of the ``main`` ruleset in ``.asf.yaml`` and can merge a pull request
@@ -39,8 +48,8 @@ from the GitHub UI without waiting for any required check.
 
 Only the Python standard library is used so the script runs in CI and locally:
 
-    GITHUB_TOKEN=$(gh auth token) DRY_RUN=1 python .github/scripts/automerge_gate.py \\
-        --repo apache/mahout --sha <head sha>
+    GITHUB_TOKEN=$(gh auth token) DRY_RUN=1 MAX_WAIT_MINUTES=0 \\
+        python .github/scripts/automerge_gate.py --repo apache/mahout --sha <head sha>
 
 ``DRY_RUN=1`` performs no mutation (auto-merge is not disabled, no comment).
 """
@@ -51,6 +60,7 @@ import argparse
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -60,8 +70,11 @@ API_URL = os.environ.get("GITHUB_API_URL", "https://api.github.com")
 GRAPHQL_URL = os.environ.get("GITHUB_GRAPHQL_URL", "https://api.github.com/graphql")
 # Only workflows triggered by these events are CI for the pull request. In
 # particular this excludes "PR Approval Check" (pull_request_target), which is
-# its own required status check, and this gate itself (workflow_run).
+# its own required status check.
 PR_EVENTS = {"pull_request"}
+# The gate's own workflow (name: in automerge-gate.yml) must not wait for itself.
+GATE_WORKFLOW = os.environ.get("GATE_WORKFLOW", "Auto-merge Gate")
+POLL_SECONDS = int(os.environ.get("POLL_SECONDS", "30"))
 # Conclusions that do not count as a CI failure.
 OK_CONCLUSIONS = {"success", "skipped", "neutral"}
 # A run that is waiting for a maintainer to approve it (fork PRs) is pending,
@@ -137,6 +150,8 @@ def latest_pr_runs(runs: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         if run.get("event") not in PR_EVENTS:
             continue
         name = run.get("name") or str(run.get("workflow_id"))
+        if name == GATE_WORKFLOW:
+            continue
         if name not in latest or run["id"] > latest[name]["id"]:
             latest[name] = run
     return latest
@@ -230,31 +245,53 @@ def failure_comment(sha: str, failed: list[dict[str, Any]], enabled_by: str) -> 
     return "\n".join(lines)
 
 
-def gate(token: str, repo: str, sha: str, dry_run: bool) -> tuple[bool, list[str]]:
-    """Evaluate the gate. Returns ``(ok, log_lines)``."""
-    lines: list[str] = []
-    runs = latest_pr_runs(workflow_runs_for_sha(token, repo, sha))
-    if not runs:
-        # Cannot happen when triggered by workflow_run, but be explicit.
-        lines.append(f"No pull_request workflow runs found for {sha[:7]}.")
-        return False, lines
+def wait_for_runs(
+    token: str, repo: str, sha: str, max_wait_minutes: float
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[str]]:
+    """Poll until no pull_request workflow run of ``sha`` is pending.
 
-    pending: list[dict[str, Any]] = []
-    failed: list[dict[str, Any]] = []
+    Returns ``(pending, failed, log_lines)``; ``pending`` is non-empty only
+    when the wait timed out.
+    """
+    deadline = time.monotonic() + max_wait_minutes * 60
+    attempt = 0
+    while True:
+        attempt += 1
+        runs = latest_pr_runs(workflow_runs_for_sha(token, repo, sha))
+        pending = [run for run in runs.values() if classify(run) == "pending"]
+        if runs and not pending:
+            break
+        names = ", ".join(sorted(run["name"] for run in pending)) or "(no runs yet)"
+        if time.monotonic() >= deadline:
+            lines = [f"Still waiting for: {names}."]
+            return pending, [], lines
+        if attempt == 1 or attempt % 10 == 0:
+            print(f"Waiting for: {names} ...", flush=True)
+        time.sleep(POLL_SECONDS)
+
+    lines = []
+    failed = []
     for name in sorted(runs):
         run = runs[name]
         state = classify(run)
         lines.append(
             f"{name}: {run.get('status')}/{run.get('conclusion') or '-'} -> {state}"
         )
-        if state == "pending":
-            pending.append(run)
-        elif state == "failed":
+        if state == "failed":
             failed.append(run)
+    return [], failed, lines
 
+
+def gate(
+    token: str, repo: str, sha: str, dry_run: bool, max_wait_minutes: float
+) -> tuple[bool, list[str]]:
+    """Evaluate the gate. Returns ``(ok, log_lines)``."""
+    pending, failed, lines = wait_for_runs(token, repo, sha, max_wait_minutes)
     if pending:
-        names = ", ".join(run["name"] for run in pending)
-        lines.append(f"Waiting for: {names}. Re-evaluated when they complete.")
+        lines.append(
+            f"Gave up after {max_wait_minutes:g} minutes. Re-run this job once "
+            "the remaining workflows have completed."
+        )
         return False, lines
 
     if not failed:
@@ -275,7 +312,18 @@ def gate(token: str, repo: str, sha: str, dry_run: bool) -> tuple[bool, list[str
                 "DRY_RUN set, would disable it and comment."
             )
             continue
-        disable_auto_merge(token, node_id)
+        try:
+            disable_auto_merge(token, node_id)
+        except GitHubError as exc:
+            # GITHUB_TOKEN is read-only for PRs from forks. Failing the gate
+            # keeps auto-merge from merging; a committer has to disable
+            # auto-merge (or fix CI and re-run this job).
+            lines.append(
+                f"PR #{number}: auto-merge is enabled by @{enabled_by} but could "
+                f"not be disabled ({exc}). Failing the gate instead; please "
+                "disable auto-merge manually, or fix CI and re-run this job."
+            )
+            return False, lines
         comment(token, repo, number, failure_comment(sha, failed, enabled_by))
         lines.append(
             f"PR #{number}: auto-merge (enabled by @{enabled_by}) disabled; "
@@ -310,16 +358,15 @@ def main(argv: list[str] | None = None) -> int:
             "GITHUB_TOKEN, --repo/$GITHUB_REPOSITORY and --sha/$HEAD_SHA are required"
         )
     dry_run = os.environ.get("DRY_RUN", "") not in {"", "0", "false"}
+    max_wait_minutes = float(os.environ.get("MAX_WAIT_MINUTES", "55"))
 
     try:
-        ok, lines = gate(token, args.repo, args.sha, dry_run)
+        ok, lines = gate(token, args.repo, args.sha, dry_run, max_wait_minutes)
     except GitHubError as exc:
         print(f"::error::{exc}")
         return 1
 
-    verdict = (
-        "PASS" if ok else "WAITING: not all pull_request workflows have completed."
-    )
+    verdict = "PASS" if ok else "FAIL: see above."
     lines.append(verdict)
     print("\n".join(lines))
 
@@ -329,7 +376,7 @@ def main(argv: list[str] | None = None) -> int:
             summary.write("### Auto-merge gate\n\n")
             summary.writelines(f"- {line}\n" for line in lines)
     if not ok:
-        print(f"::notice::{verdict}")
+        print(f"::error::{lines[-2] if len(lines) > 1 else verdict}")
     return 0 if ok else 1
 
 

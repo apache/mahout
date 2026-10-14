@@ -19,12 +19,16 @@
 #
 # GitHub auto-merge only waits for *required* status checks, and a required
 # check blocks manual merges just the same. So the only required CI-related
-# check is the "Auto-merge gate" job below: it is re-run every time one of
-# the pull_request workflows finishes, stays red ("waiting") until all of
-# them have completed, and then
+# check is the "Auto-merge gate" job below. It runs on the PR itself, polls
+# the other pull_request workflows of the same commit until they have all
+# completed (the check is "in progress" meanwhile, so auto-merge cannot fire
+# early), and then
 #   * passes when everything succeeded (auto-merge proceeds), or
 #   * disables auto-merge on the PR, comments, and *still passes* when
 #     something failed, so the committer can merge manually.
+# It has to be a pull_request job: a workflow_run job's check run is attached
+# to the default-branch commit, not to the PR, and never satisfies the
+# required check.
 # Urgent PRs do not need this gate: PMC members are bypass actors of the main
 # ruleset (.asf.yaml) and can merge from the GitHub UI without waiting for it.
 # See .github/scripts/automerge_gate.py for the details.
@@ -32,45 +36,35 @@
 name: Auto-merge Gate
 
 on:
-  workflow_run:
-    # Every workflow that runs on pull_request. A workflow missing from this
-    # list still counts for the gate (it lists all pull_request runs of the
-    # commit) but will not re-trigger the gate when it finishes, so the gate
-    # could stay in "waiting" until another workflow completes.
-    workflows:
-      - Pre-commit
-      - Python Testing
-      - CI for Jupyter Notebooks
-      - Wheel Build
-      - Website Build Check
-      - Links
-    types: [completed]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   actions: read
   # Both are needed by GITHUB_TOKEN to toggle auto-merge; pull-requests also
-  # covers the comment.
+  # covers the comment. (Read-only anyway for PRs from forks; the script then
+  # fails the gate instead of disabling auto-merge.)
   contents: write
   pull-requests: write
 
-# Serialise gate runs per commit (no cancellation): the newest run always
-# finishes last, so the status reflects the latest state of CI.
+# A new push supersedes the previous wait.
 concurrency:
-  group: automerge-gate-${{ github.event.workflow_run.head_sha }}
-  cancel-in-progress: false
+  group: automerge-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   gate:
     # This job name is the status check context referenced in .asf.yaml.
     name: Auto-merge gate
-    # Only CI of pull requests matters (not pushes to main etc.).
-    if: github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Must exceed MAX_WAIT_MINUTES below (the longest CI workflow is the
+    # wheel build at roughly 10 minutes; the margin is for runner queueing).
+    timeout-minutes: 60
 
     steps:
-      # workflow_run always runs the default-branch workflow; take the script
-      # from there as well. No code from the PR head is executed.
+      # The script comes from the PR head (pull_request event). It only reads
+      # workflow runs and toggles auto-merge on the PR's own auto-merge state;
+      # it cannot approve or merge anything.
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
@@ -78,8 +72,10 @@ jobs:
             .github/scripts/automerge_gate.py
           sparse-checkout-cone-mode: false
 
-      - name: Evaluate CI of the pull request head
+      - name: Wait for the other pull_request workflows and evaluate them
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GATE_WORKFLOW: ${{ github.workflow }}
+          MAX_WAIT_MINUTES: "55"
         run: python3 .github/scripts/automerge_gate.py
