@@ -1,0 +1,81 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Keeps GitHub auto-merge from merging a PR whose CI failed, without blocking
+# a committer from merging it manually (docs/community/pr-policy-and-review-guidelines.md).
+#
+# GitHub auto-merge only waits for *required* status checks, and a required
+# check blocks manual merges just the same. So the only required CI-related
+# check is the "Auto-merge gate" job below. It runs on the PR itself, polls
+# the other pull_request workflows of the same commit until they have all
+# completed (the check is "in progress" meanwhile, so auto-merge cannot fire
+# early), and then
+#   * passes when everything succeeded (auto-merge proceeds), or
+#   * disables auto-merge on the PR, comments, and *still passes* when
+#     something failed, so the committer can merge manually.
+# It has to be a pull_request job: a workflow_run job's check run is attached
+# to the default-branch commit, not to the PR, and never satisfies the
+# required check.
+# Urgent PRs do not need this gate: PMC members are bypass actors of the main
+# ruleset (.asf.yaml) and can merge from the GitHub UI without waiting for it.
+# See .github/scripts/automerge_gate.py for the details.
+#
+name: Auto-merge Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  actions: read
+  # Both are needed by GITHUB_TOKEN to toggle auto-merge; pull-requests also
+  # covers the comment. (Read-only anyway for PRs from forks; the script then
+  # fails the gate instead of disabling auto-merge.)
+  contents: write
+  pull-requests: write
+
+# A new push supersedes the previous wait.
+concurrency:
+  group: automerge-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    # This job name is the status check context referenced in .asf.yaml.
+    name: Auto-merge gate
+    runs-on: ubuntu-latest
+    # Must exceed MAX_WAIT_MINUTES below (the longest CI workflow is the
+    # wheel build at roughly 10 minutes; the margin is for runner queueing).
+    timeout-minutes: 60
+
+    steps:
+      # The script comes from the PR head (pull_request event). It only reads
+      # workflow runs and toggles auto-merge on the PR's own auto-merge state;
+      # it cannot approve or merge anything.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            .github/scripts/automerge_gate.py
+          sparse-checkout-cone-mode: false
+
+      - name: Wait for the other pull_request workflows and evaluate them
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GATE_WORKFLOW: ${{ github.workflow }}
+          MAX_WAIT_MINUTES: "55"
+        run: python3 .github/scripts/automerge_gate.py

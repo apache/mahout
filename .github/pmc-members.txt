@@ -28,6 +28,9 @@
 # their ASF id (https://gitbox.apache.org/boxer/) can merge; the others are listed
 # for completeness. Keep one username per line, case-insensitive.
 #
+# The same people are bypass actors (by numeric GitHub user id) of the "main"
+# ruleset in .asf.yaml; update both when the roster changes.
+#
 # GitHub username   # ASF id
 andrewmusselman     # akm
 andrewpalumbo       # apalumbo
