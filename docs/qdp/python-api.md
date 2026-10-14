@@ -9,8 +9,10 @@ sidebar_label: Python API
 
 - A unified encoding facade via `QdpEngine`
 - Benchmark and loader builders
-- Backend-selection helpers
+- GPU availability checks
 - Optional access to native `_qdp` types when the Rust extension is installed
+
+`qumat.qdp` re-exports `QdpEngine` and `QuantumTensor` from this package.
 
 ## Overview
 
@@ -18,19 +20,17 @@ Import from the package root:
 
 ```python
 from qumat_qdp import (
-    BACKEND,
-    Backend,
     LatencyResult,
+    NativeQdpEngine,
     NativeQuantumTensor,
     QdpBenchmark,
     QdpEngine,
     QdpTensor,
     QuantumDataLoader,
     QuantumTensor,
-    RustQdpEngine,
     ThroughputResult,
     TritonAmdEngine,
-    force_backend,
+    is_native_cuda_available,
     is_triton_amd_available,
     run_throughput_pipeline_py,
 )
@@ -39,43 +39,34 @@ from qumat_qdp import (
 Key exports:
 
 - `QdpEngine`: unified encode entry point for `backend="cuda"` and `backend="amd"`.
-- `QdpBenchmark`: benchmark builder for the Rust pipeline or explicit PyTorch reference backend.
+- `QdpBenchmark`: benchmark builder for the CUDA and AMD backends.
 - `QuantumDataLoader`: batch iterator builder for synthetic or file-backed inputs.
 - `QdpTensor` / `QuantumTensor`: thin DLPack facade type.
-- `Backend`, `BACKEND`, `force_backend`: backend detection and override helpers for the `_qdp` / PyTorch-reference selection layer.
 - `TritonAmdEngine`, `is_triton_amd_available`: direct AMD-route entry points.
-- `RustQdpEngine`, `NativeQuantumTensor`: native `_qdp` exports when the extension is available.
+- `is_native_cuda_available`: whether the native engine reports a usable CUDA device.
+- `NativeQdpEngine`, `NativeQuantumTensor`: the raw `_qdp` extension classes, when the extension is available.
 
-`BACKEND` is the backend-selection snapshot captured when `qumat_qdp` is imported:
-
-- `Backend.RUST_CUDA`: `_qdp` is available
-- `Backend.NONE`: no auto-detected backend is available
-- `Backend.PYTORCH`: only when selected explicitly before import-time evaluation
-
-PyTorch is not used as an automatic fallback. The two backend-selection surfaces are independent:
-
-- `force_backend(backend: Backend | None)` only affects what `get_backend()` returns (and, transitively, the cached `BACKEND` snapshot at import time). Pass `None` to restore auto-detection. It does **not** switch which implementation `QdpBenchmark` or `QuantumDataLoader` use, and it does **not** change the availability of `RustQdpEngine` / `NativeQuantumTensor` (those depend on whether `_qdp` could be imported).
-- To run the PyTorch reference pipeline through the builders, call `.backend("pytorch")` on `QdpBenchmark` or `QuantumDataLoader` explicitly.
-
-If you need the current override state after import time, call `get_backend()` from `qumat_qdp._backend` rather than relying on the exported `BACKEND` constant.
+An importable `_qdp` does not guarantee a usable GPU; check that with `is_native_cuda_available()` or `is_triton_amd_available()`.
 
 ## Backend Model
 
-`qumat_qdp` has two related backend-selection surfaces:
+Every backend selector names the GPU backend to run on:
 
 | Surface | Selector | Values |
 |--------|----------|--------|
-| Unified engine routing | `QdpEngine(..., backend=...)` | `"cuda"`, `"amd"` |
-| Builder fallback/reference routing | `.backend(...)` on `QdpBenchmark` / `QuantumDataLoader` | `"rust"`, `"pytorch"` |
+| Engine | `QdpEngine(..., backend=...)` | `"cuda"`, `"amd"` |
+| Data loader | `QuantumDataLoader(...).backend(...)` | `"cuda"` (default), `"amd"`, `"auto"` |
+| Benchmark | `QdpBenchmark(...).backend(...)` | `"cuda"` (default), `"amd"` |
 
-These selectors are intentionally different:
+- `"cuda"` routes to the native `_qdp` Rust/CUDA implementation on NVIDIA GPUs.
+- `"amd"` routes to the Triton AMD implementation on ROCm GPUs.
+- `"auto"` (data loader only) picks between the two for the host.
 
-- `QdpEngine(..., backend="cuda")` routes to the native `_qdp` CUDA engine.
-- `QdpEngine(..., backend="amd")` routes to the Triton AMD implementation.
-- `QdpBenchmark(...).backend("rust")` uses the Rust pipeline.
-- `QdpBenchmark(...).backend("pytorch")` uses the pure-PyTorch reference implementation.
-- `QuantumDataLoader(...).backend("rust")` uses the Rust-backed iterator.
-- `QuantumDataLoader(...).backend("pytorch")` uses the explicit PyTorch reference iterator.
+A selector raises when its GPU backend is not usable. `QuantumDataLoader(...).backend("auto")` picks the GPU backend for the host:
+
+1. `"cuda"`, when `_qdp` reports a usable CUDA device;
+2. otherwise `"amd"`, when `is_triton_amd_available()` is true;
+3. otherwise iteration raises `RuntimeError`.
 
 ## Encoding API
 
@@ -104,15 +95,14 @@ Route support summary:
 | Route | Supported methods |
 |--------|-------------------|
 | `QdpEngine(..., backend="cuda")` | `amplitude`, `angle`, `basis`, `phase`, `iqp`, `iqp-z` |
-| `QdpEngine(..., backend="amd")` | `amplitude`, `angle`, `basis` |
+| `QdpEngine(..., backend="amd")` | `amplitude`, `angle`, `basis`, `phase`, `iqp`, `iqp-z` |
 
 **CUDA tensor-input caveat:** when `data` is provided as a zero-copy CUDA `torch.Tensor`, supported encoding methods are currently limited to `amplitude`, `angle`, `basis`, `iqp`, and `iqp-z`. In that input path, `phase` is not currently supported — pass a CPU tensor, NumPy array, or Python list to use `phase` on the CUDA route.
 
 Result type notes:
 
-- The CUDA route returns the native `_qdp` tensor object when `_qdp` is available.
-- The AMD route currently returns a `torch.Tensor` from the Triton implementation.
-- `QdpTensor` / `QuantumTensor` provide a DLPack facade for backend-native tensor producers.
+- Both routes return a `QdpTensor`. Convert it with `torch.from_dlpack(qt)` or `qt.to_torch()`.
+- `qt.value` holds the backend-native object: the `_qdp` tensor on the CUDA route, a `torch.Tensor` on the AMD route. `qt.backend` is `"cuda"` or `"amd"`.
 
 Direct AMD usage is also available:
 
@@ -125,15 +115,18 @@ engine = TritonAmdEngine(device_id=0, precision="float32")
 
 Use `is_triton_amd_available()` to check whether the Triton AMD runtime is available before selecting that route.
 
-A pure-PyTorch reference encoder is also available at `qumat_qdp.torch_ref.encode`. It supports `amplitude`, `angle`, `basis`, and `iqp` (call `iqp_encode(..., enable_zz=False)` directly for Z-only behavior). It does not implement `phase` or `iqp-z`, and runs entirely in PyTorch — useful for cross-checking the Rust pipeline.
-
 ### QdpTensor and QuantumTensor
 
-`QdpTensor` is a thin DLPack facade; `QuantumTensor` is an alias.
+`QdpTensor` is a thin DLPack facade over a backend-native result; `QuantumTensor` is an alias.
+
+Fields:
+
+- `value`: the backend-native object
+- `backend`: `"cuda"` or `"amd"`
 
 Available methods:
 
-- `__dlpack__(stream=None)`
+- `__dlpack__(stream=None, **kwargs)`
 - `__dlpack_device__()`
 - `to_torch()`
 
@@ -168,21 +161,20 @@ tensor = torch.from_dlpack(qt)
 | `batches(total, size=64)` | Total batches and batch size. |
 | `prefetch(n)` | No-op (API compatibility). |
 | `warmup(n)` | Warmup batch count. |
-| `backend(name)` | Select `"rust"` or `"pytorch"`. |
+| `dtype(name)` | `"f32"` (default) or `"f64"`. Encodings without an f32 kernel (`phase`, `iqp`, `iqp-z`) run in f64 on the CUDA backend. |
+| `backend(name)` | Select `"cuda"` or `"amd"`. |
 
 Backend notes:
 
-- `"rust"` is the default backend.
-- `"pytorch"` is explicit and intended as a reference path.
-- The Rust benchmark path is the native pipeline used by `run_throughput_pipeline_py`.
-- The PyTorch benchmark path is implemented in Python and is useful for fallback testing and comparisons.
+- `"cuda"` is the default backend. It is the native pipeline used by `run_throughput_pipeline_py`.
+- `"amd"` runs the Triton AMD engine in a Python loop on the selected ROCm device and raises if no ROCm runtime is available.
 
 Encoding support summary:
 
 | Benchmark backend | Supported methods |
 |--------|-------------------|
-| `"rust"` | `amplitude`, `angle`, `basis` |
-| `"pytorch"` | `amplitude`, `angle`, `basis`, `iqp` |
+| `"cuda"` | `amplitude`, `angle`, `basis` |
+| `"amd"` | `amplitude`, `angle`, `basis`, `iqp`, `iqp-z` |
 
 Treat `phase` and `iqp-z` as direct-encode methods today rather than benchmark-helper features.
 
@@ -191,7 +183,7 @@ Example:
 ```python
 from qumat_qdp import QdpBenchmark
 
-rust_result = (
+cuda_result = (
     QdpBenchmark(device_id=0)
     .qubits(16)
     .encoding("amplitude")
@@ -200,9 +192,9 @@ rust_result = (
     .run_throughput()
 )
 
-ref_result = (
+amd_result = (
     QdpBenchmark(device_id=0)
-    .backend("pytorch")
+    .backend("amd")
     .qubits(16)
     .encoding("iqp")
     .batches(100, size=64)
@@ -236,29 +228,30 @@ Result types:
 | `source_file(path, streaming=False)` | Use a file-backed source. |
 | `seed(s)` | RNG seed for reproducibility. |
 | `null_handling(policy)` | Set `"fill_zero"` or `"reject"`. |
-| `backend(name)` | Select `"rust"` or `"pytorch"`. |
+| `dtype(name)` | Element precision for file sources: `"float64"` (default, lossless) or `"float32"`. Synthetic data is generated in float32. |
+| `backend(name)` | Select `"cuda"`, `"amd"`, or `"auto"` (see [Backend Model](#backend-model)). |
 
 File source notes:
 
 - `source_file(path, streaming=False)` accepts local paths and also accepts remote `s3://...` / `gs://...` paths when QDP is built with the optional `remote-io` feature.
 - Remote URL query strings and fragments are rejected.
 - `streaming=True` currently supports `.parquet` only.
-- The Rust backend supports broader file formats and streaming loaders.
-- The explicit PyTorch backend supports synthetic data plus `.npy`, `.pt`, and `.pth` files only.
+- The `"cuda"` backend supports broader file formats and streaming loaders.
+- The `"amd"` backend loads files in memory and supports synthetic data plus `.npy`, `.pt`, and `.pth` files only.
 
 Iteration behavior depends on backend:
 
 | Loader backend | Iteration yields |
 |--------|------------------|
-| `"rust"` | `NativeQuantumTensor` / `_qdp.QuantumTensor` (the native Rust extension type, not the `QuantumTensor` facade alias) |
-| `"pytorch"` | `torch.Tensor` |
+| `"cuda"` | `QdpTensor` wrapping the native `_qdp.QuantumTensor` |
+| `"amd"` | `QdpTensor` wrapping a `torch.Tensor` on the ROCm device |
 
 Encoding support summary:
 
 | Loader backend | Supported methods |
 |--------|-------------------|
-| `"rust"` | documented for `amplitude`, `angle`, `basis` |
-| `"pytorch"` | `amplitude`, `angle`, `basis`, `iqp` |
+| `"cuda"` | documented for `amplitude`, `angle`, `basis` |
+| `"amd"` | `amplitude`, `angle`, `basis`, `iqp`, `iqp-z` |
 
 `phase` and `iqp-z` are not documented loader-first methods.
 
@@ -270,7 +263,7 @@ import torch
 
 loader = (
     QuantumDataLoader(device_id=0)
-    .backend("pytorch")
+    .backend("amd")
     .qubits(4)
     .encoding("iqp")
     .batches(5, size=8)
@@ -306,7 +299,7 @@ for qt in loader:
 
 Signature:
 
-`run_throughput_pipeline_py(device_id=0, num_qubits=16, batch_size=64, total_batches=100, encoding_method="amplitude", warmup_batches=0, seed=None, float32_pipeline=False)`
+`run_throughput_pipeline_py(device_id=0, num_qubits=16, batch_size=64, total_batches=100, encoding_method="amplitude", warmup_batches=0, seed=None, dtype="f64")`
 
 Returns a tuple:
 
