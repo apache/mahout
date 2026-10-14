@@ -74,7 +74,7 @@ For non-trivial code contributions, contributors are expected to have an ASF ICL
 When deciding whether to merge, committers should verify all of the following:
 
 - Required CI checks are green (enforced automatically, see below).
-- At least one committer approves (enforced automatically, see below).
+- At least two committers approve (enforced automatically, see below).
 - All blocking comments are resolved.
 
 #### Auto-merge and CI
@@ -115,13 +115,12 @@ decision.
 
 The `Committer approval` status check ([`pr-approval-check.yml`](https://github.com/apache/mahout/blob/main/.github/workflows/pr-approval-check.yml)) is required on `main` and re-runs whenever a review is submitted, edited, or dismissed:
 
-- The PR must have at least one reviewer whose latest review is an approval and who has write access to the repository (i.e. a committer). Approvals from non-committers are welcome but do not satisfy the check.
+- The PR must have at least **two** distinct reviewers whose latest review is an approval and who have write access to the repository (i.e. committers). Approvals from non-committers are welcome but do not count. The number is set by `REQUIRED_APPROVALS` in the workflow.
 - Following GitHub semantics, a comment-only review keeps an earlier approval in place; "Request changes" or dismissing the review removes it.
 - PRs opened by PMC members are exempt. The list of PMC GitHub accounts lives in [`.github/pmc-members.txt`](https://github.com/apache/mahout/blob/main/.github/pmc-members.txt) and must be updated when the PMC roster changes.
+- This applies to auto-merge and manual merges alike; PMC members can bypass it in an emergency (see above).
 
-The two-approval expectation for high-impact changes below is not enforced by tooling and remains a committer responsibility.
-
-The following changes should receive at least two committer approvals and prior public discussion (issue or `dev@` thread):
+The following changes should additionally have prior public discussion (issue or `dev@` thread):
 
 - API or behavior-breaking changes.
 - Architecture or major dependency changes.
