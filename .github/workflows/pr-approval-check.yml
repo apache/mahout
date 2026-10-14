@@ -15,11 +15,12 @@
 # limitations under the License.
 #
 # Enforces the PR policy (docs/community/pr-policy-and-review-guidelines.md):
-# a pull request needs at least one approving review from a committer before
-# it can be merged, unless it was opened by a PMC member
+# a pull request needs at least REQUIRED_APPROVALS (2) approving reviews from
+# committers before it can be merged, unless it was opened by a PMC member
 # (.github/pmc-members.txt). The "Committer approval" job is a required status
-# check on main via .asf.yaml, mirroring Airflow's
-# required_approving_review_count: 1 but with the PMC exemption.
+# check on main via .asf.yaml, mirroring GitHub's
+# required_approving_review_count: 2 but with the PMC exemption.
+# PMC members can bypass it in an emergency (main ruleset in .asf.yaml).
 #
 name: PR Approval Check
 
@@ -59,8 +60,10 @@ jobs:
             .github/scripts/check_pr_approval.py
           sparse-checkout-cone-mode: false
 
-      - name: Check for a committer approval
+      - name: Check for committer approvals
         env:
           GITHUB_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          # Committer approvals a non-PMC PR needs. Keep the docs in sync.
+          REQUIRED_APPROVALS: "2"
         run: python3 .github/scripts/check_pr_approval.py

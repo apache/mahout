@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Check that a pull request has at least one approving review from a committer.
+"""Check that a pull request has enough approving reviews from committers.
 
 This backs the ``Committer approval`` required status check on ``main``
 (see ``.github/workflows/pr-approval-check.yml`` and ``.asf.yaml``).
@@ -22,16 +22,17 @@ This backs the ``Committer approval`` required status check on ``main``
 Rules:
 
 * A pull request opened by a PMC member (``.github/pmc-members.txt``) is exempt.
-* Otherwise, at least one reviewer whose *latest* review is ``APPROVED`` must have
-  write access to the repository. Per ASF policy every committer has write access,
-  so "has write access" is used as the definition of "is a committer".
+* Otherwise, at least ``REQUIRED_APPROVALS`` (default 2) distinct reviewers whose
+  *latest* review is ``APPROVED`` must have write access to the repository. Per
+  ASF policy every committer has write access, so "has write access" is used as
+  the definition of "is a committer".
 * Following GitHub's own semantics, a ``COMMENTED`` review does not revoke an
   earlier approval, while ``CHANGES_REQUESTED`` or a dismissal does.
 
 Only the Python standard library is used so the script runs in CI and locally:
 
     GITHUB_TOKEN=$(gh auth token) python .github/scripts/check_pr_approval.py \\
-        --repo apache/mahout --pr 1234
+        --repo apache/mahout --pr 1234 [--required-approvals 2]
 
 Exit status is 0 when the PR may be merged and 1 otherwise.
 """
@@ -50,6 +51,8 @@ from typing import Any
 
 API_URL = os.environ.get("GITHUB_API_URL", "https://api.github.com")
 DEFAULT_PMC_FILE = Path(__file__).resolve().parents[1] / "pmc-members.txt"
+# Committer approvals a non-PMC PR needs (REQUIRED_APPROVALS in the workflow).
+DEFAULT_REQUIRED_APPROVALS = 2
 # Review states that change a reviewer's standing. COMMENTED is deliberately
 # excluded: on GitHub a comment-only review leaves a previous approval in place.
 DECISIVE_STATES = {"APPROVED", "CHANGES_REQUESTED", "DISMISSED"}
@@ -131,7 +134,11 @@ def has_write_access(token: str, repo: str, login: str) -> bool:
 
 
 def check(
-    token: str, repo: str, pr_number: int, pmc_members: set[str]
+    token: str,
+    repo: str,
+    pr_number: int,
+    pmc_members: set[str],
+    required_approvals: int = DEFAULT_REQUIRED_APPROVALS,
 ) -> tuple[bool, list[str]]:
     """Evaluate the rule. Returns ``(ok, log_lines)``."""
     lines: list[str] = []
@@ -168,9 +175,12 @@ def check(
                 f"Approved by @{login} (not a committer; does not satisfy the rule)."
             )
 
-    if committer_approvers:
+    if len(committer_approvers) >= required_approvals:
         return True, lines
-    lines.append("No approving review from a committer.")
+    lines.append(
+        f"{len(committer_approvers)} of {required_approvals} required committer "
+        "approvals."
+    )
     return False, lines
 
 
@@ -195,6 +205,13 @@ def main(argv: list[str] | None = None) -> int:
         default=DEFAULT_PMC_FILE,
         help=f"PMC member list (default: {DEFAULT_PMC_FILE})",
     )
+    parser.add_argument(
+        "--required-approvals",
+        type=int,
+        default=int(os.environ.get("REQUIRED_APPROVALS", DEFAULT_REQUIRED_APPROVALS)),
+        help="committer approvals a non-PMC PR needs "
+        f"(default: $REQUIRED_APPROVALS or {DEFAULT_REQUIRED_APPROVALS})",
+    )
     args = parser.parse_args(argv)
 
     token = os.environ.get("GITHUB_TOKEN")
@@ -202,6 +219,8 @@ def main(argv: list[str] | None = None) -> int:
         parser.error(
             "GITHUB_TOKEN, --repo/$GITHUB_REPOSITORY and --pr/$PR_NUMBER are required"
         )
+    if args.required_approvals < 1:
+        parser.error("--required-approvals must be at least 1")
 
     pmc_members = load_pmc_members(args.pmc_file)
     if not pmc_members:
@@ -211,15 +230,18 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     try:
-        ok, lines = check(token, args.repo, int(args.pr), pmc_members)
+        ok, lines = check(
+            token, args.repo, int(args.pr), pmc_members, args.required_approvals
+        )
     except GitHubError as exc:
         print(f"::error::{exc}")
         return 1
 
+    n = args.required_approvals
     if ok:
-        verdict = "PASS: at least one committer approval (or PMC author)."
+        verdict = f"PASS: at least {n} committer approval(s) (or PMC author)."
     else:
-        verdict = "FAIL: needs at least one approving review from a committer."
+        verdict = f"FAIL: needs at least {n} approving review(s) from committers."
     lines.append(verdict)
     print("\n".join(lines))
 
