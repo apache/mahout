@@ -55,21 +55,79 @@ github:
     # enable updating head branches of pull requests
     allow_update_branch: true
 
-  protected_branches:
-    main:
-      required_linear_history: true
-      required_signatures: false
-      # PR policy (docs/community/pr-policy-and-review-guidelines.md): a PR needs
-      # at least one approving review from a committer before it can be merged,
-      # unless it was opened by a PMC member (.github/pmc-members.txt).
-      # GitHub's own required_approving_review_count (as used by Airflow) cannot
-      # exempt PMC members, so the rule is enforced through this required status
-      # check produced by .github/workflows/pr-approval-check.yml.
-      required_status_checks:
-        strict: false
-        checks:
-          - context: "Committer approval"
-            app_id: 15368  # GitHub Actions
+  # Branch protection for main is a ruleset (not classic protected_branches)
+  # because only rulesets support bypass actors. Classic protection and
+  # rulesets are both enforced when both exist, so there must be no
+  # protected_branches entry for main.
+  #
+  # PR policy (docs/community/pr-policy-and-review-guidelines.md): a PR needs
+  # at least two approving reviews from committers before it can be merged,
+  # unless it was opened by a PMC member (.github/pmc-members.txt).
+  # GitHub's own required_approving_review_count (as used by Airflow) cannot
+  # exempt PMC members, so the rule is enforced through the required status
+  # check "Committer approval" produced by .github/workflows/pr-approval-check.yml.
+  # "Auto-merge gate" (.github/workflows/automerge-gate.yml) keeps auto-merge
+  # (allow_auto_merge above) from merging a PR whose CI failed: GitHub
+  # auto-merge only waits for *required* checks, and the CI jobs themselves are
+  # deliberately not required so that a committer can still merge manually
+  # after a failure. The gate waits for all pull_request workflows, disables
+  # auto-merge on failure, and then passes.
+  #
+  # PMC members are bypass actors: on any pull request they get "Merge without
+  # waiting for requirements to be met (bypass rules)", e.g. for urgent fixes
+  # or when the ASF runner queue is stuck. bypass_mode "pull_request" means
+  # they still have to open a pull request (no direct pushes) and every bypass
+  # is recorded in the audit log. GitHub has no notion of a PMC and the ASF org
+  # has no PMC team, so they are listed by GitHub user id, one line per member
+  # of .github/pmc-members.txt; update both when the PMC roster changes
+  # (`gh api users/<login> -q .id`).
+  #
+  # Raw Rulesets API payload: asfyaml only coerces a known set of keys to
+  # integers (actor_id, required_approving_review_count, ...). integration_id
+  # is not one of them and arrives at GitHub as a string, which is rejected
+  # ("Invalid property /rules/4"), so the required checks are not pinned to
+  # the GitHub Actions app (any source).
+  rulesets:
+    - name: "main"
+      target: branch
+      enforcement: active
+      conditions:
+        ref_name:
+          include:
+            - "~DEFAULT_BRANCH"
+          exclude: []
+      bypass_actors:
+        - { actor_type: User, bypass_mode: pull_request, actor_id: 692523 }     # andrewmusselman
+        - { actor_type: User, bypass_mode: pull_request, actor_id: 7681565 }    # andrewpalumbo
+        - { actor_type: User, bypass_mode: pull_request, actor_id: 105915352 }  # guan404ming
+        - { actor_type: User, bypass_mode: pull_request, actor_id: 70953 }      # MaineC
+        - { actor_type: User, bypass_mode: pull_request, actor_id: 43886578 }   # 400Ping
+        - { actor_type: User, bypass_mode: pull_request, actor_id: 101171023 }  # rich7420
+        - { actor_type: User, bypass_mode: pull_request, actor_id: 409707 }     # sscdotopen
+        - { actor_type: User, bypass_mode: pull_request, actor_id: 135417 }     # magsol
+        - { actor_type: User, bypass_mode: pull_request, actor_id: 176382 }     # sslavic
+        - { actor_type: User, bypass_mode: pull_request, actor_id: 5852441 }    # rawkintrevo
+      rules:
+        # Only bypass actors can delete or force-push main.
+        - type: deletion
+        - type: non_fast_forward
+        - type: required_linear_history
+        # Changes must come through a pull request. No review count here:
+        # committer approval is the status check below (with PMC exemption).
+        - type: pull_request
+          parameters:
+            required_approving_review_count: 0
+            dismiss_stale_reviews_on_push: false
+            require_code_owner_review: false
+            require_last_push_approval: false
+            required_review_thread_resolution: false
+        - type: required_status_checks
+          parameters:
+            strict_required_status_checks_policy: false
+            required_status_checks:
+              - context: "Committer approval"
+              - context: "Auto-merge gate"
+
   environments:
     pypi:
       required_reviewers:
