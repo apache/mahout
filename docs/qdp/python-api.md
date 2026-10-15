@@ -306,7 +306,9 @@ for qt in loader:
 
 Signature:
 
-`run_throughput_pipeline_py(device_id=0, num_qubits=16, batch_size=64, total_batches=100, encoding_method="amplitude", warmup_batches=0, seed=None, float32_pipeline=False)`
+`run_throughput_pipeline_py(device_id=0, num_qubits=16, batch_size=64, total_batches=100, encoding_method="amplitude", warmup_batches=0, seed=None, dtype="f64")`
+
+`dtype` selects the pipeline element type: `"f64"` (default) or `"f32"`.
 
 Returns a tuple:
 
