@@ -58,7 +58,7 @@ fn test_amplitude_encoding_workflow() {
     let data = common::create_test_data(1024);
     println!("Created test data: {} elements", data.len());
 
-    let result = engine.encode(&data, 10, "amplitude");
+    let result = engine.encode_single(&data, 10, "amplitude");
     let dlpack_ptr = result.expect("Encoding should succeed");
     assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
     println!("PASS: Encoding succeeded, DLPack pointer valid");
@@ -85,7 +85,7 @@ fn test_amplitude_encoding_async_pipeline() {
     let data = common::create_test_data(200000);
     println!("Created test data: {} elements", data.len());
 
-    let result = engine.encode(&data, 18, "amplitude");
+    let result = engine.encode_single(&data, 18, "amplitude");
     let dlpack_ptr = result.expect("Encoding should succeed");
     assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
     println!("PASS: Encoding succeeded, DLPack pointer valid");
@@ -221,7 +221,7 @@ fn test_single_encode_dlpack_2d_shape() {
     };
 
     let data = common::create_test_data(16);
-    let result = engine.encode(&data, 4, "amplitude");
+    let result = engine.encode_single(&data, 4, "amplitude");
     assert!(result.is_ok(), "Encoding should succeed");
 
     let dlpack_ptr = result.unwrap();
@@ -259,7 +259,7 @@ fn test_dlpack_device_id() {
     };
 
     let data = common::create_test_data(16);
-    let result = engine.encode(&data, 4, "amplitude");
+    let result = engine.encode_single(&data, 4, "amplitude");
     assert!(result.is_ok(), "Encoding should succeed");
 
     let dlpack_ptr = result.unwrap();

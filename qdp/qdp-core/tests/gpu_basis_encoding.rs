@@ -159,7 +159,7 @@ fn test_basis_out_of_range_rejected() {
     assert!(result.is_err());
     match result {
         Err(MahoutError::InvalidInput(msg)) => {
-            assert!(msg.contains("exceeds state size"), "msg: {msg}");
+            assert!(msg.contains("exceeds state vector size"), "msg: {msg}");
         }
         _ => panic!("expected InvalidInput, got {:?}", result),
     }

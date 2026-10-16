@@ -404,8 +404,8 @@ def test_encode_numpy_precision(precision, expected_dtype):
     ("data", "error_match"),
     [
         (
-            np.array([1.0, 2.0, 3.0, 4.0], dtype=np.float32),
-            None,  # Wrong dtype - will raise RuntimeError or TypeError
+            np.array([1.0, 2.0, 3.0, 4.0], dtype=np.float16),
+            None,  # Unsupported dtype (float64 and float32 are accepted)
         ),
         (
             np.array([[[1.0, 2.0], [3.0, 4.0]]], dtype=np.float64),

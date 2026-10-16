@@ -14,64 +14,76 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//
-// Tests for GPU-side f32 L2 norm helper in AmplitudeEncoder.
-//
+// Tests for the GPU-side f32 inverse-norm reduction used by amplitude encoding.
 
 #![cfg(target_os = "linux")]
 
-use approx::assert_relative_eq;
 use cudarc::driver::DevicePtr;
-use qdp_core::gpu::encodings::amplitude::AmplitudeEncoder;
+use qdp_core::gpu::kernels::{LaunchCtx, Shape, amplitude};
 
 mod common;
 
-#[test]
-fn test_calculate_inv_norm_gpu_f32_basic() {
-    println!("Testing AmplitudeEncoder::calculate_inv_norm_gpu_f32 (basic case)...");
-
-    // Input: [3.0, 4.0] -> norm = 5.0, inv_norm = 0.2
-    let input: Vec<f32> = vec![3.0, 4.0];
-    let expected_norm = (3.0_f32.powi(2) + 4.0_f32.powi(2)).sqrt();
-    let expected_inv_norm = 1.0_f32 / expected_norm;
-
-    let Some((device, input_d)) = common::copy_f32_to_device(input.as_slice()) else {
-        println!("SKIP: No CUDA device available");
-        return;
+/// Queue the reduction, wait, and return (inverse norms, flag).
+fn inv_norms_sync(input: &[f32], shape: Shape) -> Option<(Vec<f32>, i32)> {
+    let (device, input_d) = common::copy_f32_to_device(input)?;
+    let ctx = LaunchCtx::default_stream(&device);
+    let (norms, flag) = unsafe {
+        amplitude::inv_norms::<f32>(&ctx, *input_d.device_ptr() as *const f32, shape).unwrap()
     };
-    let inv = unsafe {
-        AmplitudeEncoder::calculate_inv_norm_gpu_f32(
-            &device,
-            *input_d.device_ptr() as *const f32,
-            input.len(),
-        )
-        .unwrap()
-    };
-
-    assert_relative_eq!(inv, expected_inv_norm, epsilon = 1e-6_f32);
+    device.synchronize().unwrap();
+    let norms = device.dtoh_sync_copy(&norms).unwrap();
+    let flag = device.dtoh_sync_copy(&flag).unwrap()[0];
+    Some((norms, flag))
 }
 
 #[test]
-fn test_calculate_inv_norm_gpu_f32_invalid_zero() {
-    println!("Testing AmplitudeEncoder::calculate_inv_norm_gpu_f32 with zero vector...");
-
-    let input: Vec<f32> = vec![0.0, 0.0, 0.0];
-    let Some((device, input_d)) = common::copy_f32_to_device(input.as_slice()) else {
-        println!("SKIP: No CUDA device available");
+fn test_inv_norms_f32_basic() {
+    // Input: [3.0, 4.0] -> norm = 5.0, inv_norm = 0.2
+    let expected = 1.0_f32 / 5.0;
+    let Some((norms, flag)) = inv_norms_sync(&[3.0, 4.0], Shape::new(1, 2)) else {
+        println!("SKIP: No CUDA device");
         return;
     };
+    assert_eq!(norms.len(), 1);
+    assert!((norms[0] - expected).abs() < 1e-6, "got {}", norms[0]);
+    assert_eq!(flag, 0);
+}
 
-    let result = unsafe {
-        AmplitudeEncoder::calculate_inv_norm_gpu_f32(
-            &device,
-            *input_d.device_ptr() as *const f32,
-            input.len(),
-        )
+#[test]
+fn test_inv_norms_f32_per_sample() {
+    // Two samples: [3, 4] and [0, 2] -> inverse norms 0.2 and 0.5
+    let Some((norms, flag)) = inv_norms_sync(&[3.0, 4.0, 0.0, 2.0], Shape::new(2, 2)) else {
+        println!("SKIP: No CUDA device");
+        return;
     };
-
     assert!(
-        result.is_err(),
-        "Expected error for zero-norm f32 input, got {:?}",
-        result
+        (norms[0] - 0.2).abs() < 1e-6 && (norms[1] - 0.5).abs() < 1e-6,
+        "{norms:?}"
     );
+    assert_eq!(flag, 0);
+}
+
+#[test]
+fn test_inv_norms_f32_single_large_sample() {
+    // 2^15 elements of 1.0: norm = sqrt(2^15), exercised through the wide
+    // single-sample reduction rather than the per-sample batch kernel.
+    let n = 1usize << 15;
+    let input = vec![1.0_f32; n];
+    let Some((norms, flag)) = inv_norms_sync(&input, Shape::new(1, n)) else {
+        println!("SKIP: No CUDA device");
+        return;
+    };
+    let expected = 1.0 / (n as f32).sqrt();
+    assert!((norms[0] - expected).abs() < 1e-6, "got {}", norms[0]);
+    assert_eq!(flag, 0);
+}
+
+#[test]
+fn test_inv_norms_f32_invalid_zero_raises_flag() {
+    let Some((norms, flag)) = inv_norms_sync(&[0.0, 0.0, 0.0], Shape::new(1, 3)) else {
+        println!("SKIP: No CUDA device");
+        return;
+    };
+    assert_eq!(norms[0], 0.0, "invalid samples get inv_norm 0");
+    assert_eq!(flag, 1, "zero norm must raise the flag");
 }

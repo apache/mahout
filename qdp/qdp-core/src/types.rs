@@ -14,22 +14,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Canonical domain types for encodings and element dtypes (`Dtype`).
+//! Canonical domain types: the `Encoding` enum and the element `Dtype`.
 //!
-//! ## `Encoding::supports_f32`
-//!
-//! A future shape of this API may return true for amplitude, angle, and basis once each encoder
-//! has a batch float32 GPU path. **Today only amplitude implements**
-//! [`QuantumEncoder::encode_batch_f32`] for the synthetic prefetch pipeline, so
-//! [`Encoding::supports_f32`](Encoding::supports_f32) stays amplitude-only and
-//! [`crate::pipeline_runner::PipelineConfig::normalize`] avoids routing other encodings through
-//! `encode_batch_f32`. Widen this method when angle/basis gain real `encode_batch_f32`
-//! implementations.
+//! `Encoding` is the name-to-kernel table. Everything that varies per
+//! encoding (sample width, supported input dtypes, the launch itself) lives
+//! on the [`Kernel`] it maps to, so a new encoding is one variant here plus
+//! one descriptor under `gpu::kernels`.
 
 use crate::error::{MahoutError, Result};
-use crate::gpu::encodings::{
-    AmplitudeEncoder, AngleEncoder, BasisEncoder, PhaseEncoder, QuantumEncoder, iqp_full_encoder,
-    iqp_z_encoder,
+use crate::gpu::kernels::{
+    AmplitudeKernel, AngleKernel, BasisKernel, DeviceDtype, Kernel, PhaseKernel, iqp_full_kernel,
+    iqp_z_kernel,
 };
 
 /// Dtype for pipeline configuration (re-export of [`crate::gpu::memory::Precision`]).
@@ -122,39 +117,29 @@ impl Encoding {
     /// - `Angle` / `IqpZ` / `Phase`: one value per qubit (`n`)
     /// - `Iqp`: single-qubit + pairwise ZZ terms (`n + n*(n-1)/2`)
     /// - `Basis`: single integer index (`1`)
+    ///
+    /// Elements per sample this encoding consumes for `num_qubits`; see [`Kernel::sample_size`].
     #[must_use]
-    pub const fn vector_len(self, num_qubits: u32) -> usize {
-        let n = num_qubits as usize;
-        match self {
-            Self::Amplitude => 1 << n,
-            Self::Angle | Self::IqpZ | Self::Phase => n,
-            Self::Iqp => n + n * n.saturating_sub(1) / 2,
-            Self::Basis => 1,
-        }
+    pub fn vector_len(self, num_qubits: u32) -> usize {
+        self.encoder().sample_size(num_qubits as usize)
     }
 
-    /// Whether the **synthetic batch pipeline** may keep [`crate::gpu::memory::Precision::Float32`]
-    /// end-to-end (prefetched host `Vec<f32>` plus [`crate::QdpEngine::encode_batch_f32`]).
-    ///
-    /// Returns true for encodings whose batch host fill and `encode_batch_f32` paths are wired
-    /// end-to-end: amplitude, angle, basis. IQP / IQP-Z / Phase still normalize to `Float64`
-    /// in [`crate::pipeline_runner::PipelineConfig::normalize`] until their batch f32 GPU
-    /// paths exist.
+    /// True when this encoding has a float32 device kernel.
     #[must_use]
-    pub const fn supports_f32(self) -> bool {
-        matches!(self, Self::Amplitude | Self::Angle | Self::Basis)
+    pub fn supports_f32(self) -> bool {
+        self.encoder().supports(DeviceDtype::F32)
     }
 
     /// Static encoder dispatch (no per-call heap allocation).
     #[must_use]
-    pub fn encoder(self) -> &'static dyn QuantumEncoder {
+    pub fn encoder(self) -> &'static dyn Kernel {
         match self {
-            Self::Amplitude => &AmplitudeEncoder,
-            Self::Angle => &AngleEncoder,
-            Self::Basis => &BasisEncoder,
-            Self::Iqp => iqp_full_encoder(),
-            Self::IqpZ => iqp_z_encoder(),
-            Self::Phase => &PhaseEncoder,
+            Self::Amplitude => &AmplitudeKernel,
+            Self::Angle => &AngleKernel,
+            Self::Basis => &BasisKernel,
+            Self::Iqp => iqp_full_kernel(),
+            Self::IqpZ => iqp_z_kernel(),
+            Self::Phase => &PhaseKernel,
         }
     }
 }
