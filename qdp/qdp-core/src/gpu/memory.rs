@@ -92,18 +92,19 @@ fn build_oom_message(
     )
 }
 
-/// Guard that checks available GPU memory before attempting a large allocation.
+/// The accept/reject decision itself, against caller-supplied `free`/`total` figures.
 ///
-/// Returns a MemoryAllocation error with a helpful message when the request
-/// exceeds the currently reported free memory.
+/// Split out of [`ensure_device_memory_available`] so the decision can be exercised without a
+/// device: every path that queries CUDA is unreachable on the stub build, which would otherwise
+/// leave the rejection rule — the behavior issue #1430 is about — untested wherever CI runs.
 #[cfg(target_os = "linux")]
-pub(crate) fn ensure_device_memory_available(
+pub(crate) fn ensure_fits_in_free_memory(
     requested_bytes: usize,
     context: &str,
     qubits: Option<usize>,
+    free: usize,
+    total: usize,
 ) -> Result<()> {
-    let (free, total) = query_cuda_mem_info()?;
-
     if (requested_bytes as u64) > (free as u64) {
         return Err(MahoutError::MemoryAllocation(build_oom_message(
             context,
@@ -115,6 +116,20 @@ pub(crate) fn ensure_device_memory_available(
     }
 
     Ok(())
+}
+
+/// Guard that checks available GPU memory before attempting a large allocation.
+///
+/// Returns a MemoryAllocation error with a helpful message when the request
+/// exceeds the currently reported free memory.
+#[cfg(target_os = "linux")]
+pub(crate) fn ensure_device_memory_available(
+    requested_bytes: usize,
+    context: &str,
+    qubits: Option<usize>,
+) -> Result<()> {
+    let (free, total) = query_cuda_mem_info()?;
+    ensure_fits_in_free_memory(requested_bytes, context, qubits, free, total)
 }
 
 /// Wraps CUDA allocation errors with an OOM-aware MahoutError.

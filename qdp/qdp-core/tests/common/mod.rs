@@ -177,6 +177,36 @@ pub fn qdp_engine_with_precision(precision: Precision) -> Option<QdpEngine> {
     QdpEngine::new_with_precision(0, precision).ok()
 }
 
+/// Returns a QDP engine, or `None` when one cannot be created — including on hosts with no
+/// NVIDIA driver at all.
+///
+/// [`qdp_engine`] is not enough for that case: when `libcuda` cannot be dlopened, `cudarc`
+/// panics (`panic_no_lib_found`) instead of returning `Err`, so `.ok()` never yields `None` and
+/// the test aborts rather than skipping. Probing inside `catch_unwind` with the default hook
+/// suppressed borrows that much from `parquet_f32_fidelity.rs`'s helper for issue #1342.
+///
+/// It stops short of what that helper does, and the difference matters. A stub build — toolkit
+/// absent, `libcuda` present — creates an engine *successfully* and only fails when a kernel is
+/// launched, so this probe returns `Some` there. That is sufficient for callers that never launch
+/// a kernel, which is why the memory-guard tests can use it: they assert on the guard's decision
+/// before any encode runs. A test that does launch one needs `parquet_f32_fidelity.rs`'s version,
+/// which probes with a trivial 1-qubit encode; using this one instead reproduces #1342.
+#[cfg(target_os = "linux")]
+#[allow(dead_code)]
+pub fn qdp_engine_probed() -> Option<QdpEngine> {
+    // The panic hook is process-global, so serialize probes against each other. This narrows the
+    // suppression window but does not close it: the harness runs tests on parallel threads, so a
+    // genuine panic elsewhere that lands inside this window still loses its message. Same hazard
+    // as the `parquet_f32_fidelity.rs` helper this borrows from.
+    static PROBE_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+    let _guard = PROBE_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    let prev_hook = std::panic::take_hook();
+    std::panic::set_hook(Box::new(|_| {}));
+    let probe = std::panic::catch_unwind(|| QdpEngine::new(0).ok());
+    std::panic::set_hook(prev_hook);
+    probe.ok().flatten()
+}
+
 /// Copies f64 host data to the default CUDA device, or returns `None` when unavailable.
 #[cfg(target_os = "linux")]
 #[allow(dead_code)]
