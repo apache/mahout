@@ -66,9 +66,11 @@ jobs:
 
       - name: Smoke-test wheel
         run: |
-          uv venv /tmp/qumat-smoke
-          VIRTUAL_ENV=/tmp/qumat-smoke uv pip install dist/*.whl
-          /tmp/qumat-smoke/bin/python -c "import qumat; print('qumat import OK')"
+          for py in 3.10 3.11 3.12 3.13; do
+            uv venv --python "$py" "/tmp/qumat-smoke-$py"
+            VIRTUAL_ENV="/tmp/qumat-smoke-$py" uv pip install dist/*.whl
+            "/tmp/qumat-smoke-$py/bin/python" -c "import qumat; print('$py: qumat import OK')"
+          done
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
