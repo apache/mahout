@@ -32,9 +32,9 @@ Example:
 from typing import Any, NoReturn
 
 _INSTALL_MSG = (
-    "QDP requires the qumat-qdp native extension. "
-    "Build and install it with: cd qdp/qdp-python && maturin develop --release. "
-    "Note: qumat-qdp supports Python 3.10-3.12 only."
+    "QDP requires the qumat-qdp native extension, which supports Python 3.10-3.12 only. "
+    'On those versions install it with: pip install "qumat[qdp]", '
+    "or build it from source with: cd qdp/qdp-python && maturin develop --release."
 )
 
 
