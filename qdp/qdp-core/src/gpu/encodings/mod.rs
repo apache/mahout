@@ -20,9 +20,9 @@ use std::sync::Arc;
 
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::GpuStateVector;
+use crate::gpu_rt::CudaDevice;
 use crate::preprocessing::Preprocessor;
-use cudarc::driver::CudaDevice;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use std::ffi::c_void;
 
 /// Maximum number of qubits supported (16GB GPU memory limit)
@@ -98,7 +98,7 @@ pub trait QuantumEncoder: Send + Sync + 'static {
     /// # Safety
     /// Caller must ensure `input_d` points to valid GPU memory with at least `input_len` elements
     /// of the expected dtype on the same device as `device`, and `stream` is a valid CUDA stream or null.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_from_gpu_ptr(
         &self,
         _device: &Arc<CudaDevice>,
@@ -119,7 +119,7 @@ pub trait QuantumEncoder: Send + Sync + 'static {
     /// Caller must ensure `input_batch_d` points to valid GPU memory with at least
     /// `num_samples * sample_size` elements of the expected dtype on the same device as `device`,
     /// and `stream` is a valid CUDA stream or null.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_batch_from_gpu_ptr(
         &self,
         _device: &Arc<CudaDevice>,
@@ -148,7 +148,7 @@ pub trait QuantumEncoder: Send + Sync + 'static {
     /// Caller must ensure `input_d` points to valid GPU memory with at least `input_len`
     /// `f32` elements on the same device as `device`, and `stream` is either null or a valid
     /// CUDA stream associated with `device`.
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_from_gpu_ptr_f32(
         &self,
         _device: &Arc<CudaDevice>,
@@ -182,7 +182,7 @@ pub trait QuantumEncoder: Send + Sync + 'static {
     ///
     /// # Safety
     /// Caller must ensure `input_batch_d` points to valid GPU memory (f32).
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     unsafe fn encode_batch_from_gpu_ptr_f32(
         &self,
         _device: &Arc<CudaDevice>,

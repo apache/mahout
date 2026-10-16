@@ -22,7 +22,7 @@
 
 use std::ffi::c_void;
 
-use cudarc::driver::{CudaSlice, DevicePtr};
+use crate::gpu_rt::{CudaSlice, DevicePtr};
 use qdp_kernels::launch_basis_encode_batch;
 
 use super::{ChunkEncoder, STAGE_SIZE_ELEMENTS};

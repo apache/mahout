@@ -16,14 +16,14 @@
 
 // DLPack protocol for zero-copy GPU memory sharing with PyTorch
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
 use crate::gpu::memory::{BufferStorage, GpuDeviceType, GpuStateVector, Precision};
 use std::os::raw::{c_int, c_void};
 use std::sync::Arc;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use crate::gpu::cuda_ffi::{
     CUDA_EVENT_DISABLE_TIMING, cudaEventCreateWithFlags, cudaEventDestroy, cudaEventRecord,
     cudaStreamWaitEvent,
@@ -45,7 +45,7 @@ pub fn dlpack_stream_to_cuda(stream: i64) -> *mut c_void {
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 /// # Safety
 /// `stream` must be a valid CUDA stream pointer or one of the CUDA sentinel
 /// values (legacy/per-thread default). Passing any other pointer is undefined.
@@ -96,7 +96,7 @@ pub unsafe fn synchronize_stream(stream: *mut c_void) -> Result<()> {
     Ok(())
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(qdp_gpu_platform))]
 /// # Safety
 /// No-op on non-Linux targets, kept unsafe to match the Linux signature.
 pub unsafe fn synchronize_stream(_stream: *mut c_void) -> Result<()> {

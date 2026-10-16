@@ -4,10 +4,20 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-cudarc = { workspace = true }
+cudarc = { workspace = true, optional = true }
 
 [build-dependencies]
 cc = { workspace = true }
+
+[features]
+# `cuda` and `hip` are mutually exclusive; pick exactly one vendor backend.
+# If both end up enabled (e.g. via workspace feature unification), `hip` takes
+# precedence: kernels build for HIP and cudarc is compiled but unused.
+# Default build: NVIDIA CUDA via cudarc + nvcc-compiled kernels.
+default = ["cuda"]
+cuda = ["dep:cudarc"]
+# AMD build: hipcc-compiled kernels + the in-crate HIP device traits; no cudarc.
+hip = []
 
 [lib]
 name = "qdp_kernels"

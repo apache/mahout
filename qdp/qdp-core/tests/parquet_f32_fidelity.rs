@@ -27,11 +27,12 @@
 //!   * CPU smoke (no GPU, runs everywhere): the f32 reader and the f64 reader
 //!     return the same logical values up to the f64→f32 rounding. This is the
 //!     part that actually asserts in CI (ubuntu, no GPU).
-//!   * GPU fidelity (Linux + CUDA, skipped otherwise): full reader→kernel
-//!     pipeline. Thresholds match `gpu_fidelity.rs` — amplitude f32 norm
-//!     precision means ~1e-3 at 8–16 qubits, NOT 0.99999. The issue's
-//!     "≥ 0.99999 where applicable" does not apply to amplitude encoding; see
-//!     `gpu_fidelity.rs::compare_f32_f64_amplitude` for the established baseline.
+//!   * GPU fidelity (platforms that build the GPU backend, skipped otherwise):
+//!     full reader→kernel pipeline. Thresholds match `gpu_fidelity.rs` —
+//!     amplitude f32 norm precision means ~1e-3 at 8–16 qubits, NOT 0.99999.
+//!     The issue's "≥ 0.99999 where applicable" does not apply to amplitude
+//!     encoding; see `gpu_fidelity.rs::compare_f32_f64_amplitude` for the
+//!     established baseline.
 
 use std::sync::atomic::{AtomicUsize, Ordering};
 
@@ -109,10 +110,10 @@ fn test_parquet_f32_f64_reader_consistency() {
 }
 
 // ---------------------------------------------------------------------------
-// GPU fidelity (Linux + CUDA) — mirrors compare_f32_f64_amplitude, Parquet src.
+// GPU fidelity — mirrors compare_f32_f64_amplitude, Parquet src.
 // ---------------------------------------------------------------------------
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 mod gpu {
     use super::*;
     use qdp_core::Precision;

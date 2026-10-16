@@ -14,18 +14,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(qdp_gpu_platform))]
 mod fallback;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 mod linux;
-#[cfg(not(any(target_os = "linux", target_os = "windows")))]
+#[cfg(not(any(qdp_gpu_platform, target_os = "windows")))]
 mod other;
-#[cfg(target_os = "windows")]
+// Windows non-GPU stub: used only on Windows without the hip feature.
+// When qdp_gpu_platform is set (Windows+hip), the linux module is used instead.
+#[cfg(all(target_os = "windows", not(qdp_gpu_platform)))]
 mod windows;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub(crate) use linux::encode_from_parquet;
-#[cfg(not(any(target_os = "linux", target_os = "windows")))]
+#[cfg(not(any(qdp_gpu_platform, target_os = "windows")))]
 pub(crate) use other::encode_from_parquet;
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(qdp_gpu_platform)))]
 pub(crate) use windows::encode_from_parquet;
