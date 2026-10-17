@@ -155,6 +155,7 @@ class QdpBenchmark:
                 f"Unknown encoding {method!r}. "
                 f"Valid options: {sorted(_VALID_ENCODINGS)}"
             )
+        self._check_backend_support(self._backend_name, method.lower())
         self._encoding_method = method.lower()
         return self
 
@@ -218,6 +219,7 @@ class QdpBenchmark:
         """
         if name not in ("rust", "pytorch"):
             raise ValueError(f"backend must be 'rust' or 'pytorch', got {name!r}")
+        self._check_backend_support(name, self._encoding_method)
         self._backend_name = name
         return self
 
@@ -237,6 +239,14 @@ class QdpBenchmark:
         if self._num_qubits is None or self._total_batches is None:
             raise ValueError(
                 "Set qubits and batches (e.g. .qubits(16).batches(100, 64))"
+            )
+
+    # Pytorch backend is not supported for phase encoding for now, remove this once supported
+    def _check_backend_support(self, backend: str, encoding: str) -> None:
+        if backend == "pytorch" and encoding == "phase":
+            raise ValueError(
+                "PyTorch backend does not support 'phase' encoding. "
+                "Use the Rust backend instead."
             )
 
     def run_throughput(self) -> ThroughputResult:
