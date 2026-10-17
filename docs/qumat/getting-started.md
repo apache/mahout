@@ -18,6 +18,8 @@ Install with QDP (Quantum Data Plane) support:
 pip install qumat[qdp]
 ```
 
+QDP (the `qdp` extra) requires Python 3.10-3.12 and is not available on Python 3.13.
+
 ## From Source (Development)
 
 For development or the latest changes, use [uv](https://docs.astral.sh/uv/):
@@ -27,11 +29,11 @@ git clone https://github.com/apache/mahout.git
 cd mahout
 pip install uv
 uv sync                     # Core Qumat
-uv sync --extra qdp         # With QDP (requires NVIDIA GPU + CUDA)
+uv sync --python '>=3.10,<3.13' --extra qdp  # With QDP (NVIDIA GPU + CUDA; QDP needs Python 3.10-3.12)
 ```
 
 :::note Why uv?
-The project uses `uv` to handle dependency overrides required for Python 3.10+ compatibility with some backend dependencies.
+The repository commits a `uv.lock`, so `uv sync` gives a reproducible development environment across Python 3.10-3.13.
 :::
 
 ## Basic Usage
@@ -52,7 +54,7 @@ print(result)
 
 ## Dependencies
 
-Prior to installation, ensure Python 3.10-3.12 is installed. Dependencies such as Qiskit, Cirq, and Amazon Braket SDK are managed automatically.
+Prior to installation, ensure Python 3.10-3.13 is installed. Dependencies such as Qiskit, Cirq, and Amazon Braket SDK are managed automatically. QDP (the `qdp` extra) requires Python 3.10-3.12 and is not available on Python 3.13.
 
 ## Apache Release
 
