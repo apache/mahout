@@ -38,6 +38,10 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
+from qumat_qdp.loader import _VALID_ENCODINGS
+
+_MAX_QUBITS = 30
+
 
 @dataclass
 class ThroughputResult:
@@ -106,6 +110,10 @@ class QdpBenchmark:
     """
 
     def __init__(self, device_id: int = 0) -> None:
+        if not isinstance(device_id, int) or device_id < 0:
+            raise ValueError(
+                f"device_id must be a non-negative integer, got {device_id!r}"
+            )
         self._device_id = device_id
         self._num_qubits: int | None = None
         self._encoding_method: str = "amplitude"
@@ -120,7 +128,12 @@ class QdpBenchmark:
 
         :param n: Number of qubits in each encoded output state.
         :returns: This builder for fluent chaining.
+        :raises ValueError: If ``n`` is not an integer in ``[1, 30]``.
         """
+        if not isinstance(n, int) or not 1 <= n <= _MAX_QUBITS:
+            raise ValueError(
+                f"num_qubits must be an integer in [1, {_MAX_QUBITS}], got {n!r}"
+            )
         self._num_qubits = n
         return self
 
@@ -130,8 +143,20 @@ class QdpBenchmark:
         :param method: Encoding name, for example ``"amplitude"``,
             ``"angle"``, ``"basis"``, ``"iqp"``, or ``"iqp-z"``.
         :returns: This builder for fluent chaining.
+        :raises ValueError: If ``method`` is empty, not a string, or not a
+            supported encoding.
         """
-        self._encoding_method = method
+        if not isinstance(method, str) or not method:
+            raise ValueError(
+                f"encoding_method must be a non-empty string, got {method!r}"
+            )
+        if method.lower() not in _VALID_ENCODINGS:
+            raise ValueError(
+                f"Unknown encoding {method!r}. "
+                f"Valid options: {sorted(_VALID_ENCODINGS)}"
+            )
+        self._check_backend_support(self._backend_name, method.lower())
+        self._encoding_method = method.lower()
         return self
 
     def batches(self, total: int, size: int = 64) -> QdpBenchmark:
@@ -140,7 +165,12 @@ class QdpBenchmark:
         :param total: Number of timed batches to process.
         :param size: Number of vectors in each batch.
         :returns: This builder for fluent chaining.
+        :raises ValueError: If either argument is not a positive integer.
         """
+        if not isinstance(total, int) or total < 1:
+            raise ValueError(f"total_batches must be a positive integer, got {total!r}")
+        if not isinstance(size, int) or size < 1:
+            raise ValueError(f"batch_size must be a positive integer, got {size!r}")
         self._total_batches = total
         self._batch_size = size
         return self
@@ -150,11 +180,15 @@ class QdpBenchmark:
 
         The current Rust benchmark pipeline manages work internally and the
         PyTorch reference path does not use a Python-side prefetch queue, so
-        ``n`` is intentionally ignored.
+        ``n`` is intentionally ignored, but it is still validated so an invalid
+        depth is rejected here rather than silently accepted.
 
         :param n: Requested prefetch depth; currently unused.
         :returns: ``self`` for fluent builder chaining.
+        :raises ValueError: If ``n`` is not a non-negative integer.
         """
+        if not isinstance(n, int) or n < 0:
+            raise ValueError(f"prefetch must be a non-negative integer, got {n!r}")
         return self
 
     def warmup(self, n: int) -> QdpBenchmark:
@@ -162,7 +196,12 @@ class QdpBenchmark:
 
         :param n: Number of batches to execute before measurements begin.
         :returns: This builder for fluent chaining.
+        :raises ValueError: If ``n`` is not a non-negative integer.
         """
+        if not isinstance(n, int) or n < 0:
+            raise ValueError(
+                f"warmup_batches must be a non-negative integer, got {n!r}"
+            )
         self._warmup_batches = n
         return self
 
@@ -180,6 +219,7 @@ class QdpBenchmark:
         """
         if name not in ("rust", "pytorch"):
             raise ValueError(f"backend must be 'rust' or 'pytorch', got {name!r}")
+        self._check_backend_support(name, self._encoding_method)
         self._backend_name = name
         return self
 
@@ -199,6 +239,14 @@ class QdpBenchmark:
         if self._num_qubits is None or self._total_batches is None:
             raise ValueError(
                 "Set qubits and batches (e.g. .qubits(16).batches(100, 64))"
+            )
+
+    # Pytorch backend is not supported for phase encoding for now, remove this once supported
+    def _check_backend_support(self, backend: str, encoding: str) -> None:
+        if backend == "pytorch" and encoding == "phase":
+            raise ValueError(
+                "PyTorch backend does not support 'phase' encoding. "
+                "Use the Rust backend instead."
             )
 
     def run_throughput(self) -> ThroughputResult:

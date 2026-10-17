@@ -159,16 +159,20 @@ tensor = torch.from_dlpack(qt)
 
 `QdpBenchmark(device_id=0)`
 
+- `device_id` (int): GPU device ordinal; must be a non-negative integer.
+
 **Chainable methods**
 
 | Method | Description |
 |--------|-------------|
-| `qubits(n)` | Number of qubits. |
-| `encoding(method)` | `"amplitude"` \| `"angle"` \| `"basis"` \| `"iqp"` \| `"iqp-z"`. |
-| `batches(total, size=64)` | Total batches and batch size. |
-| `prefetch(n)` | No-op (API compatibility). |
-| `warmup(n)` | Warmup batch count. |
+| `qubits(n)` | Number of qubits; integer in `[1, 30]`. |
+| `encoding(method)` | `"amplitude"` \| `"angle"` \| `"basis"` \| `"iqp"` \| `"iqp-z"` (case-insensitive). |
+| `batches(total, size=64)` | Total batches and batch size; both positive integers. |
+| `prefetch(n)` | No-op (API compatibility); `n` must be a non-negative integer. |
+| `warmup(n)` | Warmup batch count; non-negative integer. |
 | `backend(name)` | Select `"rust"` or `"pytorch"`. |
+
+Invalid arguments raise `ValueError` when the method is called.
 
 Backend notes:
 
