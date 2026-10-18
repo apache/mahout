@@ -193,13 +193,31 @@ def draw_circuit(circuit: qiskit.QuantumCircuit) -> Any:
     return circuit.draw()
 
 
+def _resolve_angle(
+    circuit: qiskit.QuantumCircuit,
+    angle: float | str | qiskit.circuit.Parameter,
+) -> float | qiskit.circuit.Parameter:
+    """Return the angle to use for a rotation gate.
+
+    A string angle names a symbolic parameter. Qiskit treats two distinct
+    ``Parameter`` objects with the same name as a conflict, so reuse the
+    circuit's existing ``Parameter`` for that name when there is one, and
+    only create a new one the first time the name appears.
+    """
+    if not isinstance(angle, str):
+        return angle
+    for existing in circuit.parameters:
+        if existing.name == angle:
+            return existing
+    return qiskit.circuit.Parameter(angle)
+
+
 def apply_rx_gate(
     circuit: qiskit.QuantumCircuit,
     qubit_index: int,
     angle: float | str | qiskit.circuit.Parameter,
 ) -> None:
-    param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
-    circuit.rx(param, qubit_index)
+    circuit.rx(_resolve_angle(circuit, angle), qubit_index)
 
 
 def apply_ry_gate(
@@ -207,8 +225,7 @@ def apply_ry_gate(
     qubit_index: int,
     angle: float | str | qiskit.circuit.Parameter,
 ) -> None:
-    param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
-    circuit.ry(param, qubit_index)
+    circuit.ry(_resolve_angle(circuit, angle), qubit_index)
 
 
 def apply_rz_gate(
@@ -216,8 +233,7 @@ def apply_rz_gate(
     qubit_index: int,
     angle: float | str | qiskit.circuit.Parameter,
 ) -> None:
-    param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
-    circuit.rz(param, qubit_index)
+    circuit.rz(_resolve_angle(circuit, angle), qubit_index)
 
 
 def apply_u_gate(
