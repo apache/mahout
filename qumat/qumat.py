@@ -299,6 +299,21 @@ class QuMat:
         self._validate_qubit_index(qubit_index)
         self.backend_module.apply_t_gate(self.circuit, qubit_index)
 
+    def apply_s_gate(self, qubit_index: int) -> None:
+        """Apply a S-gate (π/2 gate) to the specified qubit.
+
+        Applies a relative pi/2 phase (multiplies the |1> state by e^{i*pi/2}).
+        Essential for universal quantum computation when combined with
+        Hadamard and CNOT gates.
+
+        :param qubit_index: Index of the qubit.
+        :type qubit_index: int
+        :raises RuntimeError: If the circuit has not been initialized.
+        """
+        self._ensure_circuit_initialized()
+        self._validate_qubit_index(qubit_index)
+        self.backend_module.apply_s_gate(self.circuit, qubit_index)
+
     def execute_circuit(
         self, parameter_values: Mapping[str, float] | None = None
     ) -> Any:

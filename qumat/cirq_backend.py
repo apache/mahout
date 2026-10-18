@@ -118,6 +118,11 @@ def apply_t_gate(circuit: cirq.Circuit, qubit_index: int) -> None:
     circuit.append(cirq.T(qubit))
 
 
+def apply_s_gate(circuit: cirq.Circuit, qubit_index: int) -> None:
+    qubit = cirq.LineQubit(qubit_index)
+    circuit.append(cirq.S(qubit))
+
+
 def execute_circuit(
     circuit: cirq.Circuit,
     backend: cirq.Simulator,

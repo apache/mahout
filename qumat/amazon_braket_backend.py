@@ -116,6 +116,10 @@ def apply_t_gate(circuit: CircuitLike, qubit_index: int) -> None:
     circuit.t(qubit_index)
 
 
+def apply_s_gate(circuit: CircuitLike, qubit_index: int) -> None:
+    circuit.s(qubit_index)
+
+
 def execute_circuit(
     circuit: CircuitLike,
     backend: BraketBackend,
