@@ -34,6 +34,19 @@ class TestCreateCircuit:
 
         assert qumat.circuit is not None
 
+    def test_create_empty_circuit_resets_parameters(self, backend_name):
+        """Parameters from a previous circuit do not carry over to a new one."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+        qumat.apply_rx_gate(0, "theta")
+
+        qumat.create_empty_circuit(num_qubits=1)
+
+        assert qumat.parameters == {}
+        assert qumat.execute_circuit() is not None
+        assert qumat.get_final_state_vector() is not None
+
     @pytest.mark.parametrize("num_qubits", [0, 1, 3, 5])
     def test_create_circuit_initializes_to_zero(self, backend_name, num_qubits):
         """Test that create_empty_circuit properly initializes all qubits to |0⟩."""
