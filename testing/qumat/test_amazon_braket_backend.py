@@ -244,8 +244,8 @@ def test_execute_circuit_with_parameters():
 
 def test_get_final_state_vector_without_parameters():
     circuit = MagicMock()
-    circuit.parameters = []
-    circuit.state_vector = MagicMock()
+    working_circuit = circuit.copy.return_value
+    working_circuit.parameters = []
 
     mock_backend = MagicMock()
     mock_task = MagicMock()
@@ -259,17 +259,19 @@ def test_get_final_state_vector_without_parameters():
 
     result = get_final_state_vector(circuit, mock_backend, config)
 
-    circuit.state_vector.assert_called_once()
+    working_circuit.state_vector.assert_called_once()
+    circuit.state_vector.assert_not_called()
+    mock_backend.run.assert_called_once_with(working_circuit, shots=0)
     assert result == [1, 0]
 
 
 def test_get_final_state_vector_with_parameters_full_branch():
     circuit = MagicMock()
-    circuit.state_vector = MagicMock()
+    working_circuit = circuit.copy.return_value
 
     param = MagicMock()
     param.name = "theta"
-    circuit.parameters = [param]
+    working_circuit.parameters = [param]
 
     mock_backend = MagicMock()
     mock_task = MagicMock()
@@ -286,9 +288,11 @@ def test_get_final_state_vector_with_parameters_full_branch():
 
     result = get_final_state_vector(circuit, mock_backend, config)
 
-    circuit.state_vector.assert_called_once()
+    working_circuit.state_vector.assert_called_once()
+    circuit.state_vector.assert_not_called()
 
     args, kwargs = mock_backend.run.call_args
+    assert args[0] is working_circuit
     assert kwargs["shots"] == 0
     assert kwargs["inputs"] == {"theta": 0.5}
 
