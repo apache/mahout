@@ -24,7 +24,7 @@
 #include <math.h>
 #include "kernel_config.h"
 
-__global__ void angle_encode_kernel(
+extern "C" __global__ void angle_encode_kernel(
     const double* __restrict__ angles,
     cuDoubleComplex* __restrict__ state,
     size_t state_len,
@@ -42,7 +42,7 @@ __global__ void angle_encode_kernel(
     state[idx] = make_cuDoubleComplex(amplitude, 0.0);
 }
 
-__global__ void angle_encode_kernel_f32(
+extern "C" __global__ void angle_encode_kernel_f32(
     const float* __restrict__ angles,
     cuComplex* __restrict__ state,
     size_t state_len,
@@ -60,7 +60,7 @@ __global__ void angle_encode_kernel_f32(
     state[idx] = make_cuComplex(amplitude, 0.0f);
 }
 
-__global__ void angle_encode_batch_kernel(
+extern "C" __global__ void angle_encode_batch_kernel(
     const double* __restrict__ angles_batch,
     cuDoubleComplex* __restrict__ state_batch,
     size_t num_samples,
@@ -88,7 +88,7 @@ __global__ void angle_encode_batch_kernel(
     }
 }
 
-__global__ void angle_encode_batch_kernel_f32(
+extern "C" __global__ void angle_encode_batch_kernel_f32(
     const float* __restrict__ angles_batch,
     cuComplex* __restrict__ state_batch,
     size_t num_samples,

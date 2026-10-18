@@ -20,7 +20,7 @@
 #include <math.h>
 #include "kernel_config.h"
 
-__global__ void check_finite_batch_kernel_f32(
+extern "C" __global__ void check_finite_batch_kernel_f32(
     const float* __restrict__ input_batch,
     size_t total_values,
     int* __restrict__ has_non_finite
@@ -36,7 +36,7 @@ __global__ void check_finite_batch_kernel_f32(
     }
 }
 
-__global__ void check_finite_batch_kernel_f64(
+extern "C" __global__ void check_finite_batch_kernel_f64(
     const double* __restrict__ input_batch,
     size_t total_values,
     int* __restrict__ has_non_finite
@@ -62,7 +62,7 @@ __global__ void check_finite_batch_kernel_f64(
 // Validate f32 basis indices and cast them to size_t in a single pass.
 // `indices_out` receives the truncated indices (set to 0 when the sample is
 // invalid to keep the downstream encode kernel bounded).
-__global__ void validate_and_cast_basis_indices_kernel_f32(
+extern "C" __global__ void validate_and_cast_basis_indices_kernel_f32(
     const float* __restrict__ input_batch,
     size_t num_samples,
     size_t state_len,
@@ -99,8 +99,46 @@ __global__ void validate_and_cast_basis_indices_kernel_f32(
     }
 }
 
+// Same as above for f64 input.
+extern "C" __global__ void validate_and_cast_basis_indices_kernel_f64(
+    const double* __restrict__ input_batch,
+    size_t num_samples,
+    size_t state_len,
+    size_t* __restrict__ indices_out,
+    int* __restrict__ error_flags
+) {
+    const size_t stride = gridDim.x * blockDim.x;
+    for (size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+         idx < num_samples;
+         idx += stride) {
+        const double v = input_batch[idx];
+        if (!isfinite(v)) {
+            atomicOr(error_flags, BASIS_IDX_ERR_NON_FINITE);
+            indices_out[idx] = 0;
+            continue;
+        }
+        if (v < 0.0) {
+            atomicOr(error_flags, BASIS_IDX_ERR_NEGATIVE);
+            indices_out[idx] = 0;
+            continue;
+        }
+        const double truncated = trunc(v);
+        if (truncated != v) {
+            atomicOr(error_flags, BASIS_IDX_ERR_NON_INTEGER);
+            indices_out[idx] = 0;
+            continue;
+        }
+        if (truncated >= (double)state_len) {
+            atomicOr(error_flags, BASIS_IDX_ERR_OUT_OF_RANGE);
+            indices_out[idx] = 0;
+            continue;
+        }
+        indices_out[idx] = (size_t)truncated;
+    }
+}
+
 // Bounds-check existing size_t basis indices against state_len.
-__global__ void check_basis_indices_kernel_usize(
+extern "C" __global__ void check_basis_indices_kernel_usize(
     const size_t* __restrict__ indices,
     size_t num_samples,
     size_t state_len,
