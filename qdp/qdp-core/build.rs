@@ -18,8 +18,25 @@ use std::env;
 use std::process::Command;
 
 fn main() {
+    emit_gpu_platform_cfg();
     compile_protos();
     configure_cuda_linkage();
+}
+
+/// Emit `qdp_gpu_platform` on any OS where the GPU stack is compiled.
+///
+/// Linux always has it (the original target). Windows gets it when the `hip`
+/// feature is active (TheRock-based ROCm; the feature is set by QDP_USE_HIP=1).
+/// Source that was `#[cfg(target_os = "linux")]` uses `#[cfg(qdp_gpu_platform)]`
+/// so it compiles on both.
+fn emit_gpu_platform_cfg() {
+    println!("cargo::rustc-check-cfg=cfg(qdp_gpu_platform)");
+    let is_linux = env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("linux");
+    let is_windows = env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows");
+    let hip_feature = env::var("CARGO_FEATURE_HIP").is_ok();
+    if is_linux || (is_windows && hip_feature) {
+        println!("cargo::rustc-cfg=qdp_gpu_platform");
+    }
 }
 
 fn compile_protos() {

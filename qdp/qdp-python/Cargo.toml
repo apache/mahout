@@ -10,11 +10,15 @@ crate-type = ["cdylib"]
 [dependencies]
 pyo3 = { version = "0.27" }
 numpy = "0.27"
-qdp-core = { path = "../qdp-core" }
+qdp-core = { path = "../qdp-core", default-features = false }
 env_logger = "0.11"
 
 [features]
-default = []
+# NVIDIA CUDA backend (default); pass through to qdp-core.
+default = ["cuda"]
+cuda = ["qdp-core/cuda"]
+# AMD HIP backend; pass through to qdp-core.
+hip = ["qdp-core/hip"]
 observability = ["qdp-core/observability"]
 pytorch = ["qdp-core/pytorch"]
 remote-io = ["qdp-core/remote-io"]

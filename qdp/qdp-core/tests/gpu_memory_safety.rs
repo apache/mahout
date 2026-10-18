@@ -21,7 +21,7 @@ use qdp_core::Precision;
 mod common;
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_memory_pressure() {
     println!("Testing memory pressure (leak detection)");
     println!("Running 100 iterations of encode + free");
@@ -51,7 +51,7 @@ fn test_memory_pressure() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_multiple_concurrent_states() {
     println!("Testing multiple concurrent state vectors...");
 
@@ -81,7 +81,7 @@ fn test_multiple_concurrent_states() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_dlpack_tensor_metadata_default() {
     println!("Testing DLPack tensor metadata...");
 
@@ -131,7 +131,7 @@ fn test_dlpack_tensor_metadata_default() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 fn test_dlpack_tensor_metadata_f64() {
     println!("Testing DLPack tensor metadata...");
 

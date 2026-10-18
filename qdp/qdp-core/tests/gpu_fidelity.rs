@@ -17,7 +17,7 @@
 //! Tests for fidelity / trace-distance metrics and F32 vs F64 precision
 //! comparison across different qubit counts.
 
-#![cfg(target_os = "linux")]
+#![cfg(qdp_gpu_platform)]
 
 use approx::assert_relative_eq;
 use qdp_core::gpu::metrics::{
