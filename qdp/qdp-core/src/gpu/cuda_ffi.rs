@@ -87,13 +87,6 @@ unsafe extern "C" {
     pub(crate) fn cudaStreamWaitEvent(stream: *mut c_void, event: *mut c_void, flags: u32) -> i32;
     pub(crate) fn cudaStreamSynchronize(stream: *mut c_void) -> i32;
 
-    pub(crate) fn cudaMemsetAsync(
-        devPtr: *mut c_void,
-        value: i32,
-        count: usize,
-        stream: *mut c_void,
-    ) -> i32;
-
     /// Non-blocking event query
     ///
     /// Returns CUDA_SUCCESS if the event has completed, CUDA_ERROR_NOT_READY if not.
@@ -192,15 +185,6 @@ mod no_cuda_stubs {
     }
 
     pub(crate) unsafe fn cudaStreamSynchronize(_stream: *mut c_void) -> i32 {
-        QDP_CUDA_UNAVAILABLE
-    }
-
-    pub(crate) unsafe fn cudaMemsetAsync(
-        _devPtr: *mut c_void,
-        _value: i32,
-        _count: usize,
-        _stream: *mut c_void,
-    ) -> i32 {
         QDP_CUDA_UNAVAILABLE
     }
 

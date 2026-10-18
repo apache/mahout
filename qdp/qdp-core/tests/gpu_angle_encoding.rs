@@ -138,7 +138,7 @@ fn test_angle_parquet_encoding_case_insensitive() {
 
 #[test]
 fn test_angle_successful_encoding_from_parquet() {
-    let Some(engine) = common::qdp_engine() else {
+    let Some(engine) = common::qdp_engine_with_precision(qdp_core::Precision::Float64) else {
         println!("SKIP: No GPU available");
         return;
     };

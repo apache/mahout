@@ -14,21 +14,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Streaming encoding implementations for different quantum encoding methods.
-
-mod amplitude;
-mod angle;
-mod basis;
+//! Streaming encode of a Parquet file.
+//!
+//! An IO thread reads 512 MB chunks into pinned host buffers while the main
+//! thread copies the previous chunk to a device staging buffer and launches
+//! the encoding kernel on it. Any [`Kernel`] works here: a chunk is just a
+//! batch of whole samples written at an offset into one big state vector.
 
 use std::ffi::c_void;
 use std::sync::Arc;
 use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
 use std::thread::{self, JoinHandle};
 
-use cudarc::driver::{CudaDevice, DevicePtr};
+use cudarc::driver::{CudaDevice, DevicePtr as _};
 
-/// Guard that ensures GPU synchronization and IO thread cleanup on drop.
-/// Used to handle early returns in `stream_encode`.
+use crate::dlpack::DLManagedTensor;
+use crate::gpu::PipelineContext;
+use crate::gpu::kernels::{DeviceInput, HostInput, Kernel, LaunchCtx, Output, Pending, Shape};
+use crate::gpu::memory::{GpuStateVector, PinnedHostBuffer};
+use crate::reader::StreamingDataReader;
+use crate::types::Encoding;
+use crate::{MahoutError, QdpEngine, Result};
+use qdp_kernels::CuDoubleComplex;
+
+pub(crate) const STAGE_SIZE_BYTES: usize = 512 * 1024 * 1024;
+pub(crate) const STAGE_SIZE_ELEMENTS: usize = STAGE_SIZE_BYTES / std::mem::size_of::<f64>();
+/// Bound on the float64 staging state used when the engine precision is float32.
+const STAGING_STATE_BYTES: usize = 256 * 1024 * 1024;
+
+type FullBufferResult = std::result::Result<(PinnedHostBuffer, usize), MahoutError>;
+type FullBufferChannel = (SyncSender<FullBufferResult>, Receiver<FullBufferResult>);
+
 struct CleanupGuard<'a> {
     device: &'a Arc<CudaDevice>,
     io_handle: Option<JoinHandle<()>>,
@@ -42,8 +58,6 @@ impl<'a> CleanupGuard<'a> {
         }
     }
 
-    /// Defuse the guard and return the IO handle for explicit cleanup.
-    /// After calling this, drop() will not perform cleanup.
     fn defuse(mut self) -> JoinHandle<()> {
         self.io_handle.take().expect("IO handle already taken")
     }
@@ -59,156 +73,74 @@ impl Drop for CleanupGuard<'_> {
     }
 }
 
-use crate::dlpack::DLManagedTensor;
-use crate::gpu::PipelineContext;
-use crate::gpu::memory::{GpuStateVector, PinnedHostBuffer};
-use crate::reader::StreamingDataReader;
-use crate::types::Encoding;
-use crate::{MahoutError, QdpEngine, Result};
-
-/// 512MB staging buffer for large Parquet row groups (reduces fragmentation)
-pub(crate) const STAGE_SIZE_BYTES: usize = 512 * 1024 * 1024;
-pub(crate) const STAGE_SIZE_ELEMENTS: usize = STAGE_SIZE_BYTES / std::mem::size_of::<f64>();
-
-pub(crate) type FullBufferResult = std::result::Result<(PinnedHostBuffer, usize), MahoutError>;
-pub(crate) type FullBufferChannel = (SyncSender<FullBufferResult>, Receiver<FullBufferResult>);
-
-/// Trait for chunk-based quantum state encoding.
-///
-/// Implementations provide the encoding-specific logic while the shared
-/// streaming pipeline handles IO, buffering, and GPU memory management.
-pub(crate) trait ChunkEncoder {
-    /// Encoder-specific state (e.g., norm buffer for amplitude encoding).
-    type State;
-
-    /// Validate that the sample size is appropriate for this encoding method.
-    fn validate_sample_size(&self, sample_size: usize) -> Result<()>;
-
-    /// Whether this encoder needs the staging buffer H2D copy.
-    ///
-    /// If false, the streaming pipeline will skip the async copy to device
-    /// staging buffer, avoiding unnecessary memory bandwidth overhead.
-    /// Encoders that process data on CPU before uploading should return false.
-    fn needs_staging_copy(&self) -> bool {
-        true
-    }
-
-    /// Initialize encoder-specific state.
-    fn init_state(
-        &self,
-        engine: &QdpEngine,
-        sample_size: usize,
-        num_qubits: usize,
-    ) -> Result<Self::State>;
-
-    /// Encode a chunk of samples to quantum states.
-    ///
-    /// # Arguments
-    /// * `state` - Encoder-specific state
-    /// * `engine` - QDP engine for GPU operations
-    /// * `ctx` - Pipeline context for async operations
-    /// * `host_buffer` - Pinned host buffer containing input data
-    /// * `dev_ptr` - Device pointer to staging buffer with copied data
-    /// * `samples_in_chunk` - Number of samples in this chunk
-    /// * `sample_size` - Size of each sample in f64 elements
-    /// * `state_ptr_offset` - Pointer to output location in state vector
-    /// * `state_len` - Length of each quantum state (2^num_qubits)
-    /// * `num_qubits` - Number of qubits
-    #[allow(clippy::too_many_arguments)]
-    fn encode_chunk(
-        &self,
-        state: &mut Self::State,
-        engine: &QdpEngine,
-        ctx: &PipelineContext,
-        host_buffer: &PinnedHostBuffer,
-        dev_ptr: u64,
-        samples_in_chunk: usize,
-        sample_size: usize,
-        state_ptr_offset: *mut c_void,
-        state_len: usize,
-        num_qubits: usize,
-        global_sample_offset: usize,
-    ) -> Result<()>;
-}
-
-/// Shared streaming pipeline for encoding data from Parquet files.
-///
-/// This function handles all the common IO, buffering, and GPU memory
-/// management logic. The actual encoding is delegated to the `ChunkEncoder`.
-///
-/// # Null handling
-///
-/// The streaming Parquet path always uses [`crate::reader::NullHandling::FillZero`]
-/// when constructing the [`crate::io::ParquetBlockReader`]. This replaces any
-/// null values in the input with `0.0`, matching Mahout's historical behavior
-/// and keeping the API backward compatible. Callers that require stricter
-/// validation should ensure the input data contains no nulls.
-pub(crate) fn stream_encode<E: ChunkEncoder>(
+pub(crate) fn stream_encode(
     engine: &QdpEngine,
     path: &str,
     num_qubits: usize,
-    encoder: E,
+    kernel: &dyn Kernel,
 ) -> Result<*mut DLManagedTensor> {
-    // Initialize reader
+    let device = engine.device();
     let mut reader_core =
         crate::io::ParquetBlockReader::new(path, None, crate::reader::NullHandling::FillZero)?;
     let num_samples = reader_core.total_rows;
-
-    // Allocate output state vector
-    let total_state_vector = GpuStateVector::new_batch(
-        &engine.device,
-        num_samples,
-        num_qubits,
-        crate::Precision::Float64,
-    )?;
-    const PIPELINE_EVENT_SLOTS: usize = 2;
-    let ctx = PipelineContext::new(&engine.device, PIPELINE_EVENT_SLOTS)?;
-
-    // Check if encoder needs staging buffers before allocating
-    let needs_staging_copy = encoder.needs_staging_copy();
-
-    // Double-buffered device staging (only allocated if needed)
-    let dev_staging = if needs_staging_copy {
-        let dev_in_a = unsafe { engine.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
-            .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
-        let dev_in_b = unsafe { engine.device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
-            .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
-        Some((dev_in_a, dev_in_b))
+    crate::gpu::kernels::validate_qubit_count(num_qubits)?;
+    // The kernels write float64; when the engine wants float32 the result is
+    // converted chunk by chunk through a bounded float64 staging state, so the
+    // file never needs two full-size states resident at once.
+    let precision = engine.precision();
+    let state_len = 1usize << num_qubits;
+    let total_state_vector = GpuStateVector::new_batch(device, num_samples, num_qubits, precision)?;
+    let out = Output::of(&total_state_vector);
+    let staging_samples = (STAGING_STATE_BYTES
+        / (state_len * std::mem::size_of::<CuDoubleComplex>()))
+    .clamp(1, num_samples.max(1));
+    let staging = if precision == crate::Precision::Float32 && num_samples > 0 {
+        Some(GpuStateVector::new_batch(
+            device,
+            staging_samples,
+            num_qubits,
+            crate::Precision::Float64,
+        )?)
     } else {
         None
     };
+    let mut pending = Pending::new();
 
-    // Channel setup for async IO
+    const PIPELINE_EVENT_SLOTS: usize = 2;
+    let ctx = PipelineContext::new(device, PIPELINE_EVENT_SLOTS)?;
+    let dev_in_a = unsafe { device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
+        .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
+    let dev_in_b = unsafe { device.alloc::<f64>(STAGE_SIZE_ELEMENTS) }
+        .map_err(|e| MahoutError::MemoryAllocation(format!("{:?}", e)))?;
+
     let (full_buf_tx, full_buf_rx): FullBufferChannel = sync_channel(2);
     let (empty_buf_tx, empty_buf_rx): (SyncSender<PinnedHostBuffer>, _) = sync_channel(2);
 
-    // Read first chunk to determine sample size
     let mut host_buf_first = PinnedHostBuffer::new(STAGE_SIZE_ELEMENTS)?;
     let first_len = reader_core.read_chunk(host_buf_first.as_slice_mut())?;
-
     let sample_size = reader_core
         .get_sample_size()
         .ok_or_else(|| MahoutError::InvalidInput("Could not determine sample size".into()))?;
+    if sample_size == 0 {
+        return Err(MahoutError::InvalidInput(
+            "Streaming encode requires sample_size > 0".into(),
+        ));
+    }
+    if sample_size > STAGE_SIZE_ELEMENTS {
+        return Err(MahoutError::InvalidInput(format!(
+            "Sample size {} exceeds staging buffer capacity {}",
+            sample_size, STAGE_SIZE_ELEMENTS
+        )));
+    }
+    kernel.validate_shape(Shape::new(num_samples.max(1), sample_size), num_qubits)?;
 
-    // Validate sample size for this encoder
-    encoder.validate_sample_size(sample_size)?;
-
-    // Initialize encoder-specific state
-    let mut encoder_state = encoder.init_state(engine, sample_size, num_qubits)?;
-
-    let state_len = 1 << num_qubits;
-
-    // Send first buffer to processing
     full_buf_tx
         .send(Ok((host_buf_first, first_len)))
         .map_err(|_| MahoutError::Io("Failed to send first buffer".into()))?;
-
-    // Send second empty buffer for IO thread
     empty_buf_tx
         .send(PinnedHostBuffer::new(STAGE_SIZE_ELEMENTS)?)
         .map_err(|_| MahoutError::Io("Failed to send second buffer".into()))?;
 
-    // Spawn IO thread
     let mut reader = reader_core;
     let io_handle = thread::spawn(move || {
         loop {
@@ -216,135 +148,124 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
                 Ok(b) => b,
                 Err(_) => break,
             };
-
             let result = reader
                 .read_chunk(buffer.as_slice_mut())
                 .map(|len| (buffer, len));
-
             let should_break = match &result {
                 Ok((_, len)) => *len == 0,
                 Err(_) => true,
             };
-
             if full_buf_tx.send(result).is_err() {
                 break;
             }
-
             if should_break {
                 break;
             }
         }
     });
+    let cleanup_guard = CleanupGuard::new(device, io_handle);
 
-    // Create cleanup guard to ensure resources are released on early return
-    let cleanup_guard = CleanupGuard::new(&engine.device, io_handle);
-
-    // Main processing loop
     let mut global_sample_offset: usize = 0;
     let mut use_dev_a = true;
-
     loop {
         let (host_buffer, current_len) = match full_buf_rx.recv() {
             Ok(Ok((buffer, len))) => (buffer, len),
             Ok(Err(e)) => return Err(e),
             Err(_) => return Err(MahoutError::Io("IO thread disconnected".into())),
         };
-
         if current_len == 0 {
             break;
         }
-
         if current_len % sample_size != 0 {
             return Err(MahoutError::InvalidInput(format!(
                 "Chunk length {} is not a multiple of sample size {}",
                 current_len, sample_size
             )));
         }
-
         let samples_in_chunk = current_len / sample_size;
         if samples_in_chunk > 0 {
-            let event_slot = if use_dev_a { 0 } else { 1 };
-            // Get device pointer from staging buffers (0 if not allocated)
-            let dev_ptr = dev_staging
-                .as_ref()
-                .map(|(a, b)| {
-                    if use_dev_a {
-                        *a.device_ptr()
-                    } else {
-                        *b.device_ptr()
-                    }
-                })
-                .unwrap_or(0);
+            let chunk = Shape::new(samples_in_chunk, sample_size);
+            kernel
+                .validate_host(
+                    &HostInput::F64(&host_buffer.as_slice()[..current_len]),
+                    chunk,
+                    num_qubits,
+                )
+                .map_err(|e| {
+                    MahoutError::InvalidInput(format!(
+                        "{} (in chunk starting at sample {})",
+                        crate::gpu::kernels::invalid_input_text(&e),
+                        global_sample_offset
+                    ))
+                })?;
 
+            let event_slot = if use_dev_a { 0 } else { 1 };
+            let dev_ptr = if use_dev_a {
+                *dev_in_a.device_ptr()
+            } else {
+                *dev_in_b.device_ptr()
+            };
             unsafe {
                 crate::profile_scope!("GPU::Dispatch");
-
-                // Async copy to device (only if staging buffers are allocated).
-                // `current_len` counts f64 elements; the copy takes bytes.
-                if dev_staging.is_some() {
-                    let copy_bytes = current_len
-                        .checked_mul(std::mem::size_of::<f64>())
-                        .ok_or_else(|| {
-                            MahoutError::MemoryAllocation(format!(
-                                "Staging copy size overflow: {} * {}",
-                                current_len,
-                                std::mem::size_of::<f64>()
-                            ))
-                        })?;
-                    ctx.async_copy_to_device(
-                        host_buffer.ptr() as *const c_void,
-                        dev_ptr as *mut c_void,
-                        copy_bytes,
-                    )?;
-                    ctx.record_copy_done(event_slot)?;
-                    ctx.wait_for_copy(event_slot)?;
-                }
-
-                // Calculate output offset
-                let offset_elements =
-                    global_sample_offset.checked_mul(state_len).ok_or_else(|| {
-                        MahoutError::MemoryAllocation(format!(
-                            "Offset calculation overflow: {} * {}",
-                            global_sample_offset, state_len
-                        ))
-                    })?;
-
-                let offset_bytes = offset_elements
-                    .checked_mul(std::mem::size_of::<qdp_kernels::CuDoubleComplex>())
+                let copy_bytes = current_len
+                    .checked_mul(std::mem::size_of::<f64>())
                     .ok_or_else(|| {
                         MahoutError::MemoryAllocation(format!(
-                            "Offset bytes calculation overflow: {} * {}",
-                            offset_elements,
-                            std::mem::size_of::<qdp_kernels::CuDoubleComplex>()
+                            "Staging copy size overflow: {} * {}",
+                            current_len,
+                            std::mem::size_of::<f64>()
                         ))
                     })?;
-
-                let state_ptr_offset = total_state_vector
-                    .ptr_void()
-                    .cast::<u8>()
-                    .add(offset_bytes)
-                    .cast::<c_void>();
-
-                // Delegate to encoder
-                encoder.encode_chunk(
-                    &mut encoder_state,
-                    engine,
-                    &ctx,
-                    &host_buffer,
-                    dev_ptr,
-                    samples_in_chunk,
-                    sample_size,
-                    state_ptr_offset,
-                    state_len,
-                    num_qubits,
-                    global_sample_offset,
+                ctx.async_copy_to_device(
+                    host_buffer.ptr() as *const c_void,
+                    dev_ptr as *mut c_void,
+                    copy_bytes,
                 )?;
+                ctx.record_copy_done(event_slot)?;
+                ctx.wait_for_copy(event_slot)?;
 
-                if dev_staging.is_some() {
-                    ctx.sync_copy_stream()?;
+                let launch_ctx = LaunchCtx::new(device, ctx.stream_compute.stream as *mut c_void);
+                match &staging {
+                    None => {
+                        pending.merge(kernel.launch(
+                            &launch_ctx,
+                            DeviceInput::F64(dev_ptr as *const f64),
+                            chunk,
+                            num_qubits,
+                            out.offset_samples(global_sample_offset)?,
+                        )?);
+                    }
+                    Some(stage) => {
+                        // Encode into the float64 staging state a slice at a
+                        // time, converting each slice into the float32 result.
+                        // Everything is queued on the compute stream, so the
+                        // staging buffer is reused in order.
+                        let stage_out = Output::of(stage);
+                        let mut done = 0usize;
+                        while done < samples_in_chunk {
+                            let n = (samples_in_chunk - done).min(staging_samples);
+                            let input = (dev_ptr as *const f64).add(done * sample_size);
+                            pending.merge(kernel.launch(
+                                &launch_ctx,
+                                DeviceInput::F64(input),
+                                Shape::new(n, sample_size),
+                                num_qubits,
+                                stage_out,
+                            )?);
+                            let len = n * state_len;
+                            let dst = out.offset_samples(global_sample_offset + done)?.as_f32()?;
+                            launch_ctx.launch(
+                                "amplitude",
+                                "convert_state_to_complex64_kernel",
+                                qdp_kernels::LaunchConfig::grid_1d(len),
+                                &mut qdp_kernels::kernel_args![stage_out.as_f64()?, dst, len],
+                            )?;
+                            done += n;
+                        }
+                    }
                 }
+                ctx.sync_copy_stream()?;
             }
-
             global_sample_offset = global_sample_offset
                 .checked_add(samples_in_chunk)
                 .ok_or_else(|| {
@@ -355,49 +276,31 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
                 })?;
             use_dev_a = !use_dev_a;
         }
-
         let _ = empty_buf_tx.send(host_buffer);
     }
 
-    // Defuse guard for explicit cleanup with proper error handling
     let io_handle = cleanup_guard.defuse();
-
-    engine
-        .device
+    device
         .synchronize()
         .map_err(|e| MahoutError::Cuda(format!("{:?}", e)))?;
     io_handle
         .join()
         .map_err(|e| MahoutError::Io(format!("IO thread panicked: {:?}", e)))?;
+    // Streaming keeps the prior file semantics: a sample the kernel could not
+    // normalise (all-null rows filled with zero) becomes a zero row rather
+    // than failing the whole file, so deferred checks are dropped.
+    pending.without_checks().finish(device)?;
 
-    let dlpack_ptr = total_state_vector.to_dlpack();
-    Ok(dlpack_ptr)
+    Ok(total_state_vector.to_dlpack())
 }
 
-/// Encode data from a Parquet file using the specified encoding method.
 pub(crate) fn encode_from_parquet(
     engine: &QdpEngine,
     path: &str,
     num_qubits: usize,
     encoding_method: &str,
 ) -> Result<*mut DLManagedTensor> {
+    crate::profile_scope!("Mahout::EncodeFromParquet");
     let encoding = Encoding::from_str_ci(encoding_method)?;
-    match encoding {
-        Encoding::Amplitude => {
-            crate::profile_scope!("Mahout::EncodeAmplitudeFromParquet");
-            stream_encode(engine, path, num_qubits, amplitude::AmplitudeEncoder)
-        }
-        Encoding::Angle => {
-            crate::profile_scope!("Mahout::EncodeAngleFromParquet");
-            stream_encode(engine, path, num_qubits, angle::AngleEncoder)
-        }
-        Encoding::Basis => {
-            crate::profile_scope!("Mahout::EncodeBasisFromParquet");
-            stream_encode(engine, path, num_qubits, basis::BasisEncoder)
-        }
-        _ => Err(MahoutError::NotImplemented(format!(
-            "Encoding method '{}' not supported for streaming",
-            encoding.as_str()
-        ))),
-    }
+    stream_encode(engine, path, num_qubits, encoding.encoder())
 }

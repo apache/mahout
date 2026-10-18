@@ -92,7 +92,7 @@ fn main() {
     // We'll encode each sample individually to trigger the async pipeline
     for i in 0..NUM_SAMPLES {
         let sample = &test_data[i * VECTOR_LEN..(i + 1) * VECTOR_LEN];
-        match engine.encode(sample, NUM_QUBITS, "amplitude") {
+        match engine.encode_single(sample, NUM_QUBITS, "amplitude") {
             Ok(ptr) => {
                 if let Err(e) = unsafe { free_dlpack_tensor(ptr) } {
                     eprintln!("✗ Failed to free DLPack tensor for sample {}: {:?}", i, e);

@@ -18,7 +18,7 @@
 pub mod buffer_pool;
 #[cfg(target_os = "linux")]
 pub(crate) mod cuda_sync;
-pub mod encodings;
+pub mod kernels;
 pub mod memory;
 /// Test-only fidelity / trace-distance helpers. Public so integration tests in
 /// `tests/` can use them; not part of the supported runtime API.
@@ -29,15 +29,17 @@ pub mod overlap_tracker;
 pub mod pipeline;
 #[cfg(target_os = "linux")]
 pub mod pool_metrics;
-#[cfg(target_os = "linux")]
-pub(crate) mod validation;
+pub mod validation;
 
 #[cfg(target_os = "linux")]
 pub(crate) mod cuda_ffi;
 
 #[cfg(target_os = "linux")]
 pub use buffer_pool::{PinnedBufferHandle, PinnedBufferPool};
-pub use encodings::{AmplitudeEncoder, AngleEncoder, BasisEncoder, QuantumEncoder};
+pub use kernels::{
+    AmplitudeKernel, AngleKernel, BasisKernel, DeviceDtype, DeviceInput, HostInput, Input,
+    IqpKernel, Kernel, LaunchCtx, Output, PhaseKernel, Shape,
+};
 pub use memory::GpuStateVector;
 #[cfg(target_os = "linux")]
 #[doc(hidden)]

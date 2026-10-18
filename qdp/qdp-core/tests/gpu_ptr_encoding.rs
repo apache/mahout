@@ -17,10 +17,12 @@
 // Unit and integration tests for encode_from_gpu_ptr and encode_batch_from_gpu_ptr.
 
 #![cfg(target_os = "linux")]
+#![allow(unused_unsafe)]
 
 use cudarc::driver::{DevicePtr, DeviceSlice};
-use qdp_core::gpu::encodings::MAX_QUBITS;
-use qdp_core::gpu::{AmplitudeEncoder, QuantumEncoder};
+use qdp_core::Encoding;
+use qdp_core::gpu::kernels::MAX_QUBITS;
+use qdp_core::gpu::kernels::{DeviceInput, Input, Shape};
 use qdp_core::{MahoutError, Precision, QdpEngine};
 use std::ffi::c_void;
 
@@ -78,21 +80,37 @@ fn test_amplitude_gpu_pointer_paths_reject_excessive_qubits() {
         engine.encode_batch_from_gpu_ptr(f64_ptr, 1, 1, excessive_qubits, "amplitude")
     });
     assert_max_qubits_error(unsafe {
-        engine.encode_from_gpu_ptr_f32(f32_ptr, 1, excessive_qubits)
-    });
-    assert_max_qubits_error(unsafe {
-        engine.encode_batch_from_gpu_ptr_f32(f32_ptr, 1, 1, excessive_qubits)
-    });
-    assert_max_qubits_error(unsafe {
-        AmplitudeEncoder.encode_batch_from_gpu_ptr_f32(
-            &f32_device,
-            f32_ptr as *const c_void,
-            1,
-            1,
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(f32_ptr),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(1, 1),
             excessive_qubits,
-            std::ptr::null_mut(),
+            Encoding::Amplitude,
         )
     });
+    assert_max_qubits_error(unsafe {
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(f32_ptr),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(1, 1),
+            excessive_qubits,
+            Encoding::Amplitude,
+        )
+    });
+    assert_max_qubits_error(qdp_core::gpu::kernels::encode(
+        &f32_device,
+        qdp_core::Encoding::Amplitude.encoder(),
+        Input::Device {
+            ptr: DeviceInput::F32(f32_ptr),
+            stream: std::ptr::null_mut(),
+        },
+        Shape::new(1, 1),
+        excessive_qubits,
+    ));
 }
 
 #[test]
@@ -790,7 +808,15 @@ fn test_encode_from_gpu_ptr_f32_success() {
     let ptr = *input_d.device_ptr() as *const f32;
     let dlpack_ptr = unsafe {
         engine
-            .encode_from_gpu_ptr_f32(ptr, input_d.len(), 2)
+            .encode(
+                Input::Device {
+                    ptr: DeviceInput::F32(ptr),
+                    stream: std::ptr::null_mut(),
+                },
+                Shape::new(1, input_d.len()),
+                2,
+                Encoding::Amplitude,
+            )
             .expect("encode_from_gpu_ptr_f32")
     };
     unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 1, 4) };
@@ -814,7 +840,15 @@ fn test_encode_from_gpu_ptr_f32_with_stream_success() {
     };
     let ptr = *input_d.device_ptr() as *const f32;
     let dlpack_ptr = unsafe {
-        engine.encode_from_gpu_ptr_f32_with_stream(ptr, input_d.len(), 2, std::ptr::null_mut())
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(ptr),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(1, input_d.len()),
+            2,
+            Encoding::Amplitude,
+        )
     }
     .expect("encode_from_gpu_ptr_f32_with_stream");
     unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 1, 4) };
@@ -839,11 +873,14 @@ fn test_encode_from_gpu_ptr_f32_with_stream_non_default_success() {
     let stream = device.fork_default_stream().expect("fork_default_stream");
     let dlpack_ptr = unsafe {
         engine
-            .encode_from_gpu_ptr_f32_with_stream(
-                *input_d.device_ptr() as *const f32,
-                input_d.len(),
+            .encode(
+                Input::Device {
+                    ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                    stream: stream.stream as *mut c_void,
+                },
+                Shape::new(1, input_d.len()),
                 2,
-                stream.stream as *mut c_void,
+                Encoding::Amplitude,
             )
             .expect("encode_from_gpu_ptr_f32_with_stream (non-default stream)")
     };
@@ -866,7 +903,15 @@ fn test_encode_from_gpu_ptr_f32_success_f64_engine() {
     let ptr = *input_d.device_ptr() as *const f32;
     let dlpack_ptr = unsafe {
         engine
-            .encode_from_gpu_ptr_f32(ptr, input_d.len(), 2)
+            .encode(
+                Input::Device {
+                    ptr: DeviceInput::F32(ptr),
+                    stream: std::ptr::null_mut(),
+                },
+                Shape::new(1, input_d.len()),
+                2,
+                Encoding::Amplitude,
+            )
             .expect("encode_from_gpu_ptr_f32 (Float64 engine)")
     };
     unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 1, 4) };
@@ -889,7 +934,17 @@ fn test_encode_from_gpu_ptr_f32_empty_input() {
         }
     };
     let ptr = *input_d.device_ptr() as *const f32;
-    let result = unsafe { engine.encode_from_gpu_ptr_f32(ptr, 0, 2) };
+    let result = unsafe {
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(ptr),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(1, 0),
+            2,
+            Encoding::Amplitude,
+        )
+    };
     assert!(result.is_err());
     match &result.unwrap_err() {
         MahoutError::InvalidInput(msg) => assert!(msg.contains("empty")),
@@ -906,7 +961,17 @@ fn test_encode_from_gpu_ptr_f32_null_pointer() {
             return;
         }
     };
-    let result = unsafe { engine.encode_from_gpu_ptr_f32(std::ptr::null(), 4, 2) };
+    let result = unsafe {
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(std::ptr::null()),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(1, 4),
+            2,
+            Encoding::Amplitude,
+        )
+    };
     assert!(result.is_err());
     match &result.unwrap_err() {
         MahoutError::InvalidInput(msg) => assert!(msg.contains("null")),
@@ -931,7 +996,17 @@ fn test_encode_from_gpu_ptr_f32_input_exceeds_state_len() {
         }
     };
     let ptr = *input_d.device_ptr() as *const f32;
-    let result = unsafe { engine.encode_from_gpu_ptr_f32(ptr, input_d.len(), 2) };
+    let result = unsafe {
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(ptr),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(1, input_d.len()),
+            2,
+            Encoding::Amplitude,
+        )
+    };
     assert!(result.is_err());
     match &result.unwrap_err() {
         MahoutError::InvalidInput(msg) => {
@@ -964,7 +1039,15 @@ fn test_encode_angle_from_gpu_ptr_f32_success() {
     let ptr = *input_d.device_ptr() as *const f32;
     let dlpack_ptr = unsafe {
         engine
-            .encode_angle_from_gpu_ptr_f32(ptr, input_d.len(), 2)
+            .encode(
+                Input::Device {
+                    ptr: DeviceInput::F32(ptr),
+                    stream: std::ptr::null_mut(),
+                },
+                Shape::new(1, input_d.len()),
+                2,
+                Encoding::Angle,
+            )
             .expect("encode_angle_from_gpu_ptr_f32")
     };
     unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 1, 4) };
@@ -989,11 +1072,14 @@ fn test_encode_angle_from_gpu_ptr_f32_with_stream_success() {
     let stream = device.fork_default_stream().expect("fork_default_stream");
     let dlpack_ptr = unsafe {
         engine
-            .encode_angle_from_gpu_ptr_f32_with_stream(
-                *input_d.device_ptr() as *const f32,
-                input_d.len(),
+            .encode(
+                Input::Device {
+                    ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                    stream: stream.stream as *mut c_void,
+                },
+                Shape::new(1, input_d.len()),
                 2,
-                stream.stream as *mut c_void,
+                Encoding::Angle,
             )
             .expect("encode_angle_from_gpu_ptr_f32_with_stream")
     };
@@ -1016,7 +1102,15 @@ fn test_encode_angle_from_gpu_ptr_f32_success_f64_engine() {
     let ptr = *input_d.device_ptr() as *const f32;
     let dlpack_ptr = unsafe {
         engine
-            .encode_angle_from_gpu_ptr_f32(ptr, input_d.len(), 2)
+            .encode(
+                Input::Device {
+                    ptr: DeviceInput::F32(ptr),
+                    stream: std::ptr::null_mut(),
+                },
+                Shape::new(1, input_d.len()),
+                2,
+                Encoding::Angle,
+            )
             .expect("encode_angle_from_gpu_ptr_f32 (Float64 engine)")
     };
     unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 1, 4) };
@@ -1039,7 +1133,17 @@ fn test_encode_angle_from_gpu_ptr_f32_empty_input() {
         }
     };
     let ptr = *input_d.device_ptr() as *const f32;
-    let result = unsafe { engine.encode_angle_from_gpu_ptr_f32(ptr, 0, 1) };
+    let result = unsafe {
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(ptr),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(1, 0),
+            1,
+            Encoding::Angle,
+        )
+    };
     assert!(result.is_err());
     match &result.unwrap_err() {
         MahoutError::InvalidInput(msg) => {
@@ -1058,7 +1162,17 @@ fn test_encode_angle_from_gpu_ptr_f32_null_pointer() {
             return;
         }
     };
-    let result = unsafe { engine.encode_angle_from_gpu_ptr_f32(std::ptr::null(), 2, 2) };
+    let result = unsafe {
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(std::ptr::null()),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(1, 2),
+            2,
+            Encoding::Angle,
+        )
+    };
     assert!(result.is_err());
     match &result.unwrap_err() {
         MahoutError::InvalidInput(msg) => assert!(msg.contains("null")),
@@ -1083,7 +1197,17 @@ fn test_encode_angle_from_gpu_ptr_f32_qubit_mismatch() {
         }
     };
     let ptr = *input_d.device_ptr() as *const f32;
-    let result = unsafe { engine.encode_angle_from_gpu_ptr_f32(ptr, input_d.len(), 1) };
+    let result = unsafe {
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(ptr),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(1, input_d.len()),
+            1,
+            Encoding::Angle,
+        )
+    };
     assert!(result.is_err());
     match &result.unwrap_err() {
         MahoutError::InvalidInput(msg) => {
@@ -1111,7 +1235,17 @@ fn test_encode_angle_from_gpu_ptr_f32_too_many_qubits() {
         }
     };
     let ptr = *input_d.device_ptr() as *const f32;
-    let result = unsafe { engine.encode_angle_from_gpu_ptr_f32(ptr, input_d.len(), 31) };
+    let result = unsafe {
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(ptr),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(1, input_d.len()),
+            31,
+            Encoding::Angle,
+        )
+    };
     assert!(result.is_err());
     match &result.unwrap_err() {
         MahoutError::InvalidInput(msg) => {
@@ -1139,11 +1273,14 @@ fn test_encode_angle_from_gpu_ptr_f32_with_stream_too_many_qubits() {
     };
     let stream = device.fork_default_stream().expect("fork_default_stream");
     let result = unsafe {
-        engine.encode_angle_from_gpu_ptr_f32_with_stream(
-            *input_d.device_ptr() as *const f32,
-            input_d.len(),
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                stream: stream.stream as *mut c_void,
+            },
+            Shape::new(1, input_d.len()),
             31,
-            stream.stream as *mut c_void,
+            Encoding::Angle,
         )
     };
     assert!(result.is_err());
@@ -1176,11 +1313,14 @@ fn test_encode_batch_from_gpu_ptr_f32_success() {
         };
     let dlpack_ptr = unsafe {
         engine
-            .encode_batch_from_gpu_ptr_f32(
-                *input_d.device_ptr() as *const f32,
-                num_samples,
-                sample_size,
+            .encode(
+                Input::Device {
+                    ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                    stream: std::ptr::null_mut(),
+                },
+                Shape::new(num_samples, sample_size),
                 2,
+                Encoding::Amplitude,
             )
             .expect("encode_batch_from_gpu_ptr_f32")
     };
@@ -1213,12 +1353,14 @@ fn test_encode_batch_from_gpu_ptr_f32_with_stream_success() {
     let stream = device.fork_default_stream().expect("fork_default_stream");
     let dlpack_ptr = unsafe {
         engine
-            .encode_batch_from_gpu_ptr_f32_with_stream(
-                *input_d.device_ptr() as *const f32,
+            .encode(
+                Input::Device {
+                    ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                    stream: stream.stream as *mut c_void,
+                },
+                Shape::new(2, 4),
                 2,
-                4,
-                2,
-                stream.stream as *mut c_void,
+                Encoding::Amplitude,
             )
             .expect("encode_batch_from_gpu_ptr_f32_with_stream")
     };
@@ -1241,7 +1383,15 @@ fn test_encode_batch_from_gpu_ptr_f32_success_f64_engine() {
         };
     let dlpack_ptr = unsafe {
         engine
-            .encode_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 4, 2)
+            .encode(
+                Input::Device {
+                    ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                    stream: std::ptr::null_mut(),
+                },
+                Shape::new(2, 4),
+                2,
+                Encoding::Amplitude,
+            )
             .expect("encode_batch_from_gpu_ptr_f32 (Float64 engine)")
     };
     unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 2, 4) };
@@ -1256,7 +1406,17 @@ fn test_encode_batch_from_gpu_ptr_f32_zero_samples() {
             return;
         }
     };
-    let result = unsafe { engine.encode_batch_from_gpu_ptr_f32(std::ptr::null(), 0, 4, 2) };
+    let result = unsafe {
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(std::ptr::null()),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(0, 4),
+            2,
+            Encoding::Amplitude,
+        )
+    };
     assert!(result.is_err());
     match &result.unwrap_err() {
         MahoutError::InvalidInput(msg) => assert!(msg.contains("zero") || msg.contains("samples")),
@@ -1273,7 +1433,17 @@ fn test_encode_batch_from_gpu_ptr_f32_null_pointer() {
             return;
         }
     };
-    let result = unsafe { engine.encode_batch_from_gpu_ptr_f32(std::ptr::null(), 2, 4, 2) };
+    let result = unsafe {
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(std::ptr::null()),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(2, 4),
+            2,
+            Encoding::Amplitude,
+        )
+    };
     assert!(result.is_err());
     match &result.unwrap_err() {
         MahoutError::InvalidInput(msg) => assert!(msg.contains("null")),
@@ -1298,7 +1468,15 @@ fn test_encode_batch_from_gpu_ptr_f32_sample_size_exceeds_state_len() {
         }
     };
     let result = unsafe {
-        engine.encode_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 5, 2)
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(2, 5),
+            2,
+            Encoding::Amplitude,
+        )
     };
     assert!(result.is_err());
     match &result.unwrap_err() {
@@ -1330,11 +1508,14 @@ fn test_encode_batch_from_gpu_ptr_f32_odd_sample_size_success() {
     };
     let dlpack_ptr = unsafe {
         engine
-            .encode_batch_from_gpu_ptr_f32(
-                *input_d.device_ptr() as *const f32,
-                num_samples,
-                sample_size,
+            .encode(
+                Input::Device {
+                    ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                    stream: std::ptr::null_mut(),
+                },
+                Shape::new(num_samples, sample_size),
                 num_qubits,
+                Encoding::Amplitude,
             )
             .expect("encode_batch_from_gpu_ptr_f32 odd sample size")
     };
@@ -1374,11 +1555,14 @@ fn test_encode_angle_batch_from_gpu_ptr_f32_success() {
     };
     let dlpack_ptr = unsafe {
         engine
-            .encode_angle_batch_from_gpu_ptr_f32(
-                *input_d.device_ptr() as *const f32,
-                num_samples,
+            .encode(
+                Input::Device {
+                    ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                    stream: std::ptr::null_mut(),
+                },
+                Shape::new(num_samples, num_qubits),
                 num_qubits,
-                num_qubits,
+                Encoding::Angle,
             )
             .expect("encode_angle_batch_from_gpu_ptr_f32")
     };
@@ -1411,12 +1595,14 @@ fn test_encode_angle_batch_from_gpu_ptr_f32_with_stream_success() {
     let stream = device.fork_default_stream().expect("fork_default_stream");
     let dlpack_ptr = unsafe {
         engine
-            .encode_angle_batch_from_gpu_ptr_f32_with_stream(
-                *input_d.device_ptr() as *const f32,
-                2,
+            .encode(
+                Input::Device {
+                    ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                    stream: stream.stream as *mut c_void,
+                },
+                Shape::new(2, 3),
                 3,
-                3,
-                stream.stream as *mut c_void,
+                Encoding::Angle,
             )
             .expect("encode_angle_batch_from_gpu_ptr_f32_with_stream")
     };
@@ -1432,7 +1618,17 @@ fn test_encode_angle_batch_from_gpu_ptr_f32_null_pointer() {
             return;
         }
     };
-    let result = unsafe { engine.encode_angle_batch_from_gpu_ptr_f32(std::ptr::null(), 2, 2, 2) };
+    let result = unsafe {
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(std::ptr::null()),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(2, 2),
+            2,
+            Encoding::Angle,
+        )
+    };
     assert!(result.is_err());
     match &result.unwrap_err() {
         MahoutError::InvalidInput(msg) => assert!(msg.contains("null")),
@@ -1457,7 +1653,15 @@ fn test_encode_angle_batch_from_gpu_ptr_f32_sample_size_mismatch() {
         }
     };
     let result = unsafe {
-        engine.encode_angle_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 2, 3)
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(2, 2),
+            3,
+            Encoding::Angle,
+        )
     };
     assert!(result.is_err());
     match &result.unwrap_err() {
@@ -1480,7 +1684,17 @@ fn test_encode_angle_batch_from_gpu_ptr_f32_zero_samples() {
             return;
         }
     };
-    let result = unsafe { engine.encode_angle_batch_from_gpu_ptr_f32(std::ptr::null(), 0, 2, 2) };
+    let result = unsafe {
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(std::ptr::null()),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(0, 2),
+            2,
+            Encoding::Angle,
+        )
+    };
     assert!(result.is_err());
     match &result.unwrap_err() {
         MahoutError::InvalidInput(msg) => assert!(msg.contains("zero") || msg.contains("samples")),
@@ -1506,7 +1720,15 @@ fn test_encode_angle_batch_from_gpu_ptr_f32_non_finite_rejected() {
             }
         };
     let result = unsafe {
-        engine.encode_angle_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 2, 2)
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(2, 2),
+            2,
+            Encoding::Angle,
+        )
     };
     assert!(result.is_err());
     match &result.unwrap_err() {
@@ -1538,7 +1760,15 @@ fn test_encode_angle_batch_from_gpu_ptr_f32_infinity_rejected() {
             }
         };
     let result = unsafe {
-        engine.encode_angle_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 2, 2)
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(2, 2),
+            2,
+            Encoding::Angle,
+        )
     };
     assert!(result.is_err());
     match &result.unwrap_err() {
@@ -1574,7 +1804,15 @@ fn test_encode_angle_batch_from_gpu_ptr_f32_success_f64_engine() {
     };
     let dlpack_ptr = unsafe {
         engine
-            .encode_angle_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 3, 3)
+            .encode(
+                Input::Device {
+                    ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                    stream: std::ptr::null_mut(),
+                },
+                Shape::new(2, 3),
+                3,
+                Encoding::Angle,
+            )
             .expect("encode_angle_batch_from_gpu_ptr_f32 (Float64 engine)")
     };
     unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 2, 8) };
@@ -1602,11 +1840,14 @@ fn test_encode_basis_batch_from_gpu_ptr_f32_success() {
     };
     let dlpack_ptr = unsafe {
         engine
-            .encode_basis_batch_from_gpu_ptr_f32(
-                *input_d.device_ptr() as *const f32,
-                num_samples,
-                1,
+            .encode(
+                Input::Device {
+                    ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                    stream: std::ptr::null_mut(),
+                },
+                Shape::new(num_samples, 1),
                 num_qubits,
+                Encoding::Basis,
             )
             .expect("encode_basis_batch_from_gpu_ptr_f32")
     };
@@ -1632,12 +1873,14 @@ fn test_encode_basis_batch_from_gpu_ptr_f32_with_stream_success() {
     let stream = device.fork_default_stream().expect("fork_default_stream");
     let dlpack_ptr = unsafe {
         engine
-            .encode_basis_batch_from_gpu_ptr_f32_with_stream(
-                *input_d.device_ptr() as *const f32,
+            .encode(
+                Input::Device {
+                    ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                    stream: stream.stream as *mut c_void,
+                },
+                Shape::new(2, 1),
                 2,
-                1,
-                2,
-                stream.stream as *mut c_void,
+                Encoding::Basis,
             )
             .expect("encode_basis_batch_from_gpu_ptr_f32_with_stream")
     };
@@ -1650,7 +1893,17 @@ fn test_encode_basis_batch_from_gpu_ptr_f32_null_pointer() {
         println!("SKIP: No GPU");
         return;
     };
-    let result = unsafe { engine.encode_basis_batch_from_gpu_ptr_f32(std::ptr::null(), 2, 1, 2) };
+    let result = unsafe {
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(std::ptr::null()),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(2, 1),
+            2,
+            Encoding::Basis,
+        )
+    };
     assert!(result.is_err());
 }
 
@@ -1660,7 +1913,17 @@ fn test_encode_basis_batch_from_gpu_ptr_f32_zero_samples() {
         println!("SKIP: No GPU");
         return;
     };
-    let result = unsafe { engine.encode_basis_batch_from_gpu_ptr_f32(std::ptr::null(), 0, 1, 2) };
+    let result = unsafe {
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(std::ptr::null()),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(0, 1),
+            2,
+            Encoding::Basis,
+        )
+    };
     assert!(result.is_err());
     match result.unwrap_err() {
         MahoutError::InvalidInput(msg) => assert!(msg.contains("samples"), "msg: {msg}"),
@@ -1682,7 +1945,15 @@ fn test_encode_basis_batch_from_gpu_ptr_f32_sample_size_mismatch() {
         }
     };
     let result = unsafe {
-        engine.encode_basis_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 2, 2)
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(2, 2),
+            2,
+            Encoding::Basis,
+        )
     };
     assert!(result.is_err());
     match result.unwrap_err() {
@@ -1705,7 +1976,15 @@ fn test_encode_basis_batch_from_gpu_ptr_f32_non_finite_rejected() {
         }
     };
     let result = unsafe {
-        engine.encode_basis_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 1, 2)
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(2, 1),
+            2,
+            Encoding::Basis,
+        )
     };
     assert!(result.is_err());
     match result.unwrap_err() {
@@ -1729,7 +2008,15 @@ fn test_encode_basis_batch_from_gpu_ptr_f32_out_of_range_rejected() {
         }
     };
     let result = unsafe {
-        engine.encode_basis_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 1, 2)
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(2, 1),
+            2,
+            Encoding::Basis,
+        )
     };
     assert!(result.is_err());
     match result.unwrap_err() {
@@ -1752,7 +2039,15 @@ fn test_encode_basis_batch_from_gpu_ptr_f32_non_integer_rejected() {
         }
     };
     let result = unsafe {
-        engine.encode_basis_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 1, 2)
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(2, 1),
+            2,
+            Encoding::Basis,
+        )
     };
     assert!(result.is_err());
     match result.unwrap_err() {
@@ -1775,7 +2070,15 @@ fn test_encode_basis_batch_from_gpu_ptr_f32_negative_rejected() {
         }
     };
     let result = unsafe {
-        engine.encode_basis_batch_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 2, 1, 2)
+        engine.encode(
+            Input::Device {
+                ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                stream: std::ptr::null_mut(),
+            },
+            Shape::new(2, 1),
+            2,
+            Encoding::Basis,
+        )
     };
     assert!(result.is_err());
     match result.unwrap_err() {
@@ -1799,13 +2102,21 @@ fn test_encode_basis_from_gpu_ptr_f32_single_sample_success() {
     };
     let dlpack_ptr = unsafe {
         engine
-            .encode_basis_from_gpu_ptr_f32(*input_d.device_ptr() as *const f32, 3)
+            .encode(
+                Input::Device {
+                    ptr: DeviceInput::F32(*input_d.device_ptr() as *const f32),
+                    stream: std::ptr::null_mut(),
+                },
+                Shape::new(1, 1),
+                3,
+                Encoding::Basis,
+            )
             .expect("encode_basis_from_gpu_ptr_f32")
     };
     unsafe { common::assert_dlpack_shape_2d_and_delete(dlpack_ptr, 1, 8) };
 }
 
-// ---- Trait-method tests for `QuantumEncoder::encode_from_gpu_ptr_f32` (PR 1.5) ----
+// ---- Kernel-level f32 device-input tests ----
 //
 // The single-sample f32 method moved onto the `QuantumEncoder` trait in PR 1.5 so
 // future encoders only need a single override point instead of a standalone inherent
@@ -1826,17 +2137,17 @@ fn test_trait_encode_from_gpu_ptr_f32_amplitude() {
         return;
     };
     let encoder = qdp_core::Encoding::Amplitude.encoder();
-    let state_vector = unsafe {
-        encoder
-            .encode_from_gpu_ptr_f32(
-                &device,
-                *data_d.device_ptr() as *const std::ffi::c_void,
-                state_len,
-                num_qubits,
-                std::ptr::null_mut(),
-            )
-            .expect("trait method should succeed for amplitude")
-    };
+    let state_vector = qdp_core::gpu::kernels::encode(
+        &device,
+        encoder,
+        Input::Device {
+            ptr: DeviceInput::F32(*data_d.device_ptr() as *const f32),
+            stream: std::ptr::null_mut(),
+        },
+        Shape::new(1, state_len),
+        num_qubits,
+    )
+    .expect("trait method should succeed for amplitude");
     // Use the engine's own precision conversion so we get a valid dlpack to free.
     let state_vector = state_vector
         .to_precision(&device, qdp_core::Precision::Float32)
@@ -1860,17 +2171,17 @@ fn test_trait_encode_from_gpu_ptr_f32_angle() {
         return;
     };
     let encoder = qdp_core::Encoding::Angle.encoder();
-    let state_vector = unsafe {
-        encoder
-            .encode_from_gpu_ptr_f32(
-                &device,
-                *data_d.device_ptr() as *const std::ffi::c_void,
-                num_qubits,
-                num_qubits,
-                std::ptr::null_mut(),
-            )
-            .expect("trait method should succeed for angle")
-    };
+    let state_vector = qdp_core::gpu::kernels::encode(
+        &device,
+        encoder,
+        Input::Device {
+            ptr: DeviceInput::F32(*data_d.device_ptr() as *const f32),
+            stream: std::ptr::null_mut(),
+        },
+        Shape::new(1, num_qubits),
+        num_qubits,
+    )
+    .expect("trait method should succeed for angle");
     let state_vector = state_vector
         .to_precision(&device, qdp_core::Precision::Float32)
         .expect("to_precision");
@@ -1892,17 +2203,17 @@ fn test_trait_encode_from_gpu_ptr_f32_basis() {
         return;
     };
     let encoder = qdp_core::Encoding::Basis.encoder();
-    let state_vector = unsafe {
-        encoder
-            .encode_from_gpu_ptr_f32(
-                &device,
-                *data_d.device_ptr() as *const std::ffi::c_void,
-                1,
-                num_qubits,
-                std::ptr::null_mut(),
-            )
-            .expect("trait method should succeed for basis")
-    };
+    let state_vector = qdp_core::gpu::kernels::encode(
+        &device,
+        encoder,
+        Input::Device {
+            ptr: DeviceInput::F32(*data_d.device_ptr() as *const f32),
+            stream: std::ptr::null_mut(),
+        },
+        Shape::new(1, 1),
+        num_qubits,
+    )
+    .expect("trait method should succeed for basis");
     let state_vector = state_vector
         .to_precision(&device, qdp_core::Precision::Float32)
         .expect("to_precision");
@@ -1927,23 +2238,24 @@ fn test_trait_encode_from_gpu_ptr_f32_default_not_implemented_for_phase() {
         return;
     };
     let encoder = qdp_core::Encoding::Phase.encoder();
-    let result = unsafe {
-        encoder.encode_from_gpu_ptr_f32(
-            &device,
-            *data_d.device_ptr() as *const std::ffi::c_void,
-            num_qubits,
-            num_qubits,
-            std::ptr::null_mut(),
-        )
-    };
+    let result = qdp_core::gpu::kernels::encode(
+        &device,
+        encoder,
+        Input::Device {
+            ptr: DeviceInput::F32(*data_d.device_ptr() as *const f32),
+            stream: std::ptr::null_mut(),
+        },
+        Shape::new(1, num_qubits),
+        num_qubits,
+    );
     match result {
         Err(qdp_core::MahoutError::NotImplemented(msg)) => {
             assert!(
-                msg.contains("encode_from_gpu_ptr_f32") && msg.contains("phase"),
+                msg.contains("float32") && msg.contains("phase"),
                 "unexpected NotImplemented message: {msg}"
             );
         }
-        Ok(_) => panic!("phase should not support encode_from_gpu_ptr_f32"),
+        Ok(_) => panic!("phase should not accept float32 device input"),
         Err(e) => panic!("expected NotImplemented, got {:?}", e),
     }
 }
