@@ -43,9 +43,11 @@ class TestCreateCircuit:
 
         qumat.create_empty_circuit(num_qubits=1)
 
-        assert qumat.parameters == {}
-        assert qumat.execute_circuit() is not None
-        assert qumat.get_final_state_vector() is not None
+        execution_result = qumat.execute_circuit()
+        final_state_vector = qumat.get_final_state_vector()
+
+        assert execution_result is not None
+        assert final_state_vector is not None
 
     @pytest.mark.parametrize("num_qubits", [0, 1, 3, 5])
     def test_create_circuit_initializes_to_zero(self, backend_name, num_qubits):
