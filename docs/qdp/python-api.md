@@ -10,6 +10,7 @@ sidebar_label: Python API
 - A unified encoding facade via `QdpEngine`
 - Benchmark and loader builders
 - Backend-selection helpers
+- CPU-side input validation and L2 norms via `Preprocessor`
 - Optional access to native `_qdp` types when the Rust extension is installed
 
 ## Overview
@@ -22,6 +23,7 @@ from qumat_qdp import (
     Backend,
     LatencyResult,
     NativeQuantumTensor,
+    Preprocessor,
     QdpBenchmark,
     QdpEngine,
     QdpTensor,
@@ -42,6 +44,7 @@ Key exports:
 - `QdpBenchmark`: benchmark builder for the Rust pipeline or explicit PyTorch reference backend.
 - `QuantumDataLoader`: batch iterator builder for synthetic or file-backed inputs.
 - `QdpTensor` / `QuantumTensor`: thin DLPack facade type.
+- `Preprocessor`: CPU-side input checks and L2 norms (the same checks the encoders run before using the GPU).
 - `Backend`, `BACKEND`, `force_backend`: backend detection and override helpers for the `_qdp` / PyTorch-reference selection layer.
 - `TritonAmdEngine`, `is_triton_amd_available`: direct AMD-route entry points.
 - `RustQdpEngine`, `NativeQuantumTensor`: native `_qdp` exports when the extension is available.
@@ -150,6 +153,78 @@ qt = QdpEngine(device_id=0, backend="cuda").encode(
 )
 tensor = torch.from_dlpack(qt)
 ```
+
+## Preprocessing API
+
+`Preprocessor` exposes the CPU-side checks that the native encoders run
+before any data reaches the GPU. Use it to fail fast on bad input, or to
+see the norm that amplitude encoding divides by. All four methods are
+static, run on the CPU, and need the `_qdp` extension but not a GPU (a
+stub build without the CUDA toolkit works).
+
+| Method | Returns | Checks |
+|--------|---------|--------|
+| `validate_input(data, num_qubits)` | `None` | `1 <= num_qubits <= 30`, `data` non-empty, `len(data) <= 2**num_qubits` |
+| `calculate_l2_norm(data)` | `float` | norm is non-zero and finite (no NaN / Inf) |
+| `validate_batch(batch_data, num_samples, sample_size, num_qubits)` | `None` | `num_samples > 0`, length is `num_samples * sample_size`, `sample_size <= 2**num_qubits` |
+| `calculate_batch_l2_norms(batch_data, num_samples, sample_size)` | `numpy.ndarray` (float64, one norm per sample) | every sample norm is non-zero and finite |
+
+Input notes:
+
+- `data` is a 1D NumPy array or a sequence of numbers. Other dtypes are
+  converted to `float64`; a C-contiguous `float64` array is used without
+  a copy.
+- `batch_data` is either 2D with shape `(num_samples, sample_size)` or the
+  same values flattened to 1D in row-major order. Non-contiguous and
+  Fortran-ordered arrays are read in logical row order.
+- A failed check raises `RuntimeError` whose message starts with
+  `"Invalid input:"` (the same message `QdpEngine.encode` reports). A 1D
+  argument given a 2D array raises `TypeError`; values NumPy cannot
+  convert to `float64` (strings, ragged lists) raise `ValueError`.
+
+### Why the norm matters for amplitude encoding
+
+Amplitude encoding stores a feature vector `x` as the amplitudes of an
+`n`-qubit state. A quantum state must have total probability 1, so QDP
+loads `x / ||x||` rather than `x`, padding with zeros up to `2**n`
+entries. `calculate_l2_norm` returns that `||x||`. A vector of all zeros
+has norm 0 and cannot be normalized, so it is rejected instead of being
+encoded as an invalid state; NaN or infinite values are rejected for the
+same reason.
+
+```python
+import numpy as np
+from qumat_qdp import Preprocessor
+
+x = np.array([3.0, 4.0])  # 2 features -> fits in 1 qubit (2**1 = 2)
+
+Preprocessor.validate_input(x, num_qubits=1)  # raises on bad input
+norm = Preprocessor.calculate_l2_norm(x)  # 5.0
+amplitudes = x / norm  # [0.6, 0.8]
+print(norm, amplitudes, (amplitudes**2).sum())  # probabilities sum to 1
+
+try:
+    Preprocessor.calculate_l2_norm([0.0, 0.0])
+except RuntimeError as err:
+    print(err)  # Invalid input: Input data has zero norm
+```
+
+`QdpEngine(...).encode(x, num_qubits=1)` on a GPU produces the state with
+the same amplitudes `[0.6, 0.8]` (as complex numbers).
+
+Batch form, for a 2D array of samples:
+
+```python
+batch = np.array([[3.0, 4.0], [1.0, 1.0]])
+Preprocessor.validate_batch(batch, num_samples=2, sample_size=2, num_qubits=1)
+norms = Preprocessor.calculate_batch_l2_norms(batch, 2, 2)  # [5.0, 1.414...]
+states = batch / norms[:, None]
+```
+
+Naming note: these method names mirror the Rust
+`qdp_core::preprocessing::Preprocessor` API and are the stable public
+names. If they are ever renamed, the old names should keep working with a
+`DeprecationWarning` for at least one release rather than being removed.
 
 ## Benchmark API
 

@@ -19,3 +19,4 @@ return values, and exceptions.
 - [QuantumDataLoader](#quantumdataloader) — build iterable encoding pipelines
 - [QdpBenchmark](#qdpbenchmark) — measure throughput and latency
 - [QdpTensor](#qdptensor) — exchange encoded results through DLPack
+- [Preprocessor](#preprocessor) — validate inputs and compute L2 norms on the CPU

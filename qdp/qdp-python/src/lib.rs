@@ -18,10 +18,12 @@ mod constants;
 mod dlpack;
 mod engine;
 mod loader;
+mod preprocessing;
 mod pytorch;
 mod tensor;
 
 use engine::QdpEngine;
+use preprocessing::PyPreprocessor;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use tensor::QuantumTensor;
@@ -90,6 +92,7 @@ fn _qdp(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     m.add_class::<QdpEngine>()?;
     m.add_class::<QuantumTensor>()?;
+    m.add_class::<PyPreprocessor>()?;
     m.add_function(wrap_pyfunction!(cuda_available, m)?)?;
     #[cfg(target_os = "linux")]
     m.add_class::<PyQuantumLoader>()?;
