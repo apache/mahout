@@ -35,6 +35,7 @@ const sidebars: SidebarsConfig = {
         'qdp/concepts',
         'qdp/api',
         'qdp/python-api',
+        'qdp/numpy-input',
         'qdp/examples',
         {
           type: 'category',

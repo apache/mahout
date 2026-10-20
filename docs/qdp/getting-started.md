@@ -121,7 +121,7 @@ Notes:
 ## Tips
 
 - Default `precision` is `"float32"`; pass `precision="float64"` for higher precision: `QdpEngine(device_id=0, precision="float64")`.
-- NumPy inputs must be `float64` dtype. CUDA `torch.Tensor` inputs support `float32` or `float64` for `amplitude` and `angle` single-sample or batched inputs; `basis` accepts `int64` or `float32` single-sample or batched index tensors. `iqp` and `iqp-z` CUDA tensor inputs require `float64`, and `phase` currently requires host input.
+- NumPy inputs must be C-contiguous `float64` arrays (1D or 2D); `.npy` files must be 2D `float64`. See [NumPy Input](./numpy-input/) for the full rules and error messages. CUDA `torch.Tensor` inputs support `float32` or `float64` for `amplitude` and `angle` single-sample or batched inputs; `basis` accepts `int64` or `float32` single-sample or batched index tensors. `iqp` and `iqp-z` CUDA tensor inputs require `float64`, and `phase` currently requires host input.
 - Backend selection is explicit; valid values are `"cuda"` and `"amd"` (with `"triton_amd"` accepted as an alias for `"amd"`).
 
 ## Troubleshooting

@@ -95,7 +95,7 @@ Unified encoding facade.
 
 `encode(data, num_qubits, encoding_method="amplitude")`
 
-- `data`: Python list, NumPy array, PyTorch tensor, or other backend-supported input
+- `data`: Python list, NumPy array, PyTorch tensor, or other backend-supported input (NumPy rules: [NumPy Input](./numpy-input/))
 - `num_qubits` (int): number of qubits
 - `encoding_method` (str): depends on selected route
 
