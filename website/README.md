@@ -52,6 +52,19 @@ npm run start     # Auto-syncs before starting dev server
 npm run build     # Auto-syncs before building
 ```
 
+The sync rewrites only the frontmatter of each page: it drops Jekyll-only
+fields (`layout`, `permalink`) and, if a page has neither a `title` nor a
+leading `# Heading`, derives a title from the file name (keeping acronyms
+such as QDP and GPU). The markdown body, including links, is copied
+unchanged. Write internal links with the `.md` extension
+(`[QDP](../qdp/index.md)`) so Docusaurus can resolve them per version.
+
+After changing `scripts/sync-docs.js`, run its tests:
+
+```bash
+npm test
+```
+
 **Important:**
 - Edit ALL documentation in `/docs/`, NOT in `website/docs/`
 - `website/docs/` is gitignored (except `.gitignore` itself)
@@ -195,7 +208,7 @@ pages are included in the version snapshot before the local build validation.
 
 ## Blog Posts
 
-Blog posts live in `website/blog/`:
+Blog posts live in `/docs/blog/` (synced to the gitignored `website/blog/`):
 
 ```markdown
 ---
@@ -258,7 +271,8 @@ website/
 ├── sidebars.ts             # Sidebar navigation
 ├── package.json
 ├── scripts/
-│   └── sync-docs.js        # Documentation sync script
+│   ├── sync-docs.js        # Documentation sync script
+│   └── sync-docs.test.js   # Tests for the sync script (npm test)
 ├── docs/                   # Synced docs + website-only content
 ├── versioned_docs/         # Version snapshots
 ├── blog/                   # Blog posts
@@ -277,6 +291,7 @@ website/
 | `npm run build` | Build production site |
 | `npm run serve` | Serve production build locally |
 | `npm run sync` | Sync docs from /docs/ |
+| `npm test` | Run the sync script's unit tests |
 | `npm run docusaurus docs:version X.Y` | Create version snapshot |
 | `npm run clear` | Clear Docusaurus cache |
 

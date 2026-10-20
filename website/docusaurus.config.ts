@@ -27,6 +27,29 @@ const docsVersions = Object.fromEntries([
   ]),
 ]);
 
+const repoTreeUrl = 'https://github.com/apache/mahout/tree/main';
+
+// Docusaurus builds the "Edit this page" link from the directory it reads
+// (website/docs, website/blog), but those are copies made by
+// scripts/sync-docs.js. Point the links at the files contributors should
+// actually edit: /docs for current docs and blog posts, and
+// website/versioned_docs for released snapshots.
+const docsEditUrl = ({
+  version,
+  versionDocsDirPath,
+  docPath,
+}: {
+  version: string;
+  versionDocsDirPath: string;
+  docPath: string;
+}): string =>
+  version === 'current'
+    ? `${repoTreeUrl}/docs/${docPath}`
+    : `${repoTreeUrl}/website/${versionDocsDirPath}/${docPath}`;
+
+const blogEditUrl = ({ blogPath }: { blogPath: string }): string =>
+  `${repoTreeUrl}/docs/blog/${blogPath}`;
+
 const config: Config = {
   title: 'Apache Mahout',
   tagline: 'Distributed Linear Algebra & Quantum Computing',
@@ -66,7 +89,7 @@ const config: Config = {
         docs: {
           path: './docs/',
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/apache/mahout/tree/main/docs/',
+          editUrl: docsEditUrl,
           remarkPlugins: [remarkMath],
           rehypePlugins: [rehypeKatex],
           lastVersion: latestVersion,
@@ -78,7 +101,7 @@ const config: Config = {
             type: ['rss', 'atom'],
             xslt: true,
           },
-          editUrl: 'https://github.com/apache/mahout/tree/main/website-new/',
+          editUrl: blogEditUrl,
           blogTitle: 'News & Updates',
           blogDescription: 'Apache Mahout project news, releases, and community updates',
           postsPerPage: 'ALL',
