@@ -49,6 +49,7 @@ def _verify_tensor(tensor, expected_shape, check_normalization=False):
 
 @requires_qdp
 @pytest.mark.gpu
+@pytest.mark.gpu_torch
 @pytest.mark.parametrize(
     ("num_samples", "num_qubits", "check_norm"),
     [
@@ -87,6 +88,7 @@ def test_encode_from_numpy_file(num_samples, num_qubits, check_norm):
 
 @requires_qdp
 @pytest.mark.gpu
+@pytest.mark.gpu_torch
 @pytest.mark.parametrize("num_qubits", [1, 2, 3, 4])
 def test_encode_numpy_array_1d(num_qubits):
     """Test 1D NumPy array encoding (single sample)"""
@@ -104,6 +106,7 @@ def test_encode_numpy_array_1d(num_qubits):
 
 @requires_qdp
 @pytest.mark.gpu
+@pytest.mark.gpu_torch
 @pytest.mark.parametrize(("num_samples", "num_qubits"), [(5, 2), (10, 3)])
 def test_encode_numpy_array_2d(num_samples, num_qubits):
     """Test 2D NumPy array encoding (batch)"""
@@ -144,6 +147,7 @@ def test_encode_numpy_encoding_methods(encoding_method):
 
 @requires_qdp
 @pytest.mark.gpu
+@pytest.mark.gpu_torch
 @pytest.mark.parametrize("num_qubits", [1, 2, 3, 4])
 def test_encode_numpy_angle_encoding_1d(num_qubits):
     """Angle encoding: 1D array with num_qubits angles (single sample)"""
@@ -161,6 +165,7 @@ def test_encode_numpy_angle_encoding_1d(num_qubits):
 
 @requires_qdp
 @pytest.mark.gpu
+@pytest.mark.gpu_torch
 @pytest.mark.parametrize(("num_samples", "num_qubits"), [(5, 2), (10, 3), (1, 4)])
 def test_encode_numpy_angle_encoding_2d(num_samples, num_qubits):
     """Angle encoding: 2D array of shape (num_samples, num_qubits)"""
@@ -179,6 +184,7 @@ def test_encode_numpy_angle_encoding_2d(num_samples, num_qubits):
 
 @requires_qdp
 @pytest.mark.gpu
+@pytest.mark.gpu_torch
 def test_encode_numpy_angle_encoding_from_file():
     """Angle encoding: load angles from .npy file"""
     from _qdp import QdpEngine
@@ -219,6 +225,7 @@ def test_encode_numpy_angle_encoding_wrong_sample_size():
 
 @requires_qdp
 @pytest.mark.gpu
+@pytest.mark.gpu_torch
 @pytest.mark.parametrize(
     ("theta", "expected_probs"),
     [
@@ -252,6 +259,7 @@ def test_encode_numpy_angle_encoding_1qubit_correctness(theta, expected_probs):
 
 @requires_qdp
 @pytest.mark.gpu
+@pytest.mark.gpu_torch
 @pytest.mark.parametrize("num_qubits", [1, 2, 3, 4])
 def test_encode_numpy_basis_encoding_1d(num_qubits):
     """Basis encoding: 1D array with a single index (single sample)"""
@@ -269,6 +277,7 @@ def test_encode_numpy_basis_encoding_1d(num_qubits):
 
 @requires_qdp
 @pytest.mark.gpu
+@pytest.mark.gpu_torch
 @pytest.mark.parametrize(("num_samples", "num_qubits"), [(5, 2), (10, 3), (1, 4)])
 def test_encode_numpy_basis_encoding_2d(num_samples, num_qubits):
     """Basis encoding: 2D array of shape (num_samples, 1) with integer indices"""
@@ -286,6 +295,7 @@ def test_encode_numpy_basis_encoding_2d(num_samples, num_qubits):
 
 @requires_qdp
 @pytest.mark.gpu
+@pytest.mark.gpu_torch
 def test_encode_numpy_basis_encoding_from_file():
     """Basis encoding: load indices from .npy file"""
     from _qdp import QdpEngine
@@ -311,6 +321,7 @@ def test_encode_numpy_basis_encoding_from_file():
 
 @requires_qdp
 @pytest.mark.gpu
+@pytest.mark.gpu_torch
 @pytest.mark.parametrize(
     ("basis_index", "num_qubits"),
     [

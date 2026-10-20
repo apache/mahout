@@ -123,6 +123,7 @@ def test_amplitude_encoding_fidelity_comprehensive(
 
 @requires_qdp
 @pytest.mark.gpu
+@pytest.mark.gpu_torch
 def test_complex_integrity(engine):
     """Verify imaginary part is effectively zero for amplitude encoding."""
     num_qubits = 12
@@ -147,6 +148,7 @@ def test_complex_integrity(engine):
 
 @requires_qdp
 @pytest.mark.gpu
+@pytest.mark.gpu_torch
 def test_numerical_stability_underflow(engine_float64):
     """Test precision with extremely small values (1e-150)."""
     num_qubits = 4
