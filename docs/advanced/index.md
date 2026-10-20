@@ -9,3 +9,4 @@ In-depth material on parameterized quantum circuits (PQCs) in Qumat. Start with 
 
 - [PQC Developer's Guide](./pqc): the theory, design, and applications of PQCs, written for developers implementing them from scratch
 - [Qumat PQC Gap Analysis](./gap-analysis): what the Qumat codebase needs for a minimally viable and then a feature-complete PQC implementation
+- [Parameter Optimization Design](./parameter-optimization): design note for the gradient and optimizer utilities in `qumat.optimize`

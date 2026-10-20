@@ -21,7 +21,7 @@ from typing import Any
 
 import boto3
 from braket.aws import AwsDevice, AwsSession
-from braket.circuits import Circuit, FreeParameter
+from braket.circuits import Circuit, FreeParameter, FreeParameterExpression
 from braket.devices import LocalSimulator
 
 CircuitLike = Any
@@ -214,6 +214,19 @@ def apply_u_gate(
     circuit.rz(qubit_index, lambd)
     circuit.ry(qubit_index, theta)
     circuit.rz(qubit_index, phi)
+
+
+def count_parameter_occurrences(circuit: CircuitLike) -> dict[str, int]:
+    """Count how many gates in ``circuit`` depend on each named parameter."""
+    counts: dict[str, int] = {}
+    for instruction in circuit.instructions:
+        names: set[str] = set()
+        for value in getattr(instruction.operator, "parameters", []):
+            if isinstance(value, FreeParameterExpression):
+                names.update(str(symbol) for symbol in value.expression.free_symbols)
+        for name in names:
+            counts[name] = counts.get(name, 0) + 1
+    return counts
 
 
 def calculate_prob_zero(

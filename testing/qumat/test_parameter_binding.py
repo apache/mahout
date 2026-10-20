@@ -256,3 +256,27 @@ class TestParameterBinding:
         assert backend_config == original_config, (
             f"backend_config was mutated by get_final_state_vector in {backend_name}."
         )
+
+    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+    def test_parameter_reused_across_gates(self, backend_name):
+        """One parameter name may drive several gates (shared parameter).
+
+        RY(theta) applied twice equals RY(2 * theta), which takes |0> to |1>
+        with probability sin^2(theta). With theta = pi/2 that is 1, whereas a
+        single RY(pi/2) would give 0.5. Qiskit used to raise CircuitError
+        ("name conflict adding parameter") here.
+        """
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+        qumat.apply_ry_gate(0, "theta")
+        qumat.apply_ry_gate(0, "theta")
+        assert list(qumat.parameters) == ["theta"]
+
+        results = qumat.execute_circuit(parameter_values={"theta": math.pi / 2})
+
+        prob = get_state_probability(results, "1", num_qubits=1)
+        assert prob > 0.95, (
+            f"Expected |1> after RY(theta)RY(theta), theta=pi/2, in "
+            f"{backend_name}, got probability {prob:.4f}"
+        )
