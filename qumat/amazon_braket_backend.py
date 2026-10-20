@@ -17,7 +17,8 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, MutableMapping
-from typing import Any
+from numbers import Real
+from typing import Any, SupportsFloat
 
 import boto3
 from braket.aws import AwsDevice, AwsSession
@@ -54,6 +55,37 @@ def initialize_backend(backend_config: Mapping[str, Any]) -> BraketBackend:
             "arn:aws:braket:::device/quantum-simulator/amazon/sv1",
             aws_session=aws_session,
         )
+
+
+def _as_angle(angle: Any) -> Any:
+    """Normalise a gate angle for Braket.
+
+    Strings name a symbolic parameter. Any real number, including NumPy
+    scalars such as ``np.float32`` or ``np.int64``, is converted to a
+    plain ``float``: Braket only accepts Python numbers here and would
+    otherwise try to turn the value into a ``FreeParameter`` name.
+    Anything else (an existing ``FreeParameter`` or expression) passes
+    through unchanged.
+    """
+    if isinstance(angle, str):
+        return FreeParameter(angle)
+    if isinstance(angle, Real):
+        return float(angle)
+    return angle
+
+
+def _bound_inputs(
+    parameter_values: Mapping[str, Any], circuit: CircuitLike
+) -> dict[str, float]:
+    """Map bound parameter values to Braket ``inputs``.
+
+    Only names present in the circuit are passed, and values are cast to
+    ``float`` because Braket's simulators reject NumPy scalar types.
+    """
+    names = {p.name for p in circuit.parameters}
+    return {
+        name: float(value) for name, value in parameter_values.items() if name in names
+    }
 
 
 def create_empty_circuit(num_qubits: int | None = None) -> CircuitLike:
@@ -124,12 +156,7 @@ def execute_circuit(
     shots = backend_config["backend_options"].get("shots", 1)
     parameter_values = backend_config.get("parameter_values", {})
     if parameter_values and circuit.parameters:
-        # Braket accepts parameter names as strings in inputs dict
-        inputs = {
-            param_name: value
-            for param_name, value in parameter_values.items()
-            if param_name in {p.name for p in circuit.parameters}
-        }
+        inputs = _bound_inputs(parameter_values, circuit)
         task = backend.run(circuit, shots=shots, inputs=inputs)
     else:
         task = backend.run(circuit, shots=shots)
@@ -143,18 +170,18 @@ def get_final_state_vector(
     backend: BraketBackend,
     backend_config: MutableMapping[str, Any],
 ) -> Any:
-    circuit.state_vector()
+    # Work on a copy: ``state_vector()`` appends a StateVector result type
+    # to the circuit in place, and Braket rejects any later shot-based run
+    # of a circuit carrying that result type ("StateVector or Amplitude
+    # cannot be specified when shots>0").
+    working_circuit = circuit.copy()
+    working_circuit.state_vector()
     parameter_values = backend_config.get("parameter_values", {})
-    if parameter_values and circuit.parameters:
-        # Braket accepts parameter names as strings in inputs dict
-        inputs = {
-            param_name: value
-            for param_name, value in parameter_values.items()
-            if param_name in {p.name for p in circuit.parameters}
-        }
-        result = backend.run(circuit, shots=0, inputs=inputs).result()
+    if parameter_values and working_circuit.parameters:
+        inputs = _bound_inputs(parameter_values, working_circuit)
+        result = backend.run(working_circuit, shots=0, inputs=inputs).result()
     else:
-        result = backend.run(circuit, shots=0).result()
+        result = backend.run(working_circuit, shots=0).result()
     state_vector = result.values[0]  # ty: ignore[possibly-missing-attribute]
 
     return state_vector
@@ -170,47 +197,40 @@ def draw_circuit(circuit: CircuitLike) -> str:
 def apply_rx_gate(
     circuit: CircuitLike,
     qubit_index: int,
-    angle: float | int | str,
+    angle: float | int | str | FreeParameter,
 ) -> None:
-    if isinstance(angle, (int, float)):
-        circuit.rx(qubit_index, angle)
-    else:
-        param = FreeParameter(angle)
-        circuit.rx(qubit_index, param)
+    circuit.rx(qubit_index, _as_angle(angle))
 
 
 def apply_ry_gate(
     circuit: CircuitLike,
     qubit_index: int,
-    angle: float | int | str,
+    angle: float | int | str | FreeParameter,
 ) -> None:
-    if isinstance(angle, (int, float)):
-        circuit.ry(qubit_index, angle)
-    else:
-        param = FreeParameter(angle)
-        circuit.ry(qubit_index, param)
+    circuit.ry(qubit_index, _as_angle(angle))
 
 
 def apply_rz_gate(
     circuit: CircuitLike,
     qubit_index: int,
-    angle: float | int | str,
+    angle: float | int | str | FreeParameter,
 ) -> None:
-    if isinstance(angle, (int, float)):
-        circuit.rz(qubit_index, angle)
-    else:
-        param = FreeParameter(angle)
-        circuit.rz(qubit_index, param)
+    circuit.rz(qubit_index, _as_angle(angle))
 
 
 def apply_u_gate(
     circuit: CircuitLike,
     qubit_index: int,
-    theta: float,
-    phi: float,
-    lambd: float,
+    theta: SupportsFloat,
+    phi: SupportsFloat,
+    lambd: SupportsFloat,
 ) -> None:
     # U(θ, φ, λ) = Rz(φ) · Ry(θ) · Rz(λ)
+    # U is not parameterisable in Qumat (on any backend), so only numeric
+    # normalisation applies here; strings are left for Braket to reject.
+    theta, phi, lambd = (
+        float(a) if isinstance(a, Real) else a for a in (theta, phi, lambd)
+    )
     circuit.rz(qubit_index, lambd)
     circuit.ry(qubit_index, theta)
     circuit.rz(qubit_index, phi)
