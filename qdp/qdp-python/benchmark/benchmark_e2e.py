@@ -66,6 +66,34 @@ HIDDEN_DIM = 16
 BATCH_SIZE = 64  # Small batch to stress loop overhead
 
 
+def _input_dim(n_qubits: int, encoding_method: str) -> int:
+    """Return per-sample input dimension for the encoding method."""
+    if encoding_method == "angle":
+        return n_qubits
+    if encoding_method == "iqp-z":
+        return n_qubits
+    if encoding_method == "iqp":
+        return n_qubits + n_qubits * (n_qubits - 1) // 2
+    return 1 << n_qubits
+
+
+def _mahout_encode_batch(
+    engine,
+    data,
+    n_qubits: int,
+    encoding_method: str,
+    encode_path: str,
+):
+    """Dispatch Mahout encode via FWT or Tensor Core path (GPU vs GPU)."""
+    if encode_path == "tc":
+        if encoding_method not in ("iqp", "iqp-z"):
+            raise ValueError("encode_path=tc requires encoding_method iqp or iqp-z")
+        if not hasattr(engine, "encode_batch_tc"):
+            raise RuntimeError("encode_batch_tc not available in this build")
+        return engine.encode_batch_tc(data, n_qubits)
+    return engine.encode(data, n_qubits, encoding_method)
+
+
 def clean_cache() -> None:
     """Clear GPU cache and Python garbage collection."""
     gc.collect()
@@ -89,7 +117,7 @@ def generate_data(n_qubits, n_samples, encoding_method: str = "amplitude") -> No
             os.remove(f)
 
     print(f"Generating {n_samples} samples of {n_qubits} qubits...")
-    dim = n_qubits if encoding_method == "angle" else (1 << n_qubits)
+    dim = _input_dim(n_qubits, encoding_method)
 
     # Generate all data at once
     all_data = generate_batch_data(n_samples, dim, encoding_method, seed=42)
@@ -303,19 +331,49 @@ def run_pennylane(n_qubits, n_samples, encoding_method: str = "amplitude"):
 # -----------------------------------------------------------
 # 3. Mahout Parquet Pipeline
 # -----------------------------------------------------------
-def run_mahout_parquet(engine, n_qubits, n_samples, encoding_method: str = "amplitude"):
+def _load_parquet_iqp_batch(n_qubits: int, encoding_method: str) -> np.ndarray:
+    table = pq.read_table(DATA_FILE)
+    rows = table.column("feature_vector").to_pylist()
+    return np.asarray(rows, dtype=np.float64)
+
+
+def _load_arrow_iqp_batch(n_qubits: int, encoding_method: str) -> np.ndarray:
+    with pa.memory_map(ARROW_FILE, "r") as source:
+        reader = ipc.open_file(source)
+        table = reader.read_all()
+    flat = table.column("data").flatten().to_numpy(zero_copy_only=False)
+    dim = _input_dim(n_qubits, encoding_method)
+    return flat.reshape(-1, dim)
+
+
+def run_mahout_parquet(
+    engine,
+    n_qubits,
+    n_samples,
+    encoding_method: str = "amplitude",
+    encode_path: str = "fwt",
+):
     # Clean cache before starting benchmark
     clean_cache()
 
-    print("\n[Mahout-Parquet] Full Pipeline (Parquet -> GPU)...")
+    path_tag = "TC" if encode_path == "tc" else "FWT"
+    print(
+        f"\n[Mahout-Parquet/{path_tag}] Full Pipeline (Parquet -> GPU) "
+        f"— {encoding_method}, path={encode_path}..."
+    )
     model = DummyQNN(n_qubits).cuda()
 
     torch.cuda.synchronize()
     start_time = time.perf_counter()
 
-    # Direct Parquet to GPU pipeline
     parquet_encode_start = time.perf_counter()
-    qtensor = engine.encode(DATA_FILE, n_qubits, encoding_method)
+    if encode_path == "tc":
+        batch = _load_parquet_iqp_batch(n_qubits, encoding_method)
+        qtensor = _mahout_encode_batch(
+            engine, batch, n_qubits, encoding_method, encode_path
+        )
+    else:
+        qtensor = engine.encode(DATA_FILE, n_qubits, encoding_method)
     parquet_encode_time = time.perf_counter() - parquet_encode_start
     print(f"  Parquet->GPU (IO+Encode): {parquet_encode_time:.4f} s")
 
@@ -355,18 +413,34 @@ def run_mahout_parquet(engine, n_qubits, n_samples, encoding_method: str = "ampl
 # -----------------------------------------------------------
 # 4. Mahout Arrow IPC Pipeline
 # -----------------------------------------------------------
-def run_mahout_arrow(engine, n_qubits, n_samples, encoding_method: str = "amplitude"):
+def run_mahout_arrow(
+    engine,
+    n_qubits,
+    n_samples,
+    encoding_method: str = "amplitude",
+    encode_path: str = "fwt",
+):
     # Clean cache before starting benchmark
     clean_cache()
 
-    print("\n[Mahout-Arrow] Full Pipeline (Arrow IPC -> GPU)...")
+    path_tag = "TC" if encode_path == "tc" else "FWT"
+    print(
+        f"\n[Mahout-Arrow/{path_tag}] Full Pipeline (Arrow IPC -> GPU) "
+        f"— {encoding_method}, path={encode_path}..."
+    )
     model = DummyQNN(n_qubits).cuda()
 
     torch.cuda.synchronize()
     start_time = time.perf_counter()
 
     arrow_encode_start = time.perf_counter()
-    qtensor = engine.encode(ARROW_FILE, n_qubits, encoding_method)
+    if encode_path == "tc":
+        batch = _load_arrow_iqp_batch(n_qubits, encoding_method)
+        qtensor = _mahout_encode_batch(
+            engine, batch, n_qubits, encoding_method, encode_path
+        )
+    else:
+        qtensor = engine.encode(ARROW_FILE, n_qubits, encoding_method)
     arrow_encode_time = time.perf_counter() - arrow_encode_start
     print(f"  Arrow->GPU (IO+Encode): {arrow_encode_time:.4f} s")
 
@@ -460,10 +534,23 @@ if __name__ == "__main__":
         "--encoding-method",
         type=str,
         default="amplitude",
-        choices=["amplitude", "angle", "basis"],
-        help="Encoding method to use for Mahout (amplitude, angle, or basis).",
+        choices=["amplitude", "angle", "basis", "iqp", "iqp-z"],
+        help="Encoding method (iqp/iqp-z enable Tensor Core path option).",
+    )
+    parser.add_argument(
+        "--encode-path",
+        type=str,
+        default="fwt",
+        choices=["fwt", "tc", "both"],
+        help="Mahout GPU path: fwt=encode(), tc=encode_batch_tc(), both=compare.",
     )
     args = parser.parse_args()
+
+    if args.encode_path in ("tc", "both") and args.encoding_method not in (
+        "iqp",
+        "iqp-z",
+    ):
+        parser.error("encode_path tc/both requires --encoding-method iqp or iqp-z")
 
     # Expand "all" option
     if "all" in args.frameworks:
@@ -484,77 +571,93 @@ if __name__ == "__main__":
     print(f"E2E BENCHMARK: {args.qubits} Qubits, {args.samples} Samples")
     print("=" * 70)
 
-    # Initialize results
-    t_pl, pl_all_states = 0.0, None
-    t_mahout_parquet, mahout_parquet_all_states = 0.0, None
-    t_mahout_arrow, mahout_arrow_all_states = 0.0, None
-    t_qiskit, qiskit_all_states = 0.0, None
+    timing_results: dict[str, float] = {}
+    state_results: dict[str, object] = {}
 
-    # Run benchmarks
     if "pennylane" in args.frameworks:
         t_pl, pl_all_states = run_pennylane(
             args.qubits, args.samples, args.encoding_method
         )
-        # Clean cache between framework benchmarks
+        if t_pl > 0:
+            timing_results["PennyLane"] = t_pl
+            state_results["PennyLane"] = pl_all_states
         clean_cache()
 
     if "qiskit" in args.frameworks:
         t_qiskit, qiskit_all_states = run_qiskit(
             args.qubits, args.samples, args.encoding_method
         )
-        # Clean cache between framework benchmarks
+        if t_qiskit > 0:
+            timing_results["Qiskit"] = t_qiskit
+            state_results["Qiskit"] = qiskit_all_states
         clean_cache()
 
-    if "mahout-parquet" in args.frameworks:
-        t_mahout_parquet, mahout_parquet_all_states = run_mahout_parquet(
-            engine, args.qubits, args.samples, args.encoding_method
-        )
-        # Clean cache between framework benchmarks
-        clean_cache()
+    encode_paths = ["fwt", "tc"] if args.encode_path == "both" else [args.encode_path]
 
-    if "mahout-arrow" in args.frameworks:
-        t_mahout_arrow, mahout_arrow_all_states = run_mahout_arrow(
-            engine, args.qubits, args.samples, args.encoding_method
-        )
-        # Clean cache between framework benchmarks
-        clean_cache()
+    for encode_path in encode_paths:
+        path_suffix = f"-{encode_path.upper()}" if args.encode_path == "both" else ""
+
+        if "mahout-parquet" in args.frameworks:
+            t, states = run_mahout_parquet(
+                engine,
+                args.qubits,
+                args.samples,
+                args.encoding_method,
+                encode_path=encode_path,
+            )
+            if t > 0:
+                timing_results[f"Mahout-Parquet{path_suffix}"] = t
+                state_results[f"Mahout-Parquet{path_suffix}"] = states
+            clean_cache()
+
+        if "mahout-arrow" in args.frameworks:
+            t, states = run_mahout_arrow(
+                engine,
+                args.qubits,
+                args.samples,
+                args.encoding_method,
+                encode_path=encode_path,
+            )
+            if t > 0:
+                timing_results[f"Mahout-Arrow{path_suffix}"] = t
+                state_results[f"Mahout-Arrow{path_suffix}"] = states
+            clean_cache()
 
     print("\n" + "=" * 70)
     print("E2E LATENCY (Lower is Better)")
-    print(f"Samples: {args.samples}, Qubits: {args.qubits}")
+    print(
+        f"Samples: {args.samples}, Qubits: {args.qubits}, "
+        f"encoding={args.encoding_method}, encode_path={args.encode_path}"
+    )
     print("=" * 70)
 
-    results = []
-    if t_mahout_parquet > 0:
-        results.append(("Mahout-Parquet", t_mahout_parquet))
-    if t_mahout_arrow > 0:
-        results.append(("Mahout-Arrow", t_mahout_arrow))
-    if t_pl > 0:
-        results.append(("PennyLane", t_pl))
-    if t_qiskit > 0:
-        results.append(("Qiskit", t_qiskit))
+    sorted_results = sorted(timing_results.items(), key=lambda x: x[1])
+    for name, time_val in sorted_results:
+        print(f"{name:24s} {time_val:10.4f} s")
 
-    results.sort(key=lambda x: x[1])
-
-    for name, time_val in results:
-        print(f"{name:16s} {time_val:10.4f} s")
+    if args.encode_path == "both":
+        for base in ("Mahout-Parquet", "Mahout-Arrow"):
+            fwt_key, tc_key = f"{base}-FWT", f"{base}-TC"
+            if fwt_key in timing_results and tc_key in timing_results:
+                ratio = timing_results[fwt_key] / timing_results[tc_key]
+                print(f"{base} FWT/TC speedup: {ratio:.2f}x")
 
     print("-" * 70)
-    # Use fastest Mahout variant for speedup comparison
-    mahout_times = [t for t in [t_mahout_arrow, t_mahout_parquet] if t > 0]
+    mahout_times = [
+        t for name, t in timing_results.items() if name.startswith("Mahout-") and t > 0
+    ]
     t_mahout_best = min(mahout_times) if mahout_times else 0
     if t_mahout_best > 0:
-        if t_pl > 0:
-            print(f"Speedup vs PennyLane: {t_pl / t_mahout_best:10.2f}x")
-        if t_qiskit > 0:
-            print(f"Speedup vs Qiskit:    {t_qiskit / t_mahout_best:10.2f}x")
+        if "PennyLane" in timing_results:
+            print(
+                f"Speedup vs PennyLane: "
+                f"{timing_results['PennyLane'] / t_mahout_best:10.2f}x"
+            )
+        if "Qiskit" in timing_results:
+            print(
+                f"Speedup vs Qiskit:    "
+                f"{timing_results['Qiskit'] / t_mahout_best:10.2f}x"
+            )
 
-    # Run Verification after benchmarks
-    verify_correctness(
-        {
-            "Mahout-Parquet": mahout_parquet_all_states,
-            "Mahout-Arrow": mahout_arrow_all_states,
-            "PennyLane": pl_all_states,
-            "Qiskit": qiskit_all_states,
-        }
-    )
+    if args.encoding_method not in ("iqp", "iqp-z"):
+        verify_correctness(state_results)
