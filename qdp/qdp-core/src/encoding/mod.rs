@@ -27,23 +27,79 @@ use std::thread::{self, JoinHandle};
 
 use cudarc::driver::{CudaDevice, DevicePtr};
 
+/// Close the main thread's ends of the IO channels, then wait for the IO
+/// thread to finish.
+///
+/// Both endpoints must be dropped *before* `join()`. The IO thread is either
+/// parked in `empty_buf_rx.recv()`, which only returns once the matching
+/// `empty_buf_tx` is dropped, or blocked in `full_buf_tx.send()` on a bounded
+/// channel nobody is draining any more, which only fails once `full_buf_rx` is
+/// dropped. Joining while either endpoint is still alive therefore hangs
+/// forever on any early exit from the encoding loop.
+///
+/// The payload types are irrelevant here, since the endpoints are only
+/// dropped, so this is generic over them; that also lets the ordering be
+/// unit tested without a GPU.
+fn shutdown_io_thread<T, U>(
+    empty_buf_tx: Option<SyncSender<T>>,
+    full_buf_rx: Option<Receiver<U>>,
+    io_handle: JoinHandle<()>,
+) -> thread::Result<()> {
+    drop(empty_buf_tx);
+    drop(full_buf_rx);
+    io_handle.join()
+}
+
 /// Guard that ensures GPU synchronization and IO thread cleanup on drop.
 /// Used to handle early returns in `stream_encode`.
+///
+/// The guard owns the main thread's ends of the IO channels, so they are
+/// always closed before the IO thread is joined, no matter which exit path
+/// (early return, `?`, or unwinding) drops the guard.
 struct CleanupGuard<'a> {
     device: &'a Arc<CudaDevice>,
     io_handle: Option<JoinHandle<()>>,
+    empty_buf_tx: Option<SyncSender<PinnedHostBuffer>>,
+    full_buf_rx: Option<Receiver<FullBufferResult>>,
 }
 
 impl<'a> CleanupGuard<'a> {
-    fn new(device: &'a Arc<CudaDevice>, io_handle: JoinHandle<()>) -> Self {
+    fn new(
+        device: &'a Arc<CudaDevice>,
+        io_handle: JoinHandle<()>,
+        empty_buf_tx: SyncSender<PinnedHostBuffer>,
+        full_buf_rx: Receiver<FullBufferResult>,
+    ) -> Self {
         Self {
             device,
             io_handle: Some(io_handle),
+            empty_buf_tx: Some(empty_buf_tx),
+            full_buf_rx: Some(full_buf_rx),
         }
     }
 
+    /// Sender used to recycle drained buffers back to the IO thread.
+    fn empty_buf_tx(&self) -> &SyncSender<PinnedHostBuffer> {
+        self.empty_buf_tx
+            .as_ref()
+            .expect("empty buffer sender already taken")
+    }
+
+    /// Receiver for buffers filled by the IO thread.
+    fn full_buf_rx(&self) -> &Receiver<FullBufferResult> {
+        self.full_buf_rx
+            .as_ref()
+            .expect("full buffer receiver already taken")
+    }
+
     /// Defuse the guard and return the IO handle for explicit cleanup.
-    /// After calling this, drop() will not perform cleanup.
+    /// After calling this, drop() will not join the IO thread; it still closes
+    /// the channel endpoints it owns, so the returned handle can be joined
+    /// without deadlocking.
+    ///
+    /// Note that `Drop` also runs `device.synchronize()` and discards its
+    /// error, so that synchronization happens before any checked
+    /// `synchronize()` the caller performs afterwards.
     fn defuse(mut self) -> JoinHandle<()> {
         self.io_handle.take().expect("IO handle already taken")
     }
@@ -53,8 +109,13 @@ impl Drop for CleanupGuard<'_> {
     fn drop(&mut self) {
         // Best-effort cleanup on early return
         let _ = self.device.synchronize();
+        // Taken unconditionally: even when the guard has been defused, the
+        // channel endpoints must be closed so the IO thread can observe the
+        // shutdown and the caller's explicit join() can complete.
+        let empty_buf_tx = self.empty_buf_tx.take();
+        let full_buf_rx = self.full_buf_rx.take();
         if let Some(handle) = self.io_handle.take() {
-            let _ = handle.join();
+            let _ = shutdown_io_thread(empty_buf_tx, full_buf_rx, handle);
         }
     }
 }
@@ -236,15 +297,17 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
         }
     });
 
-    // Create cleanup guard to ensure resources are released on early return
-    let cleanup_guard = CleanupGuard::new(&engine.device, io_handle);
+    // Create cleanup guard to ensure resources are released on early return.
+    // It takes ownership of our channel endpoints so that they are closed
+    // before the IO thread is joined (see `shutdown_io_thread`).
+    let cleanup_guard = CleanupGuard::new(&engine.device, io_handle, empty_buf_tx, full_buf_rx);
 
     // Main processing loop
     let mut global_sample_offset: usize = 0;
     let mut use_dev_a = true;
 
     loop {
-        let (host_buffer, current_len) = match full_buf_rx.recv() {
+        let (host_buffer, current_len) = match cleanup_guard.full_buf_rx().recv() {
             Ok(Ok((buffer, len))) => (buffer, len),
             Ok(Err(e)) => return Err(e),
             Err(_) => return Err(MahoutError::Io("IO thread disconnected".into())),
@@ -356,7 +419,7 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
             use_dev_a = !use_dev_a;
         }
 
-        let _ = empty_buf_tx.send(host_buffer);
+        let _ = cleanup_guard.empty_buf_tx().send(host_buffer);
     }
 
     // Defuse guard for explicit cleanup with proper error handling
@@ -399,5 +462,75 @@ pub(crate) fn encode_from_parquet(
             "Encoding method '{}' not supported for streaming",
             encoding.as_str()
         ))),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::shutdown_io_thread;
+    use std::sync::mpsc::{RecvTimeoutError, sync_channel};
+    use std::thread;
+    use std::time::Duration;
+
+    /// Run `shutdown_io_thread` off the test thread so a regression shows up as
+    /// a failure instead of hanging the test binary. Panics with a message that
+    /// tells a deadlock apart from a panic inside the shutdown itself.
+    fn expect_shutdown_completes(
+        what: &str,
+        f: impl FnOnce() -> thread::Result<()> + Send + 'static,
+    ) {
+        let (done_tx, done_rx) = sync_channel(1);
+        thread::spawn(move || {
+            let _ = done_tx.send(f().is_ok());
+        });
+        match done_rx.recv_timeout(Duration::from_secs(10)) {
+            Ok(true) => {}
+            Ok(false) => panic!("{what}: the IO thread panicked"),
+            Err(RecvTimeoutError::Timeout) => {
+                panic!("{what}: shutdown deadlocked (did not complete within 10s)")
+            }
+            Err(RecvTimeoutError::Disconnected) => {
+                panic!("{what}: shutdown_io_thread itself panicked")
+            }
+        }
+    }
+
+    /// The IO thread parks in `empty_buf_rx.recv()`; only dropping our sender
+    /// wakes it up, so the shutdown must drop it before joining.
+    #[test]
+    fn shutdown_unblocks_thread_waiting_for_empty_buffer() {
+        let (full_buf_tx, full_buf_rx) = sync_channel::<usize>(2);
+        let (empty_buf_tx, empty_buf_rx) = sync_channel::<usize>(2);
+
+        let io_handle = thread::spawn(move || {
+            while let Ok(buffer) = empty_buf_rx.recv() {
+                if full_buf_tx.send(buffer).is_err() {
+                    break;
+                }
+            }
+        });
+
+        let shutdown = move || shutdown_io_thread(Some(empty_buf_tx), Some(full_buf_rx), io_handle);
+        expect_shutdown_completes("IO thread waiting for an empty buffer", shutdown);
+    }
+
+    /// The IO thread is blocked in `full_buf_tx.send()` with nobody draining
+    /// the channel; only dropping our receiver wakes it up.
+    #[test]
+    fn shutdown_unblocks_thread_blocked_on_send() {
+        // Capacity 0 makes the block deterministic: a rendezvous `send` cannot
+        // complete until someone receives, and nobody here ever will. Avoids
+        // depending on a sleep to land the thread inside `send()`.
+        let (full_buf_tx, full_buf_rx) = sync_channel::<usize>(0);
+        let (empty_buf_tx, empty_buf_rx) = sync_channel::<usize>(2);
+
+        let io_handle = thread::spawn(move || {
+            // Blocks immediately; only woken by `full_buf_rx` being dropped.
+            let _ = full_buf_tx.send(0);
+            drop(empty_buf_rx);
+        });
+
+        let shutdown = move || shutdown_io_thread(Some(empty_buf_tx), Some(full_buf_rx), io_handle);
+        expect_shutdown_completes("IO thread blocked in send()", shutdown);
     }
 }
