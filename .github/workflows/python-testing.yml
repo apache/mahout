@@ -22,6 +22,8 @@ on:
     paths:
       - "**.py"
       - "pyproject.toml"
+      - "uv.lock"
+      - "qdp/qdp-python/pyproject.toml"
       - "qdp/qdp-core/**/*.rs"
       - "qdp/qdp-kernels/**/*.rs"
       - "qdp/qdp-python/**/*.rs"
@@ -32,6 +34,8 @@ on:
     paths:
       - "**.py"
       - "pyproject.toml"
+      - "uv.lock"
+      - "qdp/qdp-python/pyproject.toml"
       - "qdp/qdp-core/**/*.rs"
       - "qdp/qdp-kernels/**/*.rs"
       - "qdp/qdp-python/**/*.rs"
@@ -73,8 +77,9 @@ jobs:
     needs: rust-check
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -88,9 +93,13 @@ jobs:
         run: pip install uv
 
       - name: Install dependencies
-        run: uv sync --group dev
+        run: uv sync --locked --group dev
 
+      # qumat-qdp (Rust + CUDA) is still capped at Python <3.13; QDP tests
+      # auto-skip when the extension is not built (see testing/conftest.py). The pure-Python
+      # qumat_qdp tests in testing/qdp_python still run from source on 3.13.
       - name: Build QDP extension
+        if: matrix.python-version != '3.13'
         uses: PyO3/maturin-action@v1
         with:
           working-directory: qdp/qdp-python

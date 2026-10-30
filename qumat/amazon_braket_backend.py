@@ -28,9 +28,20 @@ CircuitLike = Any
 BraketBackend = AwsDevice | LocalSimulator
 
 
+SUPPORTED_SIMULATOR_TYPES = ("default", "local")
+_SV1_ARN = "arn:aws:braket:::device/quantum-simulator/amazon/sv1"
+
+
 def initialize_backend(backend_config: Mapping[str, Any]) -> BraketBackend:
     backend_options = backend_config["backend_options"]
     simulator_type = backend_options.get("simulator_type", "default")
+    if simulator_type not in SUPPORTED_SIMULATOR_TYPES:
+        raise ValueError(
+            f"Unsupported simulator_type {simulator_type!r} for the Amazon Braket "
+            "backend. Supported values: 'default' (the AWS SV1 managed simulator; "
+            "needs AWS credentials and a region) or 'local' (the local simulator; "
+            "no AWS account needed)."
+        )
     region = backend_options.get("region")
 
     # Create AWS session with region if specified
@@ -41,19 +52,7 @@ def initialize_backend(backend_config: Mapping[str, Any]) -> BraketBackend:
 
     if simulator_type == "local":
         return LocalSimulator()
-    elif simulator_type == "default":
-        return AwsDevice(
-            "arn:aws:braket:::device/quantum-simulator/amazon/sv1",
-            aws_session=aws_session,
-        )
-    else:
-        print(
-            f"Simulator type '{simulator_type}' is not supported in Amazon Braket. Using default."
-        )
-        return AwsDevice(
-            "arn:aws:braket:::device/quantum-simulator/amazon/sv1",
-            aws_session=aws_session,
-        )
+    return AwsDevice(_SV1_ARN, aws_session=aws_session)
 
 
 def create_empty_circuit(num_qubits: int | None = None) -> CircuitLike:
