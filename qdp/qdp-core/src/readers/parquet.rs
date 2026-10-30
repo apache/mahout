@@ -44,14 +44,18 @@ use crate::reader::{
 /// case, and rejects negative counts that would otherwise wrap when cast to
 /// `usize`.
 ///
-/// It is **not** a bound on how many rows will actually be decoded. arrow-rs
-/// bounds a column chunk by its byte range, not by either row count (see
-/// `SerializedPageReader`'s `Values` state, used whenever no page offset index
-/// is present), so a file whose footer and row-group counts lie *consistently*
-/// passes this check and still yields more rows than it declares. The
-/// authoritative guard against writing past the output allocation is
-/// `crate::encoding::ensure_within_capacity`. Treat the value returned here as
-/// a sanity-checked sizing hint, never as a trusted bound.
+/// The value returned here is a sanity-checked sizing hint, **never a trusted
+/// bound**: a file whose two counts lie *consistently* passes this check and
+/// still decodes more rows than it declares. `crate::encoding::ensure_within_capacity`
+/// is the authoritative guard, and documents why.
+///
+/// A disagreement is rejected rather than tolerated (e.g. warning and sizing
+/// from the row-group sum instead) because arrow-rs, parquet-mr and pyarrow all
+/// derive the footer count from the row groups: a mismatch means something is
+/// genuinely wrong rather than merely unusual, and this value sizes a GPU
+/// allocation. Preferring the more plausible of two untrusted numbers would add
+/// a decision without adding safety, since neither one bounds decoding. Please
+/// revisit that reasoning before loosening this to a warning.
 fn reconcile_row_count(footer_rows: i64, row_group_rows: i64) -> Result<usize> {
     if footer_rows < 0 || row_group_rows < 0 {
         return Err(MahoutError::InvalidInput(format!(

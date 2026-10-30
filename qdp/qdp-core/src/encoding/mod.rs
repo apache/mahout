@@ -409,10 +409,16 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
     // count, and `GpuStateVector::new_batch` allocates without zeroing. If the
     // reader produced fewer samples, the uninitialized tail would be handed to
     // the caller through DLPack, so refuse instead of leaking GPU memory.
+    //
+    // A short read is not always the file's fault: `ParquetStreamingReader`
+    // currently drops leading all-null rows in a `List` column under
+    // `NullHandling::FillZero`, because the sample size is not yet known
+    // at that point. See issue #1574; the error below hints at it.
     if global_sample_offset != num_samples {
         return Err(MahoutError::InvalidInput(format!(
             "Parquet file produced {} samples but its metadata declared {}; refusing to return \
-             a partially initialized tensor",
+             a partially initialized tensor (this can also happen when the file begins with \
+             all-null rows in a List column)",
             global_sample_offset, num_samples
         )));
     }
