@@ -50,6 +50,18 @@ result = qumat.execute_circuit()
 print(result)
 ```
 
+## Choosing a simulator
+
+`backend_options["simulator_type"]` selects the simulator. Each backend
+accepts the values below; anything else raises a `ValueError` that lists
+them.
+
+| `backend_name` | `simulator_type` |
+|---|---|
+| `"qiskit"` (required) | `"aer_simulator"`, `"statevector_simulator"`, `"qasm_simulator"`, `"unitary_simulator"`, or any Aer method name such as `"matrix_product_state"` |
+| `"cirq"` | `"default"` (or omit it) |
+| `"amazon_braket"` | `"local"` (offline simulator, no AWS account), or `"default"` / omitted (the AWS SV1 managed simulator; needs AWS credentials and a region) |
+
 ## Dependencies
 
 Prior to installation, ensure Python 3.10-3.12 is installed. Dependencies such as Qiskit, Cirq, and Amazon Braket SDK are managed automatically.

@@ -20,7 +20,7 @@ from collections.abc import Mapping, MutableMapping
 from typing import Any
 
 import qiskit
-from qiskit_aer import AerSimulator
+from qiskit_aer import AerError, AerSimulator
 
 
 def initialize_backend(backend_config: Mapping[str, Any]) -> AerSimulator:
@@ -36,10 +36,17 @@ def initialize_backend(backend_config: Mapping[str, Any]) -> AerSimulator:
         "unitary_simulator": "unitary",
     }
 
-    if simulator_type in simulator_methods:
-        backend = AerSimulator(method=simulator_methods[simulator_type])
-    else:
-        backend = AerSimulator(method=simulator_type)
+    # Anything else is passed to Aer as a simulation method name.
+    method = simulator_methods.get(simulator_type, simulator_type)
+    try:
+        backend = AerSimulator(method=method)
+    except AerError as exc:
+        raise ValueError(
+            f"Unsupported simulator_type {simulator_type!r} for the Qiskit backend. "
+            f"Supported values: {', '.join(map(repr, simulator_methods))}, or an "
+            f"Aer simulation method: "
+            f"{', '.join(map(repr, AerSimulator().available_methods()))}."
+        ) from exc
 
     backend.shots = shots  # type: ignore[assignment, misc]  # runtime-settable
     return backend
