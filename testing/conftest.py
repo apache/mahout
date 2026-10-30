@@ -103,6 +103,7 @@ def pytest_collection_modifyitems(config, items):
         "test_fallback.py",
         "test_benchmark_utils.py",
         "test_benchmark_cli_validation.py",
+        "test_benchmark_builder_validation.py",
     }
 
     for item in items:
