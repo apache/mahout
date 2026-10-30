@@ -35,6 +35,30 @@ pub enum Precision {
     Float64,
 }
 
+/// Host scalar type (`f64` or `f32`) that is encoded into a state vector of
+/// matching precision: `f64` -> complex128, `f32` -> complex64.
+///
+/// Extends [`qdp_kernels::KernelElem`] (which knows the launchers and the
+/// complex output type) with the qdp-core [`Precision`] tag, so generic
+/// encoder code can allocate and address the right buffer.
+#[cfg(target_os = "linux")]
+pub(crate) trait GpuElem:
+    qdp_kernels::KernelElem + cudarc::driver::DeviceRepr + Unpin
+{
+    /// State-vector precision produced from inputs of this type.
+    const PRECISION: Precision;
+}
+
+#[cfg(target_os = "linux")]
+impl GpuElem for f64 {
+    const PRECISION: Precision = Precision::Float64;
+}
+
+#[cfg(target_os = "linux")]
+impl GpuElem for f32 {
+    const PRECISION: Precision = Precision::Float32;
+}
+
 /// Backend GPU device type for DLPack metadata.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum GpuDeviceType {
@@ -332,6 +356,13 @@ impl GpuStateVector {
     /// Returns a single-precision pointer if the buffer stores complex64 data.
     pub fn ptr_f32(&self) -> Option<*mut CuComplex> {
         self.buffer.ptr_f32()
+    }
+
+    /// Typed amplitude pointer if the buffer precision matches `T`
+    /// (generic form of [`ptr_f64`](Self::ptr_f64) / [`ptr_f32`](Self::ptr_f32)).
+    #[cfg(target_os = "linux")]
+    pub(crate) fn ptr_for<T: GpuElem>(&self) -> Option<*mut T::Complex> {
+        (self.precision() == T::PRECISION).then(|| self.ptr_void() as *mut T::Complex)
     }
 
     /// Get the number of qubits
@@ -680,3 +711,14 @@ unsafe impl<T: Copy + Send> Send for PinnedHostBuffer<T> {}
 
 #[cfg(target_os = "linux")]
 unsafe impl<T: Copy + Sync> Sync for PinnedHostBuffer<T> {}
+
+#[cfg(all(test, target_os = "linux"))]
+mod gpu_elem_tests {
+    use super::{GpuElem, Precision};
+
+    #[test]
+    fn host_scalar_maps_to_matching_state_precision() {
+        assert_eq!(<f64 as GpuElem>::PRECISION, Precision::Float64);
+        assert_eq!(<f32 as GpuElem>::PRECISION, Precision::Float32);
+    }
+}
