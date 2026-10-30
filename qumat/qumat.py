@@ -82,12 +82,16 @@ class QuMat:
 
         :param num_qubits: Number of qubits in the circuit.
         :type num_qubits: int
-        :raises ValueError: If ``num_qubits`` is not a non-negative integer.
+        :raises TypeError: If ``num_qubits`` is not an integer.
+        :raises ValueError: If ``num_qubits`` is negative.
         """
-        if not isinstance(num_qubits, int) or num_qubits < 0:
-            raise ValueError(
-                f"num_qubits must be a non-negative integer, got {num_qubits!r}"
+        # bool is a subclass of int, so it must be rejected explicitly.
+        if not isinstance(num_qubits, int) or isinstance(num_qubits, bool):
+            raise TypeError(
+                f"num_qubits must be an integer, got {type(num_qubits).__name__}"
             )
+        if num_qubits < 0:
+            raise ValueError(f"num_qubits cannot be negative, got {num_qubits}")
         self.num_qubits = num_qubits
         self.circuit = self.backend_module.create_empty_circuit(num_qubits)
 
