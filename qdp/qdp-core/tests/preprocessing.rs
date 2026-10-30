@@ -16,7 +16,7 @@
 
 use approx::assert_relative_eq;
 use qdp_core::MahoutError;
-use qdp_core::gpu::encodings::MAX_QUBITS;
+use qdp_core::gpu::kernels::MAX_QUBITS;
 use qdp_core::preprocessing::Preprocessor;
 
 #[test]
