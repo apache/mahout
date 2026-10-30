@@ -8,5 +8,6 @@ QDP (Quantum Data Plane) is a high-performance GPU-accelerated library for encod
 
 - [Getting Started](./getting-started)
 - [Core Concepts](./concepts)
+- [NumPy Input](./numpy-input)
 - [API Reference](./api)
 - [Examples](./examples)

@@ -29,6 +29,26 @@ use crate::loader::{
     PyQuantumLoader, config_from_args, parse_dtype, parse_null_handling, path_from_py,
 };
 
+const NUMPY_LAYOUT_HINT: &str = "NumPy array must be C-contiguous (row-major). Fortran-ordered, transposed \
+     or strided arrays are not supported (try: data = np.ascontiguousarray(data))";
+const TENSOR_LAYOUT_HINT: &str = "Tensor must be contiguous (C-order) to get zero-copy slice \
+     (try: tensor = tensor.contiguous())";
+
+/// Borrow a NumPy array as a row-major `&[f64]` without copying.
+///
+/// `PyReadonlyArray::as_slice` also succeeds for Fortran-ordered arrays and
+/// then yields elements in column-major *memory* order. For a 2D batch that
+/// would silently interleave samples, so require C order explicitly.
+fn c_order_slice<'a, D: numpy::ndarray::Dimension>(
+    array: &'a numpy::PyReadonlyArray<'_, f64, D>,
+    hint: &'static str,
+) -> PyResult<&'a [f64]> {
+    if !array.is_c_contiguous() {
+        return Err(PyRuntimeError::new_err(hint));
+    }
+    array.as_slice().map_err(|_| PyRuntimeError::new_err(hint))
+}
+
 /// PyO3 wrapper for QdpEngine
 ///
 /// Provides Python bindings for GPU-accelerated quantum state encoding.
@@ -147,9 +167,7 @@ impl QdpEngine {
                         "Failed to extract 1D NumPy array. Ensure dtype is float64.",
                     )
                 })?;
-                let data_slice = array_1d.as_slice().map_err(|_| {
-                    PyRuntimeError::new_err("NumPy array must be contiguous (C-order)")
-                })?;
+                let data_slice = c_order_slice(&array_1d, NUMPY_LAYOUT_HINT)?;
                 let ptr = self
                     .engine
                     .encode(data_slice, num_qubits, encoding_method)
@@ -169,9 +187,7 @@ impl QdpEngine {
                 let shape = array_2d.shape();
                 let num_samples = shape[0];
                 let sample_size = shape[1];
-                let data_slice = array_2d.as_slice().map_err(|_| {
-                    PyRuntimeError::new_err("NumPy array must be contiguous (C-order)")
-                })?;
+                let data_slice = c_order_slice(&array_2d, NUMPY_LAYOUT_HINT)?;
                 let ptr = self
                     .engine
                     .encode_batch(
@@ -233,12 +249,7 @@ impl QdpEngine {
                              (try: tensor = tensor.to(torch.float64))",
                     )
                 })?;
-                let data_slice = array_1d.as_slice().map_err(|_| {
-                    PyRuntimeError::new_err(
-                        "Tensor must be contiguous (C-order) to get zero-copy slice \
-                         (try: tensor = tensor.contiguous())",
-                    )
-                })?;
+                let data_slice = c_order_slice(&array_1d, TENSOR_LAYOUT_HINT)?;
                 let ptr = self
                     .engine
                     .encode(data_slice, num_qubits, encoding_method)
@@ -259,12 +270,7 @@ impl QdpEngine {
                 let shape = array_2d.shape();
                 let num_samples = shape[0];
                 let sample_size = shape[1];
-                let data_slice = array_2d.as_slice().map_err(|_| {
-                    PyRuntimeError::new_err(
-                        "Tensor must be contiguous (C-order) to get zero-copy slice \
-                         (try: tensor = tensor.contiguous())",
-                    )
-                })?;
+                let data_slice = c_order_slice(&array_2d, TENSOR_LAYOUT_HINT)?;
                 let ptr = self
                     .engine
                     .encode_batch(
