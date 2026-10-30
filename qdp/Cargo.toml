@@ -25,7 +25,7 @@ thiserror = "2.0"
 # Parallel computing (for CPU preprocessing)
 rayon = "1.10"
 # Apache Arrow for columnar data format support
-arrow = "54"
+arrow = { version = "54", features = ["ipc_compression"] }
 # Parquet support for Arrow
 parquet = "54"
 # NumPy file format support
