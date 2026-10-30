@@ -16,6 +16,7 @@
 
 #[cfg(not(target_os = "linux"))]
 mod fallback;
+mod host_memory;
 #[cfg(target_os = "linux")]
 mod linux;
 #[cfg(not(any(target_os = "linux", target_os = "windows")))]
@@ -29,3 +30,5 @@ pub(crate) use linux::encode_from_parquet;
 pub(crate) use other::encode_from_parquet;
 #[cfg(target_os = "windows")]
 pub(crate) use windows::encode_from_parquet;
+
+pub(crate) use host_memory::available_host_memory_bytes;

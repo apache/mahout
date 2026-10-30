@@ -251,6 +251,11 @@ pub fn read_arrow_ipc_batch<P: AsRef<Path>>(path: P) -> Result<(Vec<f64>, usize,
 /// Expects a 2D array with shape `[num_samples, sample_size]` and dtype `float64`.
 /// Returns flattened data suitable for batch encoding.
 ///
+/// The array size is estimated from the file header and checked against
+/// available host memory before the data is read; see
+/// [`crate::readers::NpyMemoryLimit`] and the `QDP_NPY_MAX_BYTES`
+/// environment variable.
+///
 /// # Returns
 /// Tuple of `(flattened_data, num_samples, sample_size)`
 ///
