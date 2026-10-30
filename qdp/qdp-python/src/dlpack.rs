@@ -185,6 +185,12 @@ pub fn extract_dlpack_tensor(
     }
 }
 
+/// Validate a `"dltensor"` capsule and return the `DLManagedTensor` inside.
+///
+/// # Safety
+/// `capsule_ptr` must be a valid, live Python object pointer, and the GIL
+/// must be held. Ownership of the returned tensor is *not* transferred:
+/// the caller must mark the capsule used before taking over the deleter.
 unsafe fn extract_managed_tensor(
     capsule_ptr: *mut ffi::PyObject,
 ) -> PyResult<*mut DLManagedTensor> {
@@ -205,6 +211,10 @@ unsafe fn extract_managed_tensor(
     Ok(managed_ptr)
 }
 
+/// Check that a DLPack tensor has a non-null data pointer on a GPU device.
+///
+/// # Safety
+/// `managed_ptr` must be non-null and point to a live `DLManagedTensor`.
 unsafe fn validate_gpu_managed_tensor(managed_ptr: *mut DLManagedTensor) -> PyResult<()> {
     let dl_tensor = unsafe { &(*managed_ptr).dl_tensor };
     if dl_tensor.data.is_null() {
@@ -222,6 +232,11 @@ unsafe fn validate_gpu_managed_tensor(managed_ptr: *mut DLManagedTensor) -> PyRe
     Ok(())
 }
 
+/// Rename a capsule to `"used_dltensor"` so no other consumer takes it.
+///
+/// # Safety
+/// `capsule_ptr` must be a valid, live `PyCapsule` pointer and the GIL must
+/// be held.
 unsafe fn mark_capsule_used(capsule_ptr: *mut ffi::PyObject) {
     unsafe { ffi::PyCapsule_SetName(capsule_ptr, USED_DLTENSOR_NAME.as_ptr() as *const i8) };
 }

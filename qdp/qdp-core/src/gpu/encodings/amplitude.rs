@@ -16,10 +16,6 @@
 
 // Amplitude encoding: state injection with L2 normalization
 
-// Allow unused_unsafe: qdp_kernels functions are unsafe in CUDA builds but safe stubs in no-CUDA builds.
-// The compiler can't statically determine which path is taken.
-#![allow(unused_unsafe)]
-
 use std::sync::Arc;
 
 use super::{QuantumEncoder, validate_qubit_count};
@@ -1057,6 +1053,11 @@ impl AmplitudeEncoder {
         }
     }
 
+    /// Same as [`Self::calculate_inv_norm_gpu`], on an explicit CUDA stream.
+    ///
+    /// # Safety
+    /// Same as [`Self::calculate_inv_norm_gpu`]. Additionally, `stream` must
+    /// be null or a valid CUDA stream on `device`.
     #[cfg(target_os = "linux")]
     pub(crate) unsafe fn calculate_inv_norm_gpu_with_stream(
         device: &Arc<CudaDevice>,

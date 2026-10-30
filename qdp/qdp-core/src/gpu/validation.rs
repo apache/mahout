@@ -20,8 +20,6 @@
 //! They allocate a 1-element i32 flag buffer, launch the relevant kernel, and copy
 //! the flag back to the host, converting non-zero states into `MahoutError::InvalidInput`.
 
-#![allow(unused_unsafe)]
-
 use crate::error::{MahoutError, Result, cuda_error_to_string};
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtrMut};
 use std::ffi::c_void;
