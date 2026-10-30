@@ -48,15 +48,15 @@ def _gpu_available() -> bool:
     ``cuda_ffi.rs``).  So importing ``_qdp`` no longer implies a working GPU,
     and ``@pytest.mark.gpu`` tests must additionally check for a real device.
 
-    Prefers the native engine's own signal (``qumat_qdp.is_cuda_available()``),
+    Prefers the native engine's own signal (``qumat_qdp.is_native_cuda_available()``),
     which is correct even for a stub build: a host with a GPU + PyTorch but no
     CUDA toolkit builds ``_qdp`` against stubs, where ``torch.cuda.is_available()``
     would wrongly report True. Falls back to torch when the helper is absent.
     """
     try:
-        from qumat_qdp import is_cuda_available
+        from qumat_qdp import is_native_cuda_available
 
-        return bool(is_cuda_available())
+        return bool(is_native_cuda_available())
     except Exception:
         pass
     try:
@@ -100,7 +100,7 @@ def pytest_collection_modifyitems(config, items):
     # Tests that work without _qdp (PyTorch reference backend tests).
     _NO_QDP_OK = {
         "test_torch_ref.py",
-        "test_fallback.py",
+        "test_backend_selection.py",
         "test_benchmark_utils.py",
         "test_benchmark_cli_validation.py",
     }

@@ -29,23 +29,21 @@ Usage:
 
 from __future__ import annotations
 
-# Backend detection: gracefully degrade when _qdp (Rust extension) is unavailable.
-from qumat_qdp._backend import Backend, force_backend, get_backend, get_qdp
+# Gracefully degrade when _qdp (Rust extension) is unavailable.
+from qumat_qdp._native import get_qdp
 
 _qdp_mod = get_qdp()
 if _qdp_mod is not None:
-    RustQdpEngine = getattr(_qdp_mod, "QdpEngine")
+    NativeQdpEngine = getattr(_qdp_mod, "QdpEngine")
     NativeQuantumTensor = getattr(_qdp_mod, "QuantumTensor")
     run_throughput_pipeline_py = getattr(_qdp_mod, "run_throughput_pipeline_py", None)
 else:
-    RustQdpEngine = None
+    NativeQdpEngine = None
     NativeQuantumTensor = None
     run_throughput_pipeline_py = None
 
-BACKEND = get_backend()
 
-
-def is_cuda_available() -> bool:
+def is_native_cuda_available() -> bool:
     """Return whether a usable CUDA device is available to the native engine.
 
     Unlike the importability of the ``_qdp`` extension -- which only means it
@@ -76,20 +74,17 @@ from qumat_qdp.tensor import QdpTensor, QuantumTensor
 from qumat_qdp.triton_amd import TritonAmdEngine, is_triton_amd_available
 
 __all__ = [
-    "BACKEND",
-    "Backend",
     "LatencyResult",
+    "NativeQdpEngine",
     "NativeQuantumTensor",
     "QdpBenchmark",
     "QdpEngine",
     "QdpTensor",
     "QuantumDataLoader",
     "QuantumTensor",
-    "RustQdpEngine",
     "ThroughputResult",
     "TritonAmdEngine",
-    "force_backend",
-    "is_cuda_available",
+    "is_native_cuda_available",
     "is_triton_amd_available",
     "run_throughput_pipeline_py",
 ]
