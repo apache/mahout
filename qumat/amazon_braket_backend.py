@@ -143,18 +143,20 @@ def get_final_state_vector(
     backend: BraketBackend,
     backend_config: MutableMapping[str, Any],
 ) -> Any:
-    circuit.state_vector()
+    # StateVector is only valid with shots=0, so keep it off the caller's circuit
+    working_circuit = circuit.copy()
+    working_circuit.state_vector()
     parameter_values = backend_config.get("parameter_values", {})
-    if parameter_values and circuit.parameters:
+    if parameter_values and working_circuit.parameters:
         # Braket accepts parameter names as strings in inputs dict
         inputs = {
             param_name: value
             for param_name, value in parameter_values.items()
-            if param_name in {p.name for p in circuit.parameters}
+            if param_name in {p.name for p in working_circuit.parameters}
         }
-        result = backend.run(circuit, shots=0, inputs=inputs).result()
+        result = backend.run(working_circuit, shots=0, inputs=inputs).result()
     else:
-        result = backend.run(circuit, shots=0).result()
+        result = backend.run(working_circuit, shots=0).result()
     state_vector = result.values[0]  # ty: ignore[possibly-missing-attribute]
 
     return state_vector
