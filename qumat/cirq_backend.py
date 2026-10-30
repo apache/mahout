@@ -136,19 +136,18 @@ def execute_circuit(
         working_circuit.append(
             cirq.measure(*working_circuit.all_qubits(), key="result")
         )
-    simulator = cirq.Simulator()
     parameter_values = backend_config.get("parameter_values", None)
     if parameter_values:
         # Convert parameter_values to applicable resolvers
         res = [cirq.ParamResolver(parameter_values)]
-        results = simulator.run_sweep(
+        results = backend.run_sweep(
             working_circuit,
             repetitions=backend_config["backend_options"].get("shots", 1),
             params=res,
         )
         return [result.histogram(key="result") for result in results]
     else:
-        result = simulator.run(
+        result = backend.run(
             working_circuit,
             repetitions=backend_config["backend_options"].get("shots", 1),
         )
@@ -208,13 +207,12 @@ def get_final_state_vector(
     backend: cirq.Simulator,
     backend_config: MutableMapping[str, Any],
 ) -> Any:
-    simulator = cirq.Simulator()
     parameter_values = backend_config.get("parameter_values", None)
     if parameter_values:
         resolver = cirq.ParamResolver(parameter_values)
-        result = simulator.simulate(circuit, param_resolver=resolver)
+        result = backend.simulate(circuit, param_resolver=resolver)
     else:
-        result = simulator.simulate(circuit)
+        result = backend.simulate(circuit)
     return result.final_state_vector
 
 
