@@ -218,6 +218,15 @@ def get_final_state_vector(
     return result.final_state_vector
 
 
+def count_parameter_occurrences(circuit: cirq.Circuit) -> dict[str, int]:
+    """Count how many gates in ``circuit`` depend on each named parameter."""
+    counts: dict[str, int] = {}
+    for operation in circuit.all_operations():
+        for name in cirq.parameter_names(operation):
+            counts[name] = counts.get(name, 0) + 1
+    return counts
+
+
 def calculate_prob_zero(
     results: dict[int, int] | list[dict[int, int]],
     ancilla_qubit: int,
