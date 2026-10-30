@@ -22,11 +22,22 @@
 # required_approving_review_count: 2 but with the PMC exemption.
 # PMC members can bypass it in an emergency (main ruleset in .asf.yaml).
 #
+# The check runs on the pull_request event, like the other CI workflows, so
+# that for pull requests from forks it goes through the same "Approve and run"
+# step as the rest of CI: until a maintainer approves the workflow runs the
+# check is pending ("Expected"), not failed. A pull_request_target trigger
+# would run on every fork PR the moment it is opened and fail it on sight,
+# before anyone had a chance to review. The price is that the workflow
+# definition itself comes from the PR head; the script and the PMC list are
+# still taken from the base branch below, and a PR that touches this file has
+# to be reviewed with that in mind, as for any workflow change.
+# The Auto-merge gate (automerge-gate.yml) does not wait for this workflow:
+# it is not CI and fails by design until the PR has enough approvals.
+#
 name: PR Approval Check
 
 on:
-  # Runs with the base repository's workflow definition, also for fork PRs.
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   # Re-evaluate whenever a review is submitted, edited or dismissed.
   pull_request_review:
@@ -49,8 +60,8 @@ jobs:
 
     steps:
       # Always take the script and the PMC list from the base branch so a PR
-      # cannot change the rule it is being checked against. No code from the
-      # PR head is executed.
+      # cannot change the rule through them. No code from the PR head is
+      # executed.
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: ${{ github.event.pull_request.base.ref }}
