@@ -364,6 +364,23 @@ class TestBenchmarkFallback:
         assert result.duration_sec > 0
         assert result.vectors_per_sec > 0
 
+    @pytest.mark.parametrize(
+        "encoding", ["amplitude", "angle", "basis", "iqp", "iqp-z", "phase"]
+    )
+    def test_pytorch_throughput_every_encoding(self, encoding):
+        """The PyTorch backend generates the right sample shape for each encoding."""
+        from qumat_qdp.api import QdpBenchmark
+
+        result = (
+            QdpBenchmark()
+            .backend("pytorch")
+            .qubits(3)
+            .encoding(encoding)
+            .batches(2, size=4)
+            .run_throughput()
+        )
+        assert result.vectors_per_sec > 0
+
     def test_pytorch_latency(self):
         from qumat_qdp.api import QdpBenchmark
 
