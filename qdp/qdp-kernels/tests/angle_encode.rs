@@ -25,7 +25,7 @@ use qdp_kernels::{
     CuComplex, launch_angle_encode_batch_f32, launch_angle_encode_f32,
     launch_check_finite_batch_f32,
 };
-
+#[allow(dead_code)]
 const EPSILON_F32: f32 = 1e-5;
 
 #[cfg(target_os = "linux")]
