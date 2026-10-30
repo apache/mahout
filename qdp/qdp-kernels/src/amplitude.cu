@@ -23,7 +23,7 @@
 #include <stdint.h>
 #include "kernel_config.h"
 
-__global__ void amplitude_encode_kernel(
+extern "C" __global__ void amplitude_encode_kernel(
     const double* __restrict__ input,
     cuDoubleComplex* __restrict__ state,
     size_t input_len,
@@ -67,7 +67,7 @@ __global__ void amplitude_encode_kernel(
     }
 }
 
-__global__ void amplitude_encode_kernel_f32(
+extern "C" __global__ void amplitude_encode_kernel_f32(
     const float* __restrict__ input,
     cuComplex* __restrict__ state,
     size_t input_len,
@@ -236,7 +236,7 @@ int launch_amplitude_encode_f32(
 /// 2. Grid-stride loop for arbitrary batch sizes
 /// 3. Coalesced memory access within warps
 /// 4. Scalar fallback for misaligned sample bases and odd tails
-__global__ void amplitude_encode_batch_kernel(
+extern "C" __global__ void amplitude_encode_batch_kernel(
     const double* __restrict__ input_batch,
     cuDoubleComplex* __restrict__ state_batch,
     const double* __restrict__ inv_norms,
@@ -309,7 +309,7 @@ __global__ void amplitude_encode_batch_kernel(
 /// 2. Grid-stride loop for arbitrary batch sizes
 /// 3. Coalesced memory access within warps
 /// 4. Minimized register pressure
-__global__ void amplitude_encode_batch_kernel_f32(
+extern "C" __global__ void amplitude_encode_batch_kernel_f32(
     const float* __restrict__ input_batch,
     cuComplex* __restrict__ state_batch,
     const float* __restrict__ inv_norms,
@@ -457,7 +457,7 @@ int launch_amplitude_encode_batch_f32(
 
 /// Kernel: accumulate L2 norm using coalesced vectorized loads.
 /// Each block atomically adds its partial sum to the output accumulator.
-__global__ void l2_norm_kernel(
+extern "C" __global__ void l2_norm_kernel(
     const double* __restrict__ input,
     size_t input_len,
     double* __restrict__ out_accum
@@ -492,7 +492,7 @@ __global__ void l2_norm_kernel(
 
 /// Kernel: accumulate L2 norm using coalesced vectorized loads (float32).
 /// Each block atomically adds its partial sum to the output accumulator.
-__global__ void l2_norm_kernel_f32(
+extern "C" __global__ void l2_norm_kernel_f32(
     const float* __restrict__ input,
     size_t input_len,
     float* __restrict__ out_accum
@@ -527,7 +527,7 @@ __global__ void l2_norm_kernel_f32(
 
 /// Kernel: accumulate L2 norms for a batch.
 /// Grid is organized as (blocks_per_sample * num_samples) blocks.
-__global__ void l2_norm_batch_kernel(
+extern "C" __global__ void l2_norm_batch_kernel(
     const double* __restrict__ input_batch,
     size_t num_samples,
     size_t sample_len,
@@ -580,7 +580,7 @@ __global__ void l2_norm_batch_kernel(
 
 /// Kernel: accumulate L2 norms for a batch (float32).
 /// Grid is organized as (blocks_per_sample * num_samples) blocks.
-__global__ void l2_norm_batch_kernel_f32(
+extern "C" __global__ void l2_norm_batch_kernel_f32(
     const float* __restrict__ input_batch,
     size_t num_samples,
     size_t sample_len,
@@ -632,7 +632,7 @@ __global__ void l2_norm_batch_kernel_f32(
 }
 
 /// Kernel: converts accumulated sum-of-squares into inverse norms.
-__global__ void finalize_inv_norm_kernel(
+extern "C" __global__ void finalize_inv_norm_kernel(
     double* __restrict__ norms,
     size_t count
 ) {
@@ -649,7 +649,7 @@ __global__ void finalize_inv_norm_kernel(
 }
 
 /// Kernel: converts accumulated sum-of-squares into inverse norms (float32).
-__global__ void finalize_inv_norm_kernel_f32(
+extern "C" __global__ void finalize_inv_norm_kernel_f32(
     float* __restrict__ norms,
     size_t count
 ) {
@@ -914,7 +914,7 @@ int launch_l2_norm_batch_f32(
 }
 
 /// Kernel: convert complex128 state vector to complex64.
-__global__ void convert_state_to_complex64_kernel(
+extern "C" __global__ void convert_state_to_complex64_kernel(
     const cuDoubleComplex* __restrict__ input_state,
     cuComplex* __restrict__ output_state,
     size_t len
@@ -950,7 +950,7 @@ int convert_state_to_float(
 }
 
 /// Kernel: convert complex64 state vector to complex128.
-__global__ void convert_state_to_complex128_kernel(
+extern "C" __global__ void convert_state_to_complex128_kernel(
     const cuComplex* __restrict__ input_state,
     cuDoubleComplex* __restrict__ output_state,
     size_t len

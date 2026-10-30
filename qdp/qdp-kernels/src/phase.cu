@@ -36,7 +36,7 @@
 
 #include "kernel_config.h"
 
-__global__ void phase_encode_kernel(
+extern "C" __global__ void phase_encode_kernel(
     const double* __restrict__ phases,
     cuDoubleComplex* __restrict__ state,
     size_t state_len,
@@ -60,7 +60,7 @@ __global__ void phase_encode_kernel(
     state[idx] = make_cuDoubleComplex(norm_factor * re, norm_factor * im);
 }
 
-__global__ void phase_encode_batch_kernel(
+extern "C" __global__ void phase_encode_batch_kernel(
     const double* __restrict__ phases_batch,
     cuDoubleComplex* __restrict__ state_batch,
     size_t num_samples,
