@@ -8,7 +8,7 @@ QDP (Quantum Data Plane) is a GPU-accelerated library for encoding classical dat
 
 ## Prerequisites
 
-- Python 3.10+
+- Python 3.10-3.12 (QDP is not yet available on Python 3.13)
 - One of:
   - NVIDIA GPU with a CUDA-compatible PyTorch build (verify with `python -c "import torch; print(torch.cuda.is_available())"`)
   - AMD GPU with a ROCm-compatible PyTorch build (verify with `python -c "import torch; print(torch.version.hip)"`) plus Triton with HIP support
