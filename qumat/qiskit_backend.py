@@ -127,6 +127,11 @@ def apply_t_gate(circuit: qiskit.QuantumCircuit, qubit_index: int) -> None:
     circuit.t(qubit_index)
 
 
+def apply_s_gate(circuit: qiskit.QuantumCircuit, qubit_index: int) -> None:
+    # Apply a S gate (π/2 gate) on the specified qubit
+    circuit.s(qubit_index)
+
+
 def execute_circuit(
     circuit: qiskit.QuantumCircuit,
     backend: AerSimulator,

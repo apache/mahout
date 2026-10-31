@@ -42,6 +42,13 @@ The Pauli Z gate introduces a phase flip without changing the qubit's state. It 
 
 It's used for measuring the phase of a qubit.
 
+## S-Gate ($\sqrt{Z}$ Gate)
+
+The S-Gate applies a **π/2 phase shift** to the qubit. It is the square root of the Pauli Z gate ($S^2 = Z$) and a member of the Clifford group. Applying the T-Gate twice is equivalent to applying the S-Gate ($T^2 = S$). Mathematically:
+
+- $S|0\rangle = |0\rangle$
+- $S|1\rangle = i|1\rangle$
+
 ## T-Gate (π/8 Gate)
 The T-Gate applies a **π/4 phase shift** to the qubit. It is essential for quantum computing because it, along with the Hadamard and CNOT gates, allows for **universal quantum computation**. Mathematically:
 
@@ -113,6 +120,7 @@ This gate is particularly useful in parameterized quantum circuits and variation
 - **Acknowledged support for Cirq & Braket** (New Addition)
 - **Removed Pauli X Gate** (Merged into NOT Gate)
 - **Added T-Gate** (New Addition)
+- **Added S-Gate** (New Addition)
 - **Added CSWAP Gate** (New Addition)
 - **Added U Gate** (New Addition)
 - **Fixed typos**
