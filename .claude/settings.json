@@ -1,0 +1,15 @@
+{
+  "enabledPlugins": {
+    "magpie-setup@apache-magpie": true,
+    "magpie-utilities@apache-magpie": true,
+    "magpie-agent-guard@apache-magpie": true
+  },
+  "extraKnownMarketplaces": {
+    "apache-magpie": {
+      "source": {
+        "source": "github",
+        "repo": "apache/magpie"
+      }
+    }
+  }
+}

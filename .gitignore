@@ -58,3 +58,6 @@ __pycache__/
 
 # coverage
 .coverage
+
+# Apache Magpie personal (per-clone) configuration
+/.apache-magpie-local/
