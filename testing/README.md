@@ -26,6 +26,7 @@ This directory contains the unified test suite for Apache Mahout, covering both 
 testing/
 ├── qumat/              # Qumat backend tests
 ├── qdp/                # QDP tests (GPU-required)
+├── qdp_python/         # Pure-Python qumat_qdp tests, run from source
 ├── utils/              # Shared test utilities
 └── conftest.py         # Pytest configuration and fixtures
 ```
@@ -35,6 +36,8 @@ testing/
 Before running QDP tests, build the `_qdp` module into the main venv:
 
 ```bash
+# QDP supports Python 3.10-3.12 only; pin to that range if uv would otherwise pick 3.13
+uv sync --python '>=3.10,<3.13' --group dev --extra qdp
 uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml
 ```
 

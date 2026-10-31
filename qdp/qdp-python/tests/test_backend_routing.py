@@ -68,12 +68,14 @@ def test_cuda_route_uses_rust_engine(monkeypatch: pytest.MonkeyPatch) -> None:
     value = engine.encode([1.0, 0.0], 1, "amplitude")
 
     assert engine.backend == "cuda"
-    assert value == "rust-quantum-tensor"
+    assert isinstance(value, qumat_qdp.QdpTensor)
+    assert value.backend == "cuda"
+    assert value.value == "rust-quantum-tensor"
     assert seen["init"] == {"device_id": 3, "precision": "float64"}
     assert seen["encode"]["encoding_method"] == "amplitude"
 
 
-def test_amd_route_returns_triton_output_directly(
+def test_amd_route_wraps_triton_output(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     class FakeValue:
@@ -104,7 +106,9 @@ def test_amd_route_returns_triton_output_directly(
     qt = engine.encode([1.0, 0.0], 1, "amplitude")
 
     assert engine.backend == "amd"
-    assert isinstance(qt, FakeValue)
+    assert isinstance(qt, qumat_qdp.QdpTensor)
+    assert qt.backend == "amd"
+    assert isinstance(qt.value, FakeValue)
     assert qt.__dlpack_device__() == (2, 0)
 
 

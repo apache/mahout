@@ -84,7 +84,8 @@ deliberately **not** required on `main`: a required check would also stop a
 committer from merging manually when a failure is judged acceptable. Instead
 the `Auto-merge gate` status check ([`automerge-gate.yml`](https://github.com/apache/mahout/blob/main/.github/workflows/automerge-gate.yml))
 is required. It runs on every push to the PR and waits for the other CI
-workflows of that commit:
+workflows of that commit (the `Committer approval` check below is not CI and
+is not waited for):
 
 - While any CI workflow is still running, the gate is "in progress", so
   auto-merge cannot fire early. (It gives up after about an hour; re-run the
@@ -118,6 +119,7 @@ The `Committer approval` status check ([`pr-approval-check.yml`](https://github.
 - The PR must have at least **two** distinct reviewers whose latest review is an approval and who have write access to the repository (i.e. committers). Approvals from non-committers are welcome but do not count. The number is set by `REQUIRED_APPROVALS` in the workflow.
 - Following GitHub semantics, a comment-only review keeps an earlier approval in place; "Request changes" or dismissing the review removes it.
 - PRs opened by PMC members are exempt. The list of PMC GitHub accounts lives in [`.github/pmc-members.txt`](https://github.com/apache/mahout/blob/main/.github/pmc-members.txt) and must be updated when the PMC roster changes.
+- Like the other CI workflows it runs on the `pull_request` event, so for pull requests from forks it waits until a maintainer approves the workflow runs ("Approve and run"). Until then the check is pending rather than failed, so a new PR is not marked red before anyone has looked at it. Once it has run, it stays red until the required approvals are in.
 - This applies to auto-merge and manual merges alike; PMC members can bypass it in an emergency (see above).
 
 The following changes should additionally have prior public discussion (issue or `dev@` thread):

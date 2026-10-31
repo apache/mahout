@@ -35,11 +35,11 @@ from __future__ import annotations
 import math
 import os
 import sys
-import warnings
 from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
-from qumat_qdp._backend import get_qdp as _get_qdp
+from qumat_qdp._native import get_qdp as _get_qdp
+from qumat_qdp.tensor import QdpTensor
 
 if TYPE_CHECKING:
     import _qdp
@@ -56,15 +56,15 @@ _VALID_ENCODINGS: frozenset[str] = frozenset(
     {"amplitude", "angle", "basis", "iqp", "iqp-z", "phase"}
 )
 
-# Fallback-supported file extensions (loadable without _qdp).
+# File extensions loadable in memory without _qdp (Triton AMD iterator).
 _TORCH_FILE_EXTS = frozenset({".pt", ".pth"})
 _NUMPY_FILE_EXTS = frozenset({".npy"})
-_FALLBACK_FILE_EXTS = _TORCH_FILE_EXTS | _NUMPY_FILE_EXTS
+_IN_MEMORY_FILE_EXTS = _TORCH_FILE_EXTS | _NUMPY_FILE_EXTS
 
 # Streaming (Rust-backed) only supports columnar formats.
 _STREAMING_FILE_EXTS = frozenset({".parquet"})
 
-# All file extensions accepted as `.source_file()` inputs (Rust + fallback).
+# All file extensions accepted as `.source_file()` inputs (Rust + in-memory).
 _ARROW_FILE_EXTS = frozenset({".arrow", ".feather", ".ipc"})
 _PROTOBUF_FILE_EXTS = frozenset({".pb"})
 _SUPPORTED_FILE_EXTS = (
@@ -76,53 +76,32 @@ _SUPPORTED_FILE_EXTS = (
 )
 
 # Backend selection literals.
-_BACKEND_RUST = "rust"
-_BACKEND_PYTORCH = "pytorch"
+_BACKEND_CUDA = "cuda"
+_BACKEND_AMD = "amd"
 _BACKEND_AUTO = "auto"
-_VALID_BACKENDS = frozenset({_BACKEND_RUST, _BACKEND_PYTORCH, _BACKEND_AUTO})
+_VALID_BACKENDS = frozenset({_BACKEND_CUDA, _BACKEND_AMD, _BACKEND_AUTO})
 
 
-def _select_torch_device(torch, device_id: int) -> str:
-    """Pick a torch device the current PyTorch build can actually use.
+def _wrap_batches(batches: Iterator[object], backend: str) -> Iterator[QdpTensor]:
+    """Wrap each backend-native batch in the ``QdpTensor`` facade."""
+    for batch in batches:
+        yield QdpTensor(batch, backend=backend)
 
-    ``torch.cuda.is_available()`` returns True whenever a usable driver and at
-    least one GPU are present, but does not check whether the GPU's compute
-    capability is in the PyTorch wheel's compiled arch list. Running on an
-    unsupported GPU surfaces as ``cudaErrorNoKernelImageForDevice`` the first
-    time a kernel launches -- a particularly opaque failure for users on
-    Pascal-and-earlier hardware where recent PyTorch wheels no longer ship
-    matching kernels.
 
-    Intersect the device's capability with ``torch.cuda.get_arch_list()`` and
-    fall back to CPU (with a warning) when they don't match. Raises
-    ``ValueError`` on an out-of-range ``device_id`` to preserve the prior
-    contract for callers that explicitly request a specific GPU.
+def _native_cuda_usable(qdp) -> bool:
+    """Return whether the ``_qdp`` extension reports a usable CUDA device.
+
+    ``_qdp`` can be built against CUDA stubs on a host without the toolkit, so
+    importability alone does not mean GPU work can run.  Builds that predate
+    the ``cuda_available`` probe are assumed usable.
     """
-    if not torch.cuda.is_available():
-        return "cpu"
-
-    if device_id < 0 or device_id >= torch.cuda.device_count():
-        raise ValueError(
-            f"Invalid CUDA device_id {device_id}; "
-            f"{torch.cuda.device_count()} device(s) available."
-        )
-
-    arch_list = torch.cuda.get_arch_list()
-    if arch_list:
-        major, minor = torch.cuda.get_device_capability(device_id)
-        device_arch = f"sm_{major}{minor}"
-        if device_arch not in arch_list:
-            warnings.warn(
-                f"GPU {device_id} ({torch.cuda.get_device_name(device_id)}, "
-                f"{device_arch}) is not in this PyTorch build's supported "
-                f"arch list ({sorted(arch_list)}). Falling back to CPU. "
-                "Install a PyTorch wheel that targets this GPU, or set "
-                "CUDA_VISIBLE_DEVICES= to silence this warning.",
-                stacklevel=2,
-            )
-            return "cpu"
-
-    return f"cuda:{device_id}"
+    probe = getattr(qdp, "cuda_available", None)
+    if probe is None:
+        return True
+    try:
+        return bool(probe())
+    except Exception:
+        return False
 
 
 def _path_extension(path: str) -> str:
@@ -171,10 +150,7 @@ def _build_torch_dataset(loader: QuantumDataLoader):
                 import torch as _torch
 
                 for batch in self._source:
-                    # DLPack capsule from the Rust backend -> torch.Tensor
-                    if not isinstance(batch, _torch.Tensor):
-                        batch = _torch.from_dlpack(batch)
-                    yield batch
+                    yield _torch.from_dlpack(batch)
 
         _torch_dataset_cls = _QdpDataset
     return _torch_dataset_cls(loader)
@@ -262,11 +238,12 @@ class QuantumDataLoader:
     Builder for batched QDP encoding iterators.
 
     ``QuantumDataLoader`` can generate synthetic input samples or read supported
-    file formats, then encode each batch with the selected backend.  The default
-    ``"rust"`` backend returns Rust-backed ``QuantumTensor`` batches, while the
-    explicit ``"pytorch"`` backend returns ``torch.Tensor`` batches.  The
-    ``"auto"`` backend tries the Rust extension first and falls back to PyTorch
-    when the native extension is unavailable.
+    file formats, then encode each batch with the selected backend.  Every
+    backend yields ``QdpTensor`` batches; ``batch.value`` is the backend-native
+    object (a Rust ``_qdp.QuantumTensor`` for ``"cuda"``, a ``torch.Tensor``
+    for ``"amd"``).  The ``"auto"`` backend
+    picks the GPU backend for the host (``"cuda"`` on NVIDIA, ``"amd"`` on AMD
+    ROCm) and raises when neither is usable.
     """
 
     def __init__(
@@ -280,7 +257,7 @@ class QuantumDataLoader:
     ) -> None:
         """Create a loader builder with default synthetic batching settings.
 
-        :param device_id: GPU device ordinal used by native and PyTorch backends.
+        :param device_id: GPU device ordinal (CUDA or ROCm, per the backend).
         :param num_qubits: Number of qubits in each encoded output state.
         :param batch_size: Number of samples per emitted batch.
         :param total_batches: Maximum number of batches to emit.
@@ -309,8 +286,10 @@ class QuantumDataLoader:
         self._synthetic_requested = False  # set True only by source_synthetic()
         self._file_requested = False
         self._null_handling: str | None = None
-        self._dtype: str | None = None  # None -> native default (float64, lossless)
-        self._backend_name: str = _BACKEND_RUST
+        # None -> backend default: float32 for synthetic data, float64 (lossless)
+        # for file sources.
+        self._dtype: str | None = None
+        self._backend_name: str = _BACKEND_CUDA
 
     def qubits(self, n: int) -> QuantumDataLoader:
         """Set the number of qubits used by subsequent encodings.
@@ -335,9 +314,7 @@ class QuantumDataLoader:
         Valid values are ``"amplitude"``, ``"angle"``, ``"basis"``,
         ``"iqp"``, ``"iqp-z"``, and ``"phase"``.  Names are matched
         case-insensitively and normalized to the canonical lowercase spelling
-        before they reach the selected backend.  The PyTorch reference backend
-        supports the same methods as ``qumat_qdp.torch_ref``; use the native
-        backend for methods that are not available in the reference path.
+        before they reach the selected backend.
 
         :param method: Encoding method name.
         :returns: ``self`` for fluent builder chaining.
@@ -361,7 +338,7 @@ class QuantumDataLoader:
 
         Both ``total`` and ``size`` must be positive integers.  For synthetic
         sources, ``total`` is the exact number of generated batches.  For file
-        sources handled by the PyTorch fallback, iteration stops at the smaller
+        sources loaded in memory by the AMD backend, iteration stops at the smaller
         of ``total`` and the number of complete/partial batches available from
         the loaded file.
 
@@ -412,8 +389,8 @@ class QuantumDataLoader:
 
         Non-streaming native loading accepts ``.parquet``, ``.arrow``,
         ``.feather``, ``.ipc``, ``.npy``, ``.pt``, ``.pth``, and ``.pb`` files.
-        The PyTorch fallback path supports only ``.npy``, ``.pt``, and ``.pth``
-        inputs because it loads the full tensor into memory before encoding.
+        The AMD backend supports only ``.npy``, ``.pt``, and ``.pth`` inputs
+        because it loads the full tensor into memory before encoding.
         Streaming mode is native-only and currently accepts ``.parquet`` files.
         Remote ``s3://`` and ``gs://`` paths are accepted when the native remote
         I/O feature is enabled; remote query strings and fragments are rejected.
@@ -453,10 +430,10 @@ class QuantumDataLoader:
     def dtype(self, name: str) -> QuantumDataLoader:
         """Set the element precision used when loading file sources.
 
-        Applies to the native ``source_file()`` path. ``"float64"`` (the default)
+        Applies to ``source_file()`` sources. ``"float64"`` (the default)
         loads file contents losslessly; ``"float32"`` narrows them to f32 on load.
         See ``source_file()`` for the cast caveats, including the ``basis``
-        exemption.
+        exemption on the native path.
 
         :param name: ``"float32"``/``"f32"`` or ``"float64"``/``"f64"`` (case-insensitive).
         :returns: ``self`` for fluent builder chaining.
@@ -473,7 +450,7 @@ class QuantumDataLoader:
         """Set or clear the synthetic data seed.
 
         ``None`` leaves the loader unseeded for the native Rust path and maps to
-        the PyTorch reference path's default deterministic seed.  Integer seeds
+        the AMD backend's default deterministic seed.  Integer seeds
         must fit Rust ``u64`` so the same configuration can be passed to the
         native backend.
 
@@ -499,7 +476,7 @@ class QuantumDataLoader:
         Valid policies are ``"fill_zero"`` (replace nulls with zero before
         encoding) and ``"reject"`` (fail on null input).  The policy is passed
         through to Rust file and synthetic loader creation when available.  The
-        PyTorch fallback loaders do not consume this setting because supported
+        AMD backend loaders do not consume this setting because supported
         ``.npy``/``.pt``/``.pth`` inputs are loaded as dense tensors.
 
         :param policy: Null handling policy, either ``"fill_zero"`` or
@@ -515,12 +492,16 @@ class QuantumDataLoader:
         return self
 
     def backend(self, name: str) -> QuantumDataLoader:
-        """Set encoding backend: ``'rust'``, ``'pytorch'``, or ``'auto'``.
+        """Set the GPU backend: ``'cuda'``, ``'amd'``, or ``'auto'``.
 
-        ``'auto'``: tries the Rust backend first and falls back to the PyTorch
-        reference backend if the Rust extension is unavailable, emitting a
-        ``RuntimeWarning`` when the fallback occurs.  ``'rust'`` raises if the
-        extension is missing.  ``'pytorch'`` always uses the pure-PyTorch path.
+        ``'cuda'`` (the default) uses the Rust/CUDA extension on NVIDIA and
+        raises if the extension is missing.  ``'amd'`` uses the Triton AMD
+        engine and raises if no ROCm runtime is available.
+
+        ``'auto'`` picks the GPU backend for this host: ``'cuda'`` when the
+        extension reports a usable CUDA device, otherwise ``'amd'`` when a
+        ROCm runtime is available.  If neither GPU backend is usable,
+        iteration raises ``RuntimeError``.
         Returns self for chaining.
         """
         if name not in _VALID_BACKENDS:
@@ -531,7 +512,7 @@ class QuantumDataLoader:
         return self
 
     def _create_iterator(self) -> Iterator[object]:
-        """Build engine and return a loader iterator (Rust-backed or PyTorch fallback)."""
+        """Build engine and return a loader iterator for the selected backend."""
         if self._synthetic_requested and self._file_requested:
             raise ValueError(
                 "Cannot set both synthetic and file sources; use either .source_synthetic() or .source_file(path), not both."
@@ -541,11 +522,7 @@ class QuantumDataLoader:
                 "source_file() was not called with a path; set file source with .source_file(path)."
             )
         use_synthetic = not self._file_requested
-        if (
-            not use_synthetic
-            and self._file_path is not None
-            and self._backend_name != _BACKEND_PYTORCH
-        ):
+        if not use_synthetic and self._file_path is not None:
             ext = _path_extension(self._file_path)
             if ext not in _SUPPORTED_FILE_EXTS:
                 raise ValueError(
@@ -566,29 +543,67 @@ class QuantumDataLoader:
                 encoding_method=self._encoding_method,
                 seed=self._seed,
             )
-        if self._backend_name == _BACKEND_PYTORCH:
-            return self._create_pytorch_iterator(use_synthetic)
-        # Rust backend (default) or auto-fallback.
         qdp = _get_qdp()
         QdpEngine = getattr(qdp, "QdpEngine", None) if qdp else None
+        if self._backend_name == _BACKEND_AUTO:
+            return self._create_auto_iterator(qdp, QdpEngine, use_synthetic)
+        if self._backend_name == _BACKEND_AMD:
+            return self._create_amd_iterator(use_synthetic)
+        # CUDA backend (default): Rust extension.
         if QdpEngine is None:
-            if self._backend_name == _BACKEND_AUTO:
-                warnings.warn(
-                    "Rust extension (_qdp) is not available"
-                    f"{_platform_hint('the Rust GPU extension')}; "
-                    "falling back to PyTorch reference backend. "
-                    "Build with: maturin develop to enable GPU acceleration.",
-                    RuntimeWarning,
-                    stacklevel=3,
-                )
-                return self._create_pytorch_iterator(use_synthetic)
             raise RuntimeError(
                 "Rust extension (_qdp) is not available. "
-                "Build with: maturin develop, or explicitly select the PyTorch "
-                f"reference backend with .backend({_BACKEND_PYTORCH!r})."
+                "Build with: maturin develop."
                 f"{_platform_hint('the Rust GPU extension')}"
             )
         return self._create_rust_iterator(QdpEngine, use_synthetic)
+
+    def _create_auto_iterator(
+        self, qdp, QdpEngine, use_synthetic: bool
+    ) -> Iterator[object]:
+        """Pick a GPU backend: NVIDIA (Rust/CUDA) first, then AMD (Triton ROCm).
+
+        :raises RuntimeError: If neither GPU backend is usable.
+        """
+        if QdpEngine is not None and _native_cuda_usable(qdp):
+            return self._create_rust_iterator(QdpEngine, use_synthetic)
+
+        from qumat_qdp.triton_amd import is_triton_amd_available
+
+        if is_triton_amd_available():
+            return self._create_amd_iterator(use_synthetic)
+
+        raise RuntimeError(
+            "No QDP GPU backend is usable: the Rust/CUDA extension (_qdp) "
+            "reports no usable CUDA device and no Triton AMD (ROCm) runtime "
+            "was found. QDP requires an NVIDIA or AMD GPU."
+            f"{_platform_hint('the Rust GPU extension')}"
+        )
+
+    def _create_amd_iterator(self, use_synthetic: bool) -> Iterator[object]:
+        """Triton AMD iterator (``.backend('amd')``, or ``'auto'`` on ROCm hosts).
+
+        Yields ``QdpTensor`` batches wrapping ``torch.Tensor`` on the ROCm device.
+
+        Sources are loaded in memory on CPU, and the engine moves each batch
+        to its device: synthetic data and ``.npy`` / ``.pt`` / ``.pth`` files.
+        Parquet, Arrow, and streaming sources require the CUDA backend.
+
+        :raises RuntimeError: If PyTorch ROCm support or Triton is unavailable.
+        """
+        from qumat_qdp.triton_amd import TritonAmdEngine
+
+        precision = self._dtype or ("float32" if use_synthetic else "float64")
+        engine = TritonAmdEngine(device_id=self._device_id, precision=precision)
+        engine.check_runtime()
+
+        import torch
+
+        if use_synthetic:
+            batches = self._torch_synthetic_iter(torch, engine.encode)
+        else:
+            batches = self._torch_file_iter(torch, engine.encode)
+        return _wrap_batches(batches, _BACKEND_AMD)
 
     def _create_rust_iterator(self, QdpEngine, use_synthetic: bool) -> Iterator[object]:
         """Create the Rust-backed loader iterator (original path)."""
@@ -606,7 +621,7 @@ class QuantumDataLoader:
                     raise RuntimeError(
                         "create_file_loader not available (e.g. only on Linux with CUDA)."
                     )
-            return iter(
+            return _wrap_batches(
                 create_loader(
                     path=self._file_path,
                     batch_size=self._batch_size,
@@ -615,14 +630,15 @@ class QuantumDataLoader:
                     batch_limit=None,
                     null_handling=self._null_handling,
                     dtype=self._dtype,
-                )
+                ),
+                _BACKEND_CUDA,
             )
         create_synthetic_loader = getattr(engine, "create_synthetic_loader", None)
         if create_synthetic_loader is None:
             raise RuntimeError(
                 "create_synthetic_loader not available (e.g. only on Linux with CUDA)."
             )
-        return iter(
+        return _wrap_batches(
             create_synthetic_loader(
                 total_batches=self._total_batches,
                 batch_size=self._batch_size,
@@ -630,37 +646,12 @@ class QuantumDataLoader:
                 encoding_method=self._encoding_method,
                 seed=self._seed,
                 null_handling=self._null_handling,
-            )
+            ),
+            _BACKEND_CUDA,
         )
 
-    def _create_pytorch_iterator(self, use_synthetic: bool) -> Iterator[object]:
-        """PyTorch reference iterator (explicitly selected via ``.backend('pytorch')``).
-
-        Yields ``torch.Tensor`` (not ``QuantumTensor``).
-
-        Supports synthetic data and ``.npy`` / ``.pt`` / ``.pth`` files.
-        Parquet, Arrow, and streaming sources require the Rust extension.
-        """
-        try:
-            import torch
-        except ImportError:
-            raise RuntimeError(
-                "PyTorch backend selected but torch is not installed. "
-                "Install PyTorch with: pip install torch"
-            ) from None
-
-        from qumat_qdp.torch_ref import encode
-
-        device = _select_torch_device(torch, self._device_id)
-
-        if use_synthetic:
-            return self._pytorch_synthetic_iter(torch, encode, device)
-        return self._pytorch_file_iter(torch, encode, device)
-
-    def _pytorch_synthetic_iter(
-        self, torch, encode_fn, device: str
-    ) -> Iterator[object]:
-        """Generate synthetic data and encode with PyTorch."""
+    def _torch_synthetic_iter(self, torch, encode_fn) -> Iterator[object]:
+        """Generate synthetic batches as torch tensors and encode with ``encode_fn``."""
         import numpy as np
 
         num_qubits = self._num_qubits
@@ -677,26 +668,26 @@ class QuantumDataLoader:
                     _build_sample(base + i + seed, sample_size, encoding_method)
                 )
             batch_np = np.stack(samples)
-            batch_tensor = torch.tensor(batch_np, dtype=torch.float64, device=device)
-            yield encode_fn(batch_tensor, num_qubits, encoding_method, device=device)
+            batch_tensor = torch.tensor(batch_np, dtype=torch.float64)
+            yield encode_fn(batch_tensor, num_qubits, encoding_method)
 
-    def _pytorch_file_iter(self, torch, encode_fn, device: str) -> Iterator[object]:
-        """Load file data and encode with PyTorch."""
+    def _torch_file_iter(self, torch, encode_fn) -> Iterator[object]:
+        """Load file data in memory as a torch tensor and encode with ``encode_fn``."""
         path = self._file_path
         assert path is not None
         ext = _path_extension(path)
 
         if self._streaming_requested:
             raise RuntimeError(
-                "Streaming file loading requires the _qdp Rust extension. "
-                "Build with: maturin develop"
+                "Streaming file loading requires the CUDA backend (_qdp Rust "
+                "extension). Build with: maturin develop"
                 f"{_platform_hint('streaming')}"
             )
 
-        if ext not in _FALLBACK_FILE_EXTS:
+        if ext not in _IN_MEMORY_FILE_EXTS:
             raise RuntimeError(
-                f"PyTorch fallback only supports {', '.join(sorted(_FALLBACK_FILE_EXTS))} files. "
-                f"Got {ext!r}. Build the _qdp extension for full format support: maturin develop"
+                f"In-memory file loading only supports {', '.join(sorted(_IN_MEMORY_FILE_EXTS))} files. "
+                f"Got {ext!r}. Use the CUDA backend (_qdp extension) for full format support."
             )
 
         # Load all data into memory.
@@ -706,12 +697,12 @@ class QuantumDataLoader:
                 raise RuntimeError(
                     f"Expected torch.Tensor in {path}, got {type(raw).__name__}"
                 )
-            all_data = raw.to(dtype=torch.float64, device=device)
+            all_data = raw.to(dtype=torch.float64)
         else:
             import numpy as np
 
             arr = np.load(path)
-            all_data = torch.tensor(arr, dtype=torch.float64, device=device)
+            all_data = torch.tensor(arr, dtype=torch.float64)
 
         if all_data.ndim == 1:
             all_data = all_data.unsqueeze(0)
@@ -728,7 +719,7 @@ class QuantumDataLoader:
             start = batch_idx * batch_size
             end = min(start + batch_size, total_samples)
             batch = all_data[start:end]
-            yield encode_fn(batch, num_qubits, encoding_method, device=device)
+            yield encode_fn(batch, num_qubits, encoding_method)
 
     def as_torch_dataset(self):
         """Wrap this loader as a ``torch.utils.data.IterableDataset``.
@@ -759,8 +750,7 @@ class QuantumDataLoader:
     def __iter__(self) -> Iterator[object]:
         """Return iterator that yields one encoded batch per step.
 
-        With the default ``"rust"`` backend, yields ``QuantumTensor``
-        (use ``torch.from_dlpack(qt)``).  With ``.backend("pytorch")``,
-        yields ``torch.Tensor`` directly.
+        Yields ``QdpTensor`` batches on every backend; convert with
+        ``torch.from_dlpack(batch)`` or ``batch.to_torch()``.
         """
         return self._create_iterator()
