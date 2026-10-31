@@ -39,12 +39,10 @@ def initialize_backend(backend_config: Mapping[str, Any]) -> cirq.Simulator:
     return cirq.Simulator()
 
 
-def create_empty_circuit(num_qubits: int | None = None) -> cirq.Circuit:
+def create_empty_circuit(num_qubits: int) -> cirq.Circuit:
     circuit = cirq.Circuit()
-    if num_qubits is not None:
-        qubits = [cirq.LineQubit(i) for i in range(num_qubits)]
-        for qubit in qubits:
-            circuit.append(cirq.I(qubit))
+    for i in range(num_qubits):
+        circuit.append(cirq.I(cirq.LineQubit(i)))
     return circuit
 
 

@@ -55,11 +55,10 @@ def initialize_backend(backend_config: Mapping[str, Any]) -> BraketBackend:
     return AwsDevice(_SV1_ARN, aws_session=aws_session)
 
 
-def create_empty_circuit(num_qubits: int | None = None) -> CircuitLike:
+def create_empty_circuit(num_qubits: int) -> CircuitLike:
     circuit: CircuitLike = Circuit()
-    if num_qubits is not None:
-        for i in range(num_qubits):
-            circuit.i(i)  # type: ignore[unresolved-attribute]
+    for i in range(num_qubits):
+        circuit.i(i)  # type: ignore[unresolved-attribute]
     return circuit
 
 
