@@ -31,8 +31,6 @@
 //
 // Circuit depth: 2 (one Hadamard layer + one phase-gate layer).
 
-#![allow(unused_unsafe)]
-
 use super::{QuantumEncoder, validate_qubit_count};
 #[cfg(target_os = "linux")]
 use crate::error::cuda_error_to_string;

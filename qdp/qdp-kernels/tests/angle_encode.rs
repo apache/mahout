@@ -16,8 +16,6 @@
 
 // Tests for angle encoding CUDA kernels.
 
-#![allow(unused_unsafe)]
-
 #[cfg(target_os = "linux")]
 use cudarc::driver::{CudaDevice, DevicePtr, DevicePtrMut};
 #[cfg(target_os = "linux")]

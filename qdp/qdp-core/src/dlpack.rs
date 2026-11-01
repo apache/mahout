@@ -16,6 +16,10 @@
 
 // DLPack protocol for zero-copy GPU memory sharing with PyTorch
 
+// Every `unsafe` block in this module must carry a `// SAFETY:` comment
+// explaining why its preconditions hold (see qdp/docs/unsafe-audit.md).
+#![warn(clippy::undocumented_unsafe_blocks)]
+
 #[cfg(target_os = "linux")]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
@@ -55,6 +59,7 @@ pub unsafe fn synchronize_stream(stream: *mut c_void) -> Result<()> {
     }
 
     let mut event: *mut c_void = std::ptr::null_mut();
+    // SAFETY: `event` is a valid, writable out-pointer for one event handle.
     let ret = unsafe { cudaEventCreateWithFlags(&mut event, CUDA_EVENT_DISABLE_TIMING) };
     if ret != 0 {
         return Err(MahoutError::Cuda(format!(
@@ -64,8 +69,11 @@ pub unsafe fn synchronize_stream(stream: *mut c_void) -> Result<()> {
         )));
     }
 
+    // SAFETY: `event` was just created successfully; a null stream is the
+    // CUDA legacy default stream, which is always valid.
     let record_ret = unsafe { cudaEventRecord(event, std::ptr::null_mut()) };
     if record_ret != 0 {
+        // SAFETY: `event` is live and is not used again after this call.
         let _ = unsafe { cudaEventDestroy(event) };
         return Err(MahoutError::Cuda(format!(
             "cudaEventRecord failed: {} ({})",
@@ -74,8 +82,11 @@ pub unsafe fn synchronize_stream(stream: *mut c_void) -> Result<()> {
         )));
     }
 
+    // SAFETY: `event` is live and recorded; the caller guarantees `stream`
+    // is a valid CUDA stream or sentinel (this fn's `# Safety` contract).
     let wait_ret = unsafe { cudaStreamWaitEvent(stream, event, 0) };
     if wait_ret != 0 {
+        // SAFETY: `event` is live and is not used again after this call.
         let _ = unsafe { cudaEventDestroy(event) };
         return Err(MahoutError::Cuda(format!(
             "cudaStreamWaitEvent failed: {} ({})",
@@ -84,6 +95,8 @@ pub unsafe fn synchronize_stream(stream: *mut c_void) -> Result<()> {
         )));
     }
 
+    // SAFETY: `event` is live and is not used again. The wait above already
+    // captured the event, and CUDA defers freeing an incomplete event.
     let destroy_ret = unsafe { cudaEventDestroy(event) };
     if destroy_ret != 0 {
         return Err(MahoutError::Cuda(format!(
@@ -166,13 +179,20 @@ pub struct DLManagedTensor {
 /// # Safety
 /// Frees shape, strides, GPU buffer, and managed tensor.
 /// Caller must ensure the pointer is valid and points to a properly initialized DLManagedTensor.
-#[allow(unsafe_op_in_unsafe_fn)]
+///
+/// In practice `managed` must come from [`GpuStateVector::to_dlpack`]: the
+/// frees below assume exactly the allocations that function makes (boxed
+/// `[i64]` shape/strides of length `ndim`, an `Arc<BufferStorage>` in
+/// `manager_ctx`, and a boxed `DLManagedTensor`). It must be called at most
+/// once per pointer.
 pub unsafe extern "C" fn dlpack_deleter(managed: *mut DLManagedTensor) {
     if managed.is_null() {
         return;
     }
 
-    let tensor = &(*managed).dl_tensor;
+    // SAFETY: non-null (checked above) and, per this fn's contract, points to
+    // a live `DLManagedTensor` that nobody else is mutating.
+    let tensor = unsafe { &(*managed).dl_tensor };
 
     // 1. Free shape array (Box<[i64]>)
     if !tensor.shape.is_null() {
@@ -182,7 +202,9 @@ pub unsafe extern "C" fn dlpack_deleter(managed: *mut DLManagedTensor) {
             1
         };
         let slice_ptr: *mut [i64] = std::ptr::slice_from_raw_parts_mut(tensor.shape, len);
-        let _ = Box::from_raw(slice_ptr);
+        // SAFETY: `to_dlpack` created `shape` with `Box::into_raw` on a boxed
+        // slice of `ndim` (= `len`) elements, and it is freed only here.
+        let _ = unsafe { Box::from_raw(slice_ptr) };
     }
 
     // 2. Free strides array
@@ -193,17 +215,23 @@ pub unsafe extern "C" fn dlpack_deleter(managed: *mut DLManagedTensor) {
             1
         };
         let slice_ptr: *mut [i64] = std::ptr::slice_from_raw_parts_mut(tensor.strides, len);
-        let _ = Box::from_raw(slice_ptr);
+        // SAFETY: same provenance and length as `shape` above.
+        let _ = unsafe { Box::from_raw(slice_ptr) };
     }
 
     // 3. Free GPU buffer (Arc reference count)
-    let ctx = (*managed).manager_ctx;
+    // SAFETY: `managed` is still live; we only read a pointer-sized field.
+    let ctx = unsafe { (*managed).manager_ctx };
     if !ctx.is_null() {
-        let _ = Arc::from_raw(ctx as *const BufferStorage);
+        // SAFETY: `to_dlpack` stored `Arc::into_raw(Arc<BufferStorage>)` here,
+        // giving this tensor one strong count; we hand that count back once.
+        let _ = unsafe { Arc::from_raw(ctx as *const BufferStorage) };
     }
 
     // 4. Free DLManagedTensor
-    let _ = Box::from_raw(managed);
+    // SAFETY: `to_dlpack` allocated `managed` with `Box::into_raw`. `tensor`
+    // (a borrow into it) is not used past this point.
+    let _ = unsafe { Box::from_raw(managed) };
 }
 
 /// Safely free a `DLManagedTensor` pointer returned from encoding APIs.
@@ -224,7 +252,6 @@ pub unsafe extern "C" fn dlpack_deleter(managed: *mut DLManagedTensor) {
 /// Returns `Err` if:
 /// - The pointer is null
 /// - The deleter is missing or has already been called
-#[allow(unsafe_op_in_unsafe_fn)]
 pub unsafe fn free_dlpack_tensor(ptr: *mut DLManagedTensor) -> Result<()> {
     if ptr.is_null() {
         return Err(MahoutError::InvalidInput(
@@ -234,14 +261,16 @@ pub unsafe fn free_dlpack_tensor(ptr: *mut DLManagedTensor) -> Result<()> {
 
     // SAFETY: Caller guarantees ptr is valid and not yet freed.
     // We've checked it's not null above.
-    let managed = &mut *ptr;
+    let managed = unsafe { &mut *ptr };
 
     let deleter = managed.deleter.take().ok_or_else(|| {
         MahoutError::InvalidInput("DLPack deleter missing or already called".into())
     })?;
 
     // Call the DLPack deleter to free memory
-    deleter(ptr);
+    // SAFETY: `ptr` is valid (caller contract) and `take()` above guarantees
+    // this deleter runs at most once for it. `managed` is not used again.
+    unsafe { deleter(ptr) };
     Ok(())
 }
 

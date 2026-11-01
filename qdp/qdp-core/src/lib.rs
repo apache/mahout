@@ -14,10 +14,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Allow unused_unsafe: CUDA FFI and kernel functions are unsafe in CUDA builds but safe stubs in no-CUDA builds.
-// The compiler can't statically determine which path is taken.
-#![allow(unused_unsafe)]
-
 pub mod dlpack;
 #[cfg(target_os = "linux")]
 mod encoding;
@@ -60,6 +56,7 @@ use crate::dlpack::DLManagedTensor;
 use cudarc::driver::CudaDevice;
 
 #[cfg(target_os = "linux")]
+#[warn(clippy::undocumented_unsafe_blocks)]
 fn validate_cuda_input_ptr(device: &CudaDevice, ptr: *const c_void) -> Result<()> {
     use crate::gpu::cuda_ffi::{
         CUDA_MEMORY_TYPE_DEVICE, CUDA_MEMORY_TYPE_MANAGED, CudaPointerAttributes,
@@ -81,6 +78,9 @@ fn validate_cuda_input_ptr(device: &CudaDevice, ptr: *const c_void) -> Result<()
         allocation_flags: 0,
     };
 
+    // SAFETY: `attrs` is a valid, writable `CudaPointerAttributes`. CUDA only
+    // inspects the address `ptr`; it never dereferences it, so any value
+    // (including host or dangling pointers) is acceptable here.
     let ret = unsafe { cudaPointerGetAttributes(&mut attrs as *mut _, ptr) };
     if ret != 0 {
         return Err(MahoutError::InvalidInput(format!(
@@ -119,6 +119,9 @@ pub struct QdpEngine {
     precision: Precision,
 }
 
+// The raw-GPU-pointer encode API below is the main `unsafe` surface of
+// qdp-core, so every `unsafe` block in it must say why it is sound.
+#[warn(clippy::undocumented_unsafe_blocks)]
 impl QdpEngine {
     /// Initialize engine on GPU device
     ///
@@ -522,6 +525,8 @@ impl QdpEngine {
         num_qubits: usize,
         encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
+        // SAFETY: forwards this fn's `# Safety` contract unchanged. A null
+        // stream selects the default stream, which `_with_stream` accepts.
         unsafe {
             self.encode_from_gpu_ptr_with_stream(
                 input_d,
@@ -561,6 +566,9 @@ impl QdpEngine {
 
         let encoding = Encoding::from_str_ci(encoding_method)?;
         let encoder = encoding.encoder();
+        // SAFETY: `validate_cuda_input_ptr` above checked that the pointer is
+        // non-null CUDA device/managed memory on `self.device`. Length,
+        // lifetime and `stream` validity are the caller's `# Safety` contract.
         let state_vector = unsafe {
             encoder.encode_from_gpu_ptr(&self.device, input_d, input_len, num_qubits, stream)
         }?;
@@ -599,6 +607,8 @@ impl QdpEngine {
         input_len: usize,
         num_qubits: usize,
     ) -> Result<*mut DLManagedTensor> {
+        // SAFETY: forwards this fn's `# Safety` contract unchanged. A null
+        // stream selects the default stream, which `_with_stream` accepts.
         unsafe {
             self.encode_from_gpu_ptr_f32_with_stream(
                 input_d,
@@ -615,8 +625,9 @@ impl QdpEngine {
     /// DLPack pointer (state vector in engine precision). Pass null for `stream` to use the default stream.
     ///
     /// # Safety
-    /// In addition to the `encode_from_gpu_ptr_f32` requirements, the stream pointer
-    /// must remain valid for the duration of this call.
+    /// In addition to the `encode_from_gpu_ptr_f32` requirements, `stream` must be
+    /// null or a valid CUDA stream on the engine's device, and must remain
+    /// valid for the duration of this call.
     #[cfg(target_os = "linux")]
     pub unsafe fn encode_from_gpu_ptr_f32_with_stream(
         &self,
@@ -633,6 +644,9 @@ impl QdpEngine {
         // encoder-side workhorse. Keeping the kernel-launch + L2-norm sequence inside
         // the encoder makes the trait surface symmetric (`QuantumEncoder::encode_from_gpu_ptr_f32`
         // can override against it) and matches the angle / basis layout.
+        // SAFETY: `validate_cuda_input_ptr` above checked that the pointer is
+        // non-null CUDA device/managed memory on `self.device`. Length,
+        // lifetime and `stream` validity are the caller's `# Safety` contract.
         let state_vector = unsafe {
             gpu::AmplitudeEncoder::encode_from_gpu_ptr_f32_with_stream(
                 &self.device,
@@ -664,6 +678,8 @@ impl QdpEngine {
         input_len: usize,
         num_qubits: usize,
     ) -> Result<*mut DLManagedTensor> {
+        // SAFETY: forwards this fn's `# Safety` contract unchanged. A null
+        // stream selects the default stream, which `_with_stream` accepts.
         unsafe {
             self.encode_angle_from_gpu_ptr_f32_with_stream(
                 input_d,
@@ -677,8 +693,9 @@ impl QdpEngine {
     /// Encode angle from existing GPU pointer (float32) on a specified CUDA stream.
     ///
     /// # Safety
-    /// In addition to the `encode_angle_from_gpu_ptr_f32` requirements, the stream pointer
-    /// must remain valid for the duration of this call.
+    /// In addition to the `encode_angle_from_gpu_ptr_f32` requirements, `stream` must be
+    /// null or a valid CUDA stream on the engine's device, and must remain
+    /// valid for the duration of this call.
     #[cfg(target_os = "linux")]
     pub unsafe fn encode_angle_from_gpu_ptr_f32_with_stream(
         &self,
@@ -691,6 +708,9 @@ impl QdpEngine {
 
         validate_cuda_input_ptr(&self.device, input_d as *const c_void)?;
 
+        // SAFETY: `validate_cuda_input_ptr` above checked that the pointer is
+        // non-null CUDA device/managed memory on `self.device`. Length,
+        // lifetime and `stream` validity are the caller's `# Safety` contract.
         let state_vector = unsafe {
             gpu::AngleEncoder::encode_from_gpu_ptr_f32_with_stream(
                 &self.device,
@@ -727,6 +747,8 @@ impl QdpEngine {
         sample_size: usize,
         num_qubits: usize,
     ) -> Result<*mut DLManagedTensor> {
+        // SAFETY: forwards this fn's `# Safety` contract unchanged. A null
+        // stream selects the default stream, which `_with_stream` accepts.
         unsafe {
             self.encode_batch_from_gpu_ptr_f32_with_stream(
                 input_batch_d,
@@ -741,8 +763,9 @@ impl QdpEngine {
     /// Encode a float32 amplitude batch from an existing GPU pointer on a specified CUDA stream.
     ///
     /// # Safety
-    /// In addition to the `encode_batch_from_gpu_ptr_f32` requirements, the stream pointer
-    /// must remain valid for the duration of this call.
+    /// In addition to the `encode_batch_from_gpu_ptr_f32` requirements, `stream` must be
+    /// null or a valid CUDA stream on the engine's device, and must remain
+    /// valid for the duration of this call.
     #[cfg(target_os = "linux")]
     pub unsafe fn encode_batch_from_gpu_ptr_f32_with_stream(
         &self,
@@ -767,6 +790,9 @@ impl QdpEngine {
 
         validate_cuda_input_ptr(&self.device, input_batch_d as *const c_void)?;
 
+        // SAFETY: `validate_cuda_input_ptr` above checked that the pointer is
+        // non-null CUDA device/managed memory on `self.device`. Length,
+        // lifetime and `stream` validity are the caller's `# Safety` contract.
         let batch_state_vector = unsafe {
             gpu::AmplitudeEncoder::encode_batch_from_gpu_ptr_f32_with_stream(
                 &self.device,
@@ -799,6 +825,8 @@ impl QdpEngine {
         sample_size: usize,
         num_qubits: usize,
     ) -> Result<*mut DLManagedTensor> {
+        // SAFETY: forwards this fn's `# Safety` contract unchanged. A null
+        // stream selects the default stream, which `_with_stream` accepts.
         unsafe {
             self.encode_angle_batch_from_gpu_ptr_f32_with_stream(
                 input_batch_d,
@@ -813,8 +841,9 @@ impl QdpEngine {
     /// Encode an angle batch from an existing GPU pointer (float32) on a specified CUDA stream.
     ///
     /// # Safety
-    /// In addition to the `encode_angle_batch_from_gpu_ptr_f32` requirements, the stream pointer
-    /// must remain valid for the duration of this call.
+    /// In addition to the `encode_angle_batch_from_gpu_ptr_f32` requirements, `stream` must be
+    /// null or a valid CUDA stream on the engine's device, and must remain
+    /// valid for the duration of this call.
     #[cfg(target_os = "linux")]
     pub unsafe fn encode_angle_batch_from_gpu_ptr_f32_with_stream(
         &self,
@@ -839,6 +868,9 @@ impl QdpEngine {
 
         validate_cuda_input_ptr(&self.device, input_batch_d as *const c_void)?;
 
+        // SAFETY: `validate_cuda_input_ptr` above checked that the pointer is
+        // non-null CUDA device/managed memory on `self.device`. Length,
+        // lifetime and `stream` validity are the caller's `# Safety` contract.
         let batch_state_vector = unsafe {
             gpu::AngleEncoder::encode_batch_from_gpu_ptr_f32_with_stream(
                 &self.device,
@@ -868,6 +900,8 @@ impl QdpEngine {
         input_d: *const f32,
         num_qubits: usize,
     ) -> Result<*mut DLManagedTensor> {
+        // SAFETY: forwards this fn's `# Safety` contract unchanged. A null
+        // stream selects the default stream, which `_with_stream` accepts.
         unsafe {
             self.encode_basis_from_gpu_ptr_f32_with_stream(
                 input_d,
@@ -881,8 +915,9 @@ impl QdpEngine {
     /// specified CUDA stream.
     ///
     /// # Safety
-    /// In addition to the `encode_basis_from_gpu_ptr_f32` requirements, the
-    /// stream pointer must remain valid for the duration of this call.
+    /// In addition to the `encode_basis_from_gpu_ptr_f32` requirements,
+    /// `stream` must be null or a valid CUDA stream on the engine's device,
+    /// and must remain valid for the duration of this call.
     #[cfg(target_os = "linux")]
     pub unsafe fn encode_basis_from_gpu_ptr_f32_with_stream(
         &self,
@@ -894,6 +929,9 @@ impl QdpEngine {
 
         validate_cuda_input_ptr(&self.device, input_d as *const c_void)?;
 
+        // SAFETY: `validate_cuda_input_ptr` above checked that the pointer is
+        // non-null CUDA device/managed memory on `self.device`. Length,
+        // lifetime and `stream` validity are the caller's `# Safety` contract.
         let state_vector = unsafe {
             gpu::BasisEncoder::encode_from_gpu_ptr_f32_with_stream(
                 &self.device,
@@ -928,6 +966,8 @@ impl QdpEngine {
         sample_size: usize,
         num_qubits: usize,
     ) -> Result<*mut DLManagedTensor> {
+        // SAFETY: forwards this fn's `# Safety` contract unchanged. A null
+        // stream selects the default stream, which `_with_stream` accepts.
         unsafe {
             self.encode_basis_batch_from_gpu_ptr_f32_with_stream(
                 input_batch_d,
@@ -944,7 +984,8 @@ impl QdpEngine {
     ///
     /// # Safety
     /// In addition to the `encode_basis_batch_from_gpu_ptr_f32` requirements,
-    /// the stream pointer must remain valid for the duration of this call.
+    /// `stream` must be null or a valid CUDA stream on the engine's device,
+    /// and must remain valid for the duration of this call.
     #[cfg(target_os = "linux")]
     pub unsafe fn encode_basis_batch_from_gpu_ptr_f32_with_stream(
         &self,
@@ -969,6 +1010,9 @@ impl QdpEngine {
 
         validate_cuda_input_ptr(&self.device, input_batch_d as *const c_void)?;
 
+        // SAFETY: `validate_cuda_input_ptr` above checked that the pointer is
+        // non-null CUDA device/managed memory on `self.device`. Length,
+        // lifetime and `stream` validity are the caller's `# Safety` contract.
         let batch_state_vector = unsafe {
             gpu::BasisEncoder::encode_batch_from_gpu_ptr_f32_with_stream(
                 &self.device,
@@ -1011,6 +1055,8 @@ impl QdpEngine {
         num_qubits: usize,
         encoding_method: &str,
     ) -> Result<*mut DLManagedTensor> {
+        // SAFETY: forwards this fn's `# Safety` contract unchanged. A null
+        // stream selects the default stream, which `_with_stream` accepts.
         unsafe {
             self.encode_batch_from_gpu_ptr_with_stream(
                 input_batch_d,
@@ -1058,6 +1104,9 @@ impl QdpEngine {
 
         let encoding = Encoding::from_str_ci(encoding_method)?;
         let encoder = encoding.encoder();
+        // SAFETY: `validate_cuda_input_ptr` above checked that the pointer is
+        // non-null CUDA device/managed memory on `self.device`. Length,
+        // lifetime and `stream` validity are the caller's `# Safety` contract.
         let batch_state_vector = unsafe {
             encoder.encode_batch_from_gpu_ptr(
                 &self.device,
