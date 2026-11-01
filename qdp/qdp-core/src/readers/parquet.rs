@@ -211,6 +211,16 @@ where
     Ok(out)
 }
 
+/// Error for a `List` column whose rows are all null under `NullHandling::FillZero`:
+/// no row ever reveals how many zeros a null sample should become.
+fn all_null_list_error() -> MahoutError {
+    MahoutError::InvalidInput(
+        "List column has rows but every row is null, so the sample size needed by \
+         NullHandling::FillZero cannot be determined"
+            .to_string(),
+    )
+}
+
 // ---------------------------------------------------------------------------
 // ParquetReader<T>
 // ---------------------------------------------------------------------------
@@ -468,6 +478,8 @@ pub struct ParquetStreamingReader<T: FloatElem = f64> {
     sample_size: Option<usize>,
     leftover_data: Vec<T>,
     leftover_cursor: usize,
+    /// Leading all-null `List` rows read before any non-null row fixed the sample size.
+    deferred_null_rows: usize,
     pub total_rows: usize,
     null_handling: NullHandling,
     _phantom: PhantomData<T>,
@@ -550,6 +562,7 @@ impl<T: FloatElem> ParquetStreamingReader<T> {
             sample_size: None,
             leftover_data: Vec::new(),
             leftover_cursor: 0,
+            deferred_null_rows: 0,
             total_rows,
             null_handling,
             _phantom: PhantomData,
@@ -658,7 +671,8 @@ impl<T: FloatElem> StreamingDataReader<T> for ParquetStreamingReader<T> {
                                 None => match self.sample_size {
                                     // All rows null but sample_size known from an earlier batch.
                                     Some(ss) => ss,
-                                    // All rows null and sample_size unknown.
+                                    // All rows null and sample_size unknown: defer them until
+                                    // a later batch fixes the size.
                                     None => {
                                         if self.null_handling == NullHandling::Reject {
                                             return Err(MahoutError::InvalidInput(
@@ -668,6 +682,7 @@ impl<T: FloatElem> StreamingDataReader<T> for ParquetStreamingReader<T> {
                                                     .to_string(),
                                             ));
                                         }
+                                        self.deferred_null_rows += list_array.len();
                                         continue;
                                     }
                                 },
@@ -725,6 +740,20 @@ impl<T: FloatElem> StreamingDataReader<T> for ParquetStreamingReader<T> {
                                     }
                                 }
                                 vals
+                            };
+
+                            // The first batch with a non-null row fixes the sample size:
+                            // emit the deferred leading null rows ahead of it.
+                            let batch_values = if self.deferred_null_rows > 0 {
+                                let mut vals = vec![
+                                    T::default();
+                                    current_sample_size * self.deferred_null_rows
+                                ];
+                                vals.extend(batch_values);
+                                self.deferred_null_rows = 0;
+                                vals
+                            } else {
+                                batch_values
                             };
 
                             (current_sample_size, batch_values)
@@ -807,7 +836,12 @@ impl<T: FloatElem> StreamingDataReader<T> for ParquetStreamingReader<T> {
                     }
                 }
                 Some(Err(e)) => return Err(MahoutError::Io(format!("Parquet read error: {}", e))),
-                None => break,
+                None => {
+                    if self.deferred_null_rows > 0 {
+                        return Err(all_null_list_error());
+                    }
+                    break;
+                }
             }
         }
 
@@ -1521,8 +1555,8 @@ mod tests {
     #[test]
     fn test_parquet_streaming_reader_cross_batch_all_null_first_fill_zero() {
         // [null, null, [1,2], [3,4]] with batch_size=2, FillZero:
-        //   batch 1 = [null, null]   — sample_size unknown; skipped
-        //   batch 2 = [[1,2], [3,4]] — sample_size established; data written
+        //   batch 1 = [null, null]   — sample_size unknown; rows are deferred
+        //   batch 2 = [[1,2], [3,4]] — sample_size established; deferred rows zero-filled
         let item_field = Arc::new(Field::new("item", DataType::Float64, true));
         let list_field = Field::new("data", DataType::List(item_field.clone()), true);
         let schema = Arc::new(Schema::new(vec![list_field]));
@@ -1542,6 +1576,67 @@ mod tests {
                 .unwrap();
         let mut buffer = vec![0.0_f64; 16];
         let written = reader.read_chunk(&mut buffer).unwrap();
-        assert_eq!(&buffer[..written], &[1.0, 2.0, 3.0, 4.0]);
+        assert_eq!(
+            &buffer[..written],
+            &[0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 4.0]
+        );
+    }
+
+    fn write_nullable_list_parquet(rows: &[Option<&[f64]>]) -> TempTestFile {
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::List(item_field.clone()), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = ListBuilder::new(Float64Builder::new());
+        for row in rows {
+            match row {
+                Some(values) => {
+                    builder.values().append_slice(values);
+                    builder.append(true);
+                }
+                None => builder.append(false),
+            }
+        }
+        let array = Arc::new(builder.finish()) as ArrayRef;
+        write_test_parquet(schema, vec![array])
+    }
+
+    #[test]
+    fn test_parquet_streaming_reader_leading_null_rows_match_declared_count() {
+        // [null, null, null, [1,2], [3,4]] with batch_size=2 and a 4-element buffer:
+        //   batch 1 = [null, null]  — fully null, sample_size unknown
+        //   batch 2 = [null, [1,2]] — sample_size established
+        //   batch 3 = [[3,4]]
+        // The small buffer forces the deferred zeros through the leftover path.
+        let file =
+            write_nullable_list_parquet(&[None, None, None, Some(&[1.0, 2.0]), Some(&[3.0, 4.0])]);
+        let mut reader =
+            ParquetStreamingReader::<f64>::new(file.path(), Some(2), NullHandling::FillZero)
+                .unwrap();
+        let declared = reader.total_rows();
+
+        let mut buffer = vec![0.0_f64; 4];
+        let mut data = Vec::new();
+        loop {
+            let written = reader.read_chunk(&mut buffer).unwrap();
+            if written == 0 {
+                break;
+            }
+            data.extend_from_slice(&buffer[..written]);
+        }
+
+        assert_eq!(data, vec![0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 4.0]);
+        assert_eq!(data.len() / reader.get_sample_size().unwrap(), declared);
+    }
+
+    #[test]
+    fn test_parquet_streaming_reader_all_null_list_fill_zero_errors() {
+        let file = write_nullable_list_parquet(&[None, None, None]);
+        let mut reader =
+            ParquetStreamingReader::<f64>::new(file.path(), Some(2), NullHandling::FillZero)
+                .unwrap();
+        let mut buffer = vec![0.0_f64; 16];
+        let err = reader.read_chunk(&mut buffer).unwrap_err().to_string();
+        assert!(err.contains("every row is null"), "unexpected error: {err}");
     }
 }
