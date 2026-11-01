@@ -1,5 +1,22 @@
 #!/usr/bin/env node
 
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Documentation Sync Script for Apache Mahout
  *
@@ -8,15 +25,22 @@
  * 1. Cleans the destination (preserving only .gitignore)
  * 2. Copies all markdown files from /docs to website/docs
  * 3. Copies all blog posts from /docs/blog to website/blog
- * 4. Transforms frontmatter for Docusaurus compatibility
+ * 4. Transforms frontmatter for Docusaurus compatibility (the markdown
+ *    body, including links, is copied unchanged)
  *
  * /docs is the SINGLE SOURCE OF TRUTH for all documentation and blog posts.
  * website/docs and website/blog are build artifacts that should not be edited directly.
+ *
+ * The markdown transforms are pure functions (string in, string out) and are
+ * exported so they can be unit tested; see scripts/sync-docs.test.js.
+ * Running this file directly performs the sync.
  */
 
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
+const matter = require('@11ty/gray-matter');
+const yaml = require('js-yaml');
 
 // Configuration
 const REPO_ROOT = path.resolve(__dirname, '../..');
@@ -79,119 +103,168 @@ function cleanDestination(destDir) {
 }
 
 /**
- * Parse YAML frontmatter from markdown content
+ * js-yaml schema used when writing frontmatter back out.
+ *
+ * Identical to the default schema except that a date with no time part
+ * (e.g. `date: 2024-03-04`, which YAML parses into a Date at midnight UTC)
+ * is written back as `2024-03-04` rather than `2024-03-04T00:00:00.000Z`,
+ * so blog post dates round-trip unchanged.
+ */
+const timestampType = yaml.DEFAULT_SCHEMA.compiledImplicit.find(
+  type => type.tag === 'tag:yaml.org,2002:timestamp',
+);
+const FRONTMATTER_SCHEMA = yaml.DEFAULT_SCHEMA.extend({
+  implicit: [
+    new yaml.Type('tag:yaml.org,2002:timestamp', {
+      kind: 'scalar',
+      resolve: timestampType.resolve,
+      construct: timestampType.construct,
+      instanceOf: Date,
+      represent: date => {
+        const iso = date.toISOString();
+        return iso.endsWith('T00:00:00.000Z') ? iso.slice(0, 10) : iso;
+      },
+    }),
+  ],
+});
+
+/**
+ * Parse YAML frontmatter from markdown content.
+ *
+ * Uses the same parser as Docusaurus itself (@11ty/gray-matter, which
+ * uses js-yaml), so lists, nested maps, multi-line strings, quoted
+ * values containing `:` and CRLF line endings are handled exactly as
+ * Docusaurus would handle them in the source file.
+ *
+ * @returns {{frontmatter: object, body: string}}
  */
 function parseFrontmatter(content) {
-  const frontmatterRegex = /^---\n([\s\S]*?)\n---\n/;
-  const match = content.match(frontmatterRegex);
-
-  if (!match) {
-    return { frontmatter: {}, body: content };
-  }
-
-  const frontmatterStr = match[1];
-  const body = content.slice(match[0].length);
-
-  // Simple YAML parsing (key: value pairs)
-  const frontmatter = {};
-  frontmatterStr.split('\n').forEach(line => {
-    const colonIndex = line.indexOf(':');
-    if (colonIndex > 0) {
-      const key = line.slice(0, colonIndex).trim();
-      let value = line.slice(colonIndex + 1).trim();
-      // Remove quotes if present
-      if ((value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'"))) {
-        value = value.slice(1, -1);
-      }
-      frontmatter[key] = value;
-    }
-  });
-
-  return { frontmatter, body };
+  // Passing an options object (even an empty one) disables gray-matter's
+  // module-level cache, which would otherwise hand back shared objects.
+  const { data, content: body } = matter(content, {});
+  return { frontmatter: data, body };
 }
 
 /**
- * Generate YAML frontmatter string
+ * Generate a YAML frontmatter block (including the `---` delimiters and
+ * a trailing newline) from a frontmatter object.
  */
 function generateFrontmatter(frontmatter) {
-  const lines = ['---'];
-  for (const [key, value] of Object.entries(frontmatter)) {
-    if (typeof value === 'string' && (value.includes(':') || value.includes('#'))) {
-      lines.push(`${key}: "${value}"`);
-    } else {
-      lines.push(`${key}: ${value}`);
-    }
-  }
-  lines.push('---\n');
-  return lines.join('\n');
+  const yamlText = yaml.dump(frontmatter, {
+    schema: FRONTMATTER_SCHEMA,
+    lineWidth: -1, // never fold long titles
+    noRefs: true,
+    quotingType: '"',
+    flowLevel: 1, // keep lists inline: `tags: [news, release]`
+  });
+  return `---\n${yamlText}---\n`;
 }
 
 /**
- * Transform frontmatter for Docusaurus compatibility
+ * Words that must keep a specific spelling when a title is derived from a
+ * file name. Keys are lower case; values are the canonical spelling.
+ * Without this, `qdp-api.md` became "Qdp Api" instead of "QDP API".
  */
-function transformFrontmatter(frontmatter, filePath) {
+const TITLE_WORDS = new Map(
+  [
+    'ADR', 'AI', 'AMD', 'API', 'APIs', 'CI', 'CLI', 'CPU', 'CUDA', 'DLPack',
+    'FAQ', 'GPU', 'GPUs', 'HTML', 'I/O', 'IO', 'IRC', 'JSON', 'LLM', 'LLMs',
+    'ML', 'NumPy', 'NVTX', 'PQC', 'PR', 'PyTorch', 'QAOA', 'QDP', 'QFT',
+    'QML', 'QPU', 'ROCm', 'SDK', 'URL', 'VQE', 'YAML',
+  ].map(word => [word.toLowerCase(), word]),
+);
+
+/**
+ * Derive a human-readable title from a file name, e.g.
+ * `qdp-gpu_faq.md` -> "QDP GPU FAQ". A leading number prefix such as
+ * `001-` is dropped, as Docusaurus does for doc IDs.
+ */
+function titleFromFilename(filePath) {
+  return path
+    .basename(filePath, path.extname(filePath))
+    .replace(/^\d+\s*[-_.]+\s*(?=[^-_.\s])/, '')
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map(word => {
+      const known = TITLE_WORDS.get(word.toLowerCase());
+      return known ?? word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
+}
+
+/**
+ * True if the markdown body starts with a level-1 heading, which
+ * Docusaurus uses as the page title when frontmatter has none.
+ */
+function hasLeadingH1(body) {
+  return /^\s*#[ \t]+\S/.test(body) || /^\s*[^\n]+\r?\n=+[ \t]*(\r?\n|$)/.test(body);
+}
+
+/**
+ * Transform frontmatter for Docusaurus compatibility.
+ *
+ * Pure function: returns a new object and never mutates its input.
+ *
+ * - Drops Jekyll-only fields (`layout`, `permalink`).
+ * - Never touches a `title` the author wrote, including an intentionally
+ *   empty one (`title: ""` is valid Docusaurus frontmatter).
+ * - If there is no title, and the body has no leading `# Heading` for
+ *   Docusaurus to use, derives one from the file name (keeping acronyms
+ *   such as QDP and GPU in their canonical form). Index pages are skipped
+ *   because their file name says nothing about the page.
+ */
+function transformFrontmatter(frontmatter, filePath, body = '') {
   const transformed = { ...frontmatter };
 
   // Remove Jekyll-specific fields
   delete transformed.layout;
   delete transformed.permalink;
 
-  // Generate title from filename if not present
-  if (!transformed.title) {
-    const basename = path.basename(filePath, '.md');
-    if (basename !== 'index') {
-      transformed.title = basename
-        .replace(/_/g, ' ')
-        .replace(/-/g, ' ')
-        .replace(/\b\w/g, c => c.toUpperCase());
-    }
+  const hasTitle = Object.prototype.hasOwnProperty.call(transformed, 'title')
+    && transformed.title !== null;
+  const basename = path.basename(filePath, path.extname(filePath));
+  if (!hasTitle && basename !== 'index' && !hasLeadingH1(body)) {
+    transformed.title = titleFromFilename(filePath);
   }
 
   return transformed;
 }
 
 /**
- * Transform markdown links for Docusaurus
+ * Transform the full text of a markdown file for Docusaurus.
+ *
+ * Pure function: no file system access. `filePath` is only used to derive
+ * a fallback title from the file name.
+ *
+ * Only the frontmatter is rewritten. The markdown body is passed through
+ * byte for byte: links are deliberately NOT rewritten, because Docusaurus
+ * resolves relative `./page.md` links to version-aware URLs itself, and
+ * stripping `.md` here caused the 404s in #1301 (fixed by #1305).
  */
-function transformLinks(content) {
-  // Match markdown links: [text](url)
-  const linkRegex = /\[([^\]]*)\]\(([^)]+)\)/g;
+function processMarkdown(content, filePath) {
+  let parsed;
+  try {
+    parsed = parseFrontmatter(content);
+  } catch (err) {
+    // Fail the sync (and so the build) loudly, naming the file to fix.
+    throw new Error(`Invalid YAML frontmatter in ${filePath}: ${err.message}`);
+  }
+  const { frontmatter, body } = parsed;
+  const transformedFrontmatter = transformFrontmatter(frontmatter, filePath, body);
 
-  return content.replace(linkRegex, (match, text, url) => {
-    // Skip external links
-    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) {
-      return match;
-    }
-
-    // Skip anchor links
-    if (url.startsWith('#')) {
-      return match;
-    }
-
-    return `[${text}](${url})`;
-  });
+  // Only add frontmatter if there's something to add
+  if (Object.keys(transformedFrontmatter).length > 0) {
+    return generateFrontmatter(transformedFrontmatter) + body;
+  }
+  return body;
 }
 
 /**
  * Process a single markdown file
  */
 function processMarkdownFile(srcPath, destPath) {
-  let content = fs.readFileSync(srcPath, 'utf-8');
-
-  const { frontmatter, body } = parseFrontmatter(content);
-  const transformedFrontmatter = transformFrontmatter(frontmatter, srcPath);
-  const transformedBody = transformLinks(body);
-
-  // Only add frontmatter if there's something to add
-  let finalContent;
-  if (Object.keys(transformedFrontmatter).length > 0) {
-    finalContent = generateFrontmatter(transformedFrontmatter) + transformedBody;
-  } else {
-    finalContent = transformedBody;
-  }
-
-  fs.writeFileSync(destPath, finalContent);
+  const content = fs.readFileSync(srcPath, 'utf-8');
+  fs.writeFileSync(destPath, processMarkdown(content, srcPath));
 }
 
 /**
@@ -330,5 +403,18 @@ function main() {
   console.log(`  Blog: ${blogStats.files} files, ${blogStats.dirs} directories`);
 }
 
-// Run the sync
-main();
+module.exports = {
+  shouldExclude,
+  parseFrontmatter,
+  generateFrontmatter,
+  transformFrontmatter,
+  titleFromFilename,
+  processMarkdown,
+  syncDirectory,
+  cleanDestination,
+};
+
+// Run the sync only when executed directly (not when required by tests).
+if (require.main === module) {
+  main();
+}
