@@ -24,6 +24,7 @@ use arrow::array::{Array, ArrayRef, FixedSizeListArray, ListArray, PrimitiveArra
 use arrow::compute;
 use arrow::datatypes::{ArrowPrimitiveType, DataType};
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
+use parquet::file::metadata::ParquetMetaData;
 
 use crate::error::{MahoutError, Result};
 use crate::reader::{
@@ -34,6 +35,54 @@ use crate::reader::{
 // ---------------------------------------------------------------------------
 // Module-level helpers
 // ---------------------------------------------------------------------------
+
+/// Reject metadata whose footer `num_rows` disagrees with the row-group sum.
+///
+/// This only catches an inconsistent footer. Both counts come from the same
+/// untrusted footer, so the returned value is a sizing hint, not a bound on how
+/// many rows the file will decode; `crate::encoding::ensure_within_capacity`
+/// enforces that bound.
+fn reconcile_row_count(footer_rows: i64, row_group_rows: i64) -> Result<usize> {
+    if footer_rows < 0 || row_group_rows < 0 {
+        return Err(MahoutError::InvalidInput(format!(
+            "Parquet metadata declares a negative row count (footer {}, row groups {}); \
+             refusing to process malformed file",
+            footer_rows, row_group_rows
+        )));
+    }
+    if footer_rows != row_group_rows {
+        return Err(MahoutError::InvalidInput(format!(
+            "Parquet footer num_rows ({}) does not match the sum of row-group row counts \
+             ({}); refusing to process potentially malformed file",
+            footer_rows, row_group_rows
+        )));
+    }
+    Ok(footer_rows as usize)
+}
+
+/// Check each count individually: `{+4, -3}` sums to 1 and would match a footer of 1.
+fn sum_row_group_rows(counts: impl IntoIterator<Item = i64>) -> Result<i64> {
+    counts.into_iter().try_fold(0i64, |acc, rows| {
+        if rows < 0 {
+            return Err(MahoutError::InvalidInput(format!(
+                "Parquet row group declares a negative row count ({}); refusing to process \
+                 malformed file",
+                rows
+            )));
+        }
+        acc.checked_add(rows).ok_or_else(|| {
+            MahoutError::InvalidInput(
+                "Parquet row-group row counts overflow i64; refusing malformed file".to_string(),
+            )
+        })
+    })
+}
+
+fn validated_total_rows(metadata: &ParquetMetaData) -> Result<usize> {
+    let footer_rows = metadata.file_metadata().num_rows();
+    let row_group_rows = sum_row_group_rows(metadata.row_groups().iter().map(|rg| rg.num_rows()))?;
+    reconcile_row_count(footer_rows, row_group_rows)
+}
 
 fn is_supported_float(dt: &DataType) -> bool {
     matches!(dt, DataType::Float32 | DataType::Float64)
@@ -243,7 +292,7 @@ impl<T: FloatElem> ParquetReader<T> {
             }
         }
 
-        let total_rows = builder.metadata().file_metadata().num_rows() as usize;
+        let total_rows = validated_total_rows(builder.metadata())?;
 
         let reader = if let Some(batch_size) = batch_size {
             builder.with_batch_size(batch_size).build()
@@ -488,7 +537,7 @@ impl<T: FloatElem> ParquetStreamingReader<T> {
             }
         }
 
-        let total_rows = builder.metadata().file_metadata().num_rows() as usize;
+        let total_rows = validated_total_rows(builder.metadata())?;
 
         let batch_size = batch_size.unwrap_or(2048);
         let reader = builder
@@ -782,6 +831,7 @@ mod tests {
     };
     use arrow::datatypes::{DataType, Field, Schema};
     use parquet::arrow::ArrowWriter;
+    use parquet::file::properties::WriterProperties;
     use std::fs;
     use std::sync::Arc;
     use std::sync::atomic::{AtomicUsize, Ordering};
@@ -822,6 +872,97 @@ mod tests {
         writer.write(&batch).unwrap();
         writer.close().unwrap();
         file
+    }
+
+    fn write_test_parquet_with_row_group_size(
+        schema: Arc<Schema>,
+        arrays: Vec<ArrayRef>,
+        max_row_group_size: usize,
+    ) -> TempTestFile {
+        let file = TempTestFile::new();
+        let batch = RecordBatch::try_new(schema.clone(), arrays).unwrap();
+        let os_file = fs::File::create(file.path()).unwrap();
+        let props = WriterProperties::builder()
+            .set_max_row_group_size(max_row_group_size)
+            .build();
+        let mut writer = ArrowWriter::try_new(os_file, schema, Some(props)).unwrap();
+        writer.write(&batch).unwrap();
+        writer.close().unwrap();
+        file
+    }
+
+    #[test]
+    fn test_reconcile_row_count_accepts_match() {
+        assert_eq!(reconcile_row_count(4, 4).unwrap(), 4);
+        assert_eq!(reconcile_row_count(0, 0).unwrap(), 0);
+    }
+
+    #[test]
+    fn test_reconcile_row_count_rejects_footer_too_small() {
+        let err = reconcile_row_count(1, 4).unwrap_err().to_string();
+        assert!(err.contains("does not match"), "unexpected error: {}", err);
+    }
+
+    #[test]
+    fn test_reconcile_row_count_rejects_footer_too_large() {
+        let err = reconcile_row_count(8, 4).unwrap_err().to_string();
+        assert!(err.contains("does not match"), "unexpected error: {}", err);
+    }
+
+    #[test]
+    fn test_reconcile_row_count_rejects_negative() {
+        let err = reconcile_row_count(-1, 4).unwrap_err().to_string();
+        assert!(err.contains("negative"), "unexpected error: {}", err);
+    }
+
+    #[test]
+    fn test_sum_row_group_rows_accepts_and_sums() {
+        assert_eq!(sum_row_group_rows([1i64, 2, 3]).unwrap(), 6);
+        assert_eq!(sum_row_group_rows(Vec::<i64>::new()).unwrap(), 0);
+    }
+
+    #[test]
+    fn test_sum_row_group_rows_rejects_negative_group() {
+        let err = sum_row_group_rows([4i64, -3]).unwrap_err().to_string();
+        assert!(err.contains("negative"), "unexpected error: {}", err);
+    }
+
+    #[test]
+    fn test_sum_row_group_rows_rejects_overflow() {
+        let err = sum_row_group_rows([i64::MAX, 1]).unwrap_err().to_string();
+        assert!(err.contains("overflow"), "unexpected error: {}", err);
+    }
+
+    #[test]
+    fn test_validated_total_rows_sums_multiple_row_groups() {
+        let item_field = Arc::new(Field::new("item", DataType::Float64, true));
+        let list_field = Field::new("data", DataType::List(item_field), true);
+        let schema = Arc::new(Schema::new(vec![list_field]));
+
+        let mut builder = ListBuilder::new(Float64Builder::new());
+        for _ in 0..3 {
+            builder.values().append_slice(&[1.0, 2.0]);
+            builder.append(true);
+        }
+        let array = Arc::new(builder.finish()) as ArrayRef;
+
+        let file = write_test_parquet_with_row_group_size(schema, vec![array], 1);
+
+        let md_builder =
+            ParquetRecordBatchReaderBuilder::try_new(fs::File::open(file.path()).unwrap()).unwrap();
+        assert!(
+            md_builder.metadata().num_row_groups() > 1,
+            "expected multiple row groups, got {}",
+            md_builder.metadata().num_row_groups()
+        );
+
+        let reader =
+            ParquetStreamingReader::<f64>::new(file.path(), None, NullHandling::FillZero).unwrap();
+        assert_eq!(reader.total_rows(), 3);
+
+        let batch_reader =
+            ParquetReader::<f64>::new(file.path(), None, NullHandling::FillZero).unwrap();
+        assert_eq!(batch_reader.get_num_samples(), Some(3));
     }
 
     #[test]

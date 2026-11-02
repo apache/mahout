@@ -192,6 +192,35 @@ pub(crate) trait ChunkEncoder {
     ) -> Result<()>;
 }
 
+/// Check that writing `samples_in_chunk` samples at `global_sample_offset` stays
+/// within the `num_samples` the output buffer was allocated for.
+///
+/// Required even though the reader validates the file's row counts: arrow-rs
+/// decodes a column chunk by its byte range, not by those counts, so a file can
+/// yield more rows than its metadata declares.
+pub(crate) fn ensure_within_capacity(
+    global_sample_offset: usize,
+    samples_in_chunk: usize,
+    num_samples: usize,
+) -> Result<usize> {
+    let next_sample_offset = global_sample_offset
+        .checked_add(samples_in_chunk)
+        .ok_or_else(|| {
+            MahoutError::MemoryAllocation(format!(
+                "Sample offset overflow: {} + {}",
+                global_sample_offset, samples_in_chunk
+            ))
+        })?;
+    if next_sample_offset > num_samples {
+        return Err(MahoutError::InvalidInput(format!(
+            "Decoded sample count exceeds allocated capacity: writing {} samples at offset {} \
+             would exceed the {} samples allocated (possible malformed Parquet metadata)",
+            samples_in_chunk, global_sample_offset, num_samples
+        )));
+    }
+    Ok(next_sample_offset)
+}
+
 /// Shared streaming pipeline for encoding data from Parquet files.
 ///
 /// This function handles all the common IO, buffering, and GPU memory
@@ -325,6 +354,9 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
         }
 
         let samples_in_chunk = current_len / sample_size;
+        let next_sample_offset =
+            ensure_within_capacity(global_sample_offset, samples_in_chunk, num_samples)?;
+
         if samples_in_chunk > 0 {
             let event_slot = if use_dev_a { 0 } else { 1 };
             // Get device pointer from staging buffers (0 if not allocated)
@@ -408,14 +440,7 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
                 }
             }
 
-            global_sample_offset = global_sample_offset
-                .checked_add(samples_in_chunk)
-                .ok_or_else(|| {
-                    MahoutError::MemoryAllocation(format!(
-                        "Sample offset overflow: {} + {}",
-                        global_sample_offset, samples_in_chunk
-                    ))
-                })?;
+            global_sample_offset = next_sample_offset;
             use_dev_a = !use_dev_a;
         }
 
@@ -432,6 +457,17 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
     io_handle
         .join()
         .map_err(|e| MahoutError::Io(format!("IO thread panicked: {:?}", e)))?;
+
+    // `GpuStateVector::new_batch` does not zero the buffer; a short read would
+    // return uninitialized device memory through DLPack.
+    if global_sample_offset != num_samples {
+        return Err(MahoutError::InvalidInput(format!(
+            "Parquet file produced {} samples but its metadata declared {}; refusing to return \
+             a partially initialized tensor (this can also happen when the file begins with \
+             all-null rows in a List column)",
+            global_sample_offset, num_samples
+        )));
+    }
 
     let dlpack_ptr = total_state_vector.to_dlpack();
     Ok(dlpack_ptr)
@@ -467,10 +503,47 @@ pub(crate) fn encode_from_parquet(
 
 #[cfg(test)]
 mod tests {
-    use super::shutdown_io_thread;
+    use super::*;
     use std::sync::mpsc::{RecvTimeoutError, sync_channel};
     use std::thread;
     use std::time::Duration;
+
+    #[test]
+    fn ensure_within_capacity_allows_exact_fit() {
+        assert_eq!(ensure_within_capacity(0, 2, 4).unwrap(), 2);
+        assert_eq!(ensure_within_capacity(2, 2, 4).unwrap(), 4);
+        assert_eq!(ensure_within_capacity(4, 0, 4).unwrap(), 4);
+    }
+
+    #[test]
+    fn ensure_within_capacity_rejects_overrun() {
+        let err = ensure_within_capacity(0, 10_000, 1)
+            .unwrap_err()
+            .to_string();
+        assert!(
+            err.contains("exceeds allocated capacity"),
+            "unexpected error: {}",
+            err
+        );
+    }
+
+    #[test]
+    fn ensure_within_capacity_rejects_overrun_mid_stream() {
+        let err = ensure_within_capacity(3, 2, 4).unwrap_err().to_string();
+        assert!(
+            err.contains("exceeds allocated capacity"),
+            "unexpected error: {}",
+            err
+        );
+    }
+
+    #[test]
+    fn ensure_within_capacity_rejects_offset_overflow() {
+        let err = ensure_within_capacity(usize::MAX, 1, usize::MAX)
+            .unwrap_err()
+            .to_string();
+        assert!(err.contains("overflow"), "unexpected error: {}", err);
+    }
 
     /// Run `shutdown_io_thread` off the test thread so a regression shows up as
     /// a failure instead of hanging the test binary. Panics with a message that
