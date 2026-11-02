@@ -28,9 +28,9 @@ import pytest
 
 def test_engine_without_gpu_raises_runtime_error():
     import _qdp
-    from qumat_qdp import is_cuda_available
+    from qumat_qdp import is_native_cuda_available
 
-    if is_cuda_available():
+    if is_native_cuda_available():
         pytest.skip("a CUDA device is available; nothing to check")
     with pytest.raises(RuntimeError, match="no usable CUDA device"):
         _qdp.QdpEngine(0)
@@ -38,9 +38,9 @@ def test_engine_without_gpu_raises_runtime_error():
 
 def test_engine_without_gpu_float64_raises_runtime_error():
     import _qdp
-    from qumat_qdp import is_cuda_available
+    from qumat_qdp import is_native_cuda_available
 
-    if is_cuda_available():
+    if is_native_cuda_available():
         pytest.skip("a CUDA device is available; nothing to check")
     with pytest.raises(RuntimeError, match="no usable CUDA device"):
         _qdp.QdpEngine(0, precision="float64")
