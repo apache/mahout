@@ -94,7 +94,7 @@ tensor = torch.from_dlpack(qtensor)
 | `phase` | one phase angle per qubit (`num_qubits` values per sample) | `engine.encode([0.0, 1.57], num_qubits=2, encoding_method="phase")` |
 | `iqp`, `iqp-z` | data length matches the IQP parameter shape for `num_qubits` (`iqp-z`: `n`; `iqp`: `n + n*(n-1)/2`) | `engine.encode([0.1, 0.2, 0.3], num_qubits=2, encoding_method="iqp")` |
 
-> Backend support: `amplitude`, `angle`, and `basis` work on both CUDA and AMD. `phase`, `iqp`, and `iqp-z` are CUDA-only today. See [Concepts](./concepts/) for IQP parameter layout, phase encoding semantics, and method details.
+> Backend support: all six methods work on both CUDA and AMD. See [Concepts](./concepts/) for IQP parameter layout, phase encoding semantics, and method details.
 
 ## File Inputs
 
