@@ -36,26 +36,12 @@ use crate::reader::{
 // Module-level helpers
 // ---------------------------------------------------------------------------
 
-/// Cross-check a Parquet file's two declared row counts against each other.
+/// Reject metadata whose footer `num_rows` disagrees with the row-group sum.
 ///
-/// `FileMetaData::num_rows` and the per-row-group counts are both self-declared
-/// fields of the same, potentially attacker-supplied, footer. Requiring them to
-/// agree catches a footer edited in isolation, which is the common tampering
-/// case, and rejects negative counts that would otherwise wrap when cast to
-/// `usize`.
-///
-/// The value returned here is a sanity-checked sizing hint, **never a trusted
-/// bound**: a file whose two counts lie *consistently* passes this check and
-/// still decodes more rows than it declares. `crate::encoding::ensure_within_capacity`
-/// is the authoritative guard, and documents why.
-///
-/// A disagreement is rejected rather than tolerated (e.g. warning and sizing
-/// from the row-group sum instead) because arrow-rs, parquet-mr and pyarrow all
-/// derive the footer count from the row groups: a mismatch means something is
-/// genuinely wrong rather than merely unusual, and this value sizes a GPU
-/// allocation. Preferring the more plausible of two untrusted numbers would add
-/// a decision without adding safety, since neither one bounds decoding. Please
-/// revisit that reasoning before loosening this to a warning.
+/// This only catches an inconsistent footer. Both counts come from the same
+/// untrusted footer, so the returned value is a sizing hint, not a bound on how
+/// many rows the file will decode; `crate::encoding::ensure_within_capacity`
+/// enforces that bound.
 fn reconcile_row_count(footer_rows: i64, row_group_rows: i64) -> Result<usize> {
     if footer_rows < 0 || row_group_rows < 0 {
         return Err(MahoutError::InvalidInput(format!(
@@ -74,11 +60,7 @@ fn reconcile_row_count(footer_rows: i64, row_group_rows: i64) -> Result<usize> {
     Ok(footer_rows as usize)
 }
 
-/// Sum per-row-group row counts, rejecting negative or overflowing values.
-///
-/// Each count must be checked individually: a crafted file with row groups
-/// `{+4, -3}` sums to `1` and would match a footer `num_rows` of `1`, hiding
-/// four real rows behind an allocation sized for one.
+/// Check each count individually: `{+4, -3}` sums to 1 and would match a footer of 1.
 fn sum_row_group_rows(counts: impl IntoIterator<Item = i64>) -> Result<i64> {
     counts.into_iter().try_fold(0i64, |acc, rows| {
         if rows < 0 {
@@ -96,13 +78,6 @@ fn sum_row_group_rows(counts: impl IntoIterator<Item = i64>) -> Result<i64> {
     })
 }
 
-/// Read the total row count from Parquet metadata, cross-checking the footer
-/// against the sum of the per-row-group counts.
-///
-/// Returns a consistency-checked row count, or an error if the metadata
-/// contradicts itself. See [`reconcile_row_count`] for why this is a sanity
-/// check and not a trust boundary: any consumer that sizes a buffer from this
-/// value must still bound itself against the data it actually decodes.
 fn validated_total_rows(metadata: &ParquetMetaData) -> Result<usize> {
     let footer_rows = metadata.file_metadata().num_rows();
     let row_group_rows = sum_row_group_rows(metadata.row_groups().iter().map(|rg| rg.num_rows()))?;
@@ -899,8 +874,6 @@ mod tests {
         file
     }
 
-    /// Like [`write_test_parquet`] but caps each row group at `max_row_group_size`
-    /// rows, so a small batch can be split across multiple row groups.
     fn write_test_parquet_with_row_group_size(
         schema: Arc<Schema>,
         arrays: Vec<ArrayRef>,
@@ -920,32 +893,24 @@ mod tests {
 
     #[test]
     fn test_reconcile_row_count_accepts_match() {
-        // Well-formed file: footer num_rows equals the row-group sum.
         assert_eq!(reconcile_row_count(4, 4).unwrap(), 4);
-        // Empty file is valid.
         assert_eq!(reconcile_row_count(0, 0).unwrap(), 0);
     }
 
     #[test]
     fn test_reconcile_row_count_rejects_footer_too_small() {
-        // Footer edited in isolation to under-report rows. This is the common
-        // tampering case; a footer that lies consistently with its row groups is
-        // caught later, by `encoding::ensure_within_capacity`.
         let err = reconcile_row_count(1, 4).unwrap_err().to_string();
         assert!(err.contains("does not match"), "unexpected error: {}", err);
     }
 
     #[test]
     fn test_reconcile_row_count_rejects_footer_too_large() {
-        // Footer over-reports rows: no OOB write, but the DLPack tail would
-        // expose uninitialized GPU memory (info leak). Rejected all the same.
         let err = reconcile_row_count(8, 4).unwrap_err().to_string();
         assert!(err.contains("does not match"), "unexpected error: {}", err);
     }
 
     #[test]
     fn test_reconcile_row_count_rejects_negative() {
-        // A negative footer would wrap to a huge value through `as usize`.
         let err = reconcile_row_count(-1, 4).unwrap_err().to_string();
         assert!(err.contains("negative"), "unexpected error: {}", err);
     }
@@ -958,8 +923,6 @@ mod tests {
 
     #[test]
     fn test_sum_row_group_rows_rejects_negative_group() {
-        // {+4, -3} sums to 1 and would match a footer num_rows of 1, hiding four
-        // real rows behind an allocation sized for one. Summing alone is not enough.
         let err = sum_row_group_rows([4i64, -3]).unwrap_err().to_string();
         assert!(err.contains("negative"), "unexpected error: {}", err);
     }
@@ -972,8 +935,6 @@ mod tests {
 
     #[test]
     fn test_validated_total_rows_sums_multiple_row_groups() {
-        // A List<f64> column with 3 samples, forced to one row per row group so
-        // the file genuinely has multiple row groups to sum over.
         let item_field = Arc::new(Field::new("item", DataType::Float64, true));
         let list_field = Field::new("data", DataType::List(item_field), true);
         let schema = Arc::new(Schema::new(vec![list_field]));
@@ -987,8 +948,6 @@ mod tests {
 
         let file = write_test_parquet_with_row_group_size(schema, vec![array], 1);
 
-        // Guard: confirm the writer really produced >1 row group, otherwise this
-        // test would not exercise the per-row-group summation at all.
         let md_builder =
             ParquetRecordBatchReaderBuilder::try_new(fs::File::open(file.path()).unwrap()).unwrap();
         assert!(
@@ -997,14 +956,10 @@ mod tests {
             md_builder.metadata().num_row_groups()
         );
 
-        // Legit file: footer num_rows (3) equals 1+1+1 across the row groups, so
-        // it must be accepted (not falsely rejected) and report the correct total.
         let reader =
             ParquetStreamingReader::<f64>::new(file.path(), None, NullHandling::FillZero).unwrap();
         assert_eq!(reader.total_rows(), 3);
 
-        // The non-streaming reader shares the same validation helper; assert it is
-        // actually wired up so that second call site cannot silently regress.
         let batch_reader =
             ParquetReader::<f64>::new(file.path(), None, NullHandling::FillZero).unwrap();
         assert_eq!(batch_reader.get_num_samples(), Some(3));

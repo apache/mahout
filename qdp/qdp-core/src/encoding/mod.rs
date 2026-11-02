@@ -192,18 +192,12 @@ pub(crate) trait ChunkEncoder {
     ) -> Result<()>;
 }
 
-/// Bound one chunk's write against the allocated state vector.
+/// Check that writing `samples_in_chunk` samples at `global_sample_offset` stays
+/// within the `num_samples` the output buffer was allocated for.
 ///
-/// Returns the sample offset reached after writing `samples_in_chunk` samples
-/// starting at `global_sample_offset`, or an error if that would run past the
-/// `num_samples` the output buffer was allocated for.
-///
-/// This is the authoritative guard against the out-of-bounds device write
-/// (CWE-787) — not the metadata reconciliation in `crate::readers::parquet`.
-/// arrow-rs bounds decoding by a column chunk's byte range rather than by the
-/// declared row counts, so a file whose footer and row-group counts lie
-/// consistently passes that reconciliation and arrives here with more samples
-/// than the allocation can hold.
+/// Required even though the reader validates the file's row counts: arrow-rs
+/// decodes a column chunk by its byte range, not by those counts, so a file can
+/// yield more rows than its metadata declares.
 pub(crate) fn ensure_within_capacity(
     global_sample_offset: usize,
     samples_in_chunk: usize,
@@ -360,10 +354,6 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
         }
 
         let samples_in_chunk = current_len / sample_size;
-
-        // Authoritative bounds check: the reader's row count is only a
-        // consistency-checked hint, so every chunk is bounded here before any
-        // kernel writes to the device buffer.
         let next_sample_offset =
             ensure_within_capacity(global_sample_offset, samples_in_chunk, num_samples)?;
 
@@ -468,15 +458,8 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
         .join()
         .map_err(|e| MahoutError::Io(format!("IO thread panicked: {:?}", e)))?;
 
-    // The device buffer was sized for `num_samples` from the file's declared row
-    // count, and `GpuStateVector::new_batch` allocates without zeroing. If the
-    // reader produced fewer samples, the uninitialized tail would be handed to
-    // the caller through DLPack, so refuse instead of leaking GPU memory.
-    //
-    // A short read is not always the file's fault: `ParquetStreamingReader`
-    // currently drops leading all-null rows in a `List` column under
-    // `NullHandling::FillZero`, because the sample size is not yet known
-    // at that point. See issue #1574; the error below hints at it.
+    // `GpuStateVector::new_batch` does not zero the buffer; a short read would
+    // return uninitialized device memory through DLPack.
     if global_sample_offset != num_samples {
         return Err(MahoutError::InvalidInput(format!(
             "Parquet file produced {} samples but its metadata declared {}; refusing to return \
@@ -527,18 +510,13 @@ mod tests {
 
     #[test]
     fn ensure_within_capacity_allows_exact_fit() {
-        // Chunks that exactly fill the allocation are the normal case.
         assert_eq!(ensure_within_capacity(0, 2, 4).unwrap(), 2);
         assert_eq!(ensure_within_capacity(2, 2, 4).unwrap(), 4);
-        // A zero-sample chunk never moves the offset.
         assert_eq!(ensure_within_capacity(4, 0, 4).unwrap(), 4);
     }
 
     #[test]
     fn ensure_within_capacity_rejects_overrun() {
-        // A Parquet file whose footer and row-group counts lie *consistently*
-        // passes the reader's reconciliation and reaches here with more samples
-        // than were allocated. This check is what stops the OOB device write.
         let err = ensure_within_capacity(0, 10_000, 1)
             .unwrap_err()
             .to_string();
@@ -551,8 +529,6 @@ mod tests {
 
     #[test]
     fn ensure_within_capacity_rejects_overrun_mid_stream() {
-        // The overrun may only appear on a later chunk, once earlier chunks have
-        // already advanced the offset.
         let err = ensure_within_capacity(3, 2, 4).unwrap_err().to_string();
         assert!(
             err.contains("exceeds allocated capacity"),
