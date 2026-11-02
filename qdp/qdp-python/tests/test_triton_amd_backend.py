@@ -364,4 +364,4 @@ def test_unified_router_iqp_and_phase_routes() -> None:
     qt_z = router.encode(torch.randn(2, n, device="cuda"), n, "iqp-z")
     assert torch.from_dlpack(qt_z).shape == (2, 1 << n)
     qt_p = router.encode(torch.randn(2, n, device="cuda"), n, "phase")
-    assert qt_p.shape == (2, 1 << n)
+    assert torch.from_dlpack(qt_p).shape == (2, 1 << n)

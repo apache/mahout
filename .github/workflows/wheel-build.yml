@@ -122,7 +122,7 @@ jobs:
             tag="cp${py/./}"
             uv venv --python "$py" "/tmp/qdp-smoke-$tag"
             VIRTUAL_ENV="/tmp/qdp-smoke-$tag" uv pip install dist/*"$tag"*.whl
-            "/tmp/qdp-smoke-$tag/bin/python" -c "from qumat_qdp._backend import get_qdp; assert get_qdp() is not None, 'Rust extension failed to load'; print('$py: qumat_qdp import OK')"
+            "/tmp/qdp-smoke-$tag/bin/python" -c "from qumat_qdp._native import get_qdp; assert get_qdp() is not None, 'Rust extension failed to load'; print('$py: qumat_qdp import OK')"
           done
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
