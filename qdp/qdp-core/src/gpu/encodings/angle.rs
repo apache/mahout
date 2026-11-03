@@ -24,9 +24,11 @@ use super::{QuantumEncoder, validate_qubit_count};
 #[cfg(target_os = "linux")]
 use crate::error::cuda_error_to_string;
 use crate::error::{MahoutError, Result};
+#[cfg(target_os = "linux")]
+use crate::gpu::memory::GpuElem;
 use crate::gpu::memory::{GpuStateVector, Precision};
 #[cfg(target_os = "linux")]
-use crate::gpu::pipeline::run_dual_stream_pipeline_aligned;
+use crate::gpu::pipeline::run_dual_stream_pipeline_aligned_typed;
 use cudarc::driver::CudaDevice;
 use std::sync::Arc;
 
@@ -433,7 +435,7 @@ impl QuantumEncoder for AngleEncoder {
         // worth of elements), scaled for f32's smaller element size.
         const ASYNC_THRESHOLD_ELEMENTS: usize = 1024 * 1024 / std::mem::size_of::<f32>(); // 1MB
         if batch_data.len() >= ASYNC_THRESHOLD_ELEMENTS {
-            return Self::encode_batch_async_pipeline_f32(
+            return Self::encode_batch_async_pipeline(
                 device,
                 batch_data,
                 num_samples,
@@ -738,27 +740,40 @@ impl AngleEncoder {
         }
     }
 
+    /// Large-batch path shared by `encode_batch` (f64) and
+    /// `encode_batch_f32` (f32): overlaps chunked H2D copies with the batch
+    /// angle kernel on two streams. `T` picks the launcher
+    /// (`T::ANGLE_ENCODE_BATCH`) and the output precision (`T::PRECISION`).
     #[cfg(target_os = "linux")]
-    fn encode_batch_async_pipeline(
+    fn encode_batch_async_pipeline<T: GpuElem>(
         device: &Arc<CudaDevice>,
-        batch_data: &[f64],
+        batch_data: &[T],
         num_samples: usize,
         sample_size: usize,
         num_qubits: usize,
         state_len: usize,
     ) -> Result<GpuStateVector> {
-        let batch_state_vector = {
-            crate::profile_scope!("GPU::AllocBatch");
-            GpuStateVector::new_batch(device, num_samples, num_qubits, Precision::Float64)?
+        // NVTX labels must be literals; keep the per-precision names that
+        // existing profiles use. `T::PRECISION` is a const, so this folds.
+        let batch_state_vector = match T::PRECISION {
+            Precision::Float64 => {
+                crate::profile_scope!("GPU::AllocBatch");
+                GpuStateVector::new_batch(device, num_samples, num_qubits, T::PRECISION)?
+            }
+            Precision::Float32 => {
+                crate::profile_scope!("GPU::AllocBatchF32");
+                GpuStateVector::new_batch(device, num_samples, num_qubits, T::PRECISION)?
+            }
         };
 
-        let state_ptr = batch_state_vector.ptr_f64().ok_or_else(|| {
-            MahoutError::InvalidInput(
-                "Batch state vector precision mismatch (expected float64 buffer)".to_string(),
-            )
+        let state_ptr = batch_state_vector.ptr_for::<T>().ok_or_else(|| {
+            MahoutError::InvalidInput(format!(
+                "Batch state vector precision mismatch (expected {} buffer)",
+                precision_name(T::PRECISION)
+            ))
         })?;
 
-        run_dual_stream_pipeline_aligned(
+        run_dual_stream_pipeline_aligned_typed(
             device,
             batch_data,
             sample_size,
@@ -777,7 +792,7 @@ impl AngleEncoder {
 
                 let state_ptr_offset = unsafe { state_ptr.add(offset_elements) as *mut c_void };
                 let ret = unsafe {
-                    qdp_kernels::launch_angle_encode_batch(
+                    (T::ANGLE_ENCODE_BATCH)(
                         input_ptr,
                         state_ptr_offset,
                         chunk_samples,
@@ -789,7 +804,8 @@ impl AngleEncoder {
 
                 if ret != 0 {
                     return Err(MahoutError::KernelLaunch(format!(
-                        "Batch angle encoding kernel failed: {} ({})",
+                        "Batch angle encoding kernel{} failed: {} ({})",
+                        precision_tag(T::PRECISION),
                         ret,
                         cuda_error_to_string(ret)
                     )));
@@ -801,68 +817,36 @@ impl AngleEncoder {
 
         Ok(batch_state_vector)
     }
+}
 
-    #[cfg(target_os = "linux")]
-    fn encode_batch_async_pipeline_f32(
-        device: &Arc<CudaDevice>,
-        batch_data: &[f32],
-        num_samples: usize,
-        sample_size: usize,
-        num_qubits: usize,
-        state_len: usize,
-    ) -> Result<GpuStateVector> {
-        let batch_state_vector = {
-            crate::profile_scope!("GPU::AllocBatchF32");
-            GpuStateVector::new_batch(device, num_samples, num_qubits, Precision::Float32)?
-        };
+/// `"float64"` / `"float32"`, as used in buffer-mismatch messages.
+#[cfg(target_os = "linux")]
+fn precision_name(precision: Precision) -> &'static str {
+    match precision {
+        Precision::Float64 => "float64",
+        Precision::Float32 => "float32",
+    }
+}
 
-        let state_ptr = batch_state_vector.ptr_f32().ok_or_else(|| {
-            MahoutError::InvalidInput(
-                "Batch state vector precision mismatch (expected float32 buffer)".to_string(),
-            )
-        })?;
+/// `""` / `" (f32)"`: keeps the pre-existing kernel error text per precision.
+#[cfg(target_os = "linux")]
+fn precision_tag(precision: Precision) -> &'static str {
+    match precision {
+        Precision::Float64 => "",
+        Precision::Float32 => " (f32)",
+    }
+}
 
-        crate::gpu::pipeline::run_dual_stream_pipeline_aligned_f32(
-            device,
-            batch_data,
-            sample_size,
-            |stream, input_ptr, chunk_offset, chunk_len| {
-                if chunk_len % sample_size != 0 || chunk_offset % sample_size != 0 {
-                    return Err(MahoutError::InvalidInput(
-                        "Angle batch chunk is not aligned to sample size".to_string(),
-                    ));
-                }
+#[cfg(all(test, target_os = "linux"))]
+mod tests {
+    use super::*;
 
-                let chunk_samples = chunk_len / sample_size;
-                let sample_offset = chunk_offset / sample_size;
-                let offset_elements = sample_offset.checked_mul(state_len).ok_or_else(|| {
-                    MahoutError::InvalidInput("Angle batch output offset overflow".to_string())
-                })?;
-
-                let state_ptr_offset = unsafe { state_ptr.add(offset_elements) as *mut c_void };
-                let ret = unsafe {
-                    qdp_kernels::launch_angle_encode_batch_f32(
-                        input_ptr,
-                        state_ptr_offset,
-                        chunk_samples,
-                        state_len,
-                        num_qubits as u32,
-                        stream.stream as *mut c_void,
-                    )
-                };
-
-                if ret != 0 {
-                    return Err(MahoutError::KernelLaunch(format!(
-                        "Batch angle encoding kernel (f32) failed: {} ({})",
-                        ret,
-                        cuda_error_to_string(ret)
-                    )));
-                }
-
-                Ok(())
-            },
-        )?;
-
-        Ok(batch_state_vector)
+    /// The generic pipeline must reproduce the old per-precision messages.
+    #[test]
+    fn pipeline_messages_match_legacy_text() {
+        assert_eq!(precision_name(Precision::Float64), "float64");
+        assert_eq!(precision_name(Precision::Float32), "float32");
+        assert_eq!(precision_tag(Precision::Float64), "");
+        assert_eq!(precision_tag(Precision::Float32), " (f32)");
     }
 }
