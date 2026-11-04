@@ -24,8 +24,6 @@ from pathlib import Path
 import pytest
 
 _QDP_PYTHON = Path(__file__).resolve().parents[2] / "qdp" / "qdp-python"
-if str(_QDP_PYTHON) not in sys.path:
-    sys.path.insert(0, str(_QDP_PYTHON))
 
 
 def _install_local_benchmark_package() -> None:

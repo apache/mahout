@@ -21,6 +21,7 @@ from __future__ import annotations
 from typing import Any
 
 from qumat_qdp.backends.cuda import CudaBackendEngine
+from qumat_qdp.tensor import QdpTensor
 
 AmdBackendEngine: Any | None = None
 
@@ -114,7 +115,7 @@ class QdpEngine:
         data: Any,
         num_qubits: int,
         encoding_method: str = "amplitude",
-    ) -> Any:
+    ) -> QdpTensor:
         """Encode input samples with the configured backend.
 
         :param data: Input samples accepted by the selected backend.
@@ -122,7 +123,11 @@ class QdpEngine:
         :param encoding_method: Encoding strategy, such as ``"amplitude"``,
             ``"angle"``, ``"basis"``, ``"iqp"``, ``"iqp-z"``, or
             ``"phase"`` when supported by the backend.
-        :returns: Backend-native encoded tensor or tensor-like result.
+        :returns: A ``QdpTensor`` wrapping the backend-native result; convert
+            with ``torch.from_dlpack(result)`` or ``result.to_torch()``.
         :raises ValueError: If the backend does not support ``encoding_method``.
         """
-        return self._engine_adapter.encode(data, num_qubits, encoding_method)
+        return QdpTensor(
+            self._engine_adapter.encode(data, num_qubits, encoding_method),
+            backend=self.backend,
+        )

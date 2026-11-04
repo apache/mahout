@@ -20,7 +20,8 @@
 # GitHub auto-merge only waits for *required* status checks, and a required
 # check blocks manual merges just the same. So the only required CI-related
 # check is the "Auto-merge gate" job below. It runs on the PR itself, polls
-# the other pull_request workflows of the same commit until they have all
+# the other pull_request workflows of the same commit (except "PR Approval
+# Check", which is its own required check and not CI) until they have all
 # completed (the check is "in progress" meanwhile, so auto-merge cannot fire
 # early), and then
 #   * passes when everything succeeded (auto-merge proceeds), or
@@ -77,5 +78,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           GATE_WORKFLOW: ${{ github.workflow }}
+          # name: of pr-approval-check.yml; not CI, so the gate does not wait for it.
+          APPROVAL_WORKFLOW: "PR Approval Check"
           MAX_WAIT_MINUTES: "55"
         run: python3 .github/scripts/automerge_gate.py
