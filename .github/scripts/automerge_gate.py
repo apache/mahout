@@ -24,7 +24,8 @@ every CI job required would also block committers from merging manually when
 they decide a failure is acceptable (e.g. a flaky external check), which is
 not what the project wants. So instead a single required check, run by a
 ``pull_request`` job on the PR itself, polls the other ``pull_request``
-workflows of the head commit until all of them have completed and then:
+workflows of the head commit (except the committer-approval check, which is
+its own required check and not CI) until all of them have completed and then:
 
 * if every one of them passed (or was skipped) -> exit 0; auto-merge, if
   enabled, merges the PR;
@@ -68,12 +69,15 @@ from typing import Any
 
 API_URL = os.environ.get("GITHUB_API_URL", "https://api.github.com")
 GRAPHQL_URL = os.environ.get("GITHUB_GRAPHQL_URL", "https://api.github.com/graphql")
-# Only workflows triggered by these events are CI for the pull request. In
-# particular this excludes "PR Approval Check" (pull_request_target), which is
-# its own required status check.
+# Only workflows triggered by these events are CI for the pull request.
 PR_EVENTS = {"pull_request"}
-# The gate's own workflow (name: in automerge-gate.yml) must not wait for itself.
+# pull_request workflows that are not CI and must not be waited for: the gate
+# itself (name: in automerge-gate.yml) and the committer-approval check (name:
+# in pr-approval-check.yml), which is its own required status check and fails
+# by design until the PR has enough approvals.
 GATE_WORKFLOW = os.environ.get("GATE_WORKFLOW", "Auto-merge Gate")
+APPROVAL_WORKFLOW = os.environ.get("APPROVAL_WORKFLOW", "PR Approval Check")
+IGNORED_WORKFLOWS = {GATE_WORKFLOW, APPROVAL_WORKFLOW}
 POLL_SECONDS = int(os.environ.get("POLL_SECONDS", "30"))
 # Conclusions that do not count as a CI failure.
 OK_CONCLUSIONS = {"success", "skipped", "neutral"}
@@ -150,7 +154,7 @@ def latest_pr_runs(runs: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         if run.get("event") not in PR_EVENTS:
             continue
         name = run.get("name") or str(run.get("workflow_id"))
-        if name == GATE_WORKFLOW:
+        if name in IGNORED_WORKFLOWS:
             continue
         if name not in latest or run["id"] > latest[name]["id"]:
             latest[name] = run

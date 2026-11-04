@@ -12,7 +12,7 @@ This page explains the core concepts behind QDP (Quantum Data Plane): the archit
 
 At a high level, QDP is organized as layered components:
 
-- **Python API (Qumat)**: `qumat.qdp` exposes a friendly Python entry point (`QdpEngine`).
+- **Python API (Qumat)**: `qumat_qdp` is the Python package; `qumat.qdp` re-exports its `QdpEngine` and `QuantumTensor`.
 - **Python native extension (PyO3)**: `qdp/qdp-python` builds the `_qdp` module, bridging Python ↔ Rust and implementing Python-side DLPack (`__dlpack__`).
 - **Rust core**: `qdp/qdp-core` contains the engine (`QdpEngine`), encoder implementations, IO readers, GPU pipelines, and DLPack export.
 - **CUDA kernels**: `qdp/qdp-kernels` provides the CUDA kernels invoked by the Rust encoders.
@@ -147,7 +147,7 @@ Key properties in QDP:
 - **Input shape**: exactly one phase angle per qubit.
 - **Validation**: all phase angles must be finite.
 - **State structure**: all computational-basis amplitudes have equal magnitude $1/\sqrt{2^n}$; the data changes the phases, not the magnitudes.
-- **Route support**: phase encoding is available on the CUDA encode path. It is not currently part of the AMD route or the CUDA tensor direct-input fast path.
+- **Route support**: phase encoding is available on the CUDA and AMD encode paths. It is not currently part of the CUDA tensor direct-input fast path.
 
 When to use it:
 
@@ -169,7 +169,7 @@ Key properties in QDP:
   - `iqp`: exactly `n + n(n-1)/2` parameters
 - **Validation**: all parameters must be finite.
 - **State structure**: unlike `angle` and `phase`, these methods can encode entangling structure through the diagonal phase construction.
-- **Route support**: `iqp` and `iqp-z` are supported on the CUDA encode path. The AMD route does not currently implement them.
+- **Route support**: `iqp` and `iqp-z` are supported on the CUDA and AMD encode paths.
 
 When to use them:
 

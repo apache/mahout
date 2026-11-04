@@ -15,19 +15,19 @@
 # limitations under the License.
 
 """
-Benchmark API: supports Rust-optimized pipeline and PyTorch reference backend.
+Benchmark API: throughput and latency benchmarks for the CUDA and AMD backends.
 
 Usage:
 
 ```python
 from qumat_qdp import QdpBenchmark, ThroughputResult, LatencyResult
 
-# Rust backend (default):
+# CUDA backend (default, Rust pipeline):
 result = (QdpBenchmark(device_id=0).qubits(16).encoding("amplitude")
           .batches(100, size=64).warmup(2).run_throughput())
 
-# PyTorch reference (must be explicitly selected):
-result = (QdpBenchmark(device_id=0).backend("pytorch").qubits(16)
+# AMD backend (Triton, ROCm):
+result = (QdpBenchmark(device_id=0).backend("amd").qubits(16)
           .encoding("amplitude").batches(100, size=64).run_throughput())
 ```
 """
@@ -75,7 +75,7 @@ def _get_run_throughput_pipeline_py():
     if _run_throughput_pipeline_py is not None:
         return _run_throughput_pipeline_py
 
-    from qumat_qdp._backend import get_qdp
+    from qumat_qdp._native import get_qdp
 
     qdp = get_qdp()
     if qdp is None:
@@ -101,8 +101,8 @@ class QdpBenchmark:
     Builder for throughput/latency benchmarks.
 
     Supports two backends:
-    - ``"rust"`` (default): Rust-optimized pipeline (no Python for-loop, GIL released).
-    - ``"pytorch"``: Pure PyTorch reference implementation (must be explicitly selected).
+    - ``"cuda"`` (default): Rust-optimized pipeline (no Python for-loop, GIL released).
+    - ``"amd"``: Triton AMD engine on a ROCm device.
     """
 
     def __init__(self, device_id: int = 0) -> None:
@@ -112,8 +112,8 @@ class QdpBenchmark:
         self._total_batches: int | None = None
         self._batch_size: int = 64
         self._warmup_batches: int = 0
-        self._backend_name: str = "rust"
-        self._dtype: str = "f64"
+        self._backend_name: str = "cuda"
+        self._dtype: str = "f32"
 
     def qubits(self, n: int) -> QdpBenchmark:
         """Set the number of qubits for benchmarked encodings.
@@ -149,7 +149,7 @@ class QdpBenchmark:
         """Accept a prefetch setting for fluent API compatibility.
 
         The current Rust benchmark pipeline manages work internally and the
-        PyTorch reference path does not use a Python-side prefetch queue, so
+        AMD path does not use a Python-side prefetch queue, so
         ``n`` is intentionally ignored.
 
         :param n: Requested prefetch depth; currently unused.
@@ -169,26 +169,27 @@ class QdpBenchmark:
     def backend(self, name: str) -> QdpBenchmark:
         """Select the benchmark execution backend.
 
-        ``"rust"`` (the default) uses the native optimized pipeline exposed by
+        ``"cuda"`` (the default) uses the native optimized pipeline exposed by
         the ``_qdp`` extension and raises at run time if that extension or entry
-        point is unavailable.  ``"pytorch"`` uses the pure-PyTorch reference
-        implementation on the selected CUDA device when usable, otherwise CPU.
+        point is unavailable.  ``"amd"`` runs the Triton AMD engine on the
+        selected ROCm device and raises at run time if no ROCm runtime is
+        available.
 
-        :param name: Backend name, either ``"rust"`` or ``"pytorch"``.
+        :param name: ``"cuda"`` or ``"amd"``.
         :returns: ``self`` for fluent builder chaining.
         :raises ValueError: If ``name`` is not a supported backend.
         """
-        if name not in ("rust", "pytorch"):
-            raise ValueError(f"backend must be 'rust' or 'pytorch', got {name!r}")
+        if name not in ("cuda", "amd"):
+            raise ValueError(f"backend must be 'cuda' or 'amd', got {name!r}")
         self._backend_name = name
         return self
 
     def dtype(self, dtype: str) -> QdpBenchmark:
-        """Set pipeline element dtype: ``'f64'`` (default) or ``'f32'``.
+        """Set pipeline element dtype: ``'f32'`` (default) or ``'f64'``.
 
-        ``'f32'`` activates the zero-copy float32 batch path where the encoding
-        supports it; encodings without an f32 kernel automatically fall back to
-        f64 inside the Rust pipeline.
+        ``'f32'`` uses the float32 batch path where the encoding supports it
+        (``amplitude``, ``angle``, ``basis``); for other encodings the Rust
+        pipeline falls back to f64.
         """
         if dtype not in ("f32", "f64"):
             raise ValueError(f"dtype must be 'f32' or 'f64', got {dtype!r}")
@@ -205,38 +206,38 @@ class QdpBenchmark:
         """Run the configured throughput benchmark.
 
         ``qubits()`` and ``batches()`` must be configured before calling this
-        method.  The default ``"rust"`` backend calls the native ``_qdp``
-        pipeline with any configured warmup batches; ``"pytorch"`` runs the
-        reference encoder loop and synchronizes CUDA timing when applicable.
+        method.  The default ``"cuda"`` backend calls the native ``_qdp``
+        pipeline with any configured warmup batches; ``"amd"`` runs a Python
+        encoder loop and synchronizes GPU timing.
 
         :returns: A ``ThroughputResult`` containing elapsed seconds and
             encoded vectors per second.
         :raises ValueError: If required benchmark parameters are missing.
-        :raises RuntimeError: If the Rust backend is selected but unavailable.
+        :raises RuntimeError: If the selected GPU backend is unavailable.
         """
         self._validate()
-        if self._backend_name == "pytorch":
-            return self._run_throughput_pytorch()
+        if self._backend_name == "amd":
+            return self._run_throughput_amd()
         return self._run_throughput_rust()
 
     def run_latency(self) -> LatencyResult:
         """Run the configured latency benchmark.
 
         ``qubits()`` and ``batches()`` must be configured before calling this
-        method.  The Rust backend reports latency from the native pipeline; the
-        PyTorch backend derives average latency from its throughput run.
+        method.  The CUDA backend reports latency from the native pipeline; the
+        AMD backend derives average latency from its throughput run.
 
         :returns: A ``LatencyResult`` containing elapsed seconds and mean
             milliseconds per encoded vector.
         :raises ValueError: If required benchmark parameters are missing.
-        :raises RuntimeError: If the Rust backend is selected but unavailable.
+        :raises RuntimeError: If the selected GPU backend is unavailable.
         """
         self._validate()
-        if self._backend_name == "pytorch":
-            return self._run_latency_pytorch()
+        if self._backend_name == "amd":
+            return self._latency_from(self._run_throughput_amd())
         return self._run_latency_rust()
 
-    # -- Rust backend --
+    # -- CUDA backend (Rust pipeline) --
 
     def _run_throughput_rust(self) -> ThroughputResult:
         run_rust = _get_run_throughput_pipeline_py()
@@ -271,15 +272,27 @@ class QdpBenchmark:
             latency_ms_per_vector=latency_ms_per_vector,
         )
 
-    # -- PyTorch backend --
+    # -- AMD backend (Triton) --
 
-    def _run_throughput_pytorch(self) -> ThroughputResult:
+    def _run_throughput_amd(self) -> ThroughputResult:
+        from qumat_qdp.triton_amd import TritonAmdEngine
+
+        engine = TritonAmdEngine(device_id=self._device_id, precision=self._dtype)
+        engine.check_runtime()
+
         import torch
 
-        from qumat_qdp.loader import _select_torch_device
-        from qumat_qdp.torch_ref import encode
+        real_dtype = torch.float32 if self._dtype == "f32" else torch.float64
+        return self._run_throughput_torch(
+            engine.encode, f"cuda:{self._device_id}", real_dtype
+        )
 
-        device = _select_torch_device(torch, self._device_id)
+    def _run_throughput_torch(
+        self, encode, device: str, real_dtype
+    ) -> ThroughputResult:
+        """Time ``encode`` over a pool of synthetic batches held on ``device``."""
+        import torch
+
         # _validate() guarantees these are not None.
         assert self._num_qubits is not None
         assert self._total_batches is not None
@@ -304,27 +317,27 @@ class QdpBenchmark:
             if encoding_method == "basis":
                 data = torch.randint(
                     0, 1 << num_qubits, (batch_size,), device=device
-                ).to(torch.float64)
+                ).to(real_dtype)
             elif encoding_method in {"angle", "iqp", "iqp-z"}:
                 data = (
                     torch.rand(batch_size, sample_dim, device=device) * (2.0 * torch.pi)
-                ).to(torch.float64)
+                ).to(real_dtype)
             else:
                 data = torch.randn(
-                    batch_size, sample_dim, dtype=torch.float64, device=device
+                    batch_size, sample_dim, dtype=real_dtype, device=device
                 )
             pool.append(data)
 
         # Warmup.
         for b in range(self._warmup_batches):
-            encode(pool[b % pool_size], num_qubits, encoding_method, device=device)
+            encode(pool[b % pool_size], num_qubits, encoding_method)
         if device.startswith("cuda"):
             torch.cuda.synchronize()
 
         # Timed run.
         start = time.perf_counter()
         for b in range(self._total_batches):
-            encode(pool[b % pool_size], num_qubits, encoding_method, device=device)
+            encode(pool[b % pool_size], num_qubits, encoding_method)
         if device.startswith("cuda"):
             torch.cuda.synchronize()
         duration = time.perf_counter() - start
@@ -335,8 +348,7 @@ class QdpBenchmark:
             vectors_per_sec=total_vectors / duration if duration > 0 else 0.0,
         )
 
-    def _run_latency_pytorch(self) -> LatencyResult:
-        result = self._run_throughput_pytorch()
+    def _latency_from(self, result: ThroughputResult) -> LatencyResult:
         assert self._total_batches is not None
         total_vectors = self._total_batches * self._batch_size
         ms_per_vector = (

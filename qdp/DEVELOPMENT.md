@@ -52,7 +52,8 @@ Use one venv at repo root (`mahout/.venv`):
 
 ```bash
 cd mahout
-uv sync --group dev --extra qdp
+# QDP supports Python 3.10-3.12 only; pin to that range (otherwise uv may pick 3.13, where QDP is not available)
+uv sync --python '>=3.10,<3.13' --group dev --extra qdp
 source .venv/bin/activate
 ```
 
