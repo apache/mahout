@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, MutableMapping
+from functools import lru_cache
 from typing import Any
 
 import qiskit
@@ -166,7 +167,17 @@ def execute_circuit(
         return result.get_counts()
 
 
-# placeholder method for use in the testing suite
+@lru_cache(maxsize=1)
+def _statevector_simulator() -> tuple[AerSimulator, Any]:
+    """Return a shared statevector simulator and its transpiler target.
+
+    Building ``AerSimulator.target`` dominates the cost of a state-vector
+    call, so it is built once and reused.
+    """
+    simulator = AerSimulator(method="statevector")
+    return simulator, simulator.target
+
+
 def get_final_state_vector(
     circuit: qiskit.QuantumCircuit,
     backend: AerSimulator,
@@ -174,7 +185,7 @@ def get_final_state_vector(
 ) -> Any:
     working_circuit = circuit.copy()
 
-    simulator = AerSimulator(method="statevector")
+    simulator, target = _statevector_simulator()
 
     # Add save_statevector instruction
     working_circuit.save_statevector()
@@ -187,8 +198,13 @@ def get_final_state_vector(
         }
         working_circuit = working_circuit.assign_parameters(parameter_bindings)
 
-    # Simulate the circuit
-    transpiled_circuit = qiskit.transpile(working_circuit, simulator)
+    # Simulate the circuit. Keep optimization_level at 1: levels 2 and 3
+    # (the default is 2) run ElidePermutations, which replaces a SWAP with
+    # a virtual qubit relabelling that save_statevector does not undo, so
+    # the reported amplitudes would be those *before* the SWAP.
+    transpiled_circuit = qiskit.transpile(
+        working_circuit, target=target, optimization_level=1
+    )
     job = simulator.run(transpiled_circuit)
     result = job.result()
 
@@ -200,12 +216,27 @@ def draw_circuit(circuit: qiskit.QuantumCircuit) -> Any:
     return circuit.draw()
 
 
+def _resolve_angle(
+    circuit: qiskit.QuantumCircuit,
+    angle: float | str | qiskit.circuit.Parameter,
+) -> Any:
+    """Return a Qiskit angle, reusing an existing Parameter with the same name.
+
+    Qiskit refuses two distinct ``Parameter`` objects with the same name in
+    one circuit, so a name used by several gates must map to one object.
+    """
+    if not isinstance(angle, str):
+        return angle
+    existing = circuit.get_parameter(angle, None)
+    return existing if existing is not None else qiskit.circuit.Parameter(angle)
+
+
 def apply_rx_gate(
     circuit: qiskit.QuantumCircuit,
     qubit_index: int,
     angle: float | str | qiskit.circuit.Parameter,
 ) -> None:
-    param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
+    param = _resolve_angle(circuit, angle)
     circuit.rx(param, qubit_index)
 
 
@@ -214,7 +245,7 @@ def apply_ry_gate(
     qubit_index: int,
     angle: float | str | qiskit.circuit.Parameter,
 ) -> None:
-    param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
+    param = _resolve_angle(circuit, angle)
     circuit.ry(param, qubit_index)
 
 
@@ -223,7 +254,7 @@ def apply_rz_gate(
     qubit_index: int,
     angle: float | str | qiskit.circuit.Parameter,
 ) -> None:
-    param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
+    param = _resolve_angle(circuit, angle)
     circuit.rz(param, qubit_index)
 
 
@@ -236,6 +267,19 @@ def apply_u_gate(
 ) -> None:
     # Apply the U gate directly with specified parameters
     circuit.u(theta, phi, lambd, qubit_index)
+
+
+def count_parameter_occurrences(circuit: qiskit.QuantumCircuit) -> dict[str, int]:
+    """Count how many gates in ``circuit`` depend on each named parameter."""
+    counts: dict[str, int] = {}
+    for instruction in circuit.data:
+        names: set[str] = set()
+        for value in instruction.operation.params:
+            if isinstance(value, qiskit.circuit.ParameterExpression):
+                names.update(param.name for param in value.parameters)
+        for name in names:
+            counts[name] = counts.get(name, 0) + 1
+    return counts
 
 
 def calculate_prob_zero(

@@ -212,6 +212,53 @@ result = minimize(cost_function, [0.5, 0.5], method='COBYLA')
 print(f"Optimized: {result.x}, cost: {result.fun}")
 ```
 
+## Built-in Optimization
+
+`qumat` ships helpers that replace the hand-written loop above. They
+compute exact expectation values from the state vector, exact
+gradients with the parameter-shift rule, and run an optimizer.
+
+```python
+from qumat import QuMat, expectation_z, optimize_parameters
+
+backend_config = {
+    'backend_name': 'qiskit',
+    'backend_options': {'simulator_type': 'statevector_simulator', 'shots': 1}
+}
+qumat = QuMat(backend_config)
+qumat.create_empty_circuit(num_qubits=2)
+qumat.apply_ry_gate(0, angle="theta")
+qumat.apply_cnot_gate(0, 1)
+qumat.apply_ry_gate(1, angle="phi")
+
+# Cost: <Z_0> + <Z_1>, minimized (-2) when both qubits are |1>
+def cost(qm, params):
+    return expectation_z(qm, params, qubits=0) + expectation_z(qm, params, qubits=1)
+
+result = optimize_parameters(
+    qumat, cost, {"theta": 0.3, "phi": 0.2}, method="adam", learning_rate=0.2
+)
+print(result.params, result.cost, result.n_evaluations)
+```
+
+- **Cost functions** take `(qumat, params)` and return a float.
+  `expectation_z(qumat, params, qubits)` binds `params` and returns the
+  exact `<Z>` (or `<Z Z ...>` for a list of qubits) with the same qubit
+  numbering on every backend.
+- **Methods**: `"gradient_descent"` and `"adam"` use parameter-shift
+  gradients. Any `scipy.optimize.minimize` method name such as
+  `"COBYLA"`, `"Nelder-Mead"` or `"L-BFGS-B"` is passed through to SciPy.
+- **Gradients**: `parameter_shift_gradient(qumat, cost, params)` is
+  exact for costs that are linear in the state (expectation values,
+  probabilities). For other costs, such as a squared error, pass
+  `gradient="finite_difference"` to `optimize_parameters`.
+- **Result**: `result.params`, `result.cost`, `result.history` (cost per
+  iteration) and `result.n_evaluations`. The best parameters are also
+  bound on `qumat`.
+
+See the [parameter optimization design note](../advanced/parameter-optimization)
+for how the gradient handles parameters shared by several gates.
+
 ## Key Points
 
 - **Parameter creation**: Use string names (e.g., `"theta"`) in rotation gates to create parameters
