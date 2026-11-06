@@ -604,6 +604,109 @@ class TestTGate:
         )
 
 
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+class TestSGate:
+    """Test class for S gate functionality (S = diag(1, i), phase of pi/2)."""
+
+    @pytest.mark.parametrize(
+        ("initial_state", "expected_state"),
+        [
+            ("0", "0"),  # S leaves |0> unchanged
+            ("1", "1"),  # S only adds a phase to |1>, measurement unchanged
+        ],
+    )
+    def test_s_gate_preserves_basis_states(
+        self, backend_name, initial_state, expected_state
+    ):
+        """S gate should preserve computational basis measurement outcomes."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+
+        if initial_state == "1":
+            qumat.apply_pauli_x_gate(0)
+
+        qumat.apply_s_gate(0)
+        results = qumat.execute_circuit()
+
+        prob = get_state_probability(
+            results, expected_state, num_qubits=1, backend_name=backend_name
+        )
+        assert prob > 0.95, (
+            f"Backend: {backend_name}, expected |{expected_state}> after S, "
+            f"got probability {prob:.4f}"
+        )
+
+    def test_s_gate_squared_is_z(self, backend_name):
+        """S^2 = Z; H-S^2-H should act like X and flip |0> to |1>."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+
+        qumat.apply_hadamard_gate(0)
+        for _ in range(2):
+            qumat.apply_s_gate(0)
+        qumat.apply_hadamard_gate(0)
+
+        results = qumat.execute_circuit()
+        prob = get_state_probability(
+            results, "1", num_qubits=1, backend_name=backend_name
+        )
+        assert prob > 0.95, (
+            f"Backend: {backend_name}, expected |1> after H-S^2-H, "
+            f"got probability {prob:.4f}"
+        )
+
+    def test_s_gate_fourth_power_is_identity(self, backend_name):
+        """S^4 = I; H-S^4-H should return |0> to |0>.
+
+        The H sandwich is needed: a diagonal gate alone never changes the
+        measurement outcome of |0>, so S^4 without it would pass trivially.
+        """
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+
+        qumat.apply_hadamard_gate(0)
+        for _ in range(4):
+            qumat.apply_s_gate(0)
+        qumat.apply_hadamard_gate(0)
+
+        results = qumat.execute_circuit()
+        prob = get_state_probability(
+            results, "0", num_qubits=1, backend_name=backend_name
+        )
+        assert prob > 0.95, (
+            f"Backend: {backend_name}, expected |0> after H-S^4-H, "
+            f"got probability {prob:.4f}"
+        )
+
+    def test_s_gate_phase_sign_is_positive(self, backend_name):
+        """S adds +pi/2, not -pi/2 (i.e. it is S, not S-dagger).
+
+        H-S-T-T-H accumulates pi/2 + pi/4 + pi/4 = pi and ends in |1>.
+        If S were S-dagger the phases would cancel and the result would be |0>.
+        """
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+
+        qumat.apply_hadamard_gate(0)
+        qumat.apply_s_gate(0)
+        qumat.apply_t_gate(0)
+        qumat.apply_t_gate(0)
+        qumat.apply_hadamard_gate(0)
+
+        results = qumat.execute_circuit()
+        prob = get_state_probability(
+            results, "1", num_qubits=1, backend_name=backend_name
+        )
+        assert prob > 0.95, (
+            f"Backend: {backend_name}, expected |1> after H-S-T-T-H, "
+            f"got probability {prob:.4f}"
+        )
+
+
 @pytest.mark.parametrize(
     "phase_applications",
     [
@@ -640,6 +743,36 @@ def test_t_gate_cross_backend_consistency(phase_applications):
             diff = abs(results_dict[b1] - results_dict[b2])
             assert diff < 0.05, (
                 f"T gate inconsistent between {b1} and {b2} for T^{phase_applications}: "
+                f"{results_dict[b1]:.4f} vs {results_dict[b2]:.4f}"
+            )
+
+
+@pytest.mark.parametrize("phase_applications", [2, 4])
+def test_s_gate_cross_backend_consistency(phase_applications):
+    """S gate should behave consistently across all backends."""
+    results_dict = {}
+
+    for backend_name in TESTING_BACKENDS:
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+
+        qumat.apply_hadamard_gate(0)
+        for _ in range(phase_applications):
+            qumat.apply_s_gate(0)
+        qumat.apply_hadamard_gate(0)
+
+        results = qumat.execute_circuit()
+        results_dict[backend_name] = get_state_probability(
+            results, "1", num_qubits=1, backend_name=backend_name
+        )
+
+    backends = list(results_dict)
+    for i, b1 in enumerate(backends):
+        for b2 in backends[i + 1 :]:
+            diff = abs(results_dict[b1] - results_dict[b2])
+            assert diff < 0.05, (
+                f"S^{phase_applications} inconsistent between {b1} and {b2}: "
                 f"{results_dict[b1]:.4f} vs {results_dict[b2]:.4f}"
             )
 
