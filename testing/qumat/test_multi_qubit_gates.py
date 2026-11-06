@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+import numpy as np
 import pytest
 
 from qumat import QuMat
@@ -64,6 +65,19 @@ def execute_and_assert_state(
         f"Expected: |{expected_state}⟩, Got probability: {prob:.4f}"
     )
     return prob
+
+
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+def test_cz_gate_phase_on_two_qubit_superposition(backend_name):
+    """CZ changes only the |11> phase in an equal two-qubit superposition."""
+    qumat = create_qumat_instance(backend_name, num_qubits=2)
+    qumat.apply_hadamard_gate(0)
+    qumat.apply_hadamard_gate(1)
+
+    qumat.apply_cz_gate(0, 1)
+
+    expected_state = np.array([1, 1, 1, -1], dtype=complex) / 2
+    np.testing.assert_allclose(qumat.get_final_state_vector(), expected_state)
 
 
 @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
