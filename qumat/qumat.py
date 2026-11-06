@@ -79,6 +79,7 @@ class QuMat:
         """Create an empty quantum circuit with the specified number of qubits.
 
         Must be called before applying any gates or executing operations.
+        Any parameters registered on a previous circuit are discarded.
 
         :param num_qubits: Number of qubits in the circuit. If ``None``,
             creates a circuit without pre-allocated qubits.
@@ -86,6 +87,7 @@ class QuMat:
         """
         self.num_qubits = num_qubits
         self.circuit = self.backend_module.create_empty_circuit(num_qubits)
+        self.parameters = {}
 
     def _ensure_circuit_initialized(self) -> None:
         """Ensure the circuit has been created before operations.
