@@ -174,6 +174,23 @@ class QuMat:
             self.circuit, control_qubit_index, target_qubit_index
         )
 
+    def apply_cz_gate(self, qubit_index1: int, qubit_index2: int) -> None:
+        """Apply a controlled-Z gate between two qubits.
+
+        The gate leaves the computational basis states unchanged except for
+        applying a phase of -1 to |11>.
+
+        :param qubit_index1: Index of the first qubit.
+        :type qubit_index1: int
+        :param qubit_index2: Index of the second qubit.
+        :type qubit_index2: int
+        :raises RuntimeError: If the circuit has not been initialized.
+        """
+        self._ensure_circuit_initialized()
+        self._validate_qubit_index(qubit_index1, "qubit_index1")
+        self._validate_qubit_index(qubit_index2, "qubit_index2")
+        self.backend_module.apply_cz_gate(self.circuit, qubit_index1, qubit_index2)
+
     def apply_toffoli_gate(
         self,
         control_qubit_index1: int,
