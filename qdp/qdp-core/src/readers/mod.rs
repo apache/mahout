@@ -33,7 +33,10 @@ pub mod tensorflow;
 pub mod torch;
 
 pub use arrow_ipc::ArrowIPCReader;
-pub use numpy::NumpyReader;
+pub use numpy::{
+    NPY_MAX_BYTES_ENV, NpyHeaderInfo, NpyMemoryLimit, NumpyReader, check_npy_memory,
+    parse_npy_header,
+};
 pub use parquet::{ParquetReader, ParquetStreamingReader};
 pub use tensorflow::TensorFlowReader;
 pub use torch::TorchReader;

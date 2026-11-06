@@ -43,6 +43,52 @@ pub trait StreamingDataReader: DataReader {
 | NumPy | `NumpyReader` | ❌ | ✅ Complete |
 | PyTorch | `TorchReader` | ❌ | ✅ (feature: `pytorch`) |
 
+### NumPy memory guard (`QDP_NPY_MAX_BYTES`)
+
+`NumpyReader` loads the whole `.npy` array into host memory. To fail fast
+instead of being killed by the OOM killer, it first parses only the file
+header (shape, dtype, `fortran_order`) and estimates the array size as
+`prod(shape) * itemsize`. The load is refused with a
+`MahoutError::MemoryAllocation` error (a `RuntimeError` in Python) when the
+estimate is over the limit.
+
+The limit is controlled by the `QDP_NPY_MAX_BYTES` environment variable:
+
+| Value | Behaviour |
+|-------|-----------|
+| unset, empty, `auto` | Refuse when `estimate * 2 > 0.8 * MemAvailable` |
+| `17179869184`, `16G`, `512MiB` | Refuse when `estimate > value` |
+| `off`, `none`, `unlimited`, `disabled` | No check |
+
+Notes:
+
+- Suffixes are binary and case-insensitive: `K`, `M`, `G`, `T`, optionally
+  followed by `B` or `iB` (`16G` = `16GiB` = 17179869184 bytes). `0` and
+  unparseable values are errors, so a typo cannot silently turn the guard off.
+- The `2x` in `auto` mode allows for a second copy of the data (for example
+  flattening a Fortran-order array to row-major).
+- `MemAvailable` comes from `/proc/meminfo` on Linux. On other platforms, or
+  if it cannot be read, `auto` logs a warning and allows the load. Set an
+  explicit byte limit if you need the guard there.
+- Inside a container, `MemAvailable` is the host's figure, not the cgroup
+  limit. Set an explicit limit if your container has a smaller memory cap.
+- Independently of the limit, the reader checks that the file is at least as
+  long as the header claims, so a truncated or corrupt file is rejected before
+  any large allocation, even with the guard set to `off`.
+- Rust callers can bypass the environment variable with
+  `NumpyReader::new(path)?.with_memory_limit(NpyMemoryLimit::MaxBytes(n))`.
+
+```bash
+# Allow up to 64 GiB regardless of currently available memory
+export QDP_NPY_MAX_BYTES=64G
+# Turn the check off entirely
+export QDP_NPY_MAX_BYTES=off
+```
+
+For datasets that do not fit in memory, convert them to Parquet and use the
+streaming reader (`ParquetStreamingReader` in Rust, or
+`QuantumDataLoader(...).source_file(path, streaming=True)` in Python).
+
 ## Benefits
 
 ### 1. Easy Extension
