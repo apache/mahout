@@ -172,6 +172,23 @@ class TestCircuitMutationPrevention:
             "Results have different states after multiple executions"
         )
 
+    def test_get_final_state_vector_does_not_mutate_circuit(self, backend_name):
+        """Reading the state vector leaves the circuit unchanged and executable."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=2)
+        qumat.apply_hadamard_gate(0)
+        qumat.apply_cnot_gate(0, 1)
+        drawing_before = str(qumat.draw_circuit())
+
+        qumat.get_final_state_vector()
+
+        assert str(qumat.draw_circuit()) == drawing_before
+        results = qumat.execute_circuit()
+        if isinstance(results, list):
+            results = results[0]
+        assert sum(results.values()) == qumat.backend_config["backend_options"]["shots"]
+
 
 class TestBackendConfigValidation:
     """Test class for backend configuration validation."""
