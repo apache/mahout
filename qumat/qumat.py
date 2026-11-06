@@ -75,15 +75,23 @@ class QuMat:
         self.num_qubits: int | None = None
         self.parameters: dict[str, float | None] = {}
 
-    def create_empty_circuit(self, num_qubits: int | None = None) -> None:
+    def create_empty_circuit(self, num_qubits: int) -> None:
         """Create an empty quantum circuit with the specified number of qubits.
 
         Must be called before applying any gates or executing operations.
 
-        :param num_qubits: Number of qubits in the circuit. If ``None``,
-            creates a circuit without pre-allocated qubits.
-        :type num_qubits: int | None, optional
+        :param num_qubits: Number of qubits in the circuit.
+        :type num_qubits: int
+        :raises TypeError: If ``num_qubits`` is not an integer.
+        :raises ValueError: If ``num_qubits`` is negative.
         """
+        # bool is a subclass of int, so it must be rejected explicitly.
+        if not isinstance(num_qubits, int) or isinstance(num_qubits, bool):
+            raise TypeError(
+                f"num_qubits must be an integer, got {type(num_qubits).__name__}"
+            )
+        if num_qubits < 0:
+            raise ValueError(f"num_qubits cannot be negative, got {num_qubits}")
         self.num_qubits = num_qubits
         self.circuit = self.backend_module.create_empty_circuit(num_qubits)
 

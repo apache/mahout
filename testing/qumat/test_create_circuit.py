@@ -30,9 +30,37 @@ class TestCreateCircuit:
         """Test that create_empty_circuit works"""
         backend_config = get_backend_config(backend_name)
         qumat = QuMat(backend_config)
-        qumat.create_empty_circuit()
+        qumat.create_empty_circuit(num_qubits=2)
 
         assert qumat.circuit is not None
+
+    @pytest.mark.parametrize("num_qubits", [None, 1.5, "2", True])
+    def test_create_empty_circuit_rejects_non_int_num_qubits(
+        self, backend_name, num_qubits
+    ):
+        """create_empty_circuit raises TypeError when num_qubits is not an int."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+
+        with pytest.raises(TypeError, match="num_qubits must be an integer"):
+            qumat.create_empty_circuit(num_qubits)
+
+        assert qumat.circuit is None
+        assert qumat.num_qubits is None
+
+    @pytest.mark.parametrize("num_qubits", [-1, -5])
+    def test_create_empty_circuit_rejects_negative_num_qubits(
+        self, backend_name, num_qubits
+    ):
+        """create_empty_circuit raises ValueError when num_qubits is negative."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+
+        with pytest.raises(ValueError, match="num_qubits cannot be negative"):
+            qumat.create_empty_circuit(num_qubits)
+
+        assert qumat.circuit is None
+        assert qumat.num_qubits is None
 
     @pytest.mark.parametrize("num_qubits", [0, 1, 3, 5])
     def test_create_circuit_initializes_to_zero(self, backend_name, num_qubits):
