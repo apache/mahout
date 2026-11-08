@@ -358,9 +358,21 @@ impl<T: FloatElem> DataReader<T> for ParquetReader<T> {
                             }
                         } else {
                             sample_size = Some(row_len);
-                            all_data.reserve(row_len * self.total_rows);
+                            // Both factors come from the file, and `reserve` panics
+                            // rather than returning an error when the product does not
+                            // fit, so the check has to happen before the call.
+                            let total_len =
+                                row_len.checked_mul(self.total_rows).ok_or_else(|| {
+                                    MahoutError::InvalidInput(format!(
+                                        "List capacity overflow: {} * {} would overflow usize",
+                                        row_len, self.total_rows
+                                    ))
+                                })?;
+                            all_data.reserve(total_len);
                             // Emit the deferred leading null rows first so FillZero keeps
-                            // them, in file order.
+                            // them, in file order. `deferred_null_rows` counts rows the
+                            // reader actually decoded, which a file can disagree with the
+                            // footer about, so this is not covered by the check above.
                             let deferred_len =
                                 row_len.checked_mul(deferred_null_rows).ok_or_else(|| {
                                     MahoutError::InvalidInput(format!(
