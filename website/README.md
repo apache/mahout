@@ -35,7 +35,7 @@ This starts a local development server at `http://localhost:3000` with hot reloa
 ├── community/                  # Community pages
 ├── about/                      # About pages
 ├── download/                   # Download pages
-└── api.md, basic-gates.md...   # API reference docs
+└── api/                        # API reference generator config (see below)
 
 /website/docs/              ← BUILD ARTIFACT (auto-synced, don't edit!)
 ├── .gitignore                  # Only tracked file
@@ -193,6 +193,120 @@ should not require editing the Docusaurus version configuration.
 The command runs the documentation sync first, so generated Python API reference
 pages are included in the version snapshot before the local build validation.
 
+## API Reference Docs
+
+The Python API reference pages are generated from docstrings; they are
+not written by hand.
+
+| Page | Generator config | Header (frontmatter + intro) | Output (gitignored) |
+|------|------------------|------------------------------|---------------------|
+| Qumat | `docs/api/qumat.yml` | `docs/api/qumat_header.md` | `website/docs/qumat/api.md` |
+| QDP | `docs/api/qumat_qdp.yml` | `docs/api/qumat_qdp_header.md` | `website/docs/qdp/api.md` |
+
+`npm run sync` (and therefore `npm run start` and `npm run build`) runs
+`uv sync --frozen --group dev`, then
+`uv run --frozen --group dev pydoc-markdown docs/api/<config>.yml` for
+each page, and writes the header followed by the generated markdown.
+
+- **To change what a page says**, edit the docstrings in `qumat/` or
+  `qdp/qdp-python/qumat_qdp/`.
+- **To change which modules or members appear**, edit the `modules` list
+  or the `filter` processor in the `.yml` file. `qumat.yml` hides
+  private names; `qumat_qdp.yml` uses `documented_only: true`, so a QDP
+  class or method without a docstring is left out.
+- **To change the page title, sidebar label or intro**, edit the
+  `*_header.md` file.
+
+pydoc-markdown parses the source statically. It does not import `qumat`,
+`qumat_qdp`, `torch` or the Rust extension, so API pages can be
+generated on a laptop with no GPU and no `maturin develop`.
+
+### Preview locally
+
+```bash
+cd website
+npm run start          # regenerate API pages, then serve /docs/master/
+npm run start:no-api   # skip generation; API pages show a placeholder
+```
+
+Open `http://localhost:3000/docs/master/qumat/api` and
+`http://localhost:3000/docs/master/qdp/api`. Docusaurus does not watch
+`/docs` or the Python sources, so after editing a docstring run
+`npm run sync` again; the running dev server picks up the new files.
+
+To see only the generated markdown for one page (handy while editing a
+docstring), run from the repository root:
+
+```bash
+uv run --group dev pydoc-markdown docs/api/qumat_qdp.yml | less
+```
+
+### Rust API docs
+
+The Rust crates in `qdp/` are not published on the website. To browse
+their API locally:
+
+```bash
+cd qdp
+cargo doc -p qdp-core --no-deps --open
+```
+
+This builds without a GPU or CUDA toolkit: the build scripts fall back
+to stub CUDA symbols and print `CUDA toolkit not found` warnings, which
+are expected. Limitations to keep in mind:
+
+- Much of `qdp-core` is behind `#[cfg(target_os = "linux")]`
+  (`QdpEngine` methods, the encoders, the pipeline runner). On macOS or
+  Windows those items are missing from the generated docs; build on
+  Linux, in the dev container, or under WSL to see the full API.
+- Items behind Cargo features (for example `remote-io`, `pytorch`) only
+  appear with `--features <name>`. `pytorch` builds the `tch` crate,
+  which needs libtorch; the repo's pre-commit hook gets it from the
+  venv's PyTorch via `LIBTORCH_USE_PYTORCH=1`.
+- rustdoc currently reports warnings for `qdp-core` (unescaped `<f64>`
+  style generics and math such as `[i]` read as links). They do not
+  fail the build; fixes are welcome.
+
+### In CI and on the live site
+
+- The **Website Build Check** workflow runs `npm run build` on pull
+  requests that touch `website/`, `docs/`, `qumat/` or
+  `qdp/qdp-python/qumat_qdp/`, so docstring-only changes are built too.
+  It does not upload a preview; check the build log, or build locally
+  and run `npm run serve`.
+- The **Deploy Website** workflow runs on pushes to `main` that touch
+  `website/` or `docs/`. A change to docstrings alone does not trigger a
+  deploy; the new API pages go live with the next website deploy (or a
+  manual `workflow_dispatch` run).
+- Broken links are reported as warnings, not errors
+  (`onBrokenLinks: 'warn'`). Read the "broken links" list in the build
+  output for pages you touched.
+
+### Versioning
+
+`npm run version -- <release-version>` runs the sync first, so the
+generated `qumat/api.md` and `qdp/api.md` are copied into
+`versioned_docs/version-<release-version>/` and frozen with the
+release. Do not use `npm run sync:no-api` before cutting a version, or
+the snapshot will contain the placeholder pages. After versioning,
+check that the snapshot contains both API pages and that the build
+reports no new broken links under `/docs/<release-version>/`.
+
+### Troubleshooting
+
+- **`Error: spawnSync uv ENOENT`** during `npm run sync`, `start` or
+  `build`: `uv` is not installed or not on `PATH`. Install it (see the
+  root `CONTRIBUTING.md`), or use `npm run start:no-api` if you do not
+  need the API pages.
+- **API page says "API reference generation was skipped"**: it was
+  synced with `sync:no-api` / `start:no-api`. Run `npm run sync`.
+- **A class or method is missing from the QDP page**: it has no
+  docstring (`documented_only: true`), its module is not in the
+  `modules` list in `docs/api/qumat_qdp.yml`, or its name starts with
+  `_`.
+- **Docstring edit not showing in `npm run start`**: re-run
+  `npm run sync`; the dev server does not regenerate API pages.
+
 ## Blog Posts
 
 Blog posts live in `website/blog/`:
@@ -222,10 +336,10 @@ npm run serve    # Serve production build locally
 
 GitHub Actions automatically deploys to `asf-site` branch when changes are pushed to `main`.
 
-Triggers:
+Triggers (see `.github/workflows/website.yml`):
 - Changes to `website/**`
 - Changes to `docs/**`
-- Changes to `qdp/docs/**`
+- Manual `workflow_dispatch` run
 
 ## Troubleshooting
 
