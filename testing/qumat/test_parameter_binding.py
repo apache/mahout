@@ -17,6 +17,7 @@
 
 import math
 
+import numpy as np
 import pytest
 
 from qumat import QuMat
@@ -189,6 +190,67 @@ class TestParameterBinding:
         assert prob > 0.4, (
             f"Expected high probability for states with qubit 0=|1⟩ in {backend_name}, "
             f"got {prob:.4f}"
+        )
+
+    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+    def test_shared_parameter_name_on_two_gates(self, backend_name):
+        """A parameter name refers to one symbolic parameter wherever it is used."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=2)
+
+        # Same name on two gates (e.g. a layer of Rx(theta) on every qubit)
+        qumat.apply_rx_gate(0, "t")
+        qumat.apply_rx_gate(1, "t")
+
+        results = qumat.execute_circuit(parameter_values={"t": math.pi})
+
+        # RX(π) on both qubits flips |00⟩ to |11⟩
+        prob = get_state_probability(results, "11", num_qubits=2)
+        assert prob > 0.95, (
+            f"Expected |11⟩ after RX(π) on both qubits sharing one parameter in "
+            f"{backend_name}, got probability {prob:.4f}"
+        )
+
+    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+    def test_shared_parameter_name_across_gate_types(self, backend_name):
+        """One name can be shared across different rotation gate types."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=2)
+
+        qumat.apply_rx_gate(0, "t")
+        qumat.apply_ry_gate(1, "t")
+        qumat.apply_rz_gate(0, "t")
+
+        # A single shared parameter is registered exactly once
+        assert list(qumat.parameters) == ["t"]
+
+        # RX(π) then RZ(π) on qubit 0 and RY(π) on qubit 1 -> |11⟩
+        results = qumat.execute_circuit(parameter_values={"t": math.pi})
+        prob = get_state_probability(results, "11", num_qubits=2)
+        assert prob > 0.95, (
+            f"Expected |11⟩ with shared parameter across RX/RY/RZ in "
+            f"{backend_name}, got probability {prob:.4f}"
+        )
+
+    @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+    def test_shared_parameter_name_state_vector(self, backend_name):
+        """Shared parameter binds consistently when reading the state vector."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=2)
+
+        qumat.apply_rx_gate(0, "t")
+        qumat.apply_rx_gate(1, "t")
+        qumat.bind_parameters({"t": math.pi})
+
+        state = np.asarray(qumat.get_final_state_vector())
+        probabilities = np.abs(state) ** 2
+
+        # Only |11⟩ (the last basis state) should carry probability
+        assert probabilities[3] > 0.99, (
+            f"Expected |11⟩ state vector in {backend_name}, got {probabilities}"
         )
 
     @pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
