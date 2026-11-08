@@ -312,9 +312,11 @@ where
     )
 }
 
+/// Element-generic form of [`run_dual_stream_pipeline_aligned`] /
+/// [`run_dual_stream_pipeline_aligned_f32`].
 #[cfg(target_os = "linux")]
 #[allow(clippy::manual_is_multiple_of)]
-fn run_dual_stream_pipeline_aligned_typed<T, F>(
+pub(crate) fn run_dual_stream_pipeline_aligned_typed<T, F>(
     device: &Arc<CudaDevice>,
     host_data: &[T],
     align_elements: usize,
