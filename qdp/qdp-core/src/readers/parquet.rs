@@ -590,6 +590,59 @@ impl<T: FloatElem> ParquetStreamingReader<T> {
     pub fn get_sample_size(&self) -> Option<usize> {
         self.sample_size
     }
+
+    /// Write as many deferred leading null rows as `buffer` has room for, as
+    /// whole zero samples, and return how many elements that took.
+    ///
+    /// The count stays in `deferred_null_rows` until it is drained, so a long
+    /// run of leading null rows is spread across calls instead of being
+    /// materialised at once. This runs before the `leftover_data` drain:
+    /// deferred rows precede the batch that fixed the sample size, so anything
+    /// already in `leftover_data` follows them in file order.
+    ///
+    /// `rows` is capped at `(limit - written) / sample_size`, so `rows *
+    /// sample_size` cannot exceed the remaining space and needs no overflow
+    /// check.
+    fn drain_deferred(&mut self, buffer: &mut [T], written: usize, limit: usize) -> usize {
+        let Some(sample_size) = self.sample_size else {
+            return 0;
+        };
+        // A `List` row of length 0 gives a sample size of 0, which no number of
+        // zeros can represent; leave the count for the end-of-file check.
+        if self.deferred_null_rows == 0 || sample_size == 0 || written >= limit {
+            return 0;
+        }
+        let rows = ((limit - written) / sample_size).min(self.deferred_null_rows);
+        let len = rows * sample_size;
+        buffer[written..written + len].fill(T::default());
+        self.deferred_null_rows -= rows;
+        len
+    }
+
+    /// Copy as much of `leftover_data` as `buffer` has room for, and return how
+    /// many elements that took.
+    ///
+    /// This never runs while deferred rows are outstanding, because those
+    /// precede everything in `leftover_data` in file order.
+    fn drain_leftover(&mut self, buffer: &mut [T], written: usize, limit: usize) -> usize {
+        if self.sample_size.is_none() || self.deferred_null_rows > 0 || written >= limit {
+            return 0;
+        }
+        let available = self.leftover_data.len() - self.leftover_cursor;
+        if available == 0 {
+            return 0;
+        }
+        let to_copy = available.min(limit - written);
+        buffer[written..written + to_copy].copy_from_slice(
+            &self.leftover_data[self.leftover_cursor..self.leftover_cursor + to_copy],
+        );
+        self.leftover_cursor += to_copy;
+        if self.leftover_cursor == self.leftover_data.len() {
+            self.leftover_data.clear();
+            self.leftover_cursor = 0;
+        }
+        to_copy
+    }
 }
 
 impl<T: FloatElem> DataReader<T> for ParquetStreamingReader<T> {
@@ -636,29 +689,9 @@ impl<T: FloatElem> StreamingDataReader<T> for ParquetStreamingReader<T> {
         };
         let mut limit = self.sample_size.map_or(buf_cap, calc_limit);
 
-        if self.sample_size.is_some() {
-            while self.leftover_cursor < self.leftover_data.len() && written < limit {
-                let available = self.leftover_data.len() - self.leftover_cursor;
-                let space_left = limit - written;
-                let to_copy = std::cmp::min(available, space_left);
-
-                if to_copy > 0 {
-                    buffer[written..written + to_copy].copy_from_slice(
-                        &self.leftover_data[self.leftover_cursor..self.leftover_cursor + to_copy],
-                    );
-                    written += to_copy;
-                    self.leftover_cursor += to_copy;
-
-                    if self.leftover_cursor == self.leftover_data.len() {
-                        self.leftover_data.clear();
-                        self.leftover_cursor = 0;
-                        break;
-                    }
-                } else {
-                    break;
-                }
-            }
-        }
+        // Deferred rows come before anything in `leftover_data`, so they go first.
+        written += self.drain_deferred(buffer, written, limit);
+        written += self.drain_leftover(buffer, written, limit);
 
         while written < limit {
             match self.reader.next() {
@@ -759,20 +792,6 @@ impl<T: FloatElem> StreamingDataReader<T> for ParquetStreamingReader<T> {
                                 vals
                             };
 
-                            // The first batch with a non-null row fixes the sample size:
-                            // emit the deferred leading null rows ahead of it.
-                            let batch_values = if self.deferred_null_rows > 0 {
-                                let mut vals = vec![
-                                    T::default();
-                                    current_sample_size * self.deferred_null_rows
-                                ];
-                                vals.extend(batch_values);
-                                self.deferred_null_rows = 0;
-                                vals
-                            } else {
-                                batch_values
-                            };
-
                             (current_sample_size, batch_values)
                         }
                         DataType::FixedSizeList(_, size) => {
@@ -831,6 +850,19 @@ impl<T: FloatElem> StreamingDataReader<T> for ParquetStreamingReader<T> {
                             limit = calc_limit(current_sample_size);
                         }
                         _ => {}
+                    }
+
+                    // This is the batch that fixed the sample size, so the deferred
+                    // rows ahead of it can finally be emitted. They may not all fit,
+                    // so park this batch's values and let `drain_deferred` work
+                    // through the count a bufferful at a time.
+                    if self.deferred_null_rows > 0 {
+                        self.leftover_data.clear();
+                        self.leftover_data.extend_from_slice(&batch_values);
+                        self.leftover_cursor = 0;
+                        written += self.drain_deferred(buffer, written, limit);
+                        written += self.drain_leftover(buffer, written, limit);
+                        continue;
                     }
 
                     let available = batch_values.len();
@@ -1643,6 +1675,45 @@ mod tests {
 
         assert_eq!(data, vec![0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 4.0]);
         assert_eq!(data.len() / reader.get_sample_size().unwrap(), declared);
+    }
+
+    #[test]
+    fn test_parquet_streaming_reader_deferred_rows_stay_within_one_batch() {
+        // 10 leading null rows accumulate across five all-null batches before
+        // [1,2] fixes the sample size. The zeros for them are emitted a bufferful
+        // at a time, so `leftover_data` never has to hold more than the batch
+        // that fixed the size (batch_size 2 * sample_size 2 = 4 elements).
+        // Building the whole deferred run at once instead would park 20 of them.
+        let mut rows: Vec<Option<&[f64]>> = vec![None; 10];
+        rows.push(Some(&[1.0, 2.0]));
+        rows.push(Some(&[3.0, 4.0]));
+        let file = write_nullable_list_parquet(&rows);
+        let mut reader =
+            ParquetStreamingReader::<f64>::new(file.path(), Some(2), NullHandling::FillZero)
+                .unwrap();
+        let declared = reader.total_rows();
+
+        let mut buffer = vec![0.0_f64; 4];
+        let mut data = Vec::new();
+        loop {
+            let written = reader.read_chunk(&mut buffer).unwrap();
+            if written == 0 {
+                break;
+            }
+            assert!(written <= 4, "a chunk must not exceed the buffer");
+            assert!(
+                reader.leftover_data.len() <= 4,
+                "leftover held {} elements; the deferred run was materialised at once",
+                reader.leftover_data.len()
+            );
+            data.extend_from_slice(&buffer[..written]);
+        }
+
+        let mut expected = vec![0.0_f64; 20];
+        expected.extend_from_slice(&[1.0, 2.0, 3.0, 4.0]);
+        assert_eq!(data, expected);
+        assert_eq!(data.len() / reader.get_sample_size().unwrap(), declared);
+        assert_eq!(declared, 12);
     }
 
     #[test]
