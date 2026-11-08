@@ -331,6 +331,8 @@ impl<T: FloatElem> DataReader<T> for ParquetReader<T> {
         let mut all_data: Vec<T> = Vec::new();
         let mut num_samples = 0;
         let mut sample_size: Option<usize> = None;
+        // Leading null rows seen before any non-null row fixes the sample size.
+        let mut deferred_null_rows = 0;
 
         for batch_result in reader {
             let batch = batch_result
@@ -366,6 +368,18 @@ impl<T: FloatElem> DataReader<T> for ParquetReader<T> {
                         } else {
                             sample_size = Some(row_len);
                             all_data.reserve(row_len * self.total_rows);
+                            // Emit the deferred leading null rows first so FillZero keeps
+                            // them, in file order.
+                            let deferred_len =
+                                row_len.checked_mul(deferred_null_rows).ok_or_else(|| {
+                                    MahoutError::InvalidInput(format!(
+                                        "Deferred null row overflow: {} * {} would overflow usize",
+                                        row_len, deferred_null_rows
+                                    ))
+                                })?;
+                            all_data.extend(std::iter::repeat_n(T::default(), deferred_len));
+                            num_samples += deferred_null_rows;
+                            deferred_null_rows = 0;
                         }
                     }
 
@@ -381,8 +395,7 @@ impl<T: FloatElem> DataReader<T> for ParquetReader<T> {
                     } else {
                         // Null outer rows present; handle per NullHandling policy.
                         // If sample_size is still unknown (every row in this batch is null),
-                        // FillZero cannot determine how many zeros to write — those null rows
-                        // are skipped and not counted in num_samples.
+                        // FillZero defers those rows until a later batch fixes the size.
                         for i in 0..list_array.len() {
                             if list_array.is_null(i) {
                                 match self.null_handling {
@@ -394,13 +407,13 @@ impl<T: FloatElem> DataReader<T> for ParquetReader<T> {
                                                 .to_string(),
                                         ));
                                     }
-                                    NullHandling::FillZero => {
-                                        if let Some(ss) = sample_size {
+                                    NullHandling::FillZero => match sample_size {
+                                        Some(ss) => {
                                             all_data.extend(std::iter::repeat_n(T::default(), ss));
                                             num_samples += 1;
                                         }
-                                        // sample_size unknown: skip this null row.
-                                    }
+                                        None => deferred_null_rows += 1,
+                                    },
                                 }
                             } else {
                                 let row = list_array.value(i);
@@ -445,6 +458,10 @@ impl<T: FloatElem> DataReader<T> for ParquetReader<T> {
                     )));
                 }
             }
+        }
+
+        if deferred_null_rows > 0 {
+            return Err(all_null_list_error());
         }
 
         let sample_size = sample_size
@@ -1499,9 +1516,9 @@ mod tests {
     #[test]
     fn test_parquet_reader_cross_batch_all_null_first_fill_zero() {
         // [null, null, [1,2], [3,4]] read with batch_size=2:
-        //   batch 1 = [null, null]   — sample_size unknown; must be skipped, not counted
-        //   batch 2 = [[1,2], [3,4]] — sample_size established here
-        // Verifies that num_samples is not corrupted by the all-null leading batch.
+        //   batch 1 = [null, null]   — sample_size unknown; rows are deferred
+        //   batch 2 = [[1,2], [3,4]] — sample_size established; deferred rows zero-filled
+        // FillZero must keep every row, regardless of how the file is split into batches.
         let item_field = Arc::new(Field::new("item", DataType::Float64, true));
         let list_field = Field::new("data", DataType::List(item_field.clone()), true);
         let schema = Arc::new(Schema::new(vec![list_field]));
@@ -1520,9 +1537,8 @@ mod tests {
         let mut reader =
             ParquetReader::<f64>::new(file.path(), Some(2), NullHandling::FillZero).unwrap();
         let (data, num_samples, sample_size) = reader.read_batch().unwrap();
-        // All-null first batch is skipped (sample_size unknown → no zeros, no count).
-        assert_eq!(data, vec![1.0, 2.0, 3.0, 4.0]);
-        assert_eq!(num_samples, 2);
+        assert_eq!(data, vec![0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 4.0]);
+        assert_eq!(num_samples, 4);
         assert_eq!(sample_size, 2);
     }
 
@@ -1627,6 +1643,15 @@ mod tests {
 
         assert_eq!(data, vec![0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 4.0]);
         assert_eq!(data.len() / reader.get_sample_size().unwrap(), declared);
+    }
+
+    #[test]
+    fn test_parquet_reader_all_null_list_fill_zero_errors() {
+        let file = write_nullable_list_parquet(&[None, None, None]);
+        let mut reader =
+            ParquetReader::<f64>::new(file.path(), Some(2), NullHandling::FillZero).unwrap();
+        let err = reader.read_batch().unwrap_err().to_string();
+        assert!(err.contains("every row is null"), "unexpected error: {err}");
     }
 
     #[test]
