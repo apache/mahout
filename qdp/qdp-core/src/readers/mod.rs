@@ -37,3 +37,16 @@ pub use numpy::NumpyReader;
 pub use parquet::{ParquetReader, ParquetStreamingReader};
 pub use tensorflow::TensorFlowReader;
 pub use torch::TorchReader;
+
+/// Error for a `List` column whose rows are all null under `NullHandling::FillZero`:
+/// no row ever reveals how many zeros a null sample should become.
+///
+/// Shared by the Parquet and Arrow IPC readers so that both report the same
+/// thing for the same file.
+pub(crate) fn all_null_list_error() -> crate::MahoutError {
+    crate::MahoutError::InvalidInput(
+        "List column has rows but every row is null, so the sample size needed by \
+         NullHandling::FillZero cannot be determined"
+            .to_string(),
+    )
+}

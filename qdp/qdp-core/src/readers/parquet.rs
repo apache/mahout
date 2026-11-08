@@ -31,6 +31,7 @@ use crate::reader::{
     ArrowPrimitive, DataReader, FloatElem, NullHandling, StreamingDataReader,
     handle_primitive_nulls,
 };
+use crate::readers::all_null_list_error;
 
 // ---------------------------------------------------------------------------
 // Module-level helpers
@@ -209,16 +210,6 @@ where
     let mut out = Vec::new();
     extend_floats::<P>(&mut out, array, null_handling)?;
     Ok(out)
-}
-
-/// Error for a `List` column whose rows are all null under `NullHandling::FillZero`:
-/// no row ever reveals how many zeros a null sample should become.
-fn all_null_list_error() -> MahoutError {
-    MahoutError::InvalidInput(
-        "List column has rows but every row is null, so the sample size needed by \
-         NullHandling::FillZero cannot be determined"
-            .to_string(),
-    )
 }
 
 // ---------------------------------------------------------------------------
