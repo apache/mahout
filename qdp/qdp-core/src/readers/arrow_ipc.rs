@@ -25,7 +25,7 @@ use arrow::ipc::reader::FileReader as ArrowFileReader;
 
 use crate::error::{MahoutError, Result};
 use crate::reader::{DataReader, NullHandling, handle_float64_nulls};
-use crate::readers::all_null_list_error;
+use crate::readers::{all_null_list_error, zero_width_list_error};
 
 /// Reader for Arrow IPC files containing FixedSizeList<Float64> or List<Float64> columns.
 pub struct ArrowIPCReader {
@@ -168,6 +168,9 @@ impl DataReader for ArrowIPCReader {
                                 )));
                             }
                         } else {
+                            if current_size == 0 {
+                                return Err(zero_width_list_error());
+                            }
                             sample_size = Some(current_size);
                             let new_capacity =
                                 current_size.checked_mul(list_array.len()).ok_or_else(|| {
@@ -464,6 +467,16 @@ mod tests {
         assert_eq!(num_samples, 5);
         assert_eq!(data, vec![0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 4.0]);
         assert_eq!(data.len(), num_samples * sample_size);
+    }
+
+    #[test]
+    fn test_arrow_ipc_reader_rejects_zero_width_list_rows() {
+        // The non-null rows are empty, so no sample has any elements. Rejecting
+        // keeps this reader's answer the same as the Parquet readers'.
+        let file = write_ipc_list_batches(&[&[None, None], &[Some(&[]), Some(&[])]]);
+        let mut reader = ArrowIPCReader::new(file.path(), NullHandling::FillZero).unwrap();
+        let err = reader.read_batch().unwrap_err().to_string();
+        assert!(err.contains("length 0"), "unexpected error: {err}");
     }
 
     #[test]

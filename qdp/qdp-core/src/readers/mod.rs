@@ -50,3 +50,16 @@ pub(crate) fn all_null_list_error() -> crate::MahoutError {
             .to_string(),
     )
 }
+
+/// Error for a `List` column whose first non-null row is empty.
+///
+/// Rows must all be the same length, so one empty row means every sample has no
+/// elements. There is nothing to encode, and `NullHandling::FillZero` has no
+/// width to fill a null row with.
+pub(crate) fn zero_width_list_error() -> crate::MahoutError {
+    crate::MahoutError::InvalidInput(
+        "List column has a non-null row of length 0, so a sample would have no \
+         elements"
+            .to_string(),
+    )
+}

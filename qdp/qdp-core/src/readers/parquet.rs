@@ -31,7 +31,7 @@ use crate::reader::{
     ArrowPrimitive, DataReader, FloatElem, NullHandling, StreamingDataReader,
     handle_primitive_nulls,
 };
-use crate::readers::all_null_list_error;
+use crate::readers::{all_null_list_error, zero_width_list_error};
 
 // ---------------------------------------------------------------------------
 // Module-level helpers
@@ -357,6 +357,9 @@ impl<T: FloatElem> DataReader<T> for ParquetReader<T> {
                                 )));
                             }
                         } else {
+                            if row_len == 0 {
+                                return Err(zero_width_list_error());
+                            }
                             sample_size = Some(row_len);
                             // Both factors come from the file, and `reserve` panics
                             // rather than returning an error when the product does not
@@ -610,8 +613,9 @@ impl<T: FloatElem> ParquetStreamingReader<T> {
         let Some(sample_size) = self.sample_size else {
             return 0;
         };
-        // A `List` row of length 0 gives a sample size of 0, which no number of
-        // zeros can represent; leave the count for the end-of-file check.
+        // A `List` column of length-0 rows is rejected before it gets here, but a
+        // `FixedSizeList` of width 0 is not, and no number of zeros represents a
+        // sample with no elements; leave the count for the end-of-file check.
         if self.deferred_null_rows == 0 || sample_size == 0 || written >= limit {
             return 0;
         }
@@ -740,6 +744,10 @@ impl<T: FloatElem> StreamingDataReader<T> for ParquetStreamingReader<T> {
                                     }
                                 },
                             };
+
+                            if current_sample_size == 0 {
+                                return Err(zero_width_list_error());
+                            }
 
                             // Validate all non-null rows in this batch.
                             for i in 0..list_array.len() {
@@ -1717,6 +1725,40 @@ mod tests {
         assert_eq!(data, expected);
         assert_eq!(data.len() / reader.get_sample_size().unwrap(), declared);
         assert_eq!(declared, 12);
+    }
+
+    #[test]
+    fn test_parquet_readers_reject_zero_width_list_rows() {
+        // Rows 3 and 4 are non-null but empty, so no sample has any elements.
+        // The leading nulls make the streaming reader reach this through the
+        // deferral path, where it used to report that every row was null.
+        let file = write_nullable_list_parquet(&[None, None, Some(&[]), Some(&[])]);
+
+        let mut streaming =
+            ParquetStreamingReader::<f64>::new(file.path(), Some(2), NullHandling::FillZero)
+                .unwrap();
+        let mut buffer = vec![0.0_f64; 16];
+        let err = streaming.read_chunk(&mut buffer).unwrap_err().to_string();
+        assert!(err.contains("length 0"), "unexpected error: {err}");
+
+        let mut batch =
+            ParquetReader::<f64>::new(file.path(), Some(2), NullHandling::FillZero).unwrap();
+        let err = batch.read_batch().unwrap_err().to_string();
+        assert!(err.contains("length 0"), "unexpected error: {err}");
+    }
+
+    #[test]
+    fn test_parquet_streaming_reader_rejects_zero_width_without_deferral() {
+        // No leading all-null batch, so the width is fixed in the first batch and
+        // the rejection has to happen there too. This used to return 0 samples
+        // for a three row file.
+        let file = write_nullable_list_parquet(&[None, Some(&[]), Some(&[])]);
+        let mut reader =
+            ParquetStreamingReader::<f64>::new(file.path(), Some(2), NullHandling::FillZero)
+                .unwrap();
+        let mut buffer = vec![0.0_f64; 16];
+        let err = reader.read_chunk(&mut buffer).unwrap_err().to_string();
+        assert!(err.contains("length 0"), "unexpected error: {err}");
     }
 
     #[test]
