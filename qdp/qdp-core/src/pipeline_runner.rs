@@ -18,7 +18,7 @@
 // Python bindings release GIL during the run.
 
 use std::f64::consts::PI;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use crate::QdpEngine;
@@ -563,7 +563,7 @@ impl Drop for PipelineIterator {
 }
 
 /// Spawn an in-memory producer over already-loaded `data`. Mirrors
-/// [`build_streaming_producer`] so the f32/f64 dispatch in `new_from_file` is a single
+/// [`build_streaming_producer`] so the f32/f64 dispatch in `spawn_file_producer` is a single
 /// generic call instead of two byte-for-byte-identical match arms.
 fn build_inmemory_producer<T>(
     data: Vec<T>,
@@ -645,20 +645,164 @@ where
     spawn_producer(producer, config.prefetch_depth)
 }
 
+/// Where a [`PipelineIterator`] gets its samples from.
+///
+/// Every knob that only makes sense for one kind of source lives in that variant, so
+/// [`PipelineConfig`] stays the set of settings shared by all sources (qubits, batch size,
+/// encoding, dtype, null handling, prefetch depth).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Source {
+    /// Deterministic in-process data (see `fill_sample`), mainly for throughput benchmarks.
+    ///
+    /// `total_batches` and `seed` are authoritative: [`PipelineIterator::new`] copies them into
+    /// the config, overriding `config.total_batches` / `config.seed`.
+    Synthetic {
+        total_batches: usize,
+        seed: Option<u64>,
+    },
+    /// Load the whole file into memory, then slice it into batches. Dispatches on the file
+    /// extension: .parquet, .arrow, .feather, .ipc, .npy, .pt, .pth, .pb.
+    ///
+    /// `batch_limit` caps the number of batches yielded; `usize::MAX` means "until EOF".
+    File { path: PathBuf, batch_limit: usize },
+    /// Read a `.parquet` file chunk by chunk so memory stays bounded for large files.
+    ///
+    /// `batch_limit` caps the number of batches yielded; `usize::MAX` means "until EOF".
+    FileStreaming { path: PathBuf, batch_limit: usize },
+}
+
+/// Normalize `config` for `source` and start the matching producer thread.
+///
+/// This is everything [`PipelineIterator::new`] does except storing the engine, so it can be
+/// exercised without a GPU (the producers are CPU-only; only `next_batch` touches CUDA).
+fn spawn_source(source: Source, config: &mut PipelineConfig) -> Result<ProducerHandles> {
+    if let Source::Synthetic {
+        total_batches,
+        seed,
+    } = source
+    {
+        config.total_batches = total_batches;
+        config.seed = seed;
+    }
+    config.normalize();
+    match source {
+        Source::Synthetic { .. } => {
+            let vector_len = vector_len(config.num_qubits, config.encoding);
+            let producer = SyntheticProducer::new(config.clone(), vector_len);
+            spawn_producer(producer, config.prefetch_depth)
+        }
+        Source::File { path, batch_limit } => spawn_file_producer(&path, config, batch_limit),
+        Source::FileStreaming { path, batch_limit } => {
+            spawn_streaming_file_producer(&path, config, batch_limit)
+        }
+    }
+}
+
+/// Phase 2a: load the full file, validate its shape, then slice it by batch.
+fn spawn_file_producer(
+    path: &Path,
+    config: &PipelineConfig,
+    batch_limit: usize,
+) -> Result<ProducerHandles> {
+    let (batch_data, num_samples, sample_size) =
+        read_file_by_extension(path, config.null_handling, config.dtype, config.encoding)?;
+    let vector_len = vector_len(config.num_qubits, config.encoding);
+
+    // Dimension validation before moving batch_data.
+    if sample_size != vector_len {
+        return Err(MahoutError::InvalidInput(format!(
+            "File feature length {} does not match vector_len {} for num_qubits={}, encoding={}",
+            sample_size,
+            vector_len,
+            config.num_qubits,
+            config.encoding.as_str()
+        )));
+    }
+    if batch_data.len() != num_samples * sample_size {
+        return Err(MahoutError::InvalidInput(format!(
+            "File data length {} is not num_samples ({}) * sample_size ({})",
+            batch_data.len(),
+            num_samples,
+            sample_size
+        )));
+    }
+
+    match batch_data {
+        BatchData::F32(data) => {
+            build_inmemory_producer::<f32>(data, sample_size, config, batch_limit)
+        }
+        BatchData::F64(data) => {
+            build_inmemory_producer::<f64>(data, sample_size, config, batch_limit)
+        }
+    }
+}
+
+/// Phase 2b: stream a Parquet file in chunks. Only `.parquet` is supported.
+/// Validates sample_size == vector_len after the first chunk.
+fn spawn_streaming_file_producer(
+    path: &Path,
+    config: &PipelineConfig,
+    batch_limit: usize,
+) -> Result<ProducerHandles> {
+    if path_extension_lower(path).as_deref() != Some("parquet") {
+        return Err(MahoutError::InvalidInput(format!(
+            "Streaming file loader supports only .parquet; got extension {:?}. Use .source_file(path) for other formats.",
+            path.extension()
+        )));
+    }
+
+    // Basis values are integer state indices; f32 narrowing corrupts indices above
+    // 2^24 (see read_file_by_extension). The streaming reader is chunked so we cannot
+    // pre-scan the whole file, so for basis we always stream as f64 (lossless) rather
+    // than honoring an f32 request that could silently change states mid-stream.
+    //
+    // The non-streaming loader can pre-scan and so *rejects* an out-of-range f32 basis
+    // request; the chunked streaming path cannot, so it downgrades to f64 instead. Warn
+    // so the caller is not left believing the stream ran in f32.
+    let f32_requested = matches!(config.dtype, Precision::Float32);
+    let is_basis = matches!(config.encoding, Encoding::Basis);
+    if f32_requested && is_basis {
+        log::warn!(
+            "float32 requested for streaming basis file; basis indices are integers and f32 \
+             cannot represent indices above {MAX_EXACT_F32_INT:.0} exactly, so this stream is \
+             read as f64. Use dtype='float64' to silence this warning."
+        );
+    }
+    if f32_requested && !is_basis {
+        build_streaming_producer::<f32>(path, config, batch_limit)
+    } else {
+        build_streaming_producer::<f64>(path, config, batch_limit)
+    }
+}
+
 impl PipelineIterator {
-    pub fn new_synthetic(engine: QdpEngine, mut config: PipelineConfig) -> Result<Self> {
-        config.normalize();
-        let vector_len = vector_len(config.num_qubits, config.encoding);
-        let producer = SyntheticProducer::new(config.clone(), vector_len);
-        let prefetch_depth = config.prefetch_depth;
-        let (rx, recycle_tx, _producer_handle) = spawn_producer(producer, prefetch_depth)?;
+    /// Create a pipeline iterator over `source`.
+    ///
+    /// Normalizes `config` (see [`PipelineConfig::normalize`]), validates the source (file
+    /// extension, feature length vs. `num_qubits`/`encoding`), and starts the background
+    /// prefetch thread. Batches are encoded on the GPU lazily, in [`Self::next_batch`].
+    pub fn new(engine: QdpEngine, source: Source, mut config: PipelineConfig) -> Result<Self> {
+        let (rx, recycle_tx, producer_handle) = spawn_source(source, &mut config)?;
         Ok(Self {
             engine,
             config,
             rx: std::sync::Mutex::new(Some(rx)),
             recycle_tx: Some(recycle_tx),
-            producer_handle: Some(_producer_handle),
+            producer_handle: Some(producer_handle),
         })
+    }
+
+    /// Synthetic-data iterator; `config.total_batches` and `config.seed` select the data.
+    #[deprecated(
+        since = "0.3.0",
+        note = "use `PipelineIterator::new(engine, Source::Synthetic { total_batches, seed }, config)`"
+    )]
+    pub fn new_synthetic(engine: QdpEngine, config: PipelineConfig) -> Result<Self> {
+        let source = Source::Synthetic {
+            total_batches: config.total_batches,
+            seed: config.seed,
+        };
+        Self::new(engine, source, config)
     }
 
     /// Create a pipeline iterator from a file (Phase 2a: load full file then slice by batch).
@@ -666,102 +810,41 @@ impl PipelineIterator {
     ///
     /// Supported extensions: .parquet, .arrow, .feather, .ipc, .npy, .pt, .pth, .pb.
     /// For file source, `batch_limit` caps batches yielded (e.g. for testing); use `usize::MAX` to iterate until EOF.
+    #[deprecated(
+        since = "0.3.0",
+        note = "use `PipelineIterator::new(engine, Source::File { path, batch_limit }, config)`"
+    )]
     pub fn new_from_file<P: AsRef<Path>>(
         engine: QdpEngine,
         path: P,
-        mut config: PipelineConfig,
+        config: PipelineConfig,
         batch_limit: usize,
     ) -> Result<Self> {
-        config.normalize();
-        let path = path.as_ref();
-        let (batch_data, num_samples, sample_size) =
-            read_file_by_extension(path, config.null_handling, config.dtype, config.encoding)?;
-        let vector_len = vector_len(config.num_qubits, config.encoding);
-
-        // Dimension validation before moving batch_data.
-        if sample_size != vector_len {
-            return Err(MahoutError::InvalidInput(format!(
-                "File feature length {} does not match vector_len {} for num_qubits={}, encoding={}",
-                sample_size,
-                vector_len,
-                config.num_qubits,
-                config.encoding.as_str()
-            )));
-        }
-        if batch_data.len() != num_samples * sample_size {
-            return Err(MahoutError::InvalidInput(format!(
-                "File data length {} is not num_samples ({}) * sample_size ({})",
-                batch_data.len(),
-                num_samples,
-                sample_size
-            )));
-        }
-
-        let (rx, recycle_tx, _producer_handle) = match batch_data {
-            BatchData::F32(data) => {
-                build_inmemory_producer::<f32>(data, sample_size, &config, batch_limit)?
-            }
-            BatchData::F64(data) => {
-                build_inmemory_producer::<f64>(data, sample_size, &config, batch_limit)?
-            }
+        let source = Source::File {
+            path: path.as_ref().to_path_buf(),
+            batch_limit,
         };
-        Ok(Self {
-            engine,
-            config,
-            rx: std::sync::Mutex::new(Some(rx)),
-            recycle_tx: Some(recycle_tx),
-            producer_handle: Some(_producer_handle),
-        })
+        Self::new(engine, source, config)
     }
 
     /// Create a pipeline iterator from a Parquet file using streaming read (Phase 2b).
     /// Only `.parquet` is supported; reduces memory for large files by reading in chunks.
     /// Validates sample_size == vector_len after the first chunk.
+    #[deprecated(
+        since = "0.3.0",
+        note = "use `PipelineIterator::new(engine, Source::FileStreaming { path, batch_limit }, config)`"
+    )]
     pub fn new_from_file_streaming<P: AsRef<Path>>(
         engine: QdpEngine,
         path: P,
-        mut config: PipelineConfig,
+        config: PipelineConfig,
         batch_limit: usize,
     ) -> Result<Self> {
-        config.normalize();
-        let path = path.as_ref();
-        if path_extension_lower(path).as_deref() != Some("parquet") {
-            return Err(MahoutError::InvalidInput(format!(
-                "Streaming file loader supports only .parquet; got extension {:?}. Use .source_file(path) for other formats.",
-                path.extension()
-            )));
-        }
-
-        // Basis values are integer state indices; f32 narrowing corrupts indices above
-        // 2^24 (see read_file_by_extension). The streaming reader is chunked so we cannot
-        // pre-scan the whole file, so for basis we always stream as f64 (lossless) rather
-        // than honoring an f32 request that could silently change states mid-stream.
-        //
-        // The non-streaming loader can pre-scan and so *rejects* an out-of-range f32 basis
-        // request; the chunked streaming path cannot, so it downgrades to f64 instead. Warn
-        // so the caller is not left believing the stream ran in f32.
-        let f32_requested = matches!(config.dtype, Precision::Float32);
-        let is_basis = matches!(config.encoding, Encoding::Basis);
-        if f32_requested && is_basis {
-            log::warn!(
-                "float32 requested for streaming basis file; basis indices are integers and f32 \
-                 cannot represent indices above {MAX_EXACT_F32_INT:.0} exactly, so this stream is \
-                 read as f64. Use dtype='float64' to silence this warning."
-            );
-        }
-        let use_f32 = f32_requested && !is_basis;
-        let (rx, recycle_tx, _producer_handle) = if use_f32 {
-            build_streaming_producer::<f32>(path, &config, batch_limit)?
-        } else {
-            build_streaming_producer::<f64>(path, &config, batch_limit)?
+        let source = Source::FileStreaming {
+            path: path.as_ref().to_path_buf(),
+            batch_limit,
         };
-        Ok(Self {
-            engine,
-            config,
-            rx: std::sync::Mutex::new(Some(rx)),
-            recycle_tx: Some(recycle_tx),
-            producer_handle: Some(_producer_handle),
-        })
+        Self::new(engine, source, config)
     }
 
     /// Returns the next batch as a DLPack pointer; `Ok(None)` when exhausted.
@@ -1553,7 +1636,7 @@ mod tests {
         use std::fs;
         use std::sync::Arc;
 
-        fn write_f32_parquet(path: &std::path::Path) {
+        pub(super) fn write_f32_parquet(path: &std::path::Path) {
             // 8 samples, each 4 features — matches amplitude encoding with 2 qubits (2^2=4)
             let item_field = Arc::new(Field::new("item", DataType::Float32, true));
             let list_field = Field::new("data", DataType::FixedSizeList(item_field, 4), true);
@@ -1574,7 +1657,7 @@ mod tests {
         static FILE_COUNTER: std::sync::atomic::AtomicUsize =
             std::sync::atomic::AtomicUsize::new(0);
 
-        fn temp_parquet_path(tag: &str) -> std::path::PathBuf {
+        pub(super) fn temp_parquet_path(tag: &str) -> std::path::PathBuf {
             let n = FILE_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
             std::env::temp_dir().join(format!(
                 "mahout_pipeline_dtype_{tag}_{pid}_{n}.parquet",
@@ -1908,6 +1991,197 @@ mod tests {
                 matches!(result.unwrap(), BatchData::F32(_)),
                 "build_streaming_producer::<f32> must deliver BatchData::F32 through the channel"
             );
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Source enum (#1434)
+    //
+    // `PipelineIterator::new` = `spawn_source` + storing a `QdpEngine`. Creating an
+    // engine needs CUDA, so the per-variant tests drive `spawn_source` directly and read
+    // the batches off the prefetch channel; the GPU-only test at the end covers `new`
+    // itself and skips when no functional GPU is present.
+    // -------------------------------------------------------------------------
+
+    mod source_tests {
+        use super::dtype_file_tests::{temp_parquet_path, write_f32_parquet};
+        use super::*;
+        use std::fs;
+
+        /// Drain every batch the producer thread sends, then join it.
+        fn collect(handles: ProducerHandles) -> Vec<PrefetchedBatch> {
+            let (rx, _recycle_tx, handle) = handles;
+            let batches: Vec<_> = rx.iter().map(|b| b.unwrap()).collect();
+            handle.join().unwrap();
+            batches
+        }
+
+        #[test]
+        fn test_source_synthetic_overrides_config_batches_and_seed() {
+            // Source::Synthetic is authoritative over config.total_batches / config.seed.
+            let mut config = PipelineConfig {
+                total_batches: 999,
+                seed: None,
+                num_qubits: 3,
+                batch_size: 4,
+                encoding: Encoding::Amplitude,
+                ..Default::default()
+            };
+            let source = Source::Synthetic {
+                total_batches: 3,
+                seed: Some(7),
+            };
+            let batches = collect(spawn_source(source, &mut config).unwrap());
+
+            assert_eq!(batches.len(), 3);
+            assert_eq!((config.total_batches, config.seed), (3, Some(7)));
+            assert!(config.prefetch_depth > 0, "spawn_source must normalize()");
+            let expected_cfg = PipelineConfig {
+                seed: Some(7),
+                ..config.clone()
+            };
+            for (i, b) in batches.iter().enumerate() {
+                assert_eq!(b.batch_n, 4);
+                assert_eq!(b.data, BatchData::F64(generate_batch(&expected_cfg, i, 8)));
+            }
+        }
+
+        #[test]
+        fn test_source_file_honours_batch_limit_and_dtype() {
+            // 8 samples x 4 features; batch_size 3 -> 3,3,2 until EOF.
+            let path = temp_parquet_path("source_file");
+            write_f32_parquet(&path);
+            let base = PipelineConfig {
+                num_qubits: 2,
+                batch_size: 3,
+                encoding: Encoding::Amplitude,
+                dtype: Precision::Float32,
+                ..Default::default()
+            };
+            let run = |batch_limit| {
+                let source = Source::File {
+                    path: path.clone(),
+                    batch_limit,
+                };
+                spawn_source(source, &mut base.clone()).map(collect)
+            };
+            let all = run(usize::MAX);
+            let limited = run(2);
+            let _ = fs::remove_file(&path);
+
+            let all = all.unwrap();
+            let sizes: Vec<_> = all.iter().map(|b| b.batch_n).collect();
+            assert_eq!(sizes, vec![3, 3, 2]);
+            assert!(matches!(all[0].data, BatchData::F32(_)));
+            assert_eq!(limited.unwrap().len(), 2, "batch_limit must cap batches");
+        }
+
+        #[test]
+        fn test_source_file_streaming_honours_batch_limit_and_dtype() {
+            let path = temp_parquet_path("source_stream");
+            write_f32_parquet(&path);
+            let base = PipelineConfig {
+                num_qubits: 2,
+                batch_size: 3,
+                encoding: Encoding::Amplitude,
+                dtype: Precision::Float32,
+                ..Default::default()
+            };
+            let run = |batch_limit| {
+                let source = Source::FileStreaming {
+                    path: path.clone(),
+                    batch_limit,
+                };
+                spawn_source(source, &mut base.clone()).map(collect)
+            };
+            let all = run(usize::MAX);
+            let limited = run(1);
+            let _ = fs::remove_file(&path);
+
+            let all = all.unwrap();
+            let sizes: Vec<_> = all.iter().map(|b| b.batch_n).collect();
+            assert_eq!(sizes, vec![3, 3, 2]);
+            match &all[0].data {
+                BatchData::F32(v) => assert_eq!(&v[..4], &[0.25_f32, 0.5, 0.75, 1.0]),
+                other => panic!("expected F32, got {other:?}"),
+            }
+            assert_eq!(limited.unwrap().len(), 1, "batch_limit must cap batches");
+        }
+
+        #[test]
+        fn test_source_file_streaming_rejects_non_parquet() {
+            let source = Source::FileStreaming {
+                path: PathBuf::from("data.npy"),
+                batch_limit: usize::MAX,
+            };
+            let err = spawn_source(source, &mut PipelineConfig::default()).err();
+            assert!(matches!(err, Some(MahoutError::InvalidInput(_))));
+        }
+
+        /// A `QdpEngine`, or `None` when CUDA is unusable. Without a driver `cudarc`
+        /// panics instead of returning `Err`, so probe inside `catch_unwind`.
+        fn try_engine() -> Option<QdpEngine> {
+            static LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+            let _guard = LOCK.lock().unwrap_or_else(|e| e.into_inner());
+            let prev = std::panic::take_hook();
+            std::panic::set_hook(Box::new(|_| {}));
+            let engine = std::panic::catch_unwind(|| QdpEngine::new(0).ok());
+            std::panic::set_hook(prev);
+            engine.ok().flatten()
+        }
+
+        #[test]
+        #[allow(deprecated)] // also checks the deprecated wrappers still work
+        fn test_pipeline_iterator_new_each_source_gpu() {
+            let Some(engine) = try_engine() else {
+                eprintln!("SKIP: no functional GPU for PipelineIterator::new");
+                return;
+            };
+            let path = temp_parquet_path("source_gpu");
+            write_f32_parquet(&path);
+            let config = PipelineConfig {
+                num_qubits: 2,
+                batch_size: 4,
+                total_batches: 2,
+                encoding: Encoding::Amplitude,
+                ..Default::default()
+            };
+            let p = path.clone();
+            let iters = [
+                PipelineIterator::new(
+                    engine.clone(),
+                    Source::Synthetic {
+                        total_batches: 2,
+                        seed: Some(1),
+                    },
+                    config.clone(),
+                ),
+                PipelineIterator::new(
+                    engine.clone(),
+                    Source::File {
+                        path: p.clone(),
+                        batch_limit: 1,
+                    },
+                    config.clone(),
+                ),
+                PipelineIterator::new(
+                    engine.clone(),
+                    Source::FileStreaming {
+                        path: p.clone(),
+                        batch_limit: 1,
+                    },
+                    config.clone(),
+                ),
+                PipelineIterator::new_synthetic(engine.clone(), config.clone()),
+                PipelineIterator::new_from_file(engine.clone(), &p, config.clone(), 1),
+                PipelineIterator::new_from_file_streaming(engine, &p, config, 1),
+            ];
+            for (i, it) in iters.into_iter().enumerate() {
+                let mut it = it.unwrap_or_else(|e| panic!("iterator {i}: {e}"));
+                let ptr = it.next_batch().unwrap().expect("at least one batch");
+                unsafe { release_dlpack(ptr) };
+            }
+            let _ = fs::remove_file(&path);
         }
     }
 }
