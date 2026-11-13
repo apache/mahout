@@ -37,3 +37,21 @@ pub use numpy::NumpyReader;
 pub use parquet::{ParquetReader, ParquetStreamingReader};
 pub use tensorflow::TensorFlowReader;
 pub use torch::TorchReader;
+
+/// A `List` column whose rows are all null gives `FillZero` no sample size to fill with.
+pub(crate) fn all_null_list_error() -> crate::MahoutError {
+    crate::MahoutError::InvalidInput(
+        "List column has rows but every row is null, so the sample size needed by \
+         NullHandling::FillZero cannot be determined"
+            .to_string(),
+    )
+}
+
+/// A `List` column whose first non-null row is empty makes every sample zero elements wide.
+pub(crate) fn zero_width_list_error() -> crate::MahoutError {
+    crate::MahoutError::InvalidInput(
+        "List column has a non-null row of length 0, so a sample would have no \
+         elements"
+            .to_string(),
+    )
+}
