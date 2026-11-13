@@ -92,7 +92,6 @@ impl DataReader for ArrowIPCReader {
         let mut all_data = Vec::new();
         let mut num_samples = 0;
         let mut sample_size: Option<usize> = None;
-        // Leading null rows seen before any non-null row fixes the sample size.
         let mut deferred_null_rows = 0;
 
         for batch_result in reader {
@@ -181,8 +180,7 @@ impl DataReader for ArrowIPCReader {
                                     ))
                                 })?;
                             all_data.reserve(new_capacity);
-                            // Emit the deferred leading null rows first so FillZero keeps
-                            // them, in file order.
+                            // Flush the deferred leading null rows ahead of this batch.
                             let deferred_len = current_size
                                 .checked_mul(deferred_null_rows)
                                 .ok_or_else(|| {
@@ -223,8 +221,6 @@ impl DataReader for ArrowIPCReader {
                                             all_data.extend(std::iter::repeat_n(0.0_f64, ss));
                                             num_samples += 1;
                                         }
-                                        // The width of a zero sample is not known yet;
-                                        // defer the row until a later batch fixes it.
                                         None => deferred_null_rows += 1,
                                     },
                                 }
@@ -256,8 +252,6 @@ impl DataReader for ArrowIPCReader {
             }
         }
 
-        // Rows are still deferred, so no row in the file was ever non-null and the
-        // sample size never arrived.
         if deferred_null_rows > 0 {
             return Err(all_null_list_error());
         }
@@ -387,7 +381,6 @@ mod tests {
     fn test_arrow_ipc_reader_cross_batch_all_null_first_fill_zero() {
         // Batch 1: [null, null]   — sample_size unknown; rows are deferred
         // Batch 2: [[1,2], [3,4]] — sample_size established; deferred rows zero-filled
-        // FillZero must keep every row, regardless of how the file is split into batches.
         let item_field = Arc::new(Field::new("item", DataType::Float64, true));
         let list_field = Field::new("data", DataType::List(item_field.clone()), true);
         let schema = Arc::new(Schema::new(vec![list_field]));
@@ -452,9 +445,7 @@ mod tests {
 
     #[test]
     fn test_arrow_ipc_reader_leading_null_rows_keep_their_position() {
-        // [null, null] / [null, [1,2]] / [[3,4]]: the third batch's rows must stay
-        // at index 3 and 4, so a caller matching results back to input rows by
-        // index still lines up.
+        // [null, null] / [null, [1,2]] / [[3,4]]: rows after the nulls keep their index.
         let file = write_ipc_list_batches(&[
             &[None, None],
             &[None, Some(&[1.0, 2.0])],
@@ -471,8 +462,6 @@ mod tests {
 
     #[test]
     fn test_arrow_ipc_reader_rejects_zero_width_list_rows() {
-        // The non-null rows are empty, so no sample has any elements. Rejecting
-        // keeps this reader's answer the same as the Parquet readers'.
         let file = write_ipc_list_batches(&[&[None, None], &[Some(&[]), Some(&[])]]);
         let mut reader = ArrowIPCReader::new(file.path(), NullHandling::FillZero).unwrap();
         let err = reader.read_batch().unwrap_err().to_string();
@@ -481,8 +470,6 @@ mod tests {
 
     #[test]
     fn test_arrow_ipc_reader_all_null_list_fill_zero_errors() {
-        // No row is ever non-null, so no sample size can be established and there
-        // is nothing to align the zeros to.
         let file = write_ipc_list_batches(&[&[None, None], &[None]]);
         let mut reader = ArrowIPCReader::new(file.path(), NullHandling::FillZero).unwrap();
         let err = reader.read_batch().unwrap_err().to_string();

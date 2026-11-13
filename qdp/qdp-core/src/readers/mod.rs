@@ -38,11 +38,7 @@ pub use parquet::{ParquetReader, ParquetStreamingReader};
 pub use tensorflow::TensorFlowReader;
 pub use torch::TorchReader;
 
-/// Error for a `List` column whose rows are all null under `NullHandling::FillZero`:
-/// no row ever reveals how many zeros a null sample should become.
-///
-/// Shared by the Parquet and Arrow IPC readers so that both report the same
-/// thing for the same file.
+/// A `List` column whose rows are all null gives `FillZero` no sample size to fill with.
 pub(crate) fn all_null_list_error() -> crate::MahoutError {
     crate::MahoutError::InvalidInput(
         "List column has rows but every row is null, so the sample size needed by \
@@ -51,11 +47,7 @@ pub(crate) fn all_null_list_error() -> crate::MahoutError {
     )
 }
 
-/// Error for a `List` column whose first non-null row is empty.
-///
-/// Rows must all be the same length, so one empty row means every sample has no
-/// elements. There is nothing to encode, and `NullHandling::FillZero` has no
-/// width to fill a null row with.
+/// A `List` column whose first non-null row is empty makes every sample zero elements wide.
 pub(crate) fn zero_width_list_error() -> crate::MahoutError {
     crate::MahoutError::InvalidInput(
         "List column has a non-null row of length 0, so a sample would have no \

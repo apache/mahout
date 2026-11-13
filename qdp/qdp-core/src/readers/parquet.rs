@@ -322,7 +322,6 @@ impl<T: FloatElem> DataReader<T> for ParquetReader<T> {
         let mut all_data: Vec<T> = Vec::new();
         let mut num_samples = 0;
         let mut sample_size: Option<usize> = None;
-        // Leading null rows seen before any non-null row fixes the sample size.
         let mut deferred_null_rows = 0;
 
         for batch_result in reader {
@@ -361,9 +360,8 @@ impl<T: FloatElem> DataReader<T> for ParquetReader<T> {
                                 return Err(zero_width_list_error());
                             }
                             sample_size = Some(row_len);
-                            // Both factors come from the file, and `reserve` panics
-                            // rather than returning an error when the product does not
-                            // fit, so the check has to happen before the call.
+                            // Both factors come from the file; neither the multiply nor
+                            // the allocation may panic.
                             let total_len =
                                 row_len.checked_mul(self.total_rows).ok_or_else(|| {
                                     MahoutError::InvalidInput(format!(
@@ -371,11 +369,14 @@ impl<T: FloatElem> DataReader<T> for ParquetReader<T> {
                                         row_len, self.total_rows
                                     ))
                                 })?;
-                            all_data.reserve(total_len);
-                            // Emit the deferred leading null rows first so FillZero keeps
-                            // them, in file order. `deferred_null_rows` counts rows the
-                            // reader actually decoded, which a file can disagree with the
-                            // footer about, so this is not covered by the check above.
+                            all_data.try_reserve(total_len).map_err(|e| {
+                                MahoutError::MemoryAllocation(format!(
+                                    "Failed to reserve {} elements for a List column of {} \
+                                     declared rows: {}",
+                                    total_len, self.total_rows, e
+                                ))
+                            })?;
+                            // Flush the deferred leading null rows ahead of this batch.
                             let deferred_len =
                                 row_len.checked_mul(deferred_null_rows).ok_or_else(|| {
                                     MahoutError::InvalidInput(format!(
@@ -400,8 +401,6 @@ impl<T: FloatElem> DataReader<T> for ParquetReader<T> {
                         num_samples += list_array.len();
                     } else {
                         // Null outer rows present; handle per NullHandling policy.
-                        // If sample_size is still unknown (every row in this batch is null),
-                        // FillZero defers those rows until a later batch fixes the size.
                         for i in 0..list_array.len() {
                             if list_array.is_null(i) {
                                 match self.null_handling {
@@ -445,7 +444,15 @@ impl<T: FloatElem> DataReader<T> for ParquetReader<T> {
 
                     if sample_size.is_none() {
                         sample_size = Some(current_size);
-                        all_data.reserve(current_size * batch.num_rows());
+                        let batch_len =
+                            current_size.checked_mul(batch.num_rows()).ok_or_else(|| {
+                                MahoutError::InvalidInput(format!(
+                                    "FixedSizeList capacity overflow: {} * {} would overflow usize",
+                                    current_size,
+                                    batch.num_rows()
+                                ))
+                            })?;
+                        all_data.reserve(batch_len);
                     }
 
                     let flat = fixed_size_list_flat_values(list_array);
@@ -597,40 +604,30 @@ impl<T: FloatElem> ParquetStreamingReader<T> {
         self.sample_size
     }
 
-    /// Write as many deferred leading null rows as `buffer` has room for, as
-    /// whole zero samples, and return how many elements that took.
-    ///
-    /// The count stays in `deferred_null_rows` until it is drained, so a long
-    /// run of leading null rows is spread across calls instead of being
-    /// materialised at once. This runs before the `leftover_data` drain:
-    /// deferred rows precede the batch that fixed the sample size, so anything
-    /// already in `leftover_data` follows them in file order.
-    ///
-    /// `rows` is capped at `(limit - written) / sample_size`, so `rows *
-    /// sample_size` cannot exceed the remaining space and needs no overflow
-    /// check.
+    /// Write as many deferred leading null rows into `buffer` as fit, as whole
+    /// zero samples, and return the element count. Runs before `drain_leftover`:
+    /// deferred rows precede everything `leftover_data` can hold.
     fn drain_deferred(&mut self, buffer: &mut [T], written: usize, limit: usize) -> usize {
         let Some(sample_size) = self.sample_size else {
             return 0;
         };
-        // A `List` column of length-0 rows is rejected before it gets here, but a
-        // `FixedSizeList` of width 0 is not, and no number of zeros represents a
-        // sample with no elements; leave the count for the end-of-file check.
-        if self.deferred_null_rows == 0 || sample_size == 0 || written >= limit {
+        // Only the `List` arm defers rows, and it rejects a zero-width row first.
+        debug_assert!(sample_size > 0, "deferred null rows with a zero-width sample");
+        if self.deferred_null_rows == 0 || written >= limit {
             return 0;
         }
-        let rows = ((limit - written) / sample_size).min(self.deferred_null_rows);
+        let Some(room) = (limit - written).checked_div(sample_size) else {
+            return 0;
+        };
+        let rows = room.min(self.deferred_null_rows);
         let len = rows * sample_size;
         buffer[written..written + len].fill(T::default());
         self.deferred_null_rows -= rows;
         len
     }
 
-    /// Copy as much of `leftover_data` as `buffer` has room for, and return how
-    /// many elements that took.
-    ///
-    /// This never runs while deferred rows are outstanding, because those
-    /// precede everything in `leftover_data` in file order.
+    /// Copy as much of `leftover_data` into `buffer` as fits and return the
+    /// element count. Refuses to run while deferred rows are outstanding.
     fn drain_leftover(&mut self, buffer: &mut [T], written: usize, limit: usize) -> usize {
         if self.sample_size.is_none() || self.deferred_null_rows > 0 || written >= limit {
             return 0;
@@ -696,7 +693,6 @@ impl<T: FloatElem> StreamingDataReader<T> for ParquetStreamingReader<T> {
         };
         let mut limit = self.sample_size.map_or(buf_cap, calc_limit);
 
-        // Deferred rows come before anything in `leftover_data`, so they go first.
         written += self.drain_deferred(buffer, written, limit);
         written += self.drain_leftover(buffer, written, limit);
 
@@ -728,8 +724,7 @@ impl<T: FloatElem> StreamingDataReader<T> for ParquetStreamingReader<T> {
                                 None => match self.sample_size {
                                     // All rows null but sample_size known from an earlier batch.
                                     Some(ss) => ss,
-                                    // All rows null and sample_size unknown: defer them until
-                                    // a later batch fixes the size.
+                                    // All rows null and sample_size unknown.
                                     None => {
                                         if self.null_handling == NullHandling::Reject {
                                             return Err(MahoutError::InvalidInput(
@@ -863,10 +858,6 @@ impl<T: FloatElem> StreamingDataReader<T> for ParquetStreamingReader<T> {
                         _ => {}
                     }
 
-                    // This is the batch that fixed the sample size, so the deferred
-                    // rows ahead of it can finally be emitted. They may not all fit,
-                    // so park this batch's values and let `drain_deferred` work
-                    // through the count a bufferful at a time.
                     if self.deferred_null_rows > 0 {
                         self.leftover_data.clear();
                         self.leftover_data.extend_from_slice(&batch_values);
@@ -1561,7 +1552,6 @@ mod tests {
         // [null, null, [1,2], [3,4]] read with batch_size=2:
         //   batch 1 = [null, null]   — sample_size unknown; rows are deferred
         //   batch 2 = [[1,2], [3,4]] — sample_size established; deferred rows zero-filled
-        // FillZero must keep every row, regardless of how the file is split into batches.
         let item_field = Arc::new(Field::new("item", DataType::Float64, true));
         let list_field = Field::new("data", DataType::List(item_field.clone()), true);
         let schema = Arc::new(Schema::new(vec![list_field]));
@@ -1690,11 +1680,8 @@ mod tests {
 
     #[test]
     fn test_parquet_streaming_reader_deferred_rows_stay_within_one_batch() {
-        // 10 leading null rows accumulate across five all-null batches before
-        // [1,2] fixes the sample size. The zeros for them are emitted a bufferful
-        // at a time, so `leftover_data` never has to hold more than the batch
-        // that fixed the size (batch_size 2 * sample_size 2 = 4 elements).
-        // Building the whole deferred run at once instead would park 20 of them.
+        // 10 leading null rows across five all-null batches before [1,2] fixes the
+        // size; `leftover_data` must never hold more than one batch (4 elements).
         let mut rows: Vec<Option<&[f64]>> = vec![None; 10];
         rows.push(Some(&[1.0, 2.0]));
         rows.push(Some(&[3.0, 4.0]));
@@ -1729,9 +1716,7 @@ mod tests {
 
     #[test]
     fn test_parquet_readers_reject_zero_width_list_rows() {
-        // Rows 3 and 4 are non-null but empty, so no sample has any elements.
-        // The leading nulls make the streaming reader reach this through the
-        // deferral path, where it used to report that every row was null.
+        // The leading nulls send the streaming reader through the deferral path.
         let file = write_nullable_list_parquet(&[None, None, Some(&[]), Some(&[])]);
 
         let mut streaming =
@@ -1749,9 +1734,7 @@ mod tests {
 
     #[test]
     fn test_parquet_streaming_reader_rejects_zero_width_without_deferral() {
-        // No leading all-null batch, so the width is fixed in the first batch and
-        // the rejection has to happen there too. This used to return 0 samples
-        // for a three row file.
+        // The width is fixed in the first batch, so the rejection happens there.
         let file = write_nullable_list_parquet(&[None, Some(&[]), Some(&[])]);
         let mut reader =
             ParquetStreamingReader::<f64>::new(file.path(), Some(2), NullHandling::FillZero)
