@@ -463,8 +463,7 @@ pub(crate) fn stream_encode<E: ChunkEncoder>(
     if global_sample_offset != num_samples {
         return Err(MahoutError::InvalidInput(format!(
             "Parquet file produced {} samples but its metadata declared {}; refusing to return \
-             a partially initialized tensor (this can also happen when the file begins with \
-             all-null rows in a List column)",
+             a partially initialized tensor",
             global_sample_offset, num_samples
         )));
     }

@@ -20,6 +20,13 @@ This gate is crucial in quantum algorithms like Grover's and quantum teleportati
 ## CNOT Gate (Controlled-X Gate)
 The CNOT gate, or controlled-X gate, is an entangling gate that acts on two qubits: a control qubit and a target qubit. If the control qubit is in the $|1\rangle$ state, it applies the X-gate to the target qubit; otherwise, it does nothing. It creates entanglement between the two qubits and is essential in building quantum circuits for various applications.
 
+## CZ Gate (Controlled-Z Gate)
+The controlled-Z gate acts on two qubits and applies a phase of $-1$ only when both qubits are in the $|1\rangle$ state. It leaves the other computational basis states unchanged:
+
+$$CZ|00\rangle = |00\rangle,\quad CZ|01\rangle = |01\rangle,\quad CZ|10\rangle = |10\rangle,\quad CZ|11\rangle = -|11\rangle$$
+
+In QuMat, apply it with `qumat.apply_cz_gate(qubit_index1, qubit_index2)`. The gate is symmetric, so the two indices may be supplied in either order.
+
 ## Toffoli Gate (Controlled-Controlled-X Gate)
 The Toffoli gate is a three-qubit gate that acts as a controlled-controlled-X gate. It applies the X-gate to the target qubit only if both control qubits are in the $|1\rangle$ state. It is used in quantum computing for implementing reversible classical logic operations.
 

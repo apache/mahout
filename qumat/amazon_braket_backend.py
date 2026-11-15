@@ -77,6 +77,10 @@ def apply_cnot_gate(
     circuit.cnot(control_qubit_index, target_qubit_index)
 
 
+def apply_cz_gate(circuit: CircuitLike, qubit_index1: int, qubit_index2: int) -> None:
+    circuit.cz(qubit_index1, qubit_index2)
+
+
 def apply_toffoli_gate(
     circuit: CircuitLike,
     control_qubit_index1: int,
