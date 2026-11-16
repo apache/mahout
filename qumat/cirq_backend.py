@@ -126,6 +126,11 @@ def apply_t_gate(circuit: cirq.Circuit, qubit_index: int) -> None:
     circuit.append(cirq.T(qubit))
 
 
+def apply_tdg_gate(circuit: cirq.Circuit, qubit_index: int) -> None:
+    qubit = cirq.LineQubit(qubit_index)
+    circuit.append(cirq.T(qubit) ** -1)
+
+
 def execute_circuit(
     circuit: cirq.Circuit,
     backend: cirq.Simulator,

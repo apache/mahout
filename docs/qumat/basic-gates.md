@@ -55,6 +55,13 @@ The T-Gate applies a **π/4 phase shift** to the qubit. It is essential for quan
 - $$T|0\rangle = |0\rangle$$
 - $$T|1\rangle = e^{i\pi/4} |1\rangle$$
 
+## T-Dagger Gate (T† Gate)
+The T-dagger gate is the inverse of T. It leaves $|0\rangle$ unchanged and applies a relative phase of $-\pi/4$ to $|1\rangle$:
+
+$$T^\dagger|0\rangle = |0\rangle,\quad T^\dagger|1\rangle = e^{-i\pi/4}|1\rangle$$
+
+In QuMat, apply it with `qumat.apply_tdg_gate(qubit_index)`. Applying T followed by T-dagger returns the qubit to its original state.
+
 ## CSWAP Gate (Controlled-SWAP / Fredkin Gate)
 The CSWAP gate, also known as the **Fredkin gate**, is a three-qubit gate that conditionally swaps the states of two target qubits based on the state of a control qubit. If the control qubit is in the $|1\rangle$ state, it swaps the states of the two target qubits; otherwise, it leaves them unchanged.
 

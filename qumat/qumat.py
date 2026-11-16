@@ -316,6 +316,20 @@ class QuMat:
         self._validate_qubit_index(qubit_index)
         self.backend_module.apply_t_gate(self.circuit, qubit_index)
 
+    def apply_tdg_gate(self, qubit_index: int) -> None:
+        """Apply a T-dagger gate to the specified qubit.
+
+        Applies a relative -pi/4 phase, multiplying the |1> state by
+        e^(-i*pi/4), and leaves the |0> state unchanged.
+
+        :param qubit_index: Index of the qubit.
+        :type qubit_index: int
+        :raises RuntimeError: If the circuit has not been initialized.
+        """
+        self._ensure_circuit_initialized()
+        self._validate_qubit_index(qubit_index)
+        self.backend_module.apply_tdg_gate(self.circuit, qubit_index)
+
     def execute_circuit(
         self, parameter_values: Mapping[str, float] | None = None
     ) -> Any:

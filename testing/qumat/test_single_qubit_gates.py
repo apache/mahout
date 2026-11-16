@@ -17,6 +17,7 @@
 
 import math
 
+import numpy as np
 import pytest
 
 from qumat import QuMat
@@ -602,6 +603,19 @@ class TestTGate:
             f"Backend: {backend_name}, expected |0> after T^8, "
             f"got probability {prob:.4f}"
         )
+
+
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+def test_tdg_gate_applies_inverse_t_phase(backend_name):
+    """T-dagger applies the negative pi/4 phase to |1> in a superposition."""
+    qumat = QuMat(get_backend_config(backend_name))
+    qumat.create_empty_circuit(num_qubits=1)
+    qumat.apply_hadamard_gate(0)
+
+    qumat.apply_tdg_gate(0)
+
+    expected_state = np.array([1, np.exp(-1j * math.pi / 4)]) / math.sqrt(2)
+    np.testing.assert_allclose(qumat.get_final_state_vector(), expected_state)
 
 
 @pytest.mark.parametrize(
