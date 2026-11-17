@@ -153,7 +153,7 @@ def run_mahout(
 
     result = (
         QdpBenchmark(device_id=device_id)
-        .backend("rust")
+        .backend("cuda")
         .qubits(num_qubits)
         .encoding(encoding_method)
         .batches(total_batches, size=batch_size)

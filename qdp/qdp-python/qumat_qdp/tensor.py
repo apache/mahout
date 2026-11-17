@@ -42,11 +42,13 @@ class QdpTensor:
     value: Any
     backend: str
 
-    def __dlpack__(self, stream: int | None = None) -> Any:
+    def __dlpack__(self, stream: int | None = None, **kwargs: Any) -> Any:
         """Return a DLPack capsule for the wrapped backend tensor.
 
         :param stream: Optional consumer stream to pass through to the wrapped
             tensor's ``__dlpack__`` implementation.
+        :param kwargs: Further DLPack keyword arguments (such as
+            ``max_version``) passed through unchanged.
         :returns: A DLPack capsule representing ``value``.
         :raises RuntimeError: If the wrapped value does not implement
             ``__dlpack__``.
@@ -57,8 +59,8 @@ class QdpTensor:
                 f"{type(self.value)!r}"
             )
         if stream is None:
-            return self.value.__dlpack__()
-        return self.value.__dlpack__(stream=stream)
+            return self.value.__dlpack__(**kwargs)
+        return self.value.__dlpack__(stream=stream, **kwargs)
 
     def __dlpack_device__(self) -> Any:
         """Return the DLPack device descriptor for the wrapped tensor.

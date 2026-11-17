@@ -61,7 +61,7 @@ github:
   # protected_branches entry for main.
   #
   # PR policy (docs/community/pr-policy-and-review-guidelines.md): a PR needs
-  # at least one approving review from a committer before it can be merged,
+  # at least two approving reviews from committers before it can be merged,
   # unless it was opened by a PMC member (.github/pmc-members.txt).
   # GitHub's own required_approving_review_count (as used by Airflow) cannot
   # exempt PMC members, so the rule is enforced through the required status

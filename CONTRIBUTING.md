@@ -53,9 +53,9 @@ For QDP environment and command-level setup (including root `.venv` workflow), s
    git clone https://github.com/apache/mahout.git
    cd mahout
    uv sync --group dev              # Core Qumat (no GPU required)
-   # uv sync --group dev --extra qdp  # With QDP extension (requires CUDA GPU)
+   # uv sync --python '>=3.10,<3.13' --group dev --extra qdp  # With QDP extension (requires CUDA GPU)
    ```
-   Add `--extra qdp` if you need GPU-accelerated encoding or want to run QDP tests. QDP tests are auto-skipped if the extension is not installed.
+   Add `--python '>=3.10,<3.13' --extra qdp` if you need GPU-accelerated encoding or want to run QDP tests. QDP supports Python 3.10-3.12 only; the range pin stops uv from picking 3.13, where QDP is not available. QDP tests are auto-skipped if the extension is not installed.
 
 3. **Set up pre-commit hooks:**
    ```bash
@@ -163,6 +163,7 @@ Apache Mahout includes several subprojects. Use the root workflow above for issu
 
 - **Pre-commit fails:** Run `pre-commit run --all-files` to see errors. Common fixes: `cargo fmt` (Rust), `cargo clippy` (Rust lint), and ensuring you use the repo venv (`uv run pre-commit` or `make pre-commit`).
 - **Wrong Python or missing package:** Ensure the virtual environment is activated and you ran `uv sync --group dev` from the repo root. For QDP, see [qdp/DEVELOPMENT.md](qdp/DEVELOPMENT.md).
+- **CI fails at `uv sync --locked`:** `uv.lock` is out of date. CI rejects a stale lock, so any change to `pyproject.toml` or `qdp/qdp-python/pyproject.toml` (including dependency bumps) must ship with a refreshed lock: run `uv lock` from the repo root and commit `uv.lock`.
 
 ---
 

@@ -129,7 +129,21 @@ impl QdpEngine {
     }
 
     /// Initialize engine with explicit precision.
+    ///
+    /// Returns [`MahoutError::Cuda`] when no usable CUDA device is present
+    /// (no NVIDIA driver, no GPU, or a build linked against the CUDA stubs).
+    /// That check runs *before* cudarc is touched: cudarc loads the driver
+    /// library lazily and panics if it is missing, which in a `panic = "abort"`
+    /// build (the Python extension) kills the host process instead of
+    /// returning an error.
     pub fn new_with_precision(device_id: usize, precision: Precision) -> Result<Self> {
+        if !cuda_runtime_available() {
+            return Err(MahoutError::Cuda(format!(
+                "no usable CUDA device for device_id={} (no NVIDIA driver or \
+                 GPU detected, or QDP was built without the CUDA toolkit)",
+                device_id
+            )));
+        }
         let device = CudaDevice::new(device_id).map_err(|e| {
             MahoutError::Cuda(format!(
                 "Failed to initialize CUDA device {}: {:?}",

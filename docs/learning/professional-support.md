@@ -35,7 +35,7 @@ An entry here is not an endorsement by the Apache Software Foundation nor any of
 | Frank Scholten | frank.scholten@orange11.nl | |
 | GridLine | [gridline.nl/contact](http://www.gridline.nl/contact) | Specialised in search and thesauri |
 | Jagdish Nomula | nomulaj@gmail.com | ML, search, algorithms, Java. [kosmex.com](http://www.kosmex.com) |
-| Jie-Kai Chang | jiekaichang@apache.org | Apache Mahout PMC Chair and co-creator of QDP. GPU-accelerated quantum data encoding (CUDA/ROCm), zero-copy data pipelines, and Kubernetes-native ML infrastructure (Ray, KubeRay). [github.com/400Ping](https://github.com/400Ping) |
+| Jie-Kai Chang | jiekaichang@apache.org | Apache Mahout PMC Chair and co-creator of QDP. GPU-accelerated quantum data encoding (CUDA/ROCm), zero-copy data pipelines, and Kubernetes-native ML infrastructure (Ray, KubeRay). [400ping.github.io](https://400ping.github.io/) |
 | LucidWorks | [lucidworks.com](http://www.lucidworks.com) | Big data platform including Mahout as a service for clustering, classification and more |
 | Sematext International | [sematext.com](http://sematext.com/) | |
 | Ted Dunning | sales@maprtech.com | Full commercial support |

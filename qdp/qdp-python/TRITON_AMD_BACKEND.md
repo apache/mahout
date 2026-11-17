@@ -46,8 +46,9 @@ state = torch.from_dlpack(qt)
 ```
 
 The public `QdpEngine(..., backend="amd")` route goes directly to the Triton
-engine and returns the Python `QuantumTensorWrapper` compatibility wrapper.
-The CUDA route remains Rust-owned and returns the extension `QuantumTensor`.
+engine and returns a `QdpTensor` whose `value` is the Triton engine's
+`torch.Tensor`.  The CUDA route returns a `QdpTensor` whose `value` is the
+extension's native tensor.
 
 ### Triton implementation details
 

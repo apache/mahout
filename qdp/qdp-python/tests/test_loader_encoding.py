@@ -46,17 +46,29 @@ def test_constructor_normalizes_encoding_case(given: str, expected: str) -> None
     assert loader._encoding_method == expected
 
 
-def test_mixed_case_encoding_iterates_without_error() -> None:
-    pytest.importorskip("torch")
-    loader = (
-        QuantumDataLoader()
-        .backend("pytorch")
-        .qubits(2)
-        .encoding("Amplitude")
-        .batches(1, size=1)
+def test_mixed_case_encoding_reaches_backend_normalized(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from types import SimpleNamespace
+
+    from qumat_qdp import loader as loader_mod
+
+    seen: dict[str, str] = {}
+
+    class FakeEngine:
+        def __init__(self, device_id: int) -> None:
+            pass
+
+        def create_synthetic_loader(self, *, encoding_method: str, **_kwargs: object):
+            seen["encoding_method"] = encoding_method
+            return []
+
+    monkeypatch.setattr(
+        loader_mod, "_get_qdp", lambda: SimpleNamespace(QdpEngine=FakeEngine)
     )
-    batches = list(loader)
-    assert len(batches) == 1
+    loader = QuantumDataLoader().qubits(2).encoding("Amplitude").batches(1, size=1)
+    assert list(loader) == []
+    assert seen["encoding_method"] == "amplitude"
 
 
 @pytest.mark.parametrize("bad", ["not-an-encoding", "amplitud", "ANGL"])

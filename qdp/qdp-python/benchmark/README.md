@@ -68,7 +68,8 @@ If you prefer to set up manually (or if `make benchmark` is not available):
 
 ```bash
 # First-time setup: install dependencies and build QDP extension
-uv sync --group dev --extra qdp
+# QDP supports Python 3.10-3.12 only; pin to that range (otherwise uv may pick 3.13, where QDP is not available)
+uv sync --python '>=3.10,<3.13' --group dev --extra qdp
 source .venv/bin/activate
 uv sync --project qdp/qdp-python --group benchmark --active
 unset CONDA_PREFIX && uv run --active maturin develop --manifest-path qdp/qdp-python/Cargo.toml

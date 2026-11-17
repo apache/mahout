@@ -18,7 +18,6 @@ loaders:
     search_path:
       - ../../qdp/qdp-python
     modules:
-      - qumat_qdp._backend
       - qumat_qdp.api
       - qumat_qdp.backend
       - qumat_qdp.tensor

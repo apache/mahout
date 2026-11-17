@@ -20,7 +20,6 @@ Apache Mahout is running a hands-on hackathon at [Community over Code Glasgow 20
 |---|---|
 | **Colab notebook** | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/apache/mahout/blob/main/website/static/hackathon/mahout_hackathon_colab.ipynb) or <a href="pathname:///hackathon/mahout_hackathon_colab.ipynb" download>download the .ipynb</a> and upload it with **File > Upload notebook** in Colab |
 | **Kickoff slides** | [View as PDF](pathname:///hackathon/mahout-hackathon-deck.pdf) or <a href="pathname:///hackathon/mahout-hackathon-deck.pptx" download>download the .pptx</a>. The slides are also shown below. |
-| **Task sheet** | [mahout-hackathon-tasks.md](pathname:///hackathon/mahout-hackathon-tasks.md), with reproduction steps and ready-to-file issue text for every task |
 | **Event page** | [events.apache.org: Apache Mahout hackathon](https://events.apache.org/events/2026/community-over-code/mahout.html) |
 
 ## Colab setup: one minute before you run anything
@@ -73,7 +72,7 @@ The notebook follows the same order as the talk:
 
 ## Hackathon tasks
 
-Every task is sized for one to two hours, needs no GPU, and ends in a pull request with a test. Claim a task by commenting on its issue. Full details, including reproduction steps, are in the [task sheet](pathname:///hackathon/mahout-hackathon-tasks.md).
+Every task is sized for one to two hours, needs no GPU, and ends in a pull request with a test. Claim a task by commenting on its issue.
 
 **Track A: Qumat (Python only).** All reproduced on `main` and on `qumat` 0.6.0. Each issue has the reproduction steps.
 

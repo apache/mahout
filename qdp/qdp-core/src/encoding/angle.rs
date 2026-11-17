@@ -135,12 +135,14 @@ mod tests {
         use cudarc::driver::CudaDevice;
         use std::sync::Arc;
 
-        let device: Arc<CudaDevice> = match CudaDevice::new(0) {
-            Ok(d) => d,
-            Err(_) => return, // no GPU
-        };
+        // Create the engine first: it returns Err without a GPU, whereas a
+        // bare CudaDevice::new panics when the driver library is missing.
         let engine = match QdpEngine::new(0) {
             Ok(e) => e,
+            Err(_) => return, // no GPU
+        };
+        let device: Arc<CudaDevice> = match CudaDevice::new(0) {
+            Ok(d) => d,
             Err(_) => return,
         };
         let ctx = match PipelineContext::new(&device, 2) {

@@ -157,9 +157,15 @@ pub fn write_list_parquet_f64(path: &str, data: &[f64], sample_size: usize) {
 }
 
 /// Returns a CUDA device handle, or `None` when CUDA is unavailable for the test environment.
+///
+/// Checks `cuda_runtime_available()` first: without an NVIDIA driver a bare
+/// `CudaDevice::new` panics inside cudarc instead of returning `Err`.
 #[cfg(target_os = "linux")]
 #[allow(dead_code)]
 pub fn cuda_device() -> Option<Arc<CudaDevice>> {
+    if !qdp_core::cuda_runtime_available() {
+        return None;
+    }
     CudaDevice::new(0).ok()
 }
 

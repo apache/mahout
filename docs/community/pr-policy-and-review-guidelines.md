@@ -74,7 +74,7 @@ For non-trivial code contributions, contributors are expected to have an ASF ICL
 When deciding whether to merge, committers should verify all of the following:
 
 - Required CI checks are green (enforced automatically, see below).
-- At least one committer approves (enforced automatically, see below).
+- At least two committers approve (enforced automatically, see below).
 - All blocking comments are resolved.
 
 #### Auto-merge and CI
@@ -84,7 +84,8 @@ deliberately **not** required on `main`: a required check would also stop a
 committer from merging manually when a failure is judged acceptable. Instead
 the `Auto-merge gate` status check ([`automerge-gate.yml`](https://github.com/apache/mahout/blob/main/.github/workflows/automerge-gate.yml))
 is required. It runs on every push to the PR and waits for the other CI
-workflows of that commit:
+workflows of that commit (the `Committer approval` check below is not CI and
+is not waited for):
 
 - While any CI workflow is still running, the gate is "in progress", so
   auto-merge cannot fire early. (It gives up after about an hour; re-run the
@@ -115,13 +116,13 @@ decision.
 
 The `Committer approval` status check ([`pr-approval-check.yml`](https://github.com/apache/mahout/blob/main/.github/workflows/pr-approval-check.yml)) is required on `main` and re-runs whenever a review is submitted, edited, or dismissed:
 
-- The PR must have at least one reviewer whose latest review is an approval and who has write access to the repository (i.e. a committer). Approvals from non-committers are welcome but do not satisfy the check.
+- The PR must have at least **two** distinct reviewers whose latest review is an approval and who have write access to the repository (i.e. committers). Approvals from non-committers are welcome but do not count. The number is set by `REQUIRED_APPROVALS` in the workflow.
 - Following GitHub semantics, a comment-only review keeps an earlier approval in place; "Request changes" or dismissing the review removes it.
 - PRs opened by PMC members are exempt. The list of PMC GitHub accounts lives in [`.github/pmc-members.txt`](https://github.com/apache/mahout/blob/main/.github/pmc-members.txt) and must be updated when the PMC roster changes.
+- Like the other CI workflows it runs on the `pull_request` event, so for pull requests from forks it waits until a maintainer approves the workflow runs ("Approve and run"). Until then the check is pending rather than failed, so a new PR is not marked red before anyone has looked at it. Once it has run, it stays red until the required approvals are in.
+- This applies to auto-merge and manual merges alike; PMC members can bypass it in an emergency (see above).
 
-The two-approval expectation for high-impact changes below is not enforced by tooling and remains a committer responsibility.
-
-The following changes should receive at least two committer approvals and prior public discussion (issue or `dev@` thread):
+The following changes should additionally have prior public discussion (issue or `dev@` thread):
 
 - API or behavior-breaking changes.
 - Architecture or major dependency changes.

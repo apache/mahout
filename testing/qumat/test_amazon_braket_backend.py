@@ -16,6 +16,7 @@
 
 from unittest.mock import MagicMock, patch
 
+import pytest
 from braket.circuits import FreeParameter
 
 from qumat.amazon_braket_backend import (
@@ -57,10 +58,29 @@ def test_initialize_backend_default():
         mock_device.assert_called_once()
 
 
-def test_initialize_backend_invalid_type():
+@pytest.mark.parametrize("simulator_type", ["invalid", "sv1", "LOCAL", None])
+def test_initialize_backend_invalid_type_raises(simulator_type):
+    """An unsupported simulator_type raises before any device or AWS session is made."""
+    with (
+        patch("qumat.amazon_braket_backend.boto3.Session") as mock_boto,
+        patch("qumat.amazon_braket_backend.AwsDevice") as mock_device,
+        patch("qumat.amazon_braket_backend.LocalSimulator") as mock_local,
+    ):
+        config = {
+            "backend_options": {"simulator_type": simulator_type, "region": "eu-west-2"}
+        }
+        with pytest.raises(ValueError, match="'default'.*'local'") as excinfo:
+            initialize_backend(config)
+
+    assert repr(simulator_type) in str(excinfo.value)
+    mock_boto.assert_not_called()
+    mock_device.assert_not_called()
+    mock_local.assert_not_called()
+
+
+def test_initialize_backend_missing_type_uses_default():
     with patch("qumat.amazon_braket_backend.AwsDevice") as mock_device:
-        config = {"backend_options": {"simulator_type": "invalid"}}
-        initialize_backend(config)
+        initialize_backend({"backend_options": {}})
         mock_device.assert_called_once()
 
 

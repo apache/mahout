@@ -23,15 +23,17 @@ from typing import Any
 import cirq
 import sympy
 
+SUPPORTED_SIMULATOR_TYPES = ("default",)
+
 
 def initialize_backend(backend_config: Mapping[str, Any]) -> cirq.Simulator:
-    # Assuming 'simulator_type' specifies the type of simulator in Cirq
     simulator_type = backend_config.get("backend_options", {}).get(
         "simulator_type", "default"
     )
-    if simulator_type != "default":
-        print(
-            f"Simulator type '{simulator_type}' is not supported in Cirq. Ignoring this argument"
+    if simulator_type not in SUPPORTED_SIMULATOR_TYPES:
+        raise ValueError(
+            f"Unsupported simulator_type {simulator_type!r} for the Cirq backend. "
+            "Supported values: 'default' (cirq.Simulator), or omit simulator_type."
         )
 
     return cirq.Simulator()
@@ -64,6 +66,12 @@ def apply_cnot_gate(
     control_qubit = cirq.LineQubit(control_qubit_index)
     target_qubit = cirq.LineQubit(target_qubit_index)
     circuit.append(cirq.CNOT(control_qubit, target_qubit))
+
+
+def apply_cz_gate(circuit: cirq.Circuit, qubit_index1: int, qubit_index2: int) -> None:
+    qubit1 = cirq.LineQubit(qubit_index1)
+    qubit2 = cirq.LineQubit(qubit_index2)
+    circuit.append(cirq.CZ(qubit1, qubit2))
 
 
 def apply_toffoli_gate(
