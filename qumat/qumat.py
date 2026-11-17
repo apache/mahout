@@ -67,9 +67,22 @@ class QuMat:
 
         self.backend_config: dict[str, Any] = dict(backend_config)
         self.backend_name: str = self.backend_config["backend_name"]
-        self.backend_module: ModuleType = import_module(
-            f".{self.backend_name}_backend", package="qumat"
-        )
+
+        # New code for issue #1506
+        supported_backends = ["amazon_braket", "cirq", "qiskit"]
+        try:
+            self.backend_module: ModuleType = import_module(
+                f".{self.backend_name}_backend", package="qumat"
+            )
+        except ModuleNotFoundError:
+            raise ValueError(
+                f"Unsupported backend_name '{self.backend_name}'."
+                f"Supported backends: {', '.join(supported_backends)}"
+            )
+
+        # self.backend_module: ModuleType = import_module(
+        #     f".{self.backend_name}_backend", package="qumat"
+        # )
         self.backend = self.backend_module.initialize_backend(self.backend_config)
         self.circuit: Any | None = None
         self.num_qubits: int | None = None
