@@ -612,7 +612,10 @@ impl<T: FloatElem> ParquetStreamingReader<T> {
             return 0;
         };
         // Only the `List` arm defers rows, and it rejects a zero-width row first.
-        debug_assert!(sample_size > 0, "deferred null rows with a zero-width sample");
+        debug_assert!(
+            sample_size > 0,
+            "deferred null rows with a zero-width sample"
+        );
         if self.deferred_null_rows == 0 || written >= limit {
             return 0;
         }
