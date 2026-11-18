@@ -16,7 +16,8 @@
 
 use arrow::array::{FixedSizeListArray, Float64Array};
 use arrow::datatypes::{DataType, Field, Schema};
-use arrow::ipc::writer::FileWriter as ArrowFileWriter;
+use arrow::ipc::CompressionType;
+use arrow::ipc::writer::{FileWriter as ArrowFileWriter, IpcWriteOptions};
 use qdp_core::io::read_arrow_ipc_batch;
 use std::fs::{self, File};
 use std::sync::Arc;
@@ -223,4 +224,57 @@ fn test_arrow_ipc_large_batch() {
 
     // Cleanup
     fs::remove_file(temp_path).unwrap();
+}
+
+/// Writes a FixedSizeList<Float64> batch with the given IPC compression and
+/// checks it reads back unchanged.
+fn roundtrip_compressed(temp_path: &str, compression: CompressionType) {
+    let num_samples = 4;
+    let sample_size = 4;
+
+    let all_values: Vec<f64> = (0..num_samples * sample_size).map(|v| v as f64).collect();
+    let values_array = Float64Array::from(all_values.clone());
+    let field = Arc::new(Field::new("item", DataType::Float64, false));
+    let list_array =
+        FixedSizeListArray::new(field, sample_size as i32, Arc::new(values_array), None);
+
+    let schema = Arc::new(Schema::new(vec![Field::new(
+        "data",
+        DataType::FixedSizeList(
+            Arc::new(Field::new("item", DataType::Float64, false)),
+            sample_size as i32,
+        ),
+        false,
+    )]));
+
+    let batch =
+        arrow::record_batch::RecordBatch::try_new(schema.clone(), vec![Arc::new(list_array)])
+            .unwrap();
+
+    let options = IpcWriteOptions::default()
+        .try_with_compression(Some(compression))
+        .unwrap();
+    let file = File::create(temp_path).unwrap();
+    let mut writer = ArrowFileWriter::try_new_with_options(file, &schema, options).unwrap();
+    writer.write(&batch).unwrap();
+    writer.finish().unwrap();
+
+    let (data, samples, size) = read_arrow_ipc_batch(temp_path).unwrap();
+
+    assert_eq!(samples, num_samples);
+    assert_eq!(size, sample_size);
+    assert_eq!(data, all_values);
+
+    fs::remove_file(temp_path).unwrap();
+}
+
+#[test]
+fn test_read_arrow_ipc_lz4_compressed() {
+    // pyarrow.feather.write_feather uses LZ4 by default
+    roundtrip_compressed("/tmp/test_arrow_ipc_lz4.arrow", CompressionType::LZ4_FRAME);
+}
+
+#[test]
+fn test_read_arrow_ipc_zstd_compressed() {
+    roundtrip_compressed("/tmp/test_arrow_ipc_zstd.arrow", CompressionType::ZSTD);
 }
