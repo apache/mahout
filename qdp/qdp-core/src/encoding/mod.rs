@@ -25,7 +25,7 @@ use std::sync::Arc;
 use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
 use std::thread::{self, JoinHandle};
 
-use cudarc::driver::{CudaDevice, DevicePtr};
+use crate::gpu_rt::{CudaDevice, DevicePtr};
 
 /// Close the main thread's ends of the IO channels, then wait for the IO
 /// thread to finish.

@@ -71,7 +71,7 @@ mod dlpack_tests {
     }
 
     #[test]
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     fn test_dlpack_single_shape_f32() {
         let Some(device) = common::cuda_device() else {
             return;
@@ -97,7 +97,7 @@ mod dlpack_tests {
     }
 
     #[test]
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     fn test_dlpack_batch_shape_f32() {
         let Some(device) = common::cuda_device() else {
             return;
@@ -142,7 +142,7 @@ mod dlpack_tests {
 
     /// synchronize_stream(CUDA_STREAM_LEGACY) syncs the legacy default stream (Linux + CUDA).
     #[test]
-    #[cfg(target_os = "linux")]
+    #[cfg(qdp_gpu_platform)]
     fn test_synchronize_stream_legacy() {
         if common::cuda_device().is_none() {
             return;

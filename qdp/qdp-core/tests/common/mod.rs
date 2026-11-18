@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use std::sync::Arc;
 
 use arrow::array::{
@@ -25,11 +25,11 @@ use arrow::record_batch::RecordBatch;
 use parquet::arrow::ArrowWriter;
 use parquet::file::properties::WriterProperties;
 
-#[cfg(target_os = "linux")]
-use cudarc::driver::{CudaDevice, CudaSlice};
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 use qdp_core::dlpack::DLManagedTensor;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
+use qdp_core::gpu_rt::{CudaDevice, CudaSlice};
+#[cfg(qdp_gpu_platform)]
 use qdp_core::{Precision, QdpEngine};
 
 /// Creates normalized test data (f64)
@@ -160,7 +160,7 @@ pub fn write_list_parquet_f64(path: &str, data: &[f64], sample_size: usize) {
 ///
 /// Checks `cuda_runtime_available()` first: without an NVIDIA driver a bare
 /// `CudaDevice::new` panics inside cudarc instead of returning `Err`.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 #[allow(dead_code)]
 pub fn cuda_device() -> Option<Arc<CudaDevice>> {
     if !qdp_core::cuda_runtime_available() {
@@ -170,21 +170,21 @@ pub fn cuda_device() -> Option<Arc<CudaDevice>> {
 }
 
 /// Returns a QDP engine, or `None` when GPU-backed engine initialization is unavailable.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 #[allow(dead_code)]
 pub fn qdp_engine() -> Option<QdpEngine> {
     QdpEngine::new(0).ok()
 }
 
 /// Returns a QDP engine with the requested precision, or `None` when unavailable.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 #[allow(dead_code)]
 pub fn qdp_engine_with_precision(precision: Precision) -> Option<QdpEngine> {
     QdpEngine::new_with_precision(0, precision).ok()
 }
 
 /// Copies f64 host data to the default CUDA device, or returns `None` when unavailable.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 #[allow(dead_code)]
 pub fn copy_f64_to_device(data: &[f64]) -> Option<(Arc<CudaDevice>, CudaSlice<f64>)> {
     let device = cuda_device()?;
@@ -193,7 +193,7 @@ pub fn copy_f64_to_device(data: &[f64]) -> Option<(Arc<CudaDevice>, CudaSlice<f6
 }
 
 /// Copies f32 host data to the default CUDA device, or returns `None` when unavailable.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 #[allow(dead_code)]
 pub fn copy_f32_to_device(data: &[f32]) -> Option<(Arc<CudaDevice>, CudaSlice<f32>)> {
     let device = cuda_device()?;
@@ -202,7 +202,7 @@ pub fn copy_f32_to_device(data: &[f32]) -> Option<(Arc<CudaDevice>, CudaSlice<f3
 }
 
 /// Copies usize host data to the default CUDA device, or returns `None` when unavailable.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 #[allow(dead_code)]
 pub fn copy_usize_to_device(data: &[usize]) -> Option<(Arc<CudaDevice>, CudaSlice<usize>)> {
     let device = cuda_device()?;
@@ -211,7 +211,7 @@ pub fn copy_usize_to_device(data: &[usize]) -> Option<(Arc<CudaDevice>, CudaSlic
 }
 
 /// Asserts a DLPack tensor is 2D with the expected shape.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 #[allow(dead_code)]
 pub unsafe fn assert_dlpack_shape_2d(dlpack_ptr: *mut DLManagedTensor, dim0: i64, dim1: i64) {
     assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
@@ -225,7 +225,7 @@ pub unsafe fn assert_dlpack_shape_2d(dlpack_ptr: *mut DLManagedTensor, dim0: i64
 }
 
 /// Asserts a DLPack tensor is 2D with the expected shape and then frees it via its deleter.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 #[allow(dead_code)]
 pub unsafe fn assert_dlpack_shape_2d_and_delete(
     dlpack_ptr: *mut DLManagedTensor,
@@ -238,7 +238,7 @@ pub unsafe fn assert_dlpack_shape_2d_and_delete(
 }
 
 /// Downloads a complex128 DLPack tensor as interleaved real and imaginary values.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 #[allow(dead_code)]
 pub unsafe fn download_dlpack_complex_f64(dlpack_ptr: *mut DLManagedTensor) -> Vec<f64> {
     assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");
@@ -247,10 +247,11 @@ pub unsafe fn download_dlpack_complex_f64(dlpack_ptr: *mut DLManagedTensor) -> V
     assert!(tensor.ndim > 0, "DLPack tensor should have dimensions");
     assert!(!tensor.shape.is_null(), "DLPack shape should not be null");
     assert!(!tensor.data.is_null(), "DLPack data should not be null");
-    assert_eq!(
-        tensor.device.device_type,
-        qdp_core::dlpack::DLDeviceType::kDLCUDA
-    );
+    #[cfg(not(feature = "hip"))]
+    let expected_device_type = qdp_core::dlpack::DLDeviceType::kDLCUDA;
+    #[cfg(feature = "hip")]
+    let expected_device_type = qdp_core::dlpack::DLDeviceType::kDLROCM;
+    assert_eq!(tensor.device.device_type, expected_device_type);
     assert_eq!(tensor.dtype.code, qdp_core::dlpack::DL_COMPLEX);
     assert_eq!(tensor.dtype.bits, 128);
     assert_eq!(tensor.dtype.lanes, 1);
@@ -262,26 +263,21 @@ pub unsafe fn download_dlpack_complex_f64(dlpack_ptr: *mut DLManagedTensor) -> V
             .and_then(|dim| count.checked_mul(dim))
     });
     let num_elements = num_elements.expect("DLPack shape should fit in usize");
-    let byte_count = num_elements
-        .checked_mul(std::mem::size_of::<qdp_kernels::CuDoubleComplex>())
-        .expect("DLPack byte count should fit in usize");
-    let host_len = num_elements
-        .checked_mul(2)
-        .expect("DLPack complex128 element count should fit in usize");
-    let mut host = vec![0.0_f64; host_len];
     let device_ptr = (tensor.data as u64)
         .checked_add(tensor.byte_offset)
         .expect("DLPack byte offset should fit in a device pointer");
 
-    let ret = unsafe {
-        cudarc::driver::sys::lib().cuMemcpyDtoH_v2(host.as_mut_ptr().cast(), device_ptr, byte_count)
-    };
-    assert_eq!(ret, cudarc::driver::sys::CUresult::CUDA_SUCCESS);
-    host
+    let device = cuda_device().expect("a device tensor implies a usable GPU");
+    qdp_core::gpu::download_complex_f64(
+        &device,
+        device_ptr as *const qdp_kernels::CuDoubleComplex,
+        num_elements,
+    )
+    .expect("device-to-host copy should succeed")
 }
 
 /// Takes the DLPack deleter from the managed tensor and invokes it exactly once.
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 #[allow(dead_code)]
 pub unsafe fn take_deleter_and_delete(dlpack_ptr: *mut DLManagedTensor) {
     assert!(!dlpack_ptr.is_null(), "DLPack pointer should not be null");

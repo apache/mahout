@@ -14,9 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub mod buffer_pool;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub(crate) mod cuda_sync;
 pub mod encodings;
 pub mod memory;
@@ -24,22 +24,22 @@ pub mod memory;
 /// `tests/` can use them; not part of the supported runtime API.
 #[doc(hidden)]
 pub mod metrics;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub mod overlap_tracker;
 pub mod pipeline;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub mod pool_metrics;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub(crate) mod validation;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub(crate) mod cuda_ffi;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub use buffer_pool::{PinnedBufferHandle, PinnedBufferPool};
 pub use encodings::{AmplitudeEncoder, AngleEncoder, BasisEncoder, QuantumEncoder};
 pub use memory::GpuStateVector;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 #[doc(hidden)]
 pub use metrics::{download_complex_f32, download_complex_f64};
 #[doc(hidden)]
@@ -49,9 +49,9 @@ pub use metrics::{
 };
 pub use pipeline::run_dual_stream_pipeline;
 
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub use overlap_tracker::OverlapTracker;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub use pipeline::PipelineContext;
-#[cfg(target_os = "linux")]
+#[cfg(qdp_gpu_platform)]
 pub use pool_metrics::{PoolMetrics, PoolUtilizationReport};
