@@ -118,8 +118,8 @@ def test_create_empty_circuit_with_qubits():
     assert len(circuit.instructions) == 3
 
 
-def test_create_empty_circuit_without_qubits():
-    circuit = create_empty_circuit()
+def test_create_empty_circuit_with_zero_qubits():
+    circuit = create_empty_circuit(0)
     assert len(circuit.instructions) == 0
 
 
