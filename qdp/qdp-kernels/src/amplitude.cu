@@ -161,7 +161,9 @@ extern "C" {
 /// * input_d - Device pointer to input data (already normalized by host)
 /// * state_d - Device pointer to output state vector
 /// * input_len - Number of input elements
-/// * state_len - Target state vector size (2^num_qubits)
+/// * state_len - Number of output amplitudes to write from state_d (>= input_len).
+///   2^num_qubits for a full state, or a pipeline chunk length, which may be odd.
+///   Entries past input_len are zero-filled; nothing beyond state_len is written.
 /// * inv_norm - Reciprocal L2 norm (1 / ||input||)
 /// * stream - CUDA stream for async execution (nullptr = default stream)
 ///
@@ -182,8 +184,9 @@ int launch_amplitude_encode(
     cuDoubleComplex* state_complex_d = static_cast<cuDoubleComplex*>(state_d);
 
     const int blockSize = DEFAULT_BLOCK_SIZE;
-    // Halve the grid size because each thread now processes 2 elements
-    const int gridSize = (state_len / 2 + blockSize - 1) / blockSize;
+    // Each thread processes 2 elements; round up so an odd state_len (e.g. a
+    // pipeline chunk) still gets a thread for its last element.
+    const int gridSize = ((state_len + 1) / 2 + blockSize - 1) / blockSize;
 
     amplitude_encode_kernel<<<gridSize, blockSize, 0, stream>>>(
         input_d,
