@@ -17,7 +17,7 @@ New here? Start with [Getting Started](./qumat/getting-started), which covers in
 ## Qumat (Circuits)
 
 - [Overview](./qumat) - What Qumat is and which backends it supports
-- [Basic Gates](./qumat/basic-gates) - NOT, Hadamard, CNOT, Toffoli, SWAP, Pauli, CSWAP, and U gates
+- [Basic Gates](./qumat/basic-gates) - NOT, Hadamard, CNOT, CZ, Toffoli, SWAP, Pauli, T, T-dagger, CSWAP, and U gates
 - [Parameterized Circuits](./qumat/parameterized-circuits) - Rotation gates (Rx, Ry, Rz) and building circuits with tunable parameters
 - [API Reference](./qumat/api) - Generated reference for the `qumat` package
 - [Core Concepts](./qumat/concepts) - The ideas behind the circuit abstraction
