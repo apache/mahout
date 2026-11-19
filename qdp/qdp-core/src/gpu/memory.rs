@@ -14,10 +14,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Allow unused_unsafe: qdp_kernels functions are unsafe in CUDA builds but safe stubs in no-CUDA builds.
-// The compiler can't statically determine which path is taken.
-#![allow(unused_unsafe)]
-
 use crate::error::{MahoutError, Result};
 use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr};
 use qdp_kernels::{CuComplex, CuDoubleComplex};
@@ -223,9 +219,16 @@ pub struct GpuStateVector {
     pub device_type: GpuDeviceType,
 }
 
-// Safety: CudaSlice and Arc are both Send + Sync
-unsafe impl Send for GpuStateVector {}
-unsafe impl Sync for GpuStateVector {}
+// `GpuStateVector` is Send + Sync automatically: every field is (cudarc
+// implements both for `CudaSlice<T>` when `T` is, and `CuComplex` /
+// `CuDoubleComplex` are plain `f32`/`f64` pairs). This used to be asserted
+// with `unsafe impl Send/Sync`, which would have kept compiling even if a
+// non-thread-safe field (e.g. a raw pointer) were added later. The check
+// below fails to compile instead.
+const _: () = {
+    const fn assert_send_sync<T: Send + Sync>() {}
+    assert_send_sync::<GpuStateVector>();
+};
 
 impl GpuStateVector {
     /// Create GPU state vector for n qubits with the given precision.

@@ -404,10 +404,23 @@ unsafe extern "C" {
     ) -> i32;
 }
 
-// Dummy implementation for non-Linux and Linux builds without CUDA (allows linking)
+// Dummy implementations for non-Linux and Linux builds without CUDA (allows linking).
+//
+// Each stub is declared `unsafe extern "C"` even though its body never touches
+// its arguments. That keeps the *type* of every launcher identical to the
+// CUDA-build declaration in the `unsafe extern "C"` block above, so callers
+// write the same `unsafe { ... }` block in both builds. If the stubs were safe
+// fns, those blocks would trip `unused_unsafe` in stub builds only, which used
+// to force a file-wide `#![allow(unused_unsafe)]` on every caller.
+
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_amplitude_encode(
+pub unsafe extern "C" fn launch_amplitude_encode(
     _input_d: *const f64,
     _state_d: *mut c_void,
     _input_len: usize,
@@ -418,9 +431,14 @@ pub extern "C" fn launch_amplitude_encode(
     999 // Error: CUDA unavailable
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_amplitude_encode_f32(
+pub unsafe extern "C" fn launch_amplitude_encode_f32(
     _input_d: *const f32,
     _state_d: *mut c_void,
     _input_len: usize,
@@ -431,9 +449,14 @@ pub extern "C" fn launch_amplitude_encode_f32(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_amplitude_encode_batch(
+pub unsafe extern "C" fn launch_amplitude_encode_batch(
     _input_batch_d: *const f64,
     _state_batch_d: *mut c_void,
     _inv_norms_d: *const f64,
@@ -445,9 +468,14 @@ pub extern "C" fn launch_amplitude_encode_batch(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_amplitude_encode_batch_f32(
+pub unsafe extern "C" fn launch_amplitude_encode_batch_f32(
     _input_batch_d: *const f32,
     _state_batch_d: *mut c_void,
     _inv_norms_d: *const f32,
@@ -459,9 +487,14 @@ pub extern "C" fn launch_amplitude_encode_batch_f32(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_l2_norm(
+pub unsafe extern "C" fn launch_l2_norm(
     _input_d: *const f64,
     _input_len: usize,
     _inv_norm_out_d: *mut f64,
@@ -470,9 +503,14 @@ pub extern "C" fn launch_l2_norm(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_l2_norm_batch(
+pub unsafe extern "C" fn launch_l2_norm_batch(
     _input_batch_d: *const f64,
     _num_samples: usize,
     _sample_len: usize,
@@ -482,9 +520,14 @@ pub extern "C" fn launch_l2_norm_batch(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_l2_norm_f32(
+pub unsafe extern "C" fn launch_l2_norm_f32(
     _input_d: *const f32,
     _input_len: usize,
     _inv_norm_out_d: *mut f32,
@@ -493,9 +536,14 @@ pub extern "C" fn launch_l2_norm_f32(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_l2_norm_batch_f32(
+pub unsafe extern "C" fn launch_l2_norm_batch_f32(
     _input_batch_d: *const f32,
     _num_samples: usize,
     _sample_len: usize,
@@ -505,9 +553,14 @@ pub extern "C" fn launch_l2_norm_batch_f32(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn convert_state_to_float(
+pub unsafe extern "C" fn convert_state_to_float(
     _input_state_d: *const CuDoubleComplex,
     _output_state_d: *mut CuComplex,
     _len: usize,
@@ -516,9 +569,14 @@ pub extern "C" fn convert_state_to_float(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn convert_state_to_double(
+pub unsafe extern "C" fn convert_state_to_double(
     _input_state_d: *const CuComplex,
     _output_state_d: *mut CuDoubleComplex,
     _len: usize,
@@ -527,9 +585,14 @@ pub extern "C" fn convert_state_to_double(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_basis_encode(
+pub unsafe extern "C" fn launch_basis_encode(
     _basis_index: usize,
     _state_d: *mut c_void,
     _state_len: usize,
@@ -538,9 +601,14 @@ pub extern "C" fn launch_basis_encode(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_basis_encode_batch(
+pub unsafe extern "C" fn launch_basis_encode_batch(
     _basis_indices_d: *const usize,
     _state_batch_d: *mut c_void,
     _num_samples: usize,
@@ -551,9 +619,14 @@ pub extern "C" fn launch_basis_encode_batch(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_basis_encode_f32(
+pub unsafe extern "C" fn launch_basis_encode_f32(
     _basis_index: usize,
     _state_d: *mut c_void,
     _state_len: usize,
@@ -562,9 +635,14 @@ pub extern "C" fn launch_basis_encode_f32(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_basis_encode_batch_f32(
+pub unsafe extern "C" fn launch_basis_encode_batch_f32(
     _basis_indices_d: *const usize,
     _state_batch_d: *mut c_void,
     _num_samples: usize,
@@ -575,9 +653,14 @@ pub extern "C" fn launch_basis_encode_batch_f32(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_angle_encode(
+pub unsafe extern "C" fn launch_angle_encode(
     _angles_d: *const f64,
     _state_d: *mut c_void,
     _state_len: usize,
@@ -587,9 +670,14 @@ pub extern "C" fn launch_angle_encode(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_angle_encode_batch(
+pub unsafe extern "C" fn launch_angle_encode_batch(
     _angles_batch_d: *const f64,
     _state_batch_d: *mut c_void,
     _num_samples: usize,
@@ -600,9 +688,14 @@ pub extern "C" fn launch_angle_encode_batch(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_angle_encode_f32(
+pub unsafe extern "C" fn launch_angle_encode_f32(
     _angles_d: *const f32,
     _state_d: *mut c_void,
     _state_len: usize,
@@ -612,9 +705,14 @@ pub extern "C" fn launch_angle_encode_f32(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_angle_encode_batch_f32(
+pub unsafe extern "C" fn launch_angle_encode_batch_f32(
     _angles_batch_d: *const f32,
     _state_batch_d: *mut c_void,
     _num_samples: usize,
@@ -625,9 +723,14 @@ pub extern "C" fn launch_angle_encode_batch_f32(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_check_finite_batch_f32(
+pub unsafe extern "C" fn launch_check_finite_batch_f32(
     _input_batch_d: *const f32,
     _total_angles: usize,
     _has_non_finite_d: *mut i32,
@@ -636,9 +739,14 @@ pub extern "C" fn launch_check_finite_batch_f32(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_check_finite_batch_f64(
+pub unsafe extern "C" fn launch_check_finite_batch_f64(
     _input_batch_d: *const f64,
     _total_values: usize,
     _has_non_finite_d: *mut i32,
@@ -647,9 +755,14 @@ pub extern "C" fn launch_check_finite_batch_f64(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_validate_and_cast_basis_indices_f32(
+pub unsafe extern "C" fn launch_validate_and_cast_basis_indices_f32(
     _input_batch_d: *const f32,
     _num_samples: usize,
     _state_len: usize,
@@ -660,9 +773,14 @@ pub extern "C" fn launch_validate_and_cast_basis_indices_f32(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_check_basis_indices_usize(
+pub unsafe extern "C" fn launch_check_basis_indices_usize(
     _indices_d: *const usize,
     _num_samples: usize,
     _state_len: usize,
@@ -672,9 +790,14 @@ pub extern "C" fn launch_check_basis_indices_usize(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_iqp_encode(
+pub unsafe extern "C" fn launch_iqp_encode(
     _data_d: *const f64,
     _state_d: *mut c_void,
     _state_len: usize,
@@ -685,9 +808,14 @@ pub extern "C" fn launch_iqp_encode(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_iqp_encode_batch(
+pub unsafe extern "C" fn launch_iqp_encode_batch(
     _data_batch_d: *const f64,
     _state_batch_d: *mut c_void,
     _num_samples: usize,
@@ -700,9 +828,14 @@ pub extern "C" fn launch_iqp_encode_batch(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_phase_encode(
+pub unsafe extern "C" fn launch_phase_encode(
     _phases_d: *const f64,
     _state_d: *mut c_void,
     _state_len: usize,
@@ -712,9 +845,14 @@ pub extern "C" fn launch_phase_encode(
     999
 }
 
+/// No-CUDA stub: always returns 999 (CUDA unavailable).
+///
+/// # Safety
+/// Same contract as the CUDA declaration. This stub never reads
+/// its arguments, so it is sound for any input.
 #[cfg(any(not(target_os = "linux"), qdp_no_cuda))]
 #[unsafe(no_mangle)]
-pub extern "C" fn launch_phase_encode_batch(
+pub unsafe extern "C" fn launch_phase_encode_batch(
     _phases_batch_d: *const f64,
     _state_batch_d: *mut c_void,
     _num_samples: usize,

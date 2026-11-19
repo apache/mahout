@@ -16,10 +16,6 @@
 
 //! Angle encoding implementation.
 
-// Allow unused_unsafe: qdp_kernels functions are unsafe in CUDA builds but safe stubs in no-CUDA builds.
-// The compiler can't statically determine which path is taken.
-#![allow(unused_unsafe)]
-
 use std::ffi::c_void;
 
 use qdp_kernels::launch_angle_encode_batch;
