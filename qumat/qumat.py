@@ -21,6 +21,8 @@ from importlib import import_module
 from types import ModuleType
 from typing import Any
 
+_SUPPORTED_BACKENDS: tuple[str, ...] = ("amazon_braket", "cirq", "qiskit")
+
 
 class QuMat:
     """Unified interface for quantum circuit operations across multiple backends.
@@ -44,8 +46,9 @@ class QuMat:
             - ``backend_name``: Name of the backend (e.g., "qiskit", "cirq", "amazon_braket")
             - ``backend_options``: Dictionary with backend-specific options
         :type backend_config: dict
-        :raises ImportError: If the specified backend module cannot be imported.
-        :raises ValueError: If backend_config is not a dictionary.
+        :raises ImportError: If a supported backend module cannot be imported.
+        :raises ValueError: If backend_config is not a dictionary, or if
+            ``backend_name`` is not one of the supported backends.
         :raises KeyError: If required configuration keys are missing.
         """
         if not isinstance(backend_config, dict):
@@ -67,6 +70,12 @@ class QuMat:
 
         self.backend_config: dict[str, Any] = dict(backend_config)
         self.backend_name: str = self.backend_config["backend_name"]
+        if self.backend_name not in _SUPPORTED_BACKENDS:
+            supported = ", ".join(_SUPPORTED_BACKENDS)
+            raise ValueError(
+                f"Unsupported backend_name {self.backend_name!r}. "
+                f"Supported backends: {supported}"
+            )
         self.backend_module: ModuleType = import_module(
             f".{self.backend_name}_backend", package="qumat"
         )
