@@ -15,6 +15,7 @@ Qumat is a high-level Python library for quantum computing that provides:
 - [Getting Started](./getting-started)
 - [Basic Gates](./basic-gates)
 - [Parameterized Circuits](./parameterized-circuits)
+- [QML Trainer](./trainer)
 - [API Reference](./api)
 - [Core Concepts](./concepts)
 - [Examples](./examples)
