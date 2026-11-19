@@ -133,6 +133,7 @@ Notes:
 | AMD route unavailable | Confirm `torch.version.hip` is set, then check `qumat_qdp.is_triton_amd_available()` and install the benchmark group if `triton` is missing |
 | CUDA build failures (from source) | Run `cargo clean` in `qdp/` and rebuild with `maturin develop` |
 | Out of memory | Reduce `num_qubits` or use `precision="float32"` |
+| `Refusing to load NumPy file` | The `.npy` array is too large for host RAM. Convert it to Parquet and stream it, or override the check with `QDP_NPY_MAX_BYTES` (see [Readers](./readers/)) |
 
 ## Next Steps
 
