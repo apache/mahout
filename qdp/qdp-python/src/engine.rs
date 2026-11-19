@@ -551,9 +551,14 @@ impl QdpEngine {
             nh,
             Dtype::Float32,
         )?;
-        let iter = qdp_core::PipelineIterator::new_synthetic(self.engine.clone(), config).map_err(
-            |e| PyRuntimeError::new_err(format!("create_synthetic_loader failed: {}", e)),
-        )?;
+        let source = qdp_core::Source::Synthetic {
+            total_batches,
+            seed,
+        };
+        let iter =
+            qdp_core::PipelineIterator::new(self.engine.clone(), source, config).map_err(|e| {
+                PyRuntimeError::new_err(format!("create_synthetic_loader failed: {}", e))
+            })?;
         Ok(PyQuantumLoader::new(Some(iter)))
     }
 
@@ -597,12 +602,11 @@ impl QdpEngine {
         let path_str = _resolved.path.to_string_lossy().into_owned();
         let iter = py
             .detach(|| {
-                qdp_core::PipelineIterator::new_from_file(
-                    engine,
-                    path_str.as_str(),
-                    config,
+                let source = qdp_core::Source::File {
+                    path: path_str.into(),
                     batch_limit,
-                )
+                };
+                qdp_core::PipelineIterator::new(engine, source, config)
             })
             .map_err(|e| PyRuntimeError::new_err(format!("create_file_loader failed: {}", e)))?;
         Ok(PyQuantumLoader::new(Some(iter)))
@@ -648,12 +652,11 @@ impl QdpEngine {
         let path_str = _resolved.path.to_string_lossy().into_owned();
         let iter = py
             .detach(|| {
-                qdp_core::PipelineIterator::new_from_file_streaming(
-                    engine,
-                    path_str.as_str(),
-                    config,
+                let source = qdp_core::Source::FileStreaming {
+                    path: path_str.into(),
                     batch_limit,
-                )
+                };
+                qdp_core::PipelineIterator::new(engine, source, config)
             })
             .map_err(|e| {
                 PyRuntimeError::new_err(format!("create_streaming_file_loader failed: {}", e))

@@ -49,7 +49,7 @@ mod pipeline_runner;
 
 #[cfg(target_os = "linux")]
 pub use pipeline_runner::{
-    PipelineConfig, PipelineIterator, PipelineRunResult, run_latency_pipeline,
+    PipelineConfig, PipelineIterator, PipelineRunResult, Source, run_latency_pipeline,
     run_throughput_pipeline,
 };
 

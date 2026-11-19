@@ -18,7 +18,7 @@
 // Python bindings release GIL during the run.
 
 use std::f64::consts::PI;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use crate::QdpEngine;
@@ -209,131 +209,255 @@ fn compute_optimal_prefetch_depth(
     }
 }
 
-pub struct SyntheticProducer {
-    pub config: PipelineConfig,
-    pub vector_len: usize,
-    pub batch_index: usize,
-    pub total_batches: usize,
+/// Return a `len`-element buffer for the next batch, reusing `recycled` when it holds the
+/// right element type and allocating a fresh zeroed one otherwise.
+///
+/// A reused buffer keeps whatever it held before (it is only resized), so callers must
+/// overwrite all `len` elements; every [`SourceAdapter::write_batch`] does.
+fn reuse_or_alloc<T: ToBatchData>(recycled: Option<BatchData>, len: usize) -> Vec<T> {
+    match recycled.and_then(T::from_recycled) {
+        Some(mut buf) => {
+            buf.resize(len, T::default());
+            buf
+        }
+        None => vec![T::default(); len],
+    }
+}
+
+/// The source-specific half of a batch producer: where samples come from.
+///
+/// [`AdapterBackedProducer`] owns everything the sources have in common (the batch limit,
+/// buffer recycling, and building the [`PrefetchedBatch`]) and asks the adapter only two
+/// questions: how big is the next batch, and what goes in it.
+pub(crate) trait SourceAdapter: Send + 'static {
+    type Elem: ToBatchData;
+
+    /// Number of elements in one sample.
+    fn sample_size(&self) -> usize;
+
+    /// Number of samples in the next batch (at most `max_samples`), or `None` once the
+    /// source is exhausted. May read ahead (e.g. refill a streaming buffer) but must not
+    /// consume anything; [`Self::write_batch`] does that.
+    fn next_batch_samples(&mut self, max_samples: usize) -> Result<Option<usize>>;
+
+    /// Overwrite all of `out` (exactly `batch_n * sample_size` elements) with the next
+    /// `batch_n` samples and advance past them. `batch_n` is the value just returned by
+    /// [`Self::next_batch_samples`].
+    fn write_batch(&mut self, batch_n: usize, out: &mut [Self::Elem]);
+}
+
+/// A [`BatchProducer`] built from a [`SourceAdapter`]: the one `produce` implementation
+/// shared by the synthetic, in-memory and streaming sources.
+pub(crate) struct AdapterBackedProducer<A> {
+    pub(crate) adapter: A,
+    pub(crate) batch_size: usize,
+    pub(crate) num_qubits: usize,
+    pub(crate) batches_yielded: usize,
+    /// Stop after this many batches even if the adapter has more; `usize::MAX` = no cap.
+    pub(crate) batch_limit: usize,
+}
+
+impl<A: SourceAdapter> AdapterBackedProducer<A> {
+    pub(crate) fn new(
+        adapter: A,
+        batch_size: usize,
+        num_qubits: usize,
+        batch_limit: usize,
+    ) -> Self {
+        Self {
+            adapter,
+            batch_size,
+            num_qubits,
+            batches_yielded: 0,
+            batch_limit,
+        }
+    }
+}
+
+impl<A: SourceAdapter> BatchProducer for AdapterBackedProducer<A> {
+    fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>> {
+        if self.batches_yielded >= self.batch_limit {
+            return Ok(None);
+        }
+        let Some(batch_n) = self.adapter.next_batch_samples(self.batch_size)? else {
+            return Ok(None);
+        };
+        let sample_size = self.adapter.sample_size();
+        let mut buf = reuse_or_alloc::<A::Elem>(recycled, batch_n * sample_size);
+        self.adapter.write_batch(batch_n, &mut buf);
+        self.batches_yielded += 1;
+        Ok(Some(PrefetchedBatch {
+            data: A::Elem::wrap(buf),
+            batch_n,
+            sample_size,
+            num_qubits: self.num_qubits,
+        }))
+    }
+}
+
+/// Element types the synthetic generator can fill (f32 math for f32, f64 math for f64,
+/// so f32 batches are *not* just f64 batches cast down).
+pub(crate) trait SyntheticElem: ToBatchData {
+    fn fill_batch(config: &PipelineConfig, batch_idx: usize, vector_len: usize, buf: &mut [Self]);
+}
+
+impl SyntheticElem for f32 {
+    fn fill_batch(config: &PipelineConfig, batch_idx: usize, vector_len: usize, buf: &mut [f32]) {
+        fill_batch_inplace_f32(config, batch_idx, vector_len, buf);
+    }
+}
+
+impl SyntheticElem for f64 {
+    fn fill_batch(config: &PipelineConfig, batch_idx: usize, vector_len: usize, buf: &mut [f64]) {
+        fill_batch_inplace(config, batch_idx, vector_len, buf);
+    }
+}
+
+/// Deterministic generated samples (see `fill_sample`). Never runs dry on its own; the
+/// producer's `batch_limit` (= `config.total_batches`) ends the stream.
+pub(crate) struct SyntheticAdapter<T> {
+    config: PipelineConfig,
+    vector_len: usize,
+    batch_index: usize,
+    _elem: std::marker::PhantomData<T>,
+}
+
+impl<T: SyntheticElem> SourceAdapter for SyntheticAdapter<T> {
+    type Elem = T;
+
+    fn sample_size(&self) -> usize {
+        self.vector_len
+    }
+
+    fn next_batch_samples(&mut self, max_samples: usize) -> Result<Option<usize>> {
+        // Synthetic batches are always full; the seed layout assumes config.batch_size.
+        debug_assert_eq!(max_samples, self.config.batch_size);
+        Ok(Some(max_samples))
+    }
+
+    fn write_batch(&mut self, _batch_n: usize, out: &mut [T]) {
+        T::fill_batch(&self.config, self.batch_index, self.vector_len, out);
+        self.batch_index += 1;
+    }
+}
+
+fn synthetic_producer<T: SyntheticElem>(
+    config: PipelineConfig,
+    vector_len: usize,
+) -> AdapterBackedProducer<SyntheticAdapter<T>> {
+    let (batch_size, num_qubits) = (config.batch_size, config.num_qubits as usize);
+    let total_batches = config.total_batches;
+    let adapter = SyntheticAdapter {
+        config,
+        vector_len,
+        batch_index: 0,
+        _elem: std::marker::PhantomData,
+    };
+    AdapterBackedProducer::new(adapter, batch_size, num_qubits, total_batches)
+}
+
+/// Synthetic producer whose element type follows `config.dtype`, chosen at run time.
+/// A thin dtype switch; all batching logic lives in [`AdapterBackedProducer`].
+pub(crate) enum SyntheticProducer {
+    F32(AdapterBackedProducer<SyntheticAdapter<f32>>),
+    F64(AdapterBackedProducer<SyntheticAdapter<f64>>),
 }
 
 impl SyntheticProducer {
-    pub fn new(config: PipelineConfig, vector_len: usize) -> Self {
-        let total_batches = config.total_batches;
-        Self {
-            config,
-            vector_len,
-            batch_index: 0,
-            total_batches,
+    pub(crate) fn new(config: PipelineConfig, vector_len: usize) -> Self {
+        if matches!(config.dtype, Precision::Float32) {
+            Self::F32(synthetic_producer(config, vector_len))
+        } else {
+            Self::F64(synthetic_producer(config, vector_len))
         }
     }
 }
 
 impl BatchProducer for SyntheticProducer {
     fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>> {
-        if self.batch_index >= self.total_batches {
-            return Ok(None);
+        match self {
+            Self::F32(p) => p.produce(recycled),
+            Self::F64(p) => p.produce(recycled),
         }
-
-        let mut data = match recycled {
-            Some(BatchData::F32(mut buf)) if matches!(self.config.dtype, Precision::Float32) => {
-                buf.resize(self.config.batch_size * self.vector_len, 0.0);
-                BatchData::F32(buf)
-            }
-            Some(BatchData::F64(mut buf)) if matches!(self.config.dtype, Precision::Float64) => {
-                buf.resize(self.config.batch_size * self.vector_len, 0.0);
-                BatchData::F64(buf)
-            }
-            _ => {
-                if matches!(self.config.dtype, Precision::Float32) {
-                    BatchData::F32(vec![0.0f32; self.config.batch_size * self.vector_len])
-                } else {
-                    BatchData::F64(vec![0.0f64; self.config.batch_size * self.vector_len])
-                }
-            }
-        };
-
-        match &mut data {
-            BatchData::F32(buf) => {
-                fill_batch_inplace_f32(&self.config, self.batch_index, self.vector_len, buf)
-            }
-            BatchData::F64(buf) => {
-                fill_batch_inplace(&self.config, self.batch_index, self.vector_len, buf)
-            }
-        }
-
-        self.batch_index += 1;
-        Ok(Some(PrefetchedBatch {
-            data,
-            batch_n: self.config.batch_size,
-            sample_size: self.vector_len,
-            num_qubits: self.config.num_qubits as usize,
-        }))
     }
 }
 
-pub struct InMemoryProducer<T: FloatElem = f64> {
-    pub data: Vec<T>,
-    pub cursor: usize,
-    pub sample_size: usize,
-    pub batch_size: usize,
-    pub num_qubits: usize,
-    pub batches_yielded: usize,
-    pub batch_limit: usize,
+/// A fully loaded file, sliced into consecutive batches.
+pub(crate) struct InMemoryAdapter<T> {
+    data: Vec<T>,
+    cursor: usize,
+    sample_size: usize,
 }
 
-impl<T: FloatElem + ToBatchData> BatchProducer for InMemoryProducer<T> {
-    fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>> {
-        if self.batches_yielded >= self.batch_limit {
-            return Ok(None);
+impl<T> InMemoryAdapter<T> {
+    pub(crate) fn new(data: Vec<T>, sample_size: usize) -> Self {
+        Self {
+            data,
+            cursor: 0,
+            sample_size,
         }
+    }
+}
+
+impl<T: ToBatchData> SourceAdapter for InMemoryAdapter<T> {
+    type Elem = T;
+
+    fn sample_size(&self) -> usize {
+        self.sample_size
+    }
+
+    fn next_batch_samples(&mut self, max_samples: usize) -> Result<Option<usize>> {
         let remaining = (self.data.len() - self.cursor) / self.sample_size;
-        if remaining == 0 {
-            return Ok(None);
-        }
+        Ok((remaining > 0).then(|| remaining.min(max_samples)))
+    }
 
-        let batch_n = remaining.min(self.batch_size);
-        let start = self.cursor;
-        let end = start + batch_n * self.sample_size;
+    fn write_batch(&mut self, batch_n: usize, out: &mut [T]) {
+        let end = self.cursor + batch_n * self.sample_size;
+        out.copy_from_slice(&self.data[self.cursor..end]);
         self.cursor = end;
-        self.batches_yielded += 1;
-        let slice = &self.data[start..end];
-
-        let data = match recycled.and_then(T::from_recycled) {
-            Some(mut buf) => {
-                buf.clear();
-                buf.extend_from_slice(slice);
-                T::wrap(buf)
-            }
-            None => T::wrap(slice.to_vec()),
-        };
-
-        Ok(Some(PrefetchedBatch {
-            data,
-            batch_n,
-            sample_size: self.sample_size,
-            num_qubits: self.num_qubits,
-        }))
     }
 }
 
-pub struct StreamingProducer<T: FloatElem = f64> {
-    pub reader: ParquetStreamingReader<T>,
-    pub buffer: Vec<T>,
-    pub buffer_cursor: usize,
-    pub read_chunk_scratch: Vec<T>,
-    pub sample_size: usize,
-    pub batch_size: usize,
-    pub num_qubits: usize,
-    pub batches_yielded: usize,
-    pub batch_limit: usize,
+pub(crate) type InMemoryProducer<T = f64> = AdapterBackedProducer<InMemoryAdapter<T>>;
+
+/// A Parquet file read chunk by chunk into a buffer that is compacted as it is consumed.
+pub(crate) struct StreamingAdapter<T: FloatElem> {
+    pub(crate) reader: ParquetStreamingReader<T>,
+    /// Elements read but not yet emitted live in `buffer[buffer_cursor..]`.
+    pub(crate) buffer: Vec<T>,
+    pub(crate) buffer_cursor: usize,
+    pub(crate) read_chunk_scratch: Vec<T>,
+    pub(crate) sample_size: usize,
 }
 
-impl<T: FloatElem + ToBatchData> BatchProducer for StreamingProducer<T> {
-    fn produce(&mut self, recycled: Option<BatchData>) -> Result<Option<PrefetchedBatch>> {
-        if self.batches_yielded >= self.batch_limit {
-            return Ok(None);
+impl<T: FloatElem> StreamingAdapter<T> {
+    /// `buffer` holds data already read (e.g. the first chunk used to discover
+    /// `sample_size`); `read_chunk_scratch.len()` is the size of every later read.
+    pub(crate) fn new(
+        reader: ParquetStreamingReader<T>,
+        buffer: Vec<T>,
+        read_chunk_scratch: Vec<T>,
+        sample_size: usize,
+    ) -> Self {
+        Self {
+            reader,
+            buffer,
+            buffer_cursor: 0,
+            read_chunk_scratch,
+            sample_size,
         }
-        let required = self.batch_size * self.sample_size;
+    }
+}
+
+impl<T: FloatElem + ToBatchData> SourceAdapter for StreamingAdapter<T> {
+    type Elem = T;
+
+    fn sample_size(&self) -> usize {
+        self.sample_size
+    }
+
+    fn next_batch_samples(&mut self, max_samples: usize) -> Result<Option<usize>> {
+        let required = max_samples * self.sample_size;
         while (self.buffer.len() - self.buffer_cursor) < required {
             let written = self.reader.read_chunk(&mut self.read_chunk_scratch)?;
             if written == 0 {
@@ -342,41 +466,24 @@ impl<T: FloatElem + ToBatchData> BatchProducer for StreamingProducer<T> {
             self.buffer
                 .extend_from_slice(&self.read_chunk_scratch[..written]);
         }
-        let available = self.buffer.len() - self.buffer_cursor;
-        let available_samples = available / self.sample_size;
+        let available_samples = (self.buffer.len() - self.buffer_cursor) / self.sample_size;
+        Ok((available_samples > 0).then(|| available_samples.min(max_samples)))
+    }
 
-        if available_samples == 0 {
-            return Ok(None);
-        }
-
-        let batch_n = available_samples.min(self.batch_size);
+    fn write_batch(&mut self, batch_n: usize, out: &mut [T]) {
         let start = self.buffer_cursor;
         let end = start + batch_n * self.sample_size;
+        out.copy_from_slice(&self.buffer[start..end]);
         self.buffer_cursor = end;
-        self.batches_yielded += 1;
-
-        let data = match recycled.and_then(T::from_recycled) {
-            Some(mut buf) => {
-                buf.clear();
-                buf.extend_from_slice(&self.buffer[start..end]);
-                T::wrap(buf)
-            }
-            None => T::wrap(self.buffer[start..end].to_vec()),
-        };
 
         if self.buffer_cursor >= self.buffer.len() / BUFFER_COMPACT_DENOM {
             self.buffer.drain(..self.buffer_cursor);
             self.buffer_cursor = 0;
         }
-
-        Ok(Some(PrefetchedBatch {
-            data,
-            batch_n,
-            sample_size: self.sample_size,
-            num_qubits: self.num_qubits,
-        }))
     }
 }
+
+pub(crate) type StreamingProducer<T = f64> = AdapterBackedProducer<StreamingAdapter<T>>;
 
 type ProducerHandles = (
     std::sync::mpsc::Receiver<Result<PrefetchedBatch>>,
@@ -563,7 +670,7 @@ impl Drop for PipelineIterator {
 }
 
 /// Spawn an in-memory producer over already-loaded `data`. Mirrors
-/// [`build_streaming_producer`] so the f32/f64 dispatch in `new_from_file` is a single
+/// [`build_streaming_producer`] so the f32/f64 dispatch in `spawn_file_producer` is a single
 /// generic call instead of two byte-for-byte-identical match arms.
 fn build_inmemory_producer<T>(
     data: Vec<T>,
@@ -574,18 +681,13 @@ fn build_inmemory_producer<T>(
 where
     T: FloatElem + ToBatchData,
 {
-    spawn_producer(
-        InMemoryProducer::<T> {
-            data,
-            cursor: 0,
-            sample_size,
-            batch_size: config.batch_size,
-            num_qubits: config.num_qubits as usize,
-            batches_yielded: 0,
-            batch_limit,
-        },
-        config.prefetch_depth,
-    )
+    let producer: InMemoryProducer<T> = AdapterBackedProducer::new(
+        InMemoryAdapter::new(data, sample_size),
+        config.batch_size,
+        config.num_qubits as usize,
+        batch_limit,
+    );
+    spawn_producer(producer, config.prefetch_depth)
 }
 
 fn build_streaming_producer<T>(
@@ -631,34 +733,173 @@ where
 
     buffer.truncate(written);
     let read_chunk_scratch = vec![T::default(); initial_cap];
-    let producer = StreamingProducer::<T> {
-        reader,
-        buffer,
-        buffer_cursor: 0,
-        read_chunk_scratch,
-        sample_size,
-        batch_size: config.batch_size,
-        num_qubits: config.num_qubits as usize,
-        batches_yielded: 0,
+    let producer: StreamingProducer<T> = AdapterBackedProducer::new(
+        StreamingAdapter::new(reader, buffer, read_chunk_scratch, sample_size),
+        config.batch_size,
+        config.num_qubits as usize,
         batch_limit,
-    };
+    );
     spawn_producer(producer, config.prefetch_depth)
 }
 
+/// Where a [`PipelineIterator`] gets its samples from.
+///
+/// Every knob that only makes sense for one kind of source lives in that variant, so
+/// [`PipelineConfig`] stays the set of settings shared by all sources (qubits, batch size,
+/// encoding, dtype, null handling, prefetch depth).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Source {
+    /// Deterministic in-process data (see `fill_sample`), mainly for throughput benchmarks.
+    ///
+    /// `total_batches` and `seed` are authoritative: [`PipelineIterator::new`] copies them into
+    /// the config, overriding `config.total_batches` / `config.seed`.
+    Synthetic {
+        total_batches: usize,
+        seed: Option<u64>,
+    },
+    /// Load the whole file into memory, then slice it into batches. Dispatches on the file
+    /// extension: .parquet, .arrow, .feather, .ipc, .npy, .pt, .pth, .pb.
+    ///
+    /// `batch_limit` caps the number of batches yielded; `usize::MAX` means "until EOF".
+    File { path: PathBuf, batch_limit: usize },
+    /// Read a `.parquet` file chunk by chunk so memory stays bounded for large files.
+    ///
+    /// `batch_limit` caps the number of batches yielded; `usize::MAX` means "until EOF".
+    FileStreaming { path: PathBuf, batch_limit: usize },
+}
+
+/// Normalize `config` for `source` and start the matching producer thread.
+///
+/// This is everything [`PipelineIterator::new`] does except storing the engine, so it can be
+/// exercised without a GPU (the producers are CPU-only; only `next_batch` touches CUDA).
+fn spawn_source(source: Source, config: &mut PipelineConfig) -> Result<ProducerHandles> {
+    if let Source::Synthetic {
+        total_batches,
+        seed,
+    } = source
+    {
+        config.total_batches = total_batches;
+        config.seed = seed;
+    }
+    config.normalize();
+    match source {
+        Source::Synthetic { .. } => {
+            let vector_len = vector_len(config.num_qubits, config.encoding);
+            let producer = SyntheticProducer::new(config.clone(), vector_len);
+            spawn_producer(producer, config.prefetch_depth)
+        }
+        Source::File { path, batch_limit } => spawn_file_producer(&path, config, batch_limit),
+        Source::FileStreaming { path, batch_limit } => {
+            spawn_streaming_file_producer(&path, config, batch_limit)
+        }
+    }
+}
+
+/// Phase 2a: load the full file, validate its shape, then slice it by batch.
+fn spawn_file_producer(
+    path: &Path,
+    config: &PipelineConfig,
+    batch_limit: usize,
+) -> Result<ProducerHandles> {
+    let (batch_data, num_samples, sample_size) =
+        read_file_by_extension(path, config.null_handling, config.dtype, config.encoding)?;
+    let vector_len = vector_len(config.num_qubits, config.encoding);
+
+    // Dimension validation before moving batch_data.
+    if sample_size != vector_len {
+        return Err(MahoutError::InvalidInput(format!(
+            "File feature length {} does not match vector_len {} for num_qubits={}, encoding={}",
+            sample_size,
+            vector_len,
+            config.num_qubits,
+            config.encoding.as_str()
+        )));
+    }
+    if batch_data.len() != num_samples * sample_size {
+        return Err(MahoutError::InvalidInput(format!(
+            "File data length {} is not num_samples ({}) * sample_size ({})",
+            batch_data.len(),
+            num_samples,
+            sample_size
+        )));
+    }
+
+    match batch_data {
+        BatchData::F32(data) => {
+            build_inmemory_producer::<f32>(data, sample_size, config, batch_limit)
+        }
+        BatchData::F64(data) => {
+            build_inmemory_producer::<f64>(data, sample_size, config, batch_limit)
+        }
+    }
+}
+
+/// Phase 2b: stream a Parquet file in chunks. Only `.parquet` is supported.
+/// Validates sample_size == vector_len after the first chunk.
+fn spawn_streaming_file_producer(
+    path: &Path,
+    config: &PipelineConfig,
+    batch_limit: usize,
+) -> Result<ProducerHandles> {
+    if path_extension_lower(path).as_deref() != Some("parquet") {
+        return Err(MahoutError::InvalidInput(format!(
+            "Streaming file loader supports only .parquet; got extension {:?}. Use .source_file(path) for other formats.",
+            path.extension()
+        )));
+    }
+
+    // Basis values are integer state indices; f32 narrowing corrupts indices above
+    // 2^24 (see read_file_by_extension). The streaming reader is chunked so we cannot
+    // pre-scan the whole file, so for basis we always stream as f64 (lossless) rather
+    // than honoring an f32 request that could silently change states mid-stream.
+    //
+    // The non-streaming loader can pre-scan and so *rejects* an out-of-range f32 basis
+    // request; the chunked streaming path cannot, so it downgrades to f64 instead. Warn
+    // so the caller is not left believing the stream ran in f32.
+    let f32_requested = matches!(config.dtype, Precision::Float32);
+    let is_basis = matches!(config.encoding, Encoding::Basis);
+    if f32_requested && is_basis {
+        log::warn!(
+            "float32 requested for streaming basis file; basis indices are integers and f32 \
+             cannot represent indices above {MAX_EXACT_F32_INT:.0} exactly, so this stream is \
+             read as f64. Use dtype='float64' to silence this warning."
+        );
+    }
+    if f32_requested && !is_basis {
+        build_streaming_producer::<f32>(path, config, batch_limit)
+    } else {
+        build_streaming_producer::<f64>(path, config, batch_limit)
+    }
+}
+
 impl PipelineIterator {
-    pub fn new_synthetic(engine: QdpEngine, mut config: PipelineConfig) -> Result<Self> {
-        config.normalize();
-        let vector_len = vector_len(config.num_qubits, config.encoding);
-        let producer = SyntheticProducer::new(config.clone(), vector_len);
-        let prefetch_depth = config.prefetch_depth;
-        let (rx, recycle_tx, _producer_handle) = spawn_producer(producer, prefetch_depth)?;
+    /// Create a pipeline iterator over `source`.
+    ///
+    /// Normalizes `config` (see [`PipelineConfig::normalize`]), validates the source (file
+    /// extension, feature length vs. `num_qubits`/`encoding`), and starts the background
+    /// prefetch thread. Batches are encoded on the GPU lazily, in [`Self::next_batch`].
+    pub fn new(engine: QdpEngine, source: Source, mut config: PipelineConfig) -> Result<Self> {
+        let (rx, recycle_tx, producer_handle) = spawn_source(source, &mut config)?;
         Ok(Self {
             engine,
             config,
             rx: std::sync::Mutex::new(Some(rx)),
             recycle_tx: Some(recycle_tx),
-            producer_handle: Some(_producer_handle),
+            producer_handle: Some(producer_handle),
         })
+    }
+
+    /// Synthetic-data iterator; `config.total_batches` and `config.seed` select the data.
+    #[deprecated(
+        since = "0.3.0",
+        note = "use `PipelineIterator::new(engine, Source::Synthetic { total_batches, seed }, config)`"
+    )]
+    pub fn new_synthetic(engine: QdpEngine, config: PipelineConfig) -> Result<Self> {
+        let source = Source::Synthetic {
+            total_batches: config.total_batches,
+            seed: config.seed,
+        };
+        Self::new(engine, source, config)
     }
 
     /// Create a pipeline iterator from a file (Phase 2a: load full file then slice by batch).
@@ -666,102 +907,41 @@ impl PipelineIterator {
     ///
     /// Supported extensions: .parquet, .arrow, .feather, .ipc, .npy, .pt, .pth, .pb.
     /// For file source, `batch_limit` caps batches yielded (e.g. for testing); use `usize::MAX` to iterate until EOF.
+    #[deprecated(
+        since = "0.3.0",
+        note = "use `PipelineIterator::new(engine, Source::File { path, batch_limit }, config)`"
+    )]
     pub fn new_from_file<P: AsRef<Path>>(
         engine: QdpEngine,
         path: P,
-        mut config: PipelineConfig,
+        config: PipelineConfig,
         batch_limit: usize,
     ) -> Result<Self> {
-        config.normalize();
-        let path = path.as_ref();
-        let (batch_data, num_samples, sample_size) =
-            read_file_by_extension(path, config.null_handling, config.dtype, config.encoding)?;
-        let vector_len = vector_len(config.num_qubits, config.encoding);
-
-        // Dimension validation before moving batch_data.
-        if sample_size != vector_len {
-            return Err(MahoutError::InvalidInput(format!(
-                "File feature length {} does not match vector_len {} for num_qubits={}, encoding={}",
-                sample_size,
-                vector_len,
-                config.num_qubits,
-                config.encoding.as_str()
-            )));
-        }
-        if batch_data.len() != num_samples * sample_size {
-            return Err(MahoutError::InvalidInput(format!(
-                "File data length {} is not num_samples ({}) * sample_size ({})",
-                batch_data.len(),
-                num_samples,
-                sample_size
-            )));
-        }
-
-        let (rx, recycle_tx, _producer_handle) = match batch_data {
-            BatchData::F32(data) => {
-                build_inmemory_producer::<f32>(data, sample_size, &config, batch_limit)?
-            }
-            BatchData::F64(data) => {
-                build_inmemory_producer::<f64>(data, sample_size, &config, batch_limit)?
-            }
+        let source = Source::File {
+            path: path.as_ref().to_path_buf(),
+            batch_limit,
         };
-        Ok(Self {
-            engine,
-            config,
-            rx: std::sync::Mutex::new(Some(rx)),
-            recycle_tx: Some(recycle_tx),
-            producer_handle: Some(_producer_handle),
-        })
+        Self::new(engine, source, config)
     }
 
     /// Create a pipeline iterator from a Parquet file using streaming read (Phase 2b).
     /// Only `.parquet` is supported; reduces memory for large files by reading in chunks.
     /// Validates sample_size == vector_len after the first chunk.
+    #[deprecated(
+        since = "0.3.0",
+        note = "use `PipelineIterator::new(engine, Source::FileStreaming { path, batch_limit }, config)`"
+    )]
     pub fn new_from_file_streaming<P: AsRef<Path>>(
         engine: QdpEngine,
         path: P,
-        mut config: PipelineConfig,
+        config: PipelineConfig,
         batch_limit: usize,
     ) -> Result<Self> {
-        config.normalize();
-        let path = path.as_ref();
-        if path_extension_lower(path).as_deref() != Some("parquet") {
-            return Err(MahoutError::InvalidInput(format!(
-                "Streaming file loader supports only .parquet; got extension {:?}. Use .source_file(path) for other formats.",
-                path.extension()
-            )));
-        }
-
-        // Basis values are integer state indices; f32 narrowing corrupts indices above
-        // 2^24 (see read_file_by_extension). The streaming reader is chunked so we cannot
-        // pre-scan the whole file, so for basis we always stream as f64 (lossless) rather
-        // than honoring an f32 request that could silently change states mid-stream.
-        //
-        // The non-streaming loader can pre-scan and so *rejects* an out-of-range f32 basis
-        // request; the chunked streaming path cannot, so it downgrades to f64 instead. Warn
-        // so the caller is not left believing the stream ran in f32.
-        let f32_requested = matches!(config.dtype, Precision::Float32);
-        let is_basis = matches!(config.encoding, Encoding::Basis);
-        if f32_requested && is_basis {
-            log::warn!(
-                "float32 requested for streaming basis file; basis indices are integers and f32 \
-                 cannot represent indices above {MAX_EXACT_F32_INT:.0} exactly, so this stream is \
-                 read as f64. Use dtype='float64' to silence this warning."
-            );
-        }
-        let use_f32 = f32_requested && !is_basis;
-        let (rx, recycle_tx, _producer_handle) = if use_f32 {
-            build_streaming_producer::<f32>(path, &config, batch_limit)?
-        } else {
-            build_streaming_producer::<f64>(path, &config, batch_limit)?
+        let source = Source::FileStreaming {
+            path: path.as_ref().to_path_buf(),
+            batch_limit,
         };
-        Ok(Self {
-            engine,
-            config,
-            rx: std::sync::Mutex::new(Some(rx)),
-            recycle_tx: Some(recycle_tx),
-            producer_handle: Some(_producer_handle),
-        })
+        Self::new(engine, source, config)
     }
 
     /// Returns the next batch as a DLPack pointer; `Ok(None)` when exhausted.
@@ -1302,15 +1482,12 @@ mod tests {
         let sample_size = 4; // 2^2
         let data = vec![0.0f64; 16]; // 16 elements = 4 samples
 
-        let mut producer = InMemoryProducer {
-            data,
-            cursor: 0,
-            sample_size,
-            batch_size: config.batch_size,
-            num_qubits: config.num_qubits as usize,
-            batches_yielded: 0,
-            batch_limit: 10,
-        };
+        let mut producer: InMemoryProducer = AdapterBackedProducer::new(
+            InMemoryAdapter::new(data, sample_size),
+            config.batch_size,
+            config.num_qubits as usize,
+            10,
+        );
 
         let batch1 = producer.produce(None).unwrap().unwrap();
         assert_eq!(batch1.batch_n, 4);
@@ -1553,7 +1730,7 @@ mod tests {
         use std::fs;
         use std::sync::Arc;
 
-        fn write_f32_parquet(path: &std::path::Path) {
+        pub(super) fn write_f32_parquet(path: &std::path::Path) {
             // 8 samples, each 4 features — matches amplitude encoding with 2 qubits (2^2=4)
             let item_field = Arc::new(Field::new("item", DataType::Float32, true));
             let list_field = Field::new("data", DataType::FixedSizeList(item_field, 4), true);
@@ -1574,7 +1751,7 @@ mod tests {
         static FILE_COUNTER: std::sync::atomic::AtomicUsize =
             std::sync::atomic::AtomicUsize::new(0);
 
-        fn temp_parquet_path(tag: &str) -> std::path::PathBuf {
+        pub(super) fn temp_parquet_path(tag: &str) -> std::path::PathBuf {
             let n = FILE_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
             std::env::temp_dir().join(format!(
                 "mahout_pipeline_dtype_{tag}_{pid}_{n}.parquet",
@@ -1735,15 +1912,8 @@ mod tests {
         #[test]
         fn test_inmemory_producer_f32_produce_yields_f32_batch_data() {
             let data = vec![0.25_f32, 0.5, 0.75, 1.0, 0.1, 0.2, 0.3, 0.4]; // 2 samples × 4
-            let mut producer = InMemoryProducer::<f32> {
-                data,
-                cursor: 0,
-                sample_size: 4,
-                batch_size: 2,
-                num_qubits: 2,
-                batches_yielded: 0,
-                batch_limit: 10,
-            };
+            let mut producer: InMemoryProducer<f32> =
+                AdapterBackedProducer::new(InMemoryAdapter::new(data, 4), 2, 2, 10);
             let batch = producer.produce(None).unwrap().unwrap();
             assert!(
                 matches!(batch.data, BatchData::F32(_)),
@@ -1774,17 +1944,12 @@ mod tests {
                 let sample_size = reader.get_sample_size().unwrap();
                 buffer.truncate(written);
                 let scratch = vec![0.0_f32; CAP];
-                let mut producer = StreamingProducer::<f32> {
-                    reader,
-                    buffer,
-                    buffer_cursor: 0,
-                    read_chunk_scratch: scratch,
-                    sample_size,
-                    batch_size: 4,
-                    num_qubits: 2,
-                    batches_yielded: 0,
-                    batch_limit: 10,
-                };
+                let mut producer: StreamingProducer<f32> = AdapterBackedProducer::new(
+                    StreamingAdapter::new(reader, buffer, scratch, sample_size),
+                    4,
+                    2,
+                    10,
+                );
                 let batch = producer.produce(None)?.unwrap();
                 Ok(batch.data)
             })();
@@ -1908,6 +2073,708 @@ mod tests {
                 matches!(result.unwrap(), BatchData::F32(_)),
                 "build_streaming_producer::<f32> must deliver BatchData::F32 through the channel"
             );
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // AdapterBackedProducer vs. the pre-#1435 producers (#1435)
+    //
+    // `legacy` is a verbatim copy of SyntheticProducer / InMemoryProducer /
+    // StreamingProducer as they were before the refactor (only renamed). Every test
+    // below runs the old and the new producer side by side on the same input and the
+    // same sequence of recycled buffers, and requires bit-identical output. Delete
+    // `legacy` once the refactor has shipped in a release.
+    // -------------------------------------------------------------------------
+
+    mod adapter_equivalence_tests {
+        use super::*;
+        use arrow::array::{ArrayRef, FixedSizeListBuilder, Float32Builder, Float64Builder};
+        use arrow::datatypes::{DataType, Field, Schema};
+        use arrow::record_batch::RecordBatch;
+        use parquet::arrow::ArrowWriter;
+        use parquet::file::properties::WriterProperties;
+        use std::sync::Arc;
+
+        #[allow(dead_code)]
+        mod legacy {
+            use super::super::super::*;
+
+            pub struct LegacySyntheticProducer {
+                pub config: PipelineConfig,
+                pub vector_len: usize,
+                pub batch_index: usize,
+                pub total_batches: usize,
+            }
+
+            impl LegacySyntheticProducer {
+                pub fn new(config: PipelineConfig, vector_len: usize) -> Self {
+                    let total_batches = config.total_batches;
+                    Self {
+                        config,
+                        vector_len,
+                        batch_index: 0,
+                        total_batches,
+                    }
+                }
+            }
+
+            impl BatchProducer for LegacySyntheticProducer {
+                fn produce(
+                    &mut self,
+                    recycled: Option<BatchData>,
+                ) -> Result<Option<PrefetchedBatch>> {
+                    if self.batch_index >= self.total_batches {
+                        return Ok(None);
+                    }
+
+                    let mut data = match recycled {
+                        Some(BatchData::F32(mut buf))
+                            if matches!(self.config.dtype, Precision::Float32) =>
+                        {
+                            buf.resize(self.config.batch_size * self.vector_len, 0.0);
+                            BatchData::F32(buf)
+                        }
+                        Some(BatchData::F64(mut buf))
+                            if matches!(self.config.dtype, Precision::Float64) =>
+                        {
+                            buf.resize(self.config.batch_size * self.vector_len, 0.0);
+                            BatchData::F64(buf)
+                        }
+                        _ => {
+                            if matches!(self.config.dtype, Precision::Float32) {
+                                BatchData::F32(vec![
+                                    0.0f32;
+                                    self.config.batch_size * self.vector_len
+                                ])
+                            } else {
+                                BatchData::F64(vec![
+                                    0.0f64;
+                                    self.config.batch_size * self.vector_len
+                                ])
+                            }
+                        }
+                    };
+
+                    match &mut data {
+                        BatchData::F32(buf) => fill_batch_inplace_f32(
+                            &self.config,
+                            self.batch_index,
+                            self.vector_len,
+                            buf,
+                        ),
+                        BatchData::F64(buf) => {
+                            fill_batch_inplace(&self.config, self.batch_index, self.vector_len, buf)
+                        }
+                    }
+
+                    self.batch_index += 1;
+                    Ok(Some(PrefetchedBatch {
+                        data,
+                        batch_n: self.config.batch_size,
+                        sample_size: self.vector_len,
+                        num_qubits: self.config.num_qubits as usize,
+                    }))
+                }
+            }
+
+            pub struct LegacyInMemoryProducer<T: FloatElem = f64> {
+                pub data: Vec<T>,
+                pub cursor: usize,
+                pub sample_size: usize,
+                pub batch_size: usize,
+                pub num_qubits: usize,
+                pub batches_yielded: usize,
+                pub batch_limit: usize,
+            }
+
+            impl<T: FloatElem + ToBatchData> BatchProducer for LegacyInMemoryProducer<T> {
+                fn produce(
+                    &mut self,
+                    recycled: Option<BatchData>,
+                ) -> Result<Option<PrefetchedBatch>> {
+                    if self.batches_yielded >= self.batch_limit {
+                        return Ok(None);
+                    }
+                    let remaining = (self.data.len() - self.cursor) / self.sample_size;
+                    if remaining == 0 {
+                        return Ok(None);
+                    }
+
+                    let batch_n = remaining.min(self.batch_size);
+                    let start = self.cursor;
+                    let end = start + batch_n * self.sample_size;
+                    self.cursor = end;
+                    self.batches_yielded += 1;
+                    let slice = &self.data[start..end];
+
+                    let data = match recycled.and_then(T::from_recycled) {
+                        Some(mut buf) => {
+                            buf.clear();
+                            buf.extend_from_slice(slice);
+                            T::wrap(buf)
+                        }
+                        None => T::wrap(slice.to_vec()),
+                    };
+
+                    Ok(Some(PrefetchedBatch {
+                        data,
+                        batch_n,
+                        sample_size: self.sample_size,
+                        num_qubits: self.num_qubits,
+                    }))
+                }
+            }
+
+            pub struct LegacyStreamingProducer<T: FloatElem = f64> {
+                pub reader: ParquetStreamingReader<T>,
+                pub buffer: Vec<T>,
+                pub buffer_cursor: usize,
+                pub read_chunk_scratch: Vec<T>,
+                pub sample_size: usize,
+                pub batch_size: usize,
+                pub num_qubits: usize,
+                pub batches_yielded: usize,
+                pub batch_limit: usize,
+            }
+
+            impl<T: FloatElem + ToBatchData> BatchProducer for LegacyStreamingProducer<T> {
+                fn produce(
+                    &mut self,
+                    recycled: Option<BatchData>,
+                ) -> Result<Option<PrefetchedBatch>> {
+                    if self.batches_yielded >= self.batch_limit {
+                        return Ok(None);
+                    }
+                    let required = self.batch_size * self.sample_size;
+                    while (self.buffer.len() - self.buffer_cursor) < required {
+                        let written = self.reader.read_chunk(&mut self.read_chunk_scratch)?;
+                        if written == 0 {
+                            break;
+                        }
+                        self.buffer
+                            .extend_from_slice(&self.read_chunk_scratch[..written]);
+                    }
+                    let available = self.buffer.len() - self.buffer_cursor;
+                    let available_samples = available / self.sample_size;
+
+                    if available_samples == 0 {
+                        return Ok(None);
+                    }
+
+                    let batch_n = available_samples.min(self.batch_size);
+                    let start = self.buffer_cursor;
+                    let end = start + batch_n * self.sample_size;
+                    self.buffer_cursor = end;
+                    self.batches_yielded += 1;
+
+                    let data = match recycled.and_then(T::from_recycled) {
+                        Some(mut buf) => {
+                            buf.clear();
+                            buf.extend_from_slice(&self.buffer[start..end]);
+                            T::wrap(buf)
+                        }
+                        None => T::wrap(self.buffer[start..end].to_vec()),
+                    };
+
+                    if self.buffer_cursor >= self.buffer.len() / BUFFER_COMPACT_DENOM {
+                        self.buffer.drain(..self.buffer_cursor);
+                        self.buffer_cursor = 0;
+                    }
+
+                    Ok(Some(PrefetchedBatch {
+                        data,
+                        batch_n,
+                        sample_size: self.sample_size,
+                        num_qubits: self.num_qubits,
+                    }))
+                }
+            }
+        }
+        use legacy::{LegacyInMemoryProducer, LegacyStreamingProducer, LegacySyntheticProducer};
+
+        /// Bit pattern of a batch, so -0.0 vs 0.0 or NaN payloads would also be caught.
+        fn bits(d: &BatchData) -> (bool, Vec<u64>) {
+            match d {
+                BatchData::F32(v) => (true, v.iter().map(|x| x.to_bits() as u64).collect()),
+                BatchData::F64(v) => (false, v.iter().map(|x| x.to_bits()).collect()),
+            }
+        }
+
+        /// How the test feeds `recycled` back into `produce`, mimicking `spawn_producer`.
+        #[derive(Clone, Copy, Debug)]
+        enum Recycle {
+            /// Consumer never returns buffers: every batch allocates.
+            Never,
+            /// Consumer returns each batch's buffer (the steady state).
+            Previous,
+            /// Consumer returns a buffer of the *other* dtype, longer than needed and full
+            /// of garbage: must be ignored or fully overwritten, never leak into output.
+            Garbage,
+        }
+
+        fn garbage(prev: &BatchData) -> BatchData {
+            match prev {
+                BatchData::F32(_) => BatchData::F64(vec![f64::NAN; 4096]),
+                BatchData::F64(_) => BatchData::F32(vec![f32::NAN; 4096]),
+            }
+        }
+
+        fn dirty_same_dtype(prev: &BatchData) -> BatchData {
+            match prev {
+                BatchData::F32(v) => BatchData::F32(vec![-7.5; v.len() + 13]),
+                BatchData::F64(v) => BatchData::F64(vec![-7.5; v.len() + 13]),
+            }
+        }
+
+        /// Drive both producers to exhaustion and require identical batches.
+        fn assert_same_output(
+            mut old: impl BatchProducer,
+            mut new: impl BatchProducer,
+            recycle: Recycle,
+        ) -> usize {
+            let (mut rec_old, mut rec_new) = (None, None);
+            let mut n = 0;
+            loop {
+                let a = old.produce(rec_old.take()).unwrap();
+                let b = new.produce(rec_new.take()).unwrap();
+                let (a, b) = match (a, b) {
+                    (None, None) => return n,
+                    (Some(a), Some(b)) => (a, b),
+                    (a, b) => panic!(
+                        "batch {n}: legacy is_some={} new is_some={}",
+                        a.is_some(),
+                        b.is_some()
+                    ),
+                };
+                assert_eq!(bits(&a.data), bits(&b.data), "batch {n} data differs");
+                assert_eq!(
+                    (a.batch_n, a.sample_size, a.num_qubits),
+                    (b.batch_n, b.sample_size, b.num_qubits),
+                    "batch {n} metadata differs"
+                );
+                match recycle {
+                    Recycle::Never => {}
+                    Recycle::Previous => {
+                        rec_old = Some(a.data);
+                        rec_new = Some(b.data);
+                    }
+                    // Alternate wrong-dtype garbage and same-dtype dirty buffers.
+                    Recycle::Garbage if n % 2 == 0 => {
+                        rec_old = Some(garbage(&a.data));
+                        rec_new = Some(garbage(&b.data));
+                    }
+                    Recycle::Garbage => {
+                        rec_old = Some(dirty_same_dtype(&a.data));
+                        rec_new = Some(dirty_same_dtype(&b.data));
+                    }
+                }
+                n += 1;
+            }
+        }
+
+        const RECYCLES: [Recycle; 3] = [Recycle::Never, Recycle::Previous, Recycle::Garbage];
+
+        #[test]
+        fn synthetic_matches_legacy_bit_for_bit() {
+            let encodings = [
+                Encoding::Amplitude,
+                Encoding::Angle,
+                Encoding::Basis,
+                Encoding::Iqp,
+                Encoding::IqpZ,
+                Encoding::Phase,
+            ];
+            let mut cases = 0;
+            for encoding in encodings {
+                for dtype in [Precision::Float32, Precision::Float64] {
+                    // Seeds near u64::MAX overflow `seed + i` inside fill_sample in debug
+                    // builds (pre-existing, legacy panics too), so stay well below it.
+                    for seed in [None, Some(0), Some(123), Some(1 << 40)] {
+                        for recycle in RECYCLES {
+                            let mut config = PipelineConfig {
+                                num_qubits: 4,
+                                batch_size: 3,
+                                total_batches: 6,
+                                encoding,
+                                seed,
+                                dtype,
+                                ..Default::default()
+                            };
+                            config.normalize();
+                            let vl = super::vector_len(config.num_qubits, encoding);
+                            let old = LegacySyntheticProducer::new(config.clone(), vl);
+                            let new = SyntheticProducer::new(config, vl);
+                            assert_eq!(assert_same_output(old, new, recycle), 6);
+                            cases += 1;
+                        }
+                    }
+                }
+            }
+            assert_eq!(cases, 6 * 2 * 4 * 3);
+        }
+
+        #[test]
+        fn inmemory_matches_legacy_bit_for_bit() {
+            // 23 samples of 4: batch sizes 1, 5, 23, 40 cover full, partial-last and
+            // single-batch cases; batch_limit 2 covers the cap.
+            let data64: Vec<f64> = (0..23 * 4).map(|i| (i as f64).sin()).collect();
+            let data32: Vec<f32> = data64.iter().map(|&x| x as f32).collect();
+            for batch_size in [1, 5, 23, 40] {
+                for batch_limit in [usize::MAX, 2] {
+                    for recycle in RECYCLES {
+                        let old = LegacyInMemoryProducer::<f64> {
+                            data: data64.clone(),
+                            cursor: 0,
+                            sample_size: 4,
+                            batch_size,
+                            num_qubits: 2,
+                            batches_yielded: 0,
+                            batch_limit,
+                        };
+                        let new: InMemoryProducer<f64> = AdapterBackedProducer::new(
+                            InMemoryAdapter::new(data64.clone(), 4),
+                            batch_size,
+                            2,
+                            batch_limit,
+                        );
+                        let n = assert_same_output(old, new, recycle);
+                        assert_eq!(n, 23usize.div_ceil(batch_size).min(batch_limit));
+
+                        let old = LegacyInMemoryProducer::<f32> {
+                            data: data32.clone(),
+                            cursor: 0,
+                            sample_size: 4,
+                            batch_size,
+                            num_qubits: 2,
+                            batches_yielded: 0,
+                            batch_limit,
+                        };
+                        let new: InMemoryProducer<f32> = AdapterBackedProducer::new(
+                            InMemoryAdapter::new(data32.clone(), 4),
+                            batch_size,
+                            2,
+                            batch_limit,
+                        );
+                        assert_same_output(old, new, recycle);
+                    }
+                }
+            }
+        }
+
+        /// `n` rows of `sample` distinct values, written in row groups of 7 so the
+        /// streaming reader crosses many record-batch boundaries.
+        fn write_stream_parquet(path: &std::path::Path, n: usize, sample: usize, f32_col: bool) {
+            let dt = if f32_col {
+                DataType::Float32
+            } else {
+                DataType::Float64
+            };
+            let item = Arc::new(Field::new("item", dt.clone(), true));
+            let field = Field::new("data", DataType::FixedSizeList(item, sample as i32), true);
+            let schema = Arc::new(Schema::new(vec![field]));
+            let value = |i: usize| (i as f64) * 0.001 - 0.37;
+            let array: ArrayRef = if f32_col {
+                let mut b = FixedSizeListBuilder::new(Float32Builder::new(), sample as i32);
+                for r in 0..n {
+                    for c in 0..sample {
+                        b.values().append_value(value(r * sample + c) as f32);
+                    }
+                    b.append(true);
+                }
+                Arc::new(b.finish())
+            } else {
+                let mut b = FixedSizeListBuilder::new(Float64Builder::new(), sample as i32);
+                for r in 0..n {
+                    for c in 0..sample {
+                        b.values().append_value(value(r * sample + c));
+                    }
+                    b.append(true);
+                }
+                Arc::new(b.finish())
+            };
+            let batch = RecordBatch::try_new(schema.clone(), vec![array]).unwrap();
+            let props = WriterProperties::builder()
+                .set_max_row_group_size(7)
+                .build();
+            let file = std::fs::File::create(path).unwrap();
+            let mut w = ArrowWriter::try_new(file, schema, Some(props)).unwrap();
+            w.write(&batch).unwrap();
+            w.close().unwrap();
+        }
+
+        /// Build legacy and new streaming producers over the same file, primed the same
+        /// way `build_streaming_producer` primes them (first chunk read up front).
+        fn streaming_pair<T: FloatElem + ToBatchData>(
+            path: &std::path::Path,
+            chunk: usize,
+            batch_size: usize,
+            batch_limit: usize,
+        ) -> (LegacyStreamingProducer<T>, StreamingProducer<T>) {
+            let prime = || {
+                let mut r = ParquetStreamingReader::<T>::new(path, Some(5), NullHandling::FillZero)
+                    .unwrap();
+                let mut buf = vec![T::default(); chunk];
+                let written = r.read_chunk(&mut buf).unwrap();
+                buf.truncate(written);
+                let ss = r.get_sample_size().unwrap();
+                (r, buf, ss)
+            };
+            let (r, buffer, ss) = prime();
+            let old = LegacyStreamingProducer::<T> {
+                reader: r,
+                buffer,
+                buffer_cursor: 0,
+                read_chunk_scratch: vec![T::default(); chunk],
+                sample_size: ss,
+                batch_size,
+                num_qubits: 2,
+                batches_yielded: 0,
+                batch_limit,
+            };
+            let (r, buffer, ss) = prime();
+            let new = AdapterBackedProducer::new(
+                StreamingAdapter::new(r, buffer, vec![T::default(); chunk], ss),
+                batch_size,
+                2,
+                batch_limit,
+            );
+            (old, new)
+        }
+
+        #[test]
+        fn streaming_matches_legacy_bit_for_bit() {
+            // 101 samples of 4. Chunk sizes smaller than, equal to, and larger than a
+            // batch force refills, buffer compaction, and partial final batches.
+            let path64 = dtype_file_tests::temp_parquet_path("equiv_stream_f64");
+            let path32 = dtype_file_tests::temp_parquet_path("equiv_stream_f32");
+            write_stream_parquet(&path64, 101, 4, false);
+            write_stream_parquet(&path32, 101, 4, true);
+            let result = std::panic::catch_unwind(|| {
+                for chunk in [4, 12, 20, 64, 1024] {
+                    for batch_size in [1, 3, 5, 200] {
+                        for batch_limit in [usize::MAX, 4] {
+                            for recycle in RECYCLES {
+                                let (old, new) =
+                                    streaming_pair::<f64>(&path64, chunk, batch_size, batch_limit);
+                                let n = assert_same_output(old, new, recycle);
+                                assert_eq!(n, 101usize.div_ceil(batch_size).min(batch_limit));
+                                let (old, new) =
+                                    streaming_pair::<f32>(&path32, chunk, batch_size, batch_limit);
+                                assert_same_output(old, new, recycle);
+                            }
+                        }
+                    }
+                }
+            });
+            let _ = std::fs::remove_file(&path64);
+            let _ = std::fs::remove_file(&path32);
+            result.unwrap();
+        }
+
+        #[test]
+        fn reuse_or_alloc_reuses_matching_dtype_and_ignores_other() {
+            let v = reuse_or_alloc::<f32>(Some(BatchData::F32(Vec::with_capacity(100))), 10);
+            assert_eq!(v.len(), 10);
+            assert!(v.capacity() >= 100, "matching dtype buffer must be reused");
+            let v = reuse_or_alloc::<f64>(Some(BatchData::F32(vec![1.0; 100])), 3);
+            assert_eq!(
+                v,
+                vec![0.0; 3],
+                "wrong dtype must fall back to a fresh zeroed Vec"
+            );
+            let v = reuse_or_alloc::<f64>(None, 2);
+            assert_eq!(v, vec![0.0; 2]);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Source enum (#1434)
+    //
+    // `PipelineIterator::new` = `spawn_source` + storing a `QdpEngine`. Creating an
+    // engine needs CUDA, so the per-variant tests drive `spawn_source` directly and read
+    // the batches off the prefetch channel; the GPU-only test at the end covers `new`
+    // itself and skips when no functional GPU is present.
+    // -------------------------------------------------------------------------
+
+    mod source_tests {
+        use super::dtype_file_tests::{temp_parquet_path, write_f32_parquet};
+        use super::*;
+        use std::fs;
+
+        /// Drain every batch the producer thread sends, then join it.
+        fn collect(handles: ProducerHandles) -> Vec<PrefetchedBatch> {
+            let (rx, _recycle_tx, handle) = handles;
+            let batches: Vec<_> = rx.iter().map(|b| b.unwrap()).collect();
+            handle.join().unwrap();
+            batches
+        }
+
+        #[test]
+        fn test_source_synthetic_overrides_config_batches_and_seed() {
+            // Source::Synthetic is authoritative over config.total_batches / config.seed.
+            let mut config = PipelineConfig {
+                total_batches: 999,
+                seed: None,
+                num_qubits: 3,
+                batch_size: 4,
+                encoding: Encoding::Amplitude,
+                ..Default::default()
+            };
+            let source = Source::Synthetic {
+                total_batches: 3,
+                seed: Some(7),
+            };
+            let batches = collect(spawn_source(source, &mut config).unwrap());
+
+            assert_eq!(batches.len(), 3);
+            assert_eq!((config.total_batches, config.seed), (3, Some(7)));
+            assert!(config.prefetch_depth > 0, "spawn_source must normalize()");
+            let expected_cfg = PipelineConfig {
+                seed: Some(7),
+                ..config.clone()
+            };
+            for (i, b) in batches.iter().enumerate() {
+                assert_eq!(b.batch_n, 4);
+                assert_eq!(b.data, BatchData::F64(generate_batch(&expected_cfg, i, 8)));
+            }
+        }
+
+        #[test]
+        fn test_source_file_honours_batch_limit_and_dtype() {
+            // 8 samples x 4 features; batch_size 3 -> 3,3,2 until EOF.
+            let path = temp_parquet_path("source_file");
+            write_f32_parquet(&path);
+            let base = PipelineConfig {
+                num_qubits: 2,
+                batch_size: 3,
+                encoding: Encoding::Amplitude,
+                dtype: Precision::Float32,
+                ..Default::default()
+            };
+            let run = |batch_limit| {
+                let source = Source::File {
+                    path: path.clone(),
+                    batch_limit,
+                };
+                spawn_source(source, &mut base.clone()).map(collect)
+            };
+            let all = run(usize::MAX);
+            let limited = run(2);
+            let _ = fs::remove_file(&path);
+
+            let all = all.unwrap();
+            let sizes: Vec<_> = all.iter().map(|b| b.batch_n).collect();
+            assert_eq!(sizes, vec![3, 3, 2]);
+            assert!(matches!(all[0].data, BatchData::F32(_)));
+            assert_eq!(limited.unwrap().len(), 2, "batch_limit must cap batches");
+        }
+
+        #[test]
+        fn test_source_file_streaming_honours_batch_limit_and_dtype() {
+            let path = temp_parquet_path("source_stream");
+            write_f32_parquet(&path);
+            let base = PipelineConfig {
+                num_qubits: 2,
+                batch_size: 3,
+                encoding: Encoding::Amplitude,
+                dtype: Precision::Float32,
+                ..Default::default()
+            };
+            let run = |batch_limit| {
+                let source = Source::FileStreaming {
+                    path: path.clone(),
+                    batch_limit,
+                };
+                spawn_source(source, &mut base.clone()).map(collect)
+            };
+            let all = run(usize::MAX);
+            let limited = run(1);
+            let _ = fs::remove_file(&path);
+
+            let all = all.unwrap();
+            let sizes: Vec<_> = all.iter().map(|b| b.batch_n).collect();
+            assert_eq!(sizes, vec![3, 3, 2]);
+            match &all[0].data {
+                BatchData::F32(v) => assert_eq!(&v[..4], &[0.25_f32, 0.5, 0.75, 1.0]),
+                other => panic!("expected F32, got {other:?}"),
+            }
+            assert_eq!(limited.unwrap().len(), 1, "batch_limit must cap batches");
+        }
+
+        #[test]
+        fn test_source_file_streaming_rejects_non_parquet() {
+            let source = Source::FileStreaming {
+                path: PathBuf::from("data.npy"),
+                batch_limit: usize::MAX,
+            };
+            let err = spawn_source(source, &mut PipelineConfig::default()).err();
+            assert!(matches!(err, Some(MahoutError::InvalidInput(_))));
+        }
+
+        /// A `QdpEngine`, or `None` when CUDA is unusable. Without a driver `cudarc`
+        /// panics instead of returning `Err`, so probe inside `catch_unwind`.
+        fn try_engine() -> Option<QdpEngine> {
+            static LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+            let _guard = LOCK.lock().unwrap_or_else(|e| e.into_inner());
+            let prev = std::panic::take_hook();
+            std::panic::set_hook(Box::new(|_| {}));
+            let engine = std::panic::catch_unwind(|| QdpEngine::new(0).ok());
+            std::panic::set_hook(prev);
+            engine.ok().flatten()
+        }
+
+        #[test]
+        #[allow(deprecated)] // also checks the deprecated wrappers still work
+        fn test_pipeline_iterator_new_each_source_gpu() {
+            let Some(engine) = try_engine() else {
+                eprintln!("SKIP: no functional GPU for PipelineIterator::new");
+                return;
+            };
+            let path = temp_parquet_path("source_gpu");
+            write_f32_parquet(&path);
+            let config = PipelineConfig {
+                num_qubits: 2,
+                batch_size: 4,
+                total_batches: 2,
+                encoding: Encoding::Amplitude,
+                ..Default::default()
+            };
+            let p = path.clone();
+            let iters = [
+                PipelineIterator::new(
+                    engine.clone(),
+                    Source::Synthetic {
+                        total_batches: 2,
+                        seed: Some(1),
+                    },
+                    config.clone(),
+                ),
+                PipelineIterator::new(
+                    engine.clone(),
+                    Source::File {
+                        path: p.clone(),
+                        batch_limit: 1,
+                    },
+                    config.clone(),
+                ),
+                PipelineIterator::new(
+                    engine.clone(),
+                    Source::FileStreaming {
+                        path: p.clone(),
+                        batch_limit: 1,
+                    },
+                    config.clone(),
+                ),
+                PipelineIterator::new_synthetic(engine.clone(), config.clone()),
+                PipelineIterator::new_from_file(engine.clone(), &p, config.clone(), 1),
+                PipelineIterator::new_from_file_streaming(engine, &p, config, 1),
+            ];
+            for (i, it) in iters.into_iter().enumerate() {
+                let mut it = it.unwrap_or_else(|e| panic!("iterator {i}: {e}"));
+                let ptr = it.next_batch().unwrap().expect("at least one batch");
+                unsafe { release_dlpack(ptr) };
+            }
+            let _ = fs::remove_file(&path);
         }
     }
 }
