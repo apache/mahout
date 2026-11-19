@@ -20,6 +20,8 @@ from importlib import import_module
 import numpy as np
 import pytest
 
+from qumat import QuMat
+
 from ..utils import TESTING_BACKENDS
 from ..utils.qumat_helpers import get_qumat_example_final_state_vector
 
@@ -75,3 +77,35 @@ class TestFinalQuantumStatesConsistency:
             results[backend_name] = get_qumat_example_final_state_vector(
                 qumat_backend_config, initial_ket_str
             )
+
+
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+@pytest.mark.parametrize("trailing_h", [False, True])
+def test_final_state_vector_after_swap(backend_name, trailing_h):
+    """A SWAP must move amplitudes, not just relabel qubits.
+
+    Regression test: Qiskit's default transpiler can replace a SWAP with a
+    virtual qubit permutation, so ``save_statevector`` used to report the
+    state *before* the swap.
+    """
+    backend_module = import_module(f".{backend_name}_helpers", package="testing.utils")
+    qumat = QuMat(backend_module.get_qumat_backend_config("get_final_state_vector"))
+    qumat.create_empty_circuit(num_qubits=2)
+    qumat.apply_pauli_x_gate(0)
+    qumat.apply_swap_gate(0, 1)
+    if trailing_h:
+        qumat.apply_hadamard_gate(0)
+    state = np.asarray(qumat.get_final_state_vector())
+
+    # After X(0) and SWAP(0, 1) the register is |q0 q1> = |01>.
+    # Qiskit indexes amplitudes little-endian (qubit 0 = least significant
+    # bit), Cirq and Braket big-endian (qubit 0 = most significant bit).
+    one_on_qubit1 = 2 if backend_name == "qiskit" else 1
+    expected = np.zeros(4, dtype=complex)
+    if trailing_h:
+        # H on qubit 0 (which is |0>) gives (|01> + |11>)/sqrt(2).
+        one_on_both = 3
+        expected[one_on_qubit1] = expected[one_on_both] = 1 / np.sqrt(2)
+    else:
+        expected[one_on_qubit1] = 1.0
+    np.testing.assert_allclose(state, expected, atol=1e-6)

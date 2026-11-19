@@ -15,6 +15,19 @@
 # limitations under the License.
 
 from . import qdp
+from .optimize import (
+    OptimizationResult,
+    expectation_z,
+    optimize_parameters,
+    parameter_shift_gradient,
+)
 from .qumat import QuMat
 
-__all__: list[str] = ["QuMat", "qdp"]
+__all__: list[str] = [
+    "OptimizationResult",
+    "QuMat",
+    "expectation_z",
+    "optimize_parameters",
+    "parameter_shift_gradient",
+    "qdp",
+]

@@ -61,6 +61,7 @@ const sidebars: SidebarsConfig = {
           items: [
             'advanced/pqc',
             'advanced/gap-analysis',
+            'advanced/parameter-optimization',
           ],
         },
         {
