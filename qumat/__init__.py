@@ -14,7 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from . import qdp
+from . import kernels, qdp
+from .kernels import (
+    AngleFeatureMap,
+    FeatureMap,
+    ZZFeatureMap,
+    fidelity_kernel,
+    kernel_matrix,
+)
 from .qumat import QuMat
 
-__all__: list[str] = ["QuMat", "qdp"]
+__all__: list[str] = [
+    "AngleFeatureMap",
+    "FeatureMap",
+    "QuMat",
+    "ZZFeatureMap",
+    "fidelity_kernel",
+    "kernel_matrix",
+    "kernels",
+    "qdp",
+]
