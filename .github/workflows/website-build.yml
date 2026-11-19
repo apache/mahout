@@ -54,6 +54,10 @@ jobs:
         working-directory: website
         run: npm run typecheck
 
+      - name: Test docs sync script
+        working-directory: website
+        run: npm test
+
       - name: Build website
         working-directory: website
         run: npm run build
