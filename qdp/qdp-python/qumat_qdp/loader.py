@@ -627,7 +627,7 @@ class QuantumDataLoader:
                     batch_size=self._batch_size,
                     num_qubits=self._num_qubits,
                     encoding_method=self._encoding_method,
-                    batch_limit=None,
+                    batch_limit=self._total_batches,
                     null_handling=self._null_handling,
                     dtype=self._dtype,
                 ),
