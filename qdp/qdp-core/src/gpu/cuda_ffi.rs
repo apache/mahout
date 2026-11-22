@@ -26,6 +26,13 @@ pub(crate) const CUDA_MEMORY_TYPE_DEVICE: i32 = 2;
 #[allow(dead_code)]
 pub(crate) const CUDA_MEMORY_TYPE_MANAGED: i32 = 3;
 
+/// Mirrors `struct cudaPointerAttributes` from the CUDA runtime's `driver_types.h`.
+///
+/// `cudaPointerGetAttributes` fills the whole struct, so this must be at least
+/// as large as the C definition or the call writes past the end of `attrs`.
+/// CUDA 13 grew the struct to 88 bytes on 64-bit Linux (a reserved tail after
+/// `hostPointer`); CUDA 12 has only the first four fields (24 bytes), so the
+/// larger layout is safe with both.
 #[allow(dead_code)]
 #[repr(C)]
 pub(crate) struct CudaPointerAttributes {
@@ -33,8 +40,19 @@ pub(crate) struct CudaPointerAttributes {
     pub device: i32,
     pub device_pointer: *mut c_void,
     pub host_pointer: *mut c_void,
-    pub is_managed: i32,
-    pub allocation_flags: u32,
+    pub reserved: [std::ffi::c_long; 8],
+}
+
+impl CudaPointerAttributes {
+    pub(crate) fn zeroed() -> Self {
+        Self {
+            memory_type: 0,
+            device: 0,
+            device_pointer: std::ptr::null_mut(),
+            host_pointer: std::ptr::null_mut(),
+            reserved: [0; 8],
+        }
+    }
 }
 
 // CUDA error codes
@@ -239,4 +257,16 @@ pub fn cuda_runtime_available() -> bool {
     // stub above, which returns the unavailable sentinel without dereferencing.
     let rc = unsafe { cudaGetDeviceCount(&mut count) };
     rc == CUDA_SUCCESS && count > 0
+}
+
+#[cfg(test)]
+mod tests {
+    use super::CudaPointerAttributes;
+
+    #[test]
+    #[cfg(all(target_os = "linux", target_pointer_width = "64"))]
+    fn pointer_attributes_matches_cuda_runtime_size() {
+        // sizeof(struct cudaPointerAttributes) in the CUDA 13.x headers
+        assert_eq!(std::mem::size_of::<CudaPointerAttributes>(), 88);
+    }
 }

@@ -72,14 +72,7 @@ fn validate_cuda_input_ptr(device: &CudaDevice, ptr: *const c_void) -> Result<()
         ));
     }
 
-    let mut attrs = CudaPointerAttributes {
-        memory_type: 0,
-        device: 0,
-        device_pointer: std::ptr::null_mut(),
-        host_pointer: std::ptr::null_mut(),
-        is_managed: 0,
-        allocation_flags: 0,
-    };
+    let mut attrs = CudaPointerAttributes::zeroed();
 
     let ret = unsafe { cudaPointerGetAttributes(&mut attrs as *mut _, ptr) };
     if ret != 0 {
