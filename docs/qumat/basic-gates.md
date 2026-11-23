@@ -55,6 +55,19 @@ The T-Gate applies a **π/4 phase shift** to the qubit. It is essential for quan
 - $$T|0\rangle = |0\rangle$$
 - $$T|1\rangle = e^{i\pi/4} |1\rangle$$
 
+## Phase Gate (P Gate)
+The Phase gate applies a phase shift of angle $\lambda$ to the $|1\rangle$ state while leaving $|0\rangle$ unchanged:
+
+$$P(\lambda)|0\rangle = |0\rangle,\quad P(\lambda)|1\rangle = e^{i\lambda}|1\rangle$$
+
+In matrix form:
+
+$$
+P(\lambda) = \begin{pmatrix} 1 & 0 \\ 0 & e^{i\lambda} \end{pmatrix}
+$$
+
+In QuMat, apply it with `qumat.apply_phase_gate(qubit_index, angle)`. The angle can be a static float (e.g. `math.pi / 4`) or a parameter name string for parameterized circuits (e.g. `"theta"`). Special cases of the Phase gate include $P(\pi) = Z$, $P(\pi/2) = S$, and $P(\pi/4) = T$.
+
 ## CSWAP Gate (Controlled-SWAP / Fredkin Gate)
 The CSWAP gate, also known as the **Fredkin gate**, is a three-qubit gate that conditionally swaps the states of two target qubits based on the state of a control qubit. If the control qubit is in the $|1\rangle$ state, it swaps the states of the two target qubits; otherwise, it leaves them unchanged.
 

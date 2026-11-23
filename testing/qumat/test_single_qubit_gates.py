@@ -17,6 +17,7 @@
 
 import math
 
+import numpy as np
 import pytest
 
 from qumat import QuMat
@@ -602,6 +603,81 @@ class TestTGate:
             f"Backend: {backend_name}, expected |0> after T^8, "
             f"got probability {prob:.4f}"
         )
+
+
+@pytest.mark.parametrize("backend_name", TESTING_BACKENDS)
+class TestPhaseGate:
+    """Test suite for the Phase gate (P gate) across all backends."""
+
+    @pytest.mark.parametrize(
+        "angle",
+        [
+            0.0,
+            math.pi / 4,
+            math.pi / 2,
+            math.pi,
+            3 * math.pi / 2,
+        ],
+    )
+    def test_phase_gate_state_vector(self, backend_name, angle):
+        """Phase gate applies e^(i*angle) to the |1> component."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+        qumat.apply_hadamard_gate(0)
+        qumat.apply_phase_gate(0, angle)
+
+        state_vector = qumat.get_final_state_vector()
+        expected_state = np.array([1.0, np.exp(1j * angle)]) / math.sqrt(2)
+        np.testing.assert_allclose(state_vector, expected_state, atol=1e-6)
+
+    def test_phase_gate_pi_equals_z(self, backend_name):
+        """P(pi) behaves like Z: H -> P(pi) -> H transforms |0> to |1>."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+        qumat.apply_hadamard_gate(0)
+        qumat.apply_phase_gate(0, math.pi)
+        qumat.apply_hadamard_gate(0)
+
+        results = qumat.execute_circuit()
+        prob_one = get_state_probability(
+            results, "1", num_qubits=1, backend_name=backend_name
+        )
+        assert prob_one > 0.95
+
+    def test_phase_gate_parameterized(self, backend_name):
+        """Phase gate accepts string parameter name and binds values at execution."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+        qumat.create_empty_circuit(num_qubits=1)
+        qumat.apply_hadamard_gate(0)
+        qumat.apply_phase_gate(0, "lambda_param")
+
+        assert "lambda_param" in qumat.parameters
+
+        # Bind parameter and verify state vector
+        qumat.bind_parameters({"lambda_param": math.pi / 4})
+        state_vector = qumat.get_final_state_vector()
+        expected_state = np.array([1.0, np.exp(1j * math.pi / 4)]) / math.sqrt(2)
+        np.testing.assert_allclose(state_vector, expected_state, atol=1e-6)
+
+    def test_phase_gate_validation(self, backend_name):
+        """Phase gate validates circuit initialization and qubit indices."""
+        backend_config = get_backend_config(backend_name)
+        qumat = QuMat(backend_config)
+
+        # Circuit not initialized
+        with pytest.raises(RuntimeError):
+            qumat.apply_phase_gate(0, math.pi / 4)
+
+        qumat.create_empty_circuit(num_qubits=2)
+
+        # Invalid indices
+        with pytest.raises(ValueError):
+            qumat.apply_phase_gate(-1, math.pi / 4)
+        with pytest.raises(ValueError):
+            qumat.apply_phase_gate(2, math.pi / 4)
 
 
 @pytest.mark.parametrize(

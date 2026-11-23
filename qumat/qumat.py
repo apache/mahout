@@ -504,6 +504,27 @@ class QuMat:
         self._handle_parameter(angle)
         self.backend_module.apply_rz_gate(self.circuit, qubit_index, angle)
 
+    def apply_phase_gate(self, qubit_index: int, angle: float | str) -> None:
+        """Apply a Phase gate (P gate) to the specified qubit.
+
+        Applies a phase shift of angle to the |1> state, leaving the |0>
+        state unchanged:
+        P(lambda)|0> = |0>, P(lambda)|1> = e^(i*lambda)|1>.
+        The angle can be a static value or a parameter name for parameterized
+        circuits.
+
+        :param qubit_index: Index of the qubit.
+        :type qubit_index: int
+        :param angle: Phase angle in radians. Can be a float or a string
+            parameter name.
+        :type angle: float | str
+        :raises RuntimeError: If the circuit has not been initialized.
+        """
+        self._ensure_circuit_initialized()
+        self._validate_qubit_index(qubit_index)
+        self._handle_parameter(angle)
+        self.backend_module.apply_phase_gate(self.circuit, qubit_index, angle)
+
     def _handle_parameter(self, param_name: float | str) -> None:
         """Register parameter names when parameterized gates are applied.
 
