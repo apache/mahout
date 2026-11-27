@@ -52,11 +52,8 @@ def initialize_backend(backend_config: Mapping[str, Any]) -> AerSimulator:
     return backend
 
 
-def create_empty_circuit(num_qubits: int | None = None) -> qiskit.QuantumCircuit:
-    if num_qubits is not None:
-        return qiskit.QuantumCircuit(num_qubits)
-    else:
-        return qiskit.QuantumCircuit()
+def create_empty_circuit(num_qubits: int) -> qiskit.QuantumCircuit:
+    return qiskit.QuantumCircuit(num_qubits)
 
 
 def apply_not_gate(circuit: qiskit.QuantumCircuit, qubit_index: int) -> None:
