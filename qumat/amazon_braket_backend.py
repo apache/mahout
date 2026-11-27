@@ -206,6 +206,18 @@ def apply_rz_gate(
         circuit.rz(qubit_index, param)
 
 
+def apply_phase_gate(
+    circuit: CircuitLike,
+    qubit_index: int,
+    angle: float | int | str,
+) -> None:
+    if isinstance(angle, (int, float)):
+        circuit.phaseshift(qubit_index, angle)
+    else:
+        param = FreeParameter(angle)
+        circuit.phaseshift(qubit_index, param)
+
+
 def apply_u_gate(
     circuit: CircuitLike,
     qubit_index: int,

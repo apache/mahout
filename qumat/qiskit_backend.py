@@ -233,6 +233,15 @@ def apply_rz_gate(
     circuit.rz(param, qubit_index)
 
 
+def apply_phase_gate(
+    circuit: qiskit.QuantumCircuit,
+    qubit_index: int,
+    angle: float | str | qiskit.circuit.Parameter,
+) -> None:
+    param = qiskit.circuit.Parameter(angle) if isinstance(angle, str) else angle
+    circuit.p(param, qubit_index)
+
+
 def apply_u_gate(
     circuit: qiskit.QuantumCircuit,
     qubit_index: int,

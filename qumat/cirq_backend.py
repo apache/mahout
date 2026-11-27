@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import copy
+import math
 from collections.abc import Mapping, MutableMapping
 from typing import Any
 
@@ -196,6 +197,21 @@ def apply_rz_gate(
     param = sympy.Symbol(angle) if isinstance(angle, str) else angle
     qubit = cirq.LineQubit(qubit_index)
     circuit.append(cirq.rz(param).on(qubit))
+
+
+def apply_phase_gate(
+    circuit: cirq.Circuit,
+    qubit_index: int,
+    angle: float | int | str | sympy.Expr,
+) -> None:
+    if isinstance(angle, str):
+        param = sympy.Symbol(angle) / sympy.pi
+    elif isinstance(angle, sympy.Expr):
+        param = angle / sympy.pi
+    else:
+        param = angle / math.pi
+    qubit = cirq.LineQubit(qubit_index)
+    circuit.append(cirq.ZPowGate(exponent=param).on(qubit))
 
 
 def apply_u_gate(

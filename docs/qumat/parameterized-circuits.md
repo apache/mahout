@@ -12,7 +12,7 @@ Parameterized quantum circuits (PQCs) contain gates with tunable parameters that
 - **Train**: Adjust parameters based on results (like machine learning)
 - **Explore**: Try different values without rewriting the circuit
 
-Rotation gates (Rx, Ry, Rz) are the primary parameterized gates. Use string names (e.g., `"theta"`) instead of numbers to create parameters, then bind values before execution.
+Rotation gates (Rx, Ry, Rz) and the Phase gate (P) are the primary parameterized gates. Use string names (e.g., `"theta"`) instead of numbers to create parameters, then bind values before execution.
 
 ## Rotation Gates
 
