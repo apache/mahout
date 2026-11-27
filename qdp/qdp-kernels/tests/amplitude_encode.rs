@@ -468,6 +468,135 @@ fn test_amplitude_encode_zero_norm_error() {
 
 #[test]
 #[cfg(target_os = "linux")]
+fn test_amplitude_encode_rejects_input_longer_than_state() {
+    println!("Testing amplitude encoding rejects input_len > state_len...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    // 5 inputs cannot fit in a 4-amplitude write window. The launcher must
+    // refuse instead of launching a kernel whose input reads outrun its writes.
+    let input = vec![1.0, 1.0, 1.0, 1.0, 1.0];
+    let inv_norm = 1.0 / 5.0f64.sqrt();
+    let state_len = 4;
+
+    let input_d = device.htod_copy(input.clone()).unwrap();
+    let mut state_d = device.alloc_zeros::<CuDoubleComplex>(state_len).unwrap();
+
+    let result = unsafe {
+        launch_amplitude_encode(
+            *input_d.device_ptr() as *const f64,
+            *state_d.device_ptr_mut() as *mut std::ffi::c_void,
+            input.len(),
+            state_len,
+            inv_norm,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_ne!(result, 0, "Should reject input_len > state_len");
+    println!(
+        "PASS: input_len > state_len rejected with error code {}",
+        result
+    );
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_amplitude_encode_rejects_input_longer_than_state_f32() {
+    println!("Testing amplitude encoding rejects input_len > state_len (float32)...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    let input: Vec<f32> = vec![1.0, 1.0, 1.0, 1.0, 1.0];
+    let inv_norm = 1.0f32 / 5.0f32.sqrt();
+    let state_len = 4;
+
+    let input_d = device.htod_copy(input.clone()).unwrap();
+    let mut state_d = device.alloc_zeros::<CuComplex>(state_len).unwrap();
+
+    let result = unsafe {
+        launch_amplitude_encode_f32(
+            *input_d.device_ptr() as *const f32,
+            *state_d.device_ptr_mut() as *mut std::ffi::c_void,
+            input.len(),
+            state_len,
+            inv_norm,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_ne!(result, 0, "Should reject input_len > state_len (float32)");
+    println!(
+        "PASS: input_len > state_len (float32) rejected with error code {}",
+        result
+    );
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_amplitude_encode_odd_state_len_writes_last_amplitude_f32() {
+    println!("Testing amplitude encoding with an odd state_len (float32)...");
+
+    let device = match CudaDevice::new(0) {
+        Ok(d) => d,
+        Err(_) => {
+            println!("SKIP: No CUDA device available");
+            return;
+        }
+    };
+
+    // 513 amplitudes: floor(513 / 2) = 256 pairs is exactly one block of
+    // DEFAULT_BLOCK_SIZE threads, so a grid sized from state_len / 2 would
+    // launch no thread for the 513th amplitude and leave it at its initial 0.
+    let state_len = 513usize;
+    let input: Vec<f32> = vec![1.0; state_len];
+    let inv_norm = 1.0f32 / (state_len as f32).sqrt();
+
+    let input_d = device.htod_copy(input.clone()).unwrap();
+    let mut state_d = device.alloc_zeros::<CuComplex>(state_len).unwrap();
+
+    let result = unsafe {
+        launch_amplitude_encode_f32(
+            *input_d.device_ptr() as *const f32,
+            *state_d.device_ptr_mut() as *mut std::ffi::c_void,
+            input.len(),
+            state_len,
+            inv_norm,
+            std::ptr::null_mut(),
+        )
+    };
+
+    assert_eq!(result, 0, "Kernel launch should succeed");
+
+    let state_h = device.dtoh_sync_copy(&state_d).unwrap();
+    for (i, amp) in state_h.iter().enumerate() {
+        assert!(
+            (amp.x - inv_norm).abs() < EPSILON_F32 && amp.y.abs() < EPSILON_F32,
+            "amplitude {} should be ({}, 0), got ({}, {})",
+            i,
+            inv_norm,
+            amp.x,
+            amp.y
+        );
+    }
+
+    println!("PASS: Odd state_len (float32) fully written");
+}
+
+#[test]
+#[cfg(target_os = "linux")]
 fn test_amplitude_encode_negative_norm_error() {
     println!("Testing amplitude encoding with negative norm (error case)...");
 

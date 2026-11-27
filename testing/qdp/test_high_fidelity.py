@@ -29,8 +29,14 @@ from .qdp_test_utils import requires_qdp
 
 np.random.seed(2026)
 
-# ASYNC_THRESHOLD = 1MB / sizeof(f64) = 131072
-PIPELINE_CHUNK_SIZE = 131072
+# Single-sample f64 amplitude encoding switches from the synchronous path to the
+# dual-stream pipeline at ASYNC_THRESHOLD = 1MB / sizeof(f64) elements
+# (qdp-core/src/gpu/encodings/amplitude.rs). The pipeline then splits the input
+# into chunks of CHUNK_SIZE_ELEMENTS = 8MB / sizeof(f64) elements
+# (qdp-core/src/gpu/pipeline.rs). Crossing a real chunk boundary therefore needs
+# more than 2^20 elements, i.e. at least 21 qubits.
+ASYNC_THRESHOLD = 1024 * 1024 // 8
+PIPELINE_CHUNK_SIZE = 8 * 1024 * 1024 // 8
 
 
 def calculate_fidelity(
@@ -86,10 +92,12 @@ def engine_float64():
     [
         (4, 16, "Small - Sync Path"),
         (10, 1000, "Medium - Padding Logic"),
-        (18, PIPELINE_CHUNK_SIZE, "Boundary - Exact Chunk Size"),
-        (18, PIPELINE_CHUNK_SIZE + 1, "Boundary - Chunk + 1"),
-        (18, PIPELINE_CHUNK_SIZE * 2, "Boundary - Two Exact Chunks"),
-        (20, 1_000_000, "Large - Async Pipeline"),
+        (18, ASYNC_THRESHOLD, "Boundary - Exact Async Threshold"),
+        (18, ASYNC_THRESHOLD + 1, "Boundary - Async Threshold + 1"),
+        (18, ASYNC_THRESHOLD * 2, "Boundary - Two Async Thresholds"),
+        (20, 1_000_000, "Large - Async Pipeline, Single Chunk"),
+        (21, PIPELINE_CHUNK_SIZE + 1, "Boundary - Crosses Real Chunk"),
+        (21, PIPELINE_CHUNK_SIZE + 513, "Boundary - Odd Tail Chunk"),
     ],
 )
 def test_amplitude_encoding_fidelity_comprehensive(
@@ -115,10 +123,25 @@ def test_amplitude_encoding_fidelity_comprehensive(
     assert torch_state.dtype == torch.complex128, "Tensor must be Complex128"
     assert torch_state.shape == (1, state_len), "Tensor shape must be [1, 2^n]"
 
+    # Element-wise check first: it pinpoints a misplaced chunk or an unwritten
+    # tail amplitude, which a single fidelity number cannot localise.
+    psi_gpu = torch_state.cpu().numpy()[0]
+    np.testing.assert_allclose(
+        psi_gpu,
+        expected_state_complex,
+        rtol=0,
+        atol=1e-12,
+        err_msg=f"Element mismatch in {desc}",
+    )
+
     fidelity = calculate_fidelity(torch_state, expected_state_complex)
     print(f"Fidelity: {fidelity:.16f}")
 
-    assert fidelity > (1.0 - 1e-14), f"Fidelity loss in {desc}! F={fidelity}"
+    # F = |<psi_gpu|psi_cpu>|^2 sums 2^num_qubits products in float64, so its
+    # own rounding noise grows with the state size and already reaches ~1e-14
+    # at 2^18 elements. 1e-12 leaves headroom for 30 qubits while still
+    # failing on any real encoding error (which the check above reports first).
+    assert fidelity > (1.0 - 1e-12), f"Fidelity loss in {desc}! F={fidelity}"
 
 
 @requires_qdp
