@@ -161,7 +161,9 @@ extern "C" {
 /// * input_d - Device pointer to input data (already normalized by host)
 /// * state_d - Device pointer to output state vector
 /// * input_len - Number of input elements
-/// * state_len - Target state vector size (2^num_qubits)
+/// * state_len - Number of output amplitudes to write from state_d (>= input_len).
+///   2^num_qubits for a full state, or a pipeline chunk length, which may be odd.
+///   Entries past input_len are zero-filled; nothing beyond state_len is written.
 /// * inv_norm - Reciprocal L2 norm (1 / ||input||)
 /// * stream - CUDA stream for async execution (nullptr = default stream)
 ///
@@ -178,12 +180,19 @@ int launch_amplitude_encode(
     if (inv_norm <= 0.0 || !isfinite(inv_norm)) {
         return cudaErrorInvalidValue;
     }
+    // The kernel reads input[0, input_len) and writes state[0, state_len); an
+    // input longer than the write window means the caller's pointer/length
+    // bookkeeping is inconsistent, so refuse rather than silently truncate.
+    if (input_len > state_len) {
+        return cudaErrorInvalidValue;
+    }
 
     cuDoubleComplex* state_complex_d = static_cast<cuDoubleComplex*>(state_d);
 
     const int blockSize = DEFAULT_BLOCK_SIZE;
-    // Halve the grid size because each thread now processes 2 elements
-    const int gridSize = (state_len / 2 + blockSize - 1) / blockSize;
+    // Each thread processes 2 elements; round up so an odd state_len (e.g. a
+    // pipeline chunk) still gets a thread for its last element.
+    const int gridSize = ((state_len + 1) / 2 + blockSize - 1) / blockSize;
 
     amplitude_encode_kernel<<<gridSize, blockSize, 0, stream>>>(
         input_d,
@@ -208,11 +217,15 @@ int launch_amplitude_encode_f32(
     if (inv_norm <= 0.0f || !isfinite(inv_norm)) {
         return cudaErrorInvalidValue;
     }
+    if (input_len > state_len) {
+        return cudaErrorInvalidValue;
+    }
 
     cuComplex* state_complex_d = static_cast<cuComplex*>(state_d);
 
     const int blockSize = DEFAULT_BLOCK_SIZE;
-    const int gridSize = (state_len / 2 + blockSize - 1) / blockSize;
+    // Mirror the f64 launcher: round up so an odd state_len is fully written.
+    const int gridSize = ((state_len + 1) / 2 + blockSize - 1) / blockSize;
 
     amplitude_encode_kernel_f32<<<gridSize, blockSize, 0, stream>>>(
         input_d,

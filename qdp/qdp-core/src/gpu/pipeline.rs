@@ -43,6 +43,15 @@ use cudarc::driver::{CudaDevice, CudaSlice, DevicePtr, DeviceRepr, safe::CudaStr
 use std::ffi::c_void;
 use std::sync::Arc;
 
+/// Host-to-device chunk budget in bytes shared by every dual-stream pipeline
+/// variant (balance between per-chunk overhead and copy/compute overlap).
+#[cfg(target_os = "linux")]
+const CHUNK_SIZE_BYTES: usize = 8 * 1024 * 1024; // 8MB
+
+/// Chunk size (in f64 elements) used by `run_dual_stream_pipeline`.
+#[cfg(target_os = "linux")]
+pub(crate) const CHUNK_SIZE_ELEMENTS: usize = CHUNK_SIZE_BYTES / std::mem::size_of::<f64>();
+
 /// Dual-stream context coordinating copy/compute with an event.
 #[cfg(target_os = "linux")]
 pub struct PipelineContext {
@@ -260,7 +269,6 @@ where
 {
     crate::profile_scope!("GPU::AsyncPipeline");
 
-    const CHUNK_SIZE_ELEMENTS: usize = 8 * 1024 * 1024 / std::mem::size_of::<f64>(); // 8MB
     run_dual_stream_pipeline_with_chunk_size::<f64, _>(
         device,
         host_data,
@@ -339,7 +347,7 @@ where
         )));
     }
 
-    let base_chunk_size_elements: usize = 8 * 1024 * 1024 / std::mem::size_of::<T>(); // 8MB
+    let base_chunk_size_elements: usize = CHUNK_SIZE_BYTES / std::mem::size_of::<T>();
     let chunk_size_elements = if align_elements >= base_chunk_size_elements {
         align_elements
     } else {

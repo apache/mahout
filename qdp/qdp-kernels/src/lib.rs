@@ -56,7 +56,9 @@ unsafe impl cudarc::driver::ValidAsZeroBits for CuComplex {}
 #[cfg(all(target_os = "linux", not(qdp_no_cuda)))]
 unsafe extern "C" {
     /// Launch amplitude encoding kernel
-    /// Returns CUDA error code (0 = success)
+    /// Returns CUDA error code (0 = success). Writes exactly `state_len`
+    /// amplitudes from `state_d`; returns `cudaErrorInvalidValue` when
+    /// `inv_norm` is not positive and finite or `input_len > state_len`.
     ///
     /// # Safety
     /// Requires valid GPU pointers, must sync before freeing
@@ -70,7 +72,9 @@ unsafe extern "C" {
     ) -> i32;
 
     /// Launch amplitude encoding kernel (float32 input/output)
-    /// Returns CUDA error code (0 = success)
+    /// Returns CUDA error code (0 = success). Same contract as
+    /// `launch_amplitude_encode`: writes exactly `state_len` amplitudes and
+    /// rejects `input_len > state_len`.
     ///
     /// # Safety
     /// Requires valid GPU pointers, must sync before freeing

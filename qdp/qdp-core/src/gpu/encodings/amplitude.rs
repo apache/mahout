@@ -739,6 +739,15 @@ impl AmplitudeEncoder {
         inv_norm: f64,
         state_vector: &GpuStateVector,
     ) -> Result<()> {
+        // Each chunk writes [chunk_offset, chunk_offset + chunk_len) and the tail
+        // memset writes [data_len, state_len); both must stay inside the allocation.
+        debug_assert!(
+            host_data.len() <= state_len && state_len <= state_vector.size_elements(),
+            "pipeline bounds: data_len={} state_len={} allocation={}",
+            host_data.len(),
+            state_len,
+            state_vector.size_elements()
+        );
         let base_state_ptr = state_vector.ptr_f64().ok_or_else(|| {
             MahoutError::InvalidInput(
                 "State vector precision mismatch (expected float64 buffer)".to_string(),
@@ -760,13 +769,16 @@ impl AmplitudeEncoder {
                         .cast::<std::ffi::c_void>()
                 };
 
-                // Launch amplitude encoding kernel on the provided stream
+                // Launch amplitude encoding kernel on the provided stream.
+                // Bound the write to this chunk: state_ptr_offset is already advanced by
+                // chunk_offset, so passing state_len would write past the allocation.
+                // The tail [data_len, state_len) is zero-filled after the pipeline.
                 let ret = unsafe {
                     launch_amplitude_encode(
                         input_ptr,
                         state_ptr_offset,
                         chunk_len,
-                        state_len,
+                        chunk_len,
                         inv_norm,
                         stream.stream as *mut c_void,
                     )
@@ -1206,5 +1218,93 @@ impl AmplitudeEncoder {
             &state_vector,
         )?;
         Ok(())
+    }
+}
+
+#[cfg(all(test, target_os = "linux"))]
+mod tests {
+    use super::*;
+    use crate::QdpEngine;
+    use crate::gpu::memory::BufferStorage;
+    use crate::gpu::pipeline::CHUNK_SIZE_ELEMENTS as PIPELINE_CHUNK_ELEMENTS;
+    use qdp_kernels::CuDoubleComplex;
+
+    const NUM_QUBITS: usize = 21;
+
+    fn gpu_device() -> Option<Arc<CudaDevice>> {
+        // QdpEngine::new returns Err without a GPU, whereas CudaDevice::new
+        // panics when the driver library is missing.
+        QdpEngine::new(0).ok()?;
+        CudaDevice::new(0).ok()
+    }
+
+    /// Runs the chunked pipeline for `len` inputs into the first half of a
+    /// two-state allocation pre-filled with NaN. The second half is a guard
+    /// region that must stay untouched.
+    fn assert_pipeline_writes_exactly_one_state(len: usize) {
+        let Some(device) = gpu_device() else {
+            println!("SKIP: No GPU available");
+            return;
+        };
+        let state_len = 1usize << NUM_QUBITS;
+        let data: Vec<f64> = (0..len).map(|i| (i % 13 + 1) as f64).collect();
+        let inv_norm = 1.0 / Preprocessor::calculate_l2_norm(&data).unwrap();
+
+        let guarded =
+            GpuStateVector::new_batch(&device, 2, NUM_QUBITS, Precision::Float64).unwrap();
+        let total_bytes = 2 * state_len * std::mem::size_of::<CuDoubleComplex>();
+        let ret =
+            unsafe { cudaMemsetAsync(guarded.ptr_void(), 0xFF, total_bytes, std::ptr::null_mut()) };
+        assert_eq!(ret, 0, "sentinel memset failed");
+        device.synchronize().unwrap();
+
+        AmplitudeEncoder::encode_async_pipeline(
+            &device, &data, NUM_QUBITS, state_len, inv_norm, &guarded,
+        )
+        .expect("pipeline encode should succeed");
+
+        let out: Vec<CuDoubleComplex> = match guarded.buffer.as_ref() {
+            BufferStorage::F64(raw) => device.dtoh_sync_copy(&raw.slice).unwrap(),
+            BufferStorage::F32(_) => unreachable!("allocated as Float64"),
+        };
+
+        let overwritten = out[state_len..]
+            .iter()
+            .filter(|a| !(a.x.is_nan() && a.y.is_nan()))
+            .count();
+        assert_eq!(
+            overwritten, 0,
+            "pipeline wrote {overwritten} amplitudes past the end of the state buffer"
+        );
+        for (i, amp) in out[..len].iter().enumerate() {
+            let expected = data[i] * inv_norm;
+            assert!(
+                (amp.x - expected).abs() < 1e-12 && amp.y == 0.0,
+                "amplitude {i}: got ({}, {}), expected ({expected}, 0)",
+                amp.x,
+                amp.y
+            );
+        }
+        for (i, amp) in out[len..state_len].iter().enumerate() {
+            assert!(
+                amp.x == 0.0 && amp.y == 0.0,
+                "padding amplitude {} is ({}, {}), expected 0",
+                len + i,
+                amp.x,
+                amp.y
+            );
+        }
+    }
+
+    #[test]
+    fn pipeline_multi_chunk_stays_within_state_buffer() {
+        assert_pipeline_writes_exactly_one_state(PIPELINE_CHUNK_ELEMENTS + 1);
+    }
+
+    #[test]
+    fn pipeline_odd_tail_chunk_writes_every_amplitude() {
+        // A 513-element tail chunk: floor(513 / 2) = 256 is a whole block, so a
+        // grid sized from len / 2 would leave the last amplitude unwritten.
+        assert_pipeline_writes_exactly_one_state(PIPELINE_CHUNK_ELEMENTS + 513);
     }
 }
